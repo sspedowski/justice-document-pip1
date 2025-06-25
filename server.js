@@ -196,3 +196,75 @@ askBtn.onclick = async () => {
     alert("Network error: " + err.message);
   }
 };
+
+const express  = require("express");
+const multer   = require("multer");
+const cors     = require("cors");
+const fs       = require("fs");
+const path     = require("path");
+const pdfParse = require("pdf-parse");
+const { fromPath } = require("pdf2pic");
+const Tesseract = require("tesseract.js");
+
+const app  = express();
+const PORT = 3000;
+
+/* ---------- static frontend ---------- */
+app.use(cors());
+app.use(express.static(path.join(__dirname, "client")));
+app.get("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "client", "index.html"))
+);
+
+/* ---------- uploads ---------- */
+const upload = multer({
+  dest: "uploads/",
+  limits: { fileSize: 10 * 1024 * 1024 },            // 10 MB max
+  fileFilter: (_req, file, cb) =>
+    file.mimetype === "application/pdf"
+      ? cb(null, true)
+      : cb(new Error("Only PDF files allowed"))
+});
+
+function ocrPdf(pdfPath) {
+  return new Promise((resolve, reject) => {
+    fromPath(pdfPath, { density: 200, format: "png", responseType: "image" })
+      (1, { responseType: "image" })                          // first page → PNG
+      .then(({ path: pngPath }) =>
+        Tesseract.recognize(pngPath, "eng")
+          .then(({ data }) => {
+            fs.unlink(pngPath, () => {});                     // tidy PNG
+            resolve(data.text.trim());
+          })
+      )
+      .catch(reject);
+  });
+}
+
+app.post("/api/summarize", upload.single("file"), async (req, res) => {
+  const pdfPath = req.file.path;
+  try {
+    const { text } = await pdfParse(fs.readFileSync(pdfPath));
+    let plain = text.trim();
+
+    if (!plain) {
+      console.log(`[OCR] ${req.file.originalname}`);
+      plain = await ocrPdf(pdfPath);
+    }
+    if (!plain) plain = "[No text found]";
+
+    res.json({
+      summary: plain.slice(0, 500),
+      fileName: req.file.originalname
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    fs.unlink(pdfPath, () => {});                              // tidy upload
+  }
+});
+
+app.listen(PORT, () =>
+  console.log(`✅  Backend + OCR live → http://localhost:${PORT}`)
+);
