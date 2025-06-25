@@ -1,0 +1,1 @@
+npm i express multer cors pdf-parse pdf2pic tesseract.js
