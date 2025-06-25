@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Build artifacts
+dist/
+build/
+web/
+uploads/
+public/
+
+# VS Code
+.vscode/
+
+# Logs & env
+*.log
+logs/
+.env
