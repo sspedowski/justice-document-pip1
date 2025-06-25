@@ -1,0 +1,21 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# package-lock.json and yarn.lock are not ignored to ensure consistent installs
+
+# Build artifacts
+dist/
+build/
+web/
+uploads/
+public/
+
+# VS Code
+.vscode/
+
+# Logs & env
+*.log
+logs/
+.env
