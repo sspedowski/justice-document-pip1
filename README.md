@@ -2,35 +2,12 @@
 
 > Open-source legal document analysis tool with AI-driven tagging and summaries.
 
-# Justice Dashboard
-
-A legal-tech tool for organizing and summarizing case documents, powered by OpenAI GPT-4 and scripture-aligned legal responses.
-
-## Features
-
-- Upload and summarize legal PDFs
-- Auto-detect key legal issues and tags (e.g., due process, CPS misconduct)
-- Export summaries and tags to CSV
-- Store prayer/intent for each case
-- Ask LawGPT for legal and Bible-based perspective
-
-## Setup
+## Quick start
 
 ```bash
-npm install
-```
-
-Create a `.env` file in the root:
-
-```
-OPENAI_API_KEY=your-key-here
-PORT=3000
-```
-
-Run the server:
-
-```bash
-npm start
+npm install            # install server & build tools
+npx tailwindcss -i style.css -o output.css --watch   # one-time or dev CSS build
+npm run dev            # nodemon server.js
 ```
 
 Then visit [http://localhost:3000](http://localhost:3000)
