@@ -212,7 +212,17 @@ function populateFilters() {
     categories.add(row.cells[0].textContent);
     misconductTypes.add(row.querySelector('select').value);
     });
-    const data = await res.json();
+  
+  // Ask Law GPT handler
+  askBtn.onclick = async () => {
+    const response = await fetch('/api/lawgpt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: summaryBox.textContent })
+    });
+    
+    try {
+      const data = await response.json();
     alert(data.answer || data.error || "No answer");
   } catch (err) {
     alert("Network error: " + err.message);
