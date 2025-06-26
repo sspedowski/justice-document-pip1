@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npx tailwindcss -i style.css -o output.css"
+"build": "npx tailwindcss -i ./client/style.css -o ./client/output.css"
   },
   "dependencies": {
     "cors": "^2.8.5",
