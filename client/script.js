@@ -213,6 +213,19 @@ function populateFilters() {
     misconductTypes.add(row.querySelector('select').value);
     });
   
+  // Populate filter dropdowns
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = option.textContent = cat;
+    categoryFilter.appendChild(option);
+  });
+  
+  misconductTypes.forEach(type => {
+    const option = document.createElement('option');
+    option.value = option.textContent = type;
+    misconductFilter.appendChild(option);
+  });
+}
   // Ask Law GPT handler
   askBtn.onclick = async () => {
     const response = await fetch('/api/lawgpt', {
