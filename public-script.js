@@ -16,22 +16,46 @@ const summaryBox   = document.getElementById("summaryBox");
 const trackerBody  = document.querySelector("#trackerTable tbody");
 
 //// ────────── restore saved rows ──────────
-(() => {
+function restoreTableData() {
+  try {
   const saved = localStorage.getItem("justiceTrackerRows");
   if (saved) trackerBody.innerHTML = saved;
 })();
 
 //// ────────── PDF → text helper (PDF.js) ──────────
 async function pdfToText(file) {
-  const buffer = await file.arrayBuffer();
-  const pdf    = await pdfjsLib.getDocument({ data: buffer }).promise;
-  let text = "";
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page    = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    text += content.items.map(i => i.str).join(" ") + "\n";
+  if (!file) {
+    throw new Error("No file provided");
   }
-  return text.trim();
+  try {
+  const buffer = await file.arrayBuffer();
+    if (!buffer) {
+      throw new Error("Failed to read file buffer");
+    }
+    const pdf = await pdfjsLib.getDocument({promise,
+    if (!pdf) {
+      throw new Error("Failed to load PDF document");
+    }
+  let text = "",
+  for (let p = 1; p <= pdf.numPages; p++) {
+      try {
+        const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+        if (!content || !content.items) {
+          console.warn(`No content found on page ${p}`);
+          continue;
+        }
+    text += content.items.map(i => i.str).join(" ") + "\n";
+      } catch (pageError) {
+        console.error(`Error processing page ${p}:`, pageError);
+        // Continue with other pages even if one fails
+  }
+    }
+    return text.trim() || "No readable text found in PDF";
+  } catch (error) {
+    console.error("PDF processing error:", error);
+    throw new Error(`Failed to process PDF: ${error.message}`);
+  }
 }
 
 //// ────────── tiny summary helper (≤200 chars) ──────────

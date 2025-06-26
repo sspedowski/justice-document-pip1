@@ -168,16 +168,27 @@ exportBtn.onclick = () => {
 
 /********** Ask Law GPT **********/
 askBtn.onclick = async () => {
-  const prompt = summaryBox.textContent || "Explain this document";
+  const prompt = summaryBox.textContent?.trim() || "Explain this document";
+  
   try {
-    const res = await fetch("/api/lawgpt", {
+    const response = await fetch("/api/lawgpt", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt })
     });
-    const data = await res.json();
-    alert(data.answer || data.error || "No answer");
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+    const data = await response.json();
+    if (!data) {
+      throw new Error("Empty response received");
+    }
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    alert(data.answer || "No answer provided");
   } catch (err) {
-    alert("Network error: " + err.message);
+    console.error("LawGPT Error:", err);
+    alert(`Error: ${err.message}`);
   }
 };
