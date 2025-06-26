@@ -192,13 +192,25 @@ exportBtn.onclick = () => {
 };
 
 /********** Ask Law GPT **********/
-askBtn.onclick = async () => {
-  const prompt = summaryBox.textContent || "Explain this document";
-  try {
-    const res = await fetch("/api/lawgpt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
+// Dashboard functionality
+const statsDisplay = document.getElementById('statsDisplay');
+const categoryFilter = document.getElementById('categoryFilter');
+const misconductFilter = document.getElementById('misconductFilter');
+function updateDashboardStats() {
+  const rows = Array.from(trackerBody.querySelectorAll('tr'));
+  const totalCases = rows.length;
+  const activeCases = rows.filter(row => 
+    row.querySelector('select').value !== 'Review Needed'
+  ).length;
+  document.getElementById('totalCases').textContent = totalCases;
+  document.getElementById('activeCases').textContent = activeCases;
+}
+function populateFilters() {
+  const categories = new Set();
+  const misconductTypes = new Set();
+  Array.from(trackerBody.querySelectorAll('tr')).forEach(row => {
+    categories.add(row.cells[0].textContent);
+    misconductTypes.add(row.querySelector('select').value);
     });
     const data = await res.json();
     alert(data.answer || data.error || "No answer");

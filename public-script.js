@@ -1,294 +1,50 @@
-/* Justice Dashboard – front-end logic v1.1.1 ✨
-   • Auto-detect child names
-   • Truncate long summaries
-   • Editable misconduct dropdown (id + name for a11y / form posts)
-   • Keyword tagging
-   • Table persistence to localStorage
-*/
+// 📂 public-script.js
+document.addEventListener('DOMContentLoaded', () => {
+  const uploadForm = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('fileInput');
+  const summaryOutput = document.getElementById('summaryOutput');
+  const fileLink = document.getElementById('fileLink');
+  const loadingIndicator = document.getElementById('loading');
 
-//// ────────── DOM refs ──────────
-const fileInput    = document.getElementById("fileUpload");
-const docInput     = document.getElementById("docInput");
-const summarizeBtn = document.getElementById("summarizeBtn");
-const exportBtn    = document.getElementById("exportBtn");
-const askBtn       = document.getElementById("askLawGpt");
-const summaryBox   = document.getElementById("summaryBox");
-const trackerBody  = document.querySelector("#trackerTable tbody");
+  uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-//// ────────── restore saved rows ──────────
-function restoreTableData() {
-  try {
-  const saved = localStorage.getItem("justiceTrackerRows");
-  if (saved) trackerBody.innerHTML = saved;
-})();
-
-//// ────────── PDF → text helper (PDF.js) ──────────
-async function pdfToText(file) {
-  if (!file) {
-    throw new Error("No file provided");
-  }
-  try {
-  const buffer = await file.arrayBuffer();
-    if (!buffer) {
-      throw new Error("Failed to read file buffer");
-    }
-    const pdf = await pdfjsLib.getDocument({promise,
-    if (!pdf) {
-      throw new Error("Failed to load PDF document");
-    }
-  let text = "",
-  for (let p = 1; p <= pdf.numPages; p++) {
-      try {
-        const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-        if (!content || !content.items) {
-          console.warn(`No content found on page ${p}`);
-          continue;
-        }
-    text += content.items.map(i => i.str).join(" ") + "\n";
-      } catch (pageError) {
-        console.error(`Error processing page ${p}:`, pageError);
-        // Continue with other pages even if one fails
-  }
-    }
-    return text.trim() || "No readable text found in PDF";
-  } catch (error) {
-    console.error("PDF processing error:", error);
-    throw new Error(`Failed to process PDF: ${error.message}`);
-  }
-}
-
-//// ────────── tiny summary helper (≤200 chars) ──────────
-const quickSummary = t => {
-  const clean = t.replace(/\s+/g, " ").trim();
-  return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
-};
-
-//// ────────── keyword → tag map ──────────
-function keywordTags(text) {
-  const lib = {
-    "Brady Violation":      /\bbrady\b|exculpatory/i,
-    "Civil Rights":         /civil rights|§?1983/i,
-    "CPS Negligence":       /cps (?:failed|negligence)/i,
-    "Custody Interference": /denied visitation|interference/i
-  };
-  return Object.entries(lib)
-    .filter(([, rgx]) => rgx.test(text))
-    .map(([tag]) => tag);
-}
-
-//// ────────── child detector ──────────
-function detectChild(text) {
-  const kids = [
-    "Jace", "Josh", "Joshua", "Peyton", "Owen",
-    "Nicholas", "John", "Lou", "Eleanora"
-  ];
-  const found = kids.find(k => new RegExp(`\\b${k}\\b`, "i").test(text));
-  return found || "Unknown";
-}
-
-//// ────────── localStorage persistence ──────────
-const saveTable = () =>
-  localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
-
-//// ────────── misconduct <select> builder (id & name) ──────────
-function buildMisconductSelect(value = "Review Needed") {
-  const sel = document.createElement("select");
-  const uid = `misconduct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  sel.id = sel.name = uid;
-  sel.className = "bg-transparent text-sm";
-
-  [
-    "Review Needed",
-    "CPS Negligence",
-    "Civil Rights Violation",
-    "Medical Malpractice",
-    "Custody Interference"
-  ].forEach(opt => {
-    const o = document.createElement("option");
-    o.value = o.textContent = opt;
-    sel.appendChild(o);
-  });
-
-  sel.value    = value;
-  sel.onchange = saveTable;
-  return sel;
-}
-
-//// ────────── add tracker row ──────────
-function addRow({ category, child, misconduct, summary, tags, fileURL, fileName }) {
-  const tr = trackerBody.insertRow();
-
-  tr.insertCell().textContent = category;           // Category
-  tr.insertCell().textContent = child;              // Child
-  tr.insertCell().appendChild(buildMisconductSelect(misconduct)); // Misconduct
-
-  const sumTd = tr.insertCell();                    // Summary
-  sumTd.textContent = summary;
-  sumTd.title       = summary;
-
-  tr.insertCell().textContent = tags.join(", ");    // Tags
-
-  const viewTd = tr.insertCell();                   // View button
-  if (fileURL) {
-    const btn   = document.createElement("button");
-    btn.className = "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
-    btn.textContent = "View PDF";
-    btn.onclick   = () => openPdf(fileURL, fileName);
-    viewTd.appendChild(btn);
-  } else {
-    viewTd.textContent = "N/A";
-  }
-
-  saveTable();
-}
-
-//// ────────── PDF viewer modal helpers ──────────
-function openPdf(url, name) {
-  pdfFrame.src         = url;
-  pdfTitle.textContent = name;
-  pdfViewerModal.classList.replace("hidden", "flex");
-}
-window.closeViewer = () =>
-  pdfViewerModal.classList.replace("flex", "hidden");
-
-//// ────────── main summarise handler ──────────
-summarizeBtn.onclick = async () => {
-  if (!fileInput.files[0] && !docInput.value.trim()) {
-    alert("Upload a PDF or paste text first.");
-    return;
-  }
-
-  let text     = docInput.value.trim();
-  let fileURL  = null;
-  let fileName = null;
-
-  if (fileInput.files[0]) {
     const file = fileInput.files[0];
-    fileURL    = URL.createObjectURL(file);
-    fileName   = file.name;
-    if (!text) text = await pdfToText(file);
-  }
-
-  const summary = quickSummary(text);
-  summaryBox.textContent = summary;
-
-  addRow({
-    category:  fileURL ? "Uploaded Document" : "Manual Entry",
-    child:     detectChild(text),
-    misconduct:"Review Needed",
-    summary,
-    tags:      keywordTags(text),
-    fileURL,
-    fileName
-  });
-};
-
-//// ────────── CSV export ──────────
-exportBtn.onclick = () => {
-  const headers = Array.from(document.querySelectorAll("#trackerTable thead th"))
-    .map(th => th.textContent);
-  const rows = Array.from(trackerBody.querySelectorAll("tr"))
-    .map(tr =>
-      Array.from(tr.children).map(td =>
-        td.querySelector("button")
-          ? "PDF"
-          : `"${td.innerText.replace(/\n/g, " ").replace(/"/g, '""')}"`)
-      .join(",")
-    );
-  const csv  = [headers.join(","), ...rows].join("\r\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const a    = Object.assign(document.createElement("a"), {
-    href: URL.createObjectURL(blob),
-    download: "justice_tracker.csv"
-  });
-  a.click();
-};
-
-//// ────────── Ask Law GPT hook ──────────
-askBtn.onclick = async () => {
-  const prompt = summaryBox.textContent || "Explain this document";
-  try {
-    const res  = await fetch("/api/lawgpt", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    alert(data.answer || data.error || "No answer");
-  } catch (err) {
-    alert("Network error: " + err.message);
-  }
-};
-
-const express  = require("express");
-const multer   = require("multer");
-const cors     = require("cors");
-const fs       = require("fs");
-const path     = require("path");
-const pdfParse = require("pdf-parse");
-const { fromPath } = require("pdf2pic");
-const Tesseract = require("tesseract.js");
-
-const app  = express();
-const PORT = 3000;
-
-/* ---------- static frontend ---------- */
-app.use(cors());
-app.use(express.static(path.join(__dirname, "client")));
-app.get("*", (req, res) =>
-  res.sendFile(path.join(__dirname, "client", "index.html"))
-);
-
-/* ---------- uploads ---------- */
-const upload = multer({
-  dest: "uploads/",
-  limits: { fileSize: 10 * 1024 * 1024 },            // 10 MB max
-  fileFilter: (_req, file, cb) =>
-    file.mimetype === "application/pdf"
-      ? cb(null, true)
-      : cb(new Error("Only PDF files allowed"))
-});
-
-function ocrPdf(pdfPath) {
-  return new Promise((resolve, reject) => {
-    fromPath(pdfPath, { density: 200, format: "png", responseType: "image" })
-      (1, { responseType: "image" })                          // first page → PNG
-      .then(({ path: pngPath }) =>
-        Tesseract.recognize(pngPath, "eng")
-          .then(({ data }) => {
-            fs.unlink(pngPath, () => {});                     // tidy PNG
-            resolve(data.text.trim());
-          })
-      )
-      .catch(reject);
-  });
-}
-
-app.post("/api/summarize", upload.single("file"), async (req, res) => {
-  const pdfPath = req.file.path;
-  try {
-    const { text } = await pdfParse(fs.readFileSync(pdfPath));
-    let plain = text.trim();
-
-    if (!plain) {
-      console.log(`[OCR] ${req.file.originalname}`);
-      plain = await ocrPdf(pdfPath);
+    if (!file) {
+      alert('Please select a PDF file to upload.');
+      return;
     }
-    if (!plain) plain = "[No text found]";
 
-    res.json({
-      summary: plain.slice(0, 500),
-      fileName: req.file.originalname
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  } finally {
-    fs.unlink(pdfPath, () => {});                              // tidy upload
-  }
+    // Show loading
+    summaryOutput.textContent = '';
+    loadingIndicator.style.display = 'inline-block';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/summarize', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to summarize PDF');
+      }
+
+      const result = await response.json();
+
+      summaryOutput.textContent = result.summary || 'No summary returned.';
+      fileLink.href = result.fileURL;
+      fileLink.textContent = `📎 View Uploaded File (${result.fileName})`;
+      fileLink.style.display = 'inline';
+
+    } catch (err) {
+      console.error('❌ Error uploading/summarizing:', err);
+      summaryOutput.textContent = 'Something went wrong while processing the PDF.';
+    } finally {
+      loadingIndicator.style.display = 'none';
+    }
+  });
 });
-
-app.listen(PORT, () =>
-  console.log(`✅  Backend + OCR live → http://localhost:${PORT}`)
-);
+// 📂 public-script.js
