@@ -153,7 +153,7 @@ summarizeBtn.onclick = async () => {
   formData.append("file", fileInput.files[0]);
 
   try {
-const res = await fetch("/api/summarize"
+const res = await fetch("/api/summarize", {
       method: "POST",
       body: formData,
     });
