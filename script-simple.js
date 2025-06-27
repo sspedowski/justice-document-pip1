@@ -333,20 +333,34 @@ function detectCategory(text, fileName) {
   return "General";
 }
 
-// Child name detector
+// Child name detector (enhanced)
 function detectChild(text) {
   if (!text || typeof text !== 'string') {
-    console.log('detectChild: Invalid text input:', text);
     return "Unknown";
   }
   
+  // Convert to lowercase for case-insensitive matching
   const cleanText = text.toLowerCase();
-  console.log('detectChild: Analyzing text:', cleanText.substring(0, 100) + '...');
   
-  const jaceFound = /\bjace\b/i.test(text);
-  const joshFound = /\bjosh\b/i.test(text);
+  // More flexible patterns to catch variations
+  const jacePatterns = [
+    /\bjace\b/i,           // Standard word boundary
+    /jace[\s,\.]/i,        // Jace followed by space, comma, or period
+    /[\s,\.]jace/i,        // Jace preceded by space, comma, or period
+    /^jace[\s,\.]/i,       // Jace at start of text
+    /[\s,\.]jace$/i        // Jace at end of text
+  ];
   
-  console.log('detectChild: Jace found:', jaceFound, 'Josh found:', joshFound);
+  const joshPatterns = [
+    /\bjosh\b/i,           // Standard word boundary
+    /josh[\s,\.]/i,        // Josh followed by space, comma, or period
+    /[\s,\.]josh/i,        // Josh preceded by space, comma, or period
+    /^josh[\s,\.]/i,       // Josh at start of text
+    /[\s,\.]josh$/i        // Josh at end of text
+  ];
+  
+  const jaceFound = jacePatterns.some(pattern => pattern.test(text));
+  const joshFound = joshPatterns.some(pattern => pattern.test(text));
   
   if (jaceFound && joshFound) return "Both";
   if (jaceFound) return "Jace";
@@ -616,10 +630,13 @@ window.smartUpdateRows = function() {
       
       const summary = cells[3].textContent.trim();
       const currentCategory = cells[0].textContent.trim();
+      const fileName = extractFileNameFromRow(row);
       
       // Enhanced category detection based on content
       let newCategory = detectCategoryFromContent(summary);
-      let newChild = detectChild(summary);
+      
+      // Enhanced child detection - check both summary and filename
+      let newChild = detectChild(summary + ' ' + fileName);
       
       // Count categories for reporting
       switch(newCategory) {
