@@ -6,6 +6,18 @@
   <title>Justice Dashboard</title>
   <link rel="stylesheet" href="./dist/styles.css">
   <script defer src="script.js"></script>
+  <script>
+    // Debug CSS loading
+    window.addEventListener('load', function() {
+      console.log('Page loaded');
+      const link = document.querySelector('link[rel="stylesheet"]');
+      if (link) {
+        console.log('CSS link found:', link.href);
+        link.addEventListener('load', () => console.log('CSS loaded successfully'));
+        link.addEventListener('error', () => console.log('CSS failed to load'));
+      }
+    });
+  </script>
   <style>
     /* Fallback styles in case CSS doesn't load */
     body { 
