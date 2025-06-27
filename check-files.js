@@ -1,7 +1,7 @@
 // Simple sanity checker – run:  npm run check
 const fs = require("fs");
 const required = [
-  "server/server.js",
+  "justice-server/server.js",
   "client/index.html",
   "client/script.js",
   ".env"
