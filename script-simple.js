@@ -270,7 +270,18 @@ async function pdfToText(file) {
       const content = await page.getTextContent();
       text += content.items.map(i => i.str).join(" ") + "\\n";
     }
-    return text.trim();
+    
+    // Check if we got meaningful text
+    const cleanText = text.trim();
+    const wordCount = (cleanText.match(/[a-zA-Z]{2,}/g) || []).length;
+    
+    // If we got very little text, include filename for better analysis
+    if (wordCount < 5 || cleanText.length < 50) {
+      console.log('PDF text extraction yielded little content, enhancing with filename');
+      return `PDF Document: ${file.name}. ${cleanText}`;
+    }
+    
+    return cleanText;
   } catch (error) {
     console.error('PDF parsing error:', error);
     return `PDF Document: ${file.name} (content extraction failed)`;
@@ -354,15 +365,11 @@ function detectCategory(text, fileName) {
   return "General";
 }
 
-// Child name detector (enhanced with debugging)
+// Child name detector (enhanced)
 function detectChild(text) {
   if (!text || typeof text !== 'string') {
-    console.log('detectChild: Invalid text input:', text);
     return "Unknown";
   }
-  
-  // Debug: Show what text we're analyzing
-  console.log('detectChild: Analyzing text snippet:', text.substring(0, 200));
   
   // More flexible patterns to catch variations
   const jacePatterns = [
@@ -385,8 +392,6 @@ function detectChild(text) {
   
   const jaceFound = jacePatterns.some(pattern => pattern.test(text));
   const joshFound = joshPatterns.some(pattern => pattern.test(text));
-  
-  console.log('detectChild: Jace found:', jaceFound, 'Josh found:', joshFound);
   
   if (jaceFound && joshFound) return "Both";
   if (jaceFound) return "Jace";
