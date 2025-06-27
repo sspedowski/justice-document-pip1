@@ -6,8 +6,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
 "build": "npx tailwindcss -i ./client/style.css -o ./client/output.css",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d client"
+    "watch": "npx tailwindcss -i ./client/style.css -o ./client/output.css --watch"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
