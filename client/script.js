@@ -227,7 +227,6 @@ function populateFilters() {
     misconductFilter.appendChild(option);
   });
 }
-  // Ask Law GPT handler
   askBtn.onclick = async () => {
     const response = await fetch('/api/lawgpt', {
       method: 'POST',
