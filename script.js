@@ -1,4 +1,7 @@
-/* Justice Dashboard – front-end logic v1.1.2 ✨ FIXED */
+/* Justice Dashboard – front-end logic v1.1.3 ✨ CLIENT-SIDE FIXED */
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', () => {
 
 /********** DOM **********/
 const fileInput    = document.getElementById("fileInput") || document.getElementById("fileUpload");
@@ -9,11 +12,19 @@ const askBtn       = document.getElementById("askLawGpt");
 const summaryBox   = document.getElementById("summaryBox");
 const trackerBody  = document.querySelector("#results") || document.querySelector("#trackerTable tbody");
 
+// Check if required elements exist
+if (!summarizeBtn) {
+  console.error("Generate button not found");
+  return;
+}
+
 /********** Restore saved rows **********/
-(() => {
-  const saved = localStorage.getItem("justiceTrackerRows");
-  if (saved) trackerBody.innerHTML = saved;
-})();
+if (trackerBody) {
+  (() => {
+    const saved = localStorage.getItem("justiceTrackerRows");
+    if (saved) trackerBody.innerHTML = saved;
+  })();
+}
 
 /********** PDF → plain-text helper **********/
 async function pdfToText(file) {
@@ -116,75 +127,69 @@ function openPdf(url, name) {
 window.closeViewer = () => pdfViewerModal.classList.replace("flex", "hidden");
 
 /********** Main summarise handler **********/
-summarizeBtn.onclick = async () => {
-  if (!fileInput.files[0] && !docInput.value.trim()) {
-    alert("Upload a PDF or paste text first.");
-    return;
-  }
+if (summarizeBtn) {
+  summarizeBtn.onclick = async () => {
+    if (!fileInput?.files[0] && !docInput?.value.trim()) {
+      alert("Upload a PDF or paste text first.");
+      return;
+    }
 
-  let text     = docInput.value.trim();
-  let fileURL  = null;
-  let fileName = null;
+    let text     = docInput?.value.trim() || "";
+    let fileURL  = null;
+    let fileName = null;
 
-  if (fileInput.files[0]) {
-    const file = fileInput.files[0];
-    fileURL    = URL.createObjectURL(file);
-    fileName   = file.name;
-    if (!text) text = await pdfToText(file);
-  }
+    if (fileInput?.files[0]) {
+      const file = fileInput.files[0];
+      fileURL    = URL.createObjectURL(file);
+      fileName   = file.name;
+      if (!text) text = await pdfToText(file);
+    }
 
-  const summary = quickSummary(text);
-  summaryBox.textContent = summary;
-  addRow({
-    category: fileURL ? "Uploaded Document" : "Manual Entry",
-    child: detectChild(text),
-    misconduct: "Review Needed",
-    summary,
-    tags: keywordTags(text),
-    fileURL,
-    fileName
-  });
-};
+    const summary = quickSummary(text);
+    if (summaryBox) summaryBox.textContent = summary;
+    
+    if (trackerBody) {
+      addRow({
+        category: fileURL ? "Uploaded Document" : "Manual Entry",
+        child: detectChild(text),
+        misconduct: "Review Needed",
+        summary,
+        tags: keywordTags(text),
+        fileURL,
+        fileName
+      });
+    }
+  };
+}
 
 /********** Export CSV **********/
-exportBtn.onclick = () => {
-  const headers = Array.from(document.querySelectorAll("#trackerTable thead th"))
-    .map(th => th.textContent);
-  const rows = Array.from(trackerBody.querySelectorAll("tr"))
-    .map(tr => Array.from(tr.children).map(td => td.innerText.replace(/\n/g, " ").replace(/"/g, '""'))
-      .join(","));
-  const csv = [headers.join(","), ...rows].join("\r\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const a    = Object.assign(document.createElement("a"), {
-    href: URL.createObjectURL(blob),
-    download: "justice_tracker.csv"
-  });
-  a.click();
-};
+if (exportBtn && trackerBody) {
+  exportBtn.onclick = () => {
+    const headers = Array.from(document.querySelectorAll("#trackerTable thead th, table thead th"))
+      .map(th => th.textContent);
+    const rows = Array.from(trackerBody.querySelectorAll("tr"))
+      .map(tr => Array.from(tr.children).map(td => td.innerText.replace(/\n/g, " ").replace(/"/g, '""'))
+        .join(","));
+    const csv = [headers.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a    = Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(blob),
+      download: "justice_tracker.csv"
+    });
+    a.click();
+  };
+}
 
 /********** Ask Law GPT **********/
-askBtn.onclick = async () => {
-  const prompt = summaryBox.textContent?.trim() || "Explain this document";
-  
-  try {
-    const response = await fetch("/api/lawgpt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-    const data = await response.json();
-    if (!data) {
-      throw new Error("Empty response received");
-    }
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    alert(data.answer || "No answer provided");
-  } catch (err) {
-    console.error("LawGPT Error:", err);
-    alert(`Error: ${err.message}`);
-  }
-};
+if (askBtn) {
+  askBtn.onclick = async () => {
+    const prompt = summaryBox?.textContent?.trim() || "Explain this document";
+    
+    // Since this is a static site, we can't connect to a server
+    // Show a message instead
+    alert("Law GPT feature requires a backend server. This is a demo showing: " + prompt);
+  };
+}
+
+// Close the DOMContentLoaded event listener
+});
