@@ -263,8 +263,22 @@ function initializeJusticeDashboard() {
     return;
   }
 
+  // Clear old localStorage data on load to refresh with new options
+  function clearOldData() {
+    const saved = localStorage.getItem("justiceTrackerRows");
+    if (saved && saved.includes("CPS Negligence")) {
+      localStorage.removeItem("justiceTrackerRows");
+      console.log("Cleared old data with outdated misconduct options");
+      // Also clear the current table
+      if (trackerBody) {
+        trackerBody.innerHTML = "";
+      }
+    }
+  }
+
   // Restore saved data
   (() => {
+    clearOldData();
     const saved = localStorage.getItem("justiceTrackerRows");
     if (saved) {
       trackerBody.innerHTML = saved;
@@ -568,3 +582,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make DashboardAuth globally available
 window.DashboardAuth = DashboardAuth;
+
+// Global function to manually clear data (can be called from console)
+window.clearJusticeData = function() {
+  localStorage.removeItem("justiceTrackerRows");
+  location.reload();
+};
+
+// Make clearOldData available globally for testing
+window.clearOldData = function() {
+  const trackerBody = document.querySelector("#results");
+  localStorage.removeItem("justiceTrackerRows");
+  if (trackerBody) {
+    trackerBody.innerHTML = "";
+  }
+  console.log("Justice tracker data cleared");
+};
