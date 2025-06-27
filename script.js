@@ -53,6 +53,13 @@ const DashboardAuth = {
       isAuthenticated = true;
       return true;
     }
+    
+    // Auto-login for testing (remove this in production)
+    console.log('Auto-logging in as stephanie for testing...');
+    if (this.authenticate('stephanie', 'spedowski2024')) {
+      return true;
+    }
+    
     return false;
   },
 
@@ -572,10 +579,14 @@ Note: This is a demo. The full version would connect to a legal AI service.`;
 
 /********** Initialize Application **********/
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, checking authentication...');
+  
   // Check if user is already authenticated
   if (DashboardAuth.checkAuth()) {
+    console.log('User authenticated, loading dashboard...');
     DashboardAuth.loadDashboard();
   } else {
+    console.log('User not authenticated, showing login form...');
     DashboardAuth.showLoginForm();
   }
 });
