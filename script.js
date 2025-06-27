@@ -317,13 +317,39 @@ function initializeJusticeDashboard() {
       .map(([tag]) => tag);
   }
 
+  // Category detector
+  function detectCategory(text, fileName) {
+    const lowerText = text.toLowerCase();
+    const lowerFileName = (fileName || "").toLowerCase();
+    
+    // Medical keywords
+    if (/medical|doctor|hospital|health|hipaa|patient|treatment|prescription|diagnosis/.test(lowerText) ||
+        /medical|doctor|hospital|health/.test(lowerFileName)) {
+      return "Medical";
+    }
+    
+    // School keywords  
+    if (/school|education|teacher|classroom|iep|504|special education|principal|counselor/.test(lowerText) ||
+        /school|education|iep/.test(lowerFileName)) {
+      return "School";
+    }
+    
+    // Legal keywords
+    if (/court|judge|attorney|lawyer|legal|custody|visitation|case|lawsuit|hearing/.test(lowerText) ||
+        /court|legal|case/.test(lowerFileName)) {
+      return "Legal";
+    }
+    
+    return "General";
+  }
+
   // Child name detector
   function detectChild(text) {
-    const children = [
-      "Jace", "Josh", "Joshua", "Peyton", "Owen", "Nicholas", "John", "Lou", "Eleanora"
-    ];
-    const found = children.find(name => new RegExp(`\\b${name}\\b`, "i").test(text));
-    return found || "Unknown";
+    const children = ["Jace", "Josh"];
+    const found = children.filter(name => new RegExp(`\\b${name}\\b`, "i").test(text));
+    if (found.length === 2) return "Both";
+    if (found.length === 1) return found[0];
+    return "Unknown";
   }
 
   // Save table to localStorage
@@ -344,10 +370,8 @@ function initializeJusticeDashboard() {
 
     const options = [
       "Review Needed",
-      "CPS Negligence", 
-      "Civil Rights Violation",
-      "Medical Malpractice",
-      "Custody Interference"
+      "Denial of Right to Medical Safety and Privacy (HIPAA Violations)",
+      "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
     ];
 
     options.forEach(opt => {
@@ -420,7 +444,7 @@ function initializeJusticeDashboard() {
     }
     
     addRow({
-      category: fileURL ? "Uploaded Document" : "Manual Entry",
+      category: detectCategory(text, fileName),
       child: detectChild(text),
       misconduct: "Review Needed",
       summary,
