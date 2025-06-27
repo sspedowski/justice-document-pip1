@@ -5,13 +5,13 @@
 */
 
 /********** DOM **********/
-const fileInput    = document.getElementById("fileUpload");
+const fileInput    = document.getElementById("fileInput") || document.getElementById("fileUpload");
 const docInput     = document.getElementById("docInput");
-const summarizeBtn = document.getElementById("summarizeBtn");
+const summarizeBtn = document.getElementById("generateBtn") || document.getElementById("summarizeBtn");
 const exportBtn    = document.getElementById("exportBtn");
 const askBtn       = document.getElementById("askLawGpt");
 const summaryBox   = document.getElementById("summaryBox");
-const trackerBody  = document.querySelector("#trackerTable tbody");
+const trackerBody  = document.querySelector("#results") || document.querySelector("#trackerTable tbody");
 
 /********** Restore saved rows **********/
 (() => {
