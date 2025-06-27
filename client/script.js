@@ -242,39 +242,4 @@ function populateFilters() {
   }
 };
 
-window.addEventListener("DOMContentLoaded", () => {
-  const generateBtn = document.querySelector("#generateBtn");
-  const fileInput   = document.querySelector("#fileInput");
-  const table       = document.querySelector("#results");
-
-  if (!generateBtn || !fileInput || !table) return;
-
-  generateBtn.addEventListener("click", async () => {
-    if (!fileInput.files.length) return alert("Please choose a file");
-
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-
-    try {
-      const res = await fetch("http://localhost:3000/api/summarize", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) return alert("Failed to get summary");
-
-      const data = await res.json();
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>Evidence</td>
-        <td>Unknown</td>
-        <td>Unspecified</td>
-        <td>Summary: ${data.summary.slice(0, 50)}...</td>
-        <td><a href="http://localhost:3000${data.fileURL}" target="_blank">View</a></td>
-      `;
-      table.appendChild(row);
-    } catch (err) {
-      console.error(err);
-      alert("An error occurred while processing the file.");
-    }
-  });
-});
+// Remove duplicate event listener code
