@@ -1,8 +1,4 @@
-/* Justice Dashboard – front-end logic v1.1.1  ✨
-   – Auto-detect child names
-   – Truncate long summaries
-   – Editable misconduct dropdown (now with id/name)
-*/
+/* Justice Dashboard – front-end logic v1.1.2 ✨ FIXED */
 
 /********** DOM **********/
 const fileInput    = document.getElementById("fileInput") || document.getElementById("fileUpload");
