@@ -11,6 +11,7 @@ const app = express();
 const upload = multer({ dest: "uploads/" });
 
 app.use(cors());
+app.use(express.static(__dirname)); // Serve static files from root directory
 app.use("/files", express.static(path.join(__dirname, "public")));
 
 app.post("/api/summarize", upload.single("file"), async (req, res) => {
