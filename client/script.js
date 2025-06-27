@@ -155,7 +155,7 @@ summarizeBtn.onclick = async () => {
   try {
 const res = await fetch("/api/summarize", {
       method: "POST",
-      body: formData,
+      body: formData
     });
     if (!res.ok) return alert("Failed to get summary");
 
