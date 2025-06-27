@@ -373,6 +373,53 @@ function initializeJusticeDashboard() {
     return "Unknown";
   }
 
+  // Check for duplicates based on file name and summary
+  function isDuplicate(fileName, summary) {
+    const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
+    
+    for (const row of existingRows) {
+      const cells = row.cells;
+      if (!cells || cells.length < 4) continue;
+      
+      const existingSummary = cells[3].textContent.trim();
+      
+      // Check for exact summary match (primary check)
+      if (existingSummary === summary.trim()) {
+        return { isDupe: true, reason: 'Identical summary content' };
+      }
+      
+      // Check for same filename if provided
+      if (fileName) {
+        const viewButton = row.querySelector('button');
+        if (viewButton && viewButton.textContent.includes('View PDF')) {
+          // Try to extract filename from button or check if very similar summary
+          if (existingSummary.length > 10 && summary.length > 10) {
+            const similarity = calculateSimilarity(existingSummary, summary);
+            if (similarity > 0.85) { // 85% similar
+              return { isDupe: true, reason: `${Math.round(similarity * 100)}% similar content` };
+            }
+          }
+        }
+      }
+    }
+    
+    return { isDupe: false };
+  }
+
+  // Calculate text similarity (basic implementation)
+  function calculateSimilarity(text1, text2) {
+    const words1 = text1.toLowerCase().split(/\s+/);
+    const words2 = text2.toLowerCase().split(/\s+/);
+    
+    if (words1.length === 0 && words2.length === 0) return 1;
+    if (words1.length === 0 || words2.length === 0) return 0;
+    
+    const commonWords = words1.filter(word => words2.includes(word));
+    const totalWords = Math.max(words1.length, words2.length);
+    
+    return commonWords.length / totalWords;
+  }
+
   // Save table to localStorage
   function saveTable() {
     localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
@@ -462,6 +509,23 @@ function initializeJusticeDashboard() {
     const summary = quickSummary(text);
     if (summaryBox) {
       summaryBox.textContent = summary;
+    }
+    
+    // Check for duplicates before adding
+    const dupeCheck = isDuplicate(fileName, summary);
+    if (dupeCheck.isDupe) {
+      const userConfirm = confirm(
+        `⚠️ Potential duplicate detected!\n\n` +
+        `Reason: ${dupeCheck.reason}\n\n` +
+        `Do you want to add this document anyway?`
+      );
+      
+      if (!userConfirm) {
+        alert("Document not added - duplicate detected.");
+        if (fileInput) fileInput.value = "";
+        if (docInput) docInput.value = "";
+        return;
+      }
     }
     
     addRow({
