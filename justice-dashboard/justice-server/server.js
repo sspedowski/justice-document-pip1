@@ -6,7 +6,7 @@ const path = require("path");
 const pdfParse = require("pdf-parse");
 const { fromPath } = require("pdf2pic");
 const Tesseract = require("tesseract.js");
-
+const crypto = require('crypto');
 const app = express();
 const upload = multer({ dest: "uploads/" });
 
