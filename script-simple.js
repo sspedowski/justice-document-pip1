@@ -481,3 +481,184 @@ window.clearJusticeData = function() {
   updateDashboardStats();
   console.log("Justice tracker data cleared");
 };
+
+// Update existing rows with new categorization logic
+window.updateExistingRows = function() {
+  const rows = Array.from(trackerBody.querySelectorAll('tr'));
+  let updatedCount = 0;
+  
+  if (rows.length === 0) {
+    alert('No existing rows to update.');
+    return;
+  }
+  
+  const proceed = confirm(
+    `Update ${rows.length} existing entries with new categorization logic?\n\n` +
+    `This will:\n` +
+    `• Re-categorize documents (Medical, School, Legal, General)\n` +
+    `• Update child detection (Jace, Josh, Both, Unknown)\n` +
+    `• Keep existing summaries and misconduct selections\n\n` +
+    `Continue?`
+  );
+  
+  if (!proceed) return;
+  
+  rows.forEach(row => {
+    try {
+      const cells = row.cells;
+      if (!cells || cells.length < 6) return;
+      
+      // Get existing data
+      const summary = cells[3].textContent.trim();
+      const fileName = extractFileNameFromRow(row);
+      
+      // Apply new detection logic
+      const newCategory = detectCategoryFromPath(summary, fileName, fileName);
+      const newChild = detectChild(summary + ' ' + fileName);
+      
+      // Update cells
+      cells[0].textContent = newCategory;
+      cells[1].textContent = newChild;
+      
+      updatedCount++;
+    } catch (error) {
+      console.error('Error updating row:', error);
+    }
+  });
+  
+  // Save updated data
+  saveTable();
+  
+  alert(
+    `Update complete!\n\n` +
+    `✅ Updated: ${updatedCount} entries\n` +
+    `🔄 New categorization applied\n` +
+    `💾 Data saved automatically`
+  );
+};
+
+// Helper function to extract filename from existing row
+function extractFileNameFromRow(row) {
+  try {
+    const actionCell = row.cells[5];
+    const button = actionCell.querySelector('button');
+    if (button && button.textContent.includes('View PDF')) {
+      // Try to get filename from any available data
+      const summary = row.cells[3].textContent;
+      // Look for patterns that might indicate filename
+      const filePattern = /([^\\\/]+\.pdf)/i;
+      const match = summary.match(filePattern);
+      return match ? match[1] : 'unknown.pdf';
+    }
+  } catch (error) {
+    console.error('Error extracting filename:', error);
+  }
+  return 'unknown.pdf';
+}
+
+// Batch update with better categorization based on content analysis
+window.smartUpdateRows = function() {
+  const rows = Array.from(trackerBody.querySelectorAll('tr'));
+  
+  if (rows.length === 0) {
+    alert('No existing rows to update.');
+    return;
+  }
+  
+  const proceed = confirm(
+    `Smart update ${rows.length} existing entries?\n\n` +
+    `This will analyze the summary content to:\n` +
+    `• Better categorize Medical/School/Legal/General\n` +
+    `• Detect Jace/Josh mentions more accurately\n` +
+    `• Update legal tags based on content\n\n` +
+    `Continue?`
+  );
+  
+  if (!proceed) return;
+  
+  let updatedCount = 0;
+  let medicalCount = 0;
+  let schoolCount = 0;
+  let legalCount = 0;
+  let jaceCount = 0;
+  let joshCount = 0;
+  let bothCount = 0;
+  
+  rows.forEach(row => {
+    try {
+      const cells = row.cells;
+      if (!cells || cells.length < 6) return;
+      
+      const summary = cells[3].textContent.trim();
+      const currentCategory = cells[0].textContent.trim();
+      
+      // Enhanced category detection based on content
+      let newCategory = detectCategoryFromContent(summary);
+      let newChild = detectChild(summary);
+      
+      // Count categories for reporting
+      switch(newCategory) {
+        case 'Medical': medicalCount++; break;
+        case 'School': schoolCount++; break;
+        case 'Legal': legalCount++; break;
+      }
+      
+      switch(newChild) {
+        case 'Jace': jaceCount++; break;
+        case 'Josh': joshCount++; break;
+        case 'Both': bothCount++; break;
+      }
+      
+      // Update cells
+      cells[0].textContent = newCategory;
+      cells[1].textContent = newChild;
+      
+      // Update tags in the tags column
+      const newTags = keywordTags(summary);
+      cells[4].textContent = newTags.join(', ');
+      
+      updatedCount++;
+    } catch (error) {
+      console.error('Error updating row:', error);
+    }
+  });
+  
+  saveTable();
+  
+  alert(
+    `Smart update complete!\n\n` +
+    `📊 Updated: ${updatedCount} entries\n\n` +
+    `📋 Categories:\n` +
+    `• Medical: ${medicalCount}\n` +
+    `• School: ${schoolCount}\n` +
+    `• Legal: ${legalCount}\n` +
+    `• General: ${updatedCount - medicalCount - schoolCount - legalCount}\n\n` +
+    `👥 Children:\n` +
+    `• Jace: ${jaceCount}\n` +
+    `• Josh: ${joshCount}\n` +
+    `• Both: ${bothCount}\n` +
+    `• Unknown: ${updatedCount - jaceCount - joshCount - bothCount}`
+  );
+};
+
+// Enhanced content-based category detection
+function detectCategoryFromContent(content) {
+  const lowerContent = content.toLowerCase();
+  
+  // Medical indicators (more comprehensive)
+  if (/medical|health|doctor|hospital|urgent care|patient|treatment|diagnosis|prescription|hipaa|spectrum health|brains|eval|consult|injury|bruise|panic attack/.test(lowerContent)) {
+    return "Medical";
+  }
+  
+  // School indicators
+  if (/school|education|grades|teacher|classroom|ela|math|science|social studies|pe|health class|principal|counselor/.test(lowerContent)) {
+    return "School";
+  }
+  
+  // Legal indicators (comprehensive)
+  if (/cps|court|police|legal|attorney|lawyer|judge|hearing|warrant|investigation|custody|visitation|divorce|complaint|report|case|foc|parenti/.test(lowerContent)) {
+    return "Legal";
+  }
+  
+  return "General";
+}
