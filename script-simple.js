@@ -128,13 +128,13 @@ async function processSingleFile(file) {
     }
     
     addRow({
-      category: detectCategory(text, file.name),
+      category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
       child: detectChild(text),
       misconduct: "Review Needed",
       summary,
       tags: keywordTags(text),
       fileURL,
-      fileName: file.name
+      fileName: parseFileName(file.name)
     });
     
     alert("Document processed successfully!");
@@ -189,13 +189,13 @@ async function processBulkFiles(files, skipDuplicates = false) {
       
       // Add row without alerts
       addRow({
-        category: detectCategory(text, file.name),
+        category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
         child: detectChild(text),
         misconduct: "Review Needed",
         summary,
         tags: keywordTags(text),
         fileURL,
-        fileName: file.name
+        fileName: parseFileName(file.name)
       });
       
       processedCount++;
@@ -248,6 +248,51 @@ const quickSummary = (text) => {
   const clean = text.replace(/\\s+/g, " ").trim();
   return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
 };
+
+// Enhanced filename parsing for Google Drive files
+function parseFileName(filePath) {
+  // Extract just the filename from full path
+  const fileName = filePath.split(/[/\\]/).pop();
+  
+  // Clean up common Google Drive artifacts
+  const cleanName = fileName
+    .replace(/^.*\d{4}\\/, '') // Remove year folders
+    .replace(/\+/g, ' ') // Replace + with spaces
+    .replace(/_/g, ' ') // Replace underscores with spaces
+    .replace(/\s+/g, ' ') // Normalize spaces
+    .trim();
+    
+  return cleanName;
+}
+
+// Enhanced category detection that considers filename patterns
+function detectCategoryFromPath(text, fileName, filePath) {
+  const lowerText = text.toLowerCase();
+  const lowerFileName = (fileName || "").toLowerCase();
+  const lowerPath = (filePath || "").toLowerCase();
+  
+  // CPS/Legal keywords
+  if (/cps complaint|court|police report|search warrant|investigation|foc|divorce|custody|hearing|notice/.test(lowerFileName) ||
+      /cps|court|police|warrant|legal|custody/.test(lowerPath)) {
+    return "Legal";
+  }
+  
+  // Medical keywords
+  if (/urgent care|medical|health|doctor|hospital|brains|spectrum health|eval|consult/.test(lowerFileName) ||
+      /medical|health|doctor|hospital/.test(lowerPath) ||
+      /medical|doctor|hospital|health|patient|treatment|diagnosis|urgent care/.test(lowerText)) {
+    return "Medical";
+  }
+  
+  // School keywords  
+  if (/grades|school|education|ela|math|science|pe|health/.test(lowerFileName) ||
+      /school|education|grades/.test(lowerPath) ||
+      /school|education|teacher|classroom|grades/.test(lowerText)) {
+    return "School";
+  }
+  
+  return "General";
+}
 
 // Category detector
 function detectCategory(text, fileName) {
