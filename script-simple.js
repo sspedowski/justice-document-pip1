@@ -152,13 +152,14 @@ async function processSingleFile(file) {
         return;
       }
     }
-    
-    // AI-powered misconduct detection
-    const misconduct = await detectMisconductWithAI(summary, "Review Needed", "Unknown");
-    
+      // AI-powered misconduct detection
+    const category = detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name);
+    const child = detectChild(text + ' ' + file.name); // Include filename in child detection
+    const misconduct = await detectMisconductWithAI(summary, category, child);
+
     addRow({
-      category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
-      child: detectChild(text),
+      category,
+      child,
       misconduct,
       summary,
       tags: keywordTags(text),
@@ -215,14 +216,15 @@ async function processBulkFiles(files, skipDuplicates = false) {
           continue;
         }
       }
-      
-      // AI-powered misconduct detection
-      const misconduct = await detectMisconductWithAI(summary, "Review Needed", "Unknown");
-      
+        // AI-powered misconduct detection
+      const category = detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name);
+      const child = detectChild(text + ' ' + file.name); // Include filename in child detection
+      const misconduct = await detectMisconductWithAI(summary, category, child);
+
       // Add row without alerts
       addRow({
-        category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
-        child: detectChild(text),
+        category,
+        child,
         misconduct,
         summary,
         tags: keywordTags(text),
@@ -352,14 +354,15 @@ function detectCategory(text, fileName) {
   return "General";
 }
 
-// Child name detector (enhanced)
+// Child name detector (enhanced with debugging)
 function detectChild(text) {
   if (!text || typeof text !== 'string') {
+    console.log('detectChild: Invalid text input:', text);
     return "Unknown";
   }
   
-  // Convert to lowercase for case-insensitive matching
-  const cleanText = text.toLowerCase();
+  // Debug: Show what text we're analyzing
+  console.log('detectChild: Analyzing text snippet:', text.substring(0, 200));
   
   // More flexible patterns to catch variations
   const jacePatterns = [
@@ -367,7 +370,8 @@ function detectChild(text) {
     /jace[\s,\.]/i,        // Jace followed by space, comma, or period
     /[\s,\.]jace/i,        // Jace preceded by space, comma, or period
     /^jace[\s,\.]/i,       // Jace at start of text
-    /[\s,\.]jace$/i        // Jace at end of text
+    /[\s,\.]jace$/i,       // Jace at end of text
+    /jace/i                // Simple match as fallback
   ];
   
   const joshPatterns = [
@@ -375,11 +379,14 @@ function detectChild(text) {
     /josh[\s,\.]/i,        // Josh followed by space, comma, or period
     /[\s,\.]josh/i,        // Josh preceded by space, comma, or period
     /^josh[\s,\.]/i,       // Josh at start of text
-    /[\s,\.]josh$/i        // Josh at end of text
+    /[\s,\.]josh$/i,       // Josh at end of text
+    /josh/i                // Simple match as fallback
   ];
   
   const jaceFound = jacePatterns.some(pattern => pattern.test(text));
   const joshFound = joshPatterns.some(pattern => pattern.test(text));
+  
+  console.log('detectChild: Jace found:', jaceFound, 'Josh found:', joshFound);
   
   if (jaceFound && joshFound) return "Both";
   if (jaceFound) return "Jace";
