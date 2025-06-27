@@ -208,6 +208,7 @@ function updateDashboardStats() {
 function populateFilters() {
   const categories = new Set();
   const misconductTypes = new Set();
+  
   Array.from(trackerBody.querySelectorAll('tr')).forEach(row => {
     categories.add(row.cells[0].textContent);
     misconductTypes.add(row.querySelector('select').value);
