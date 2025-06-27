@@ -3,6 +3,9 @@
 // Global variables for dashboard access
 let currentUser = null;
 let isAuthenticated = false;
+let isProcessingBulk = false;
+let bulkProgress = 0;
+let bulkTotal = 0;
 
 /********** Dashboard Access System **********/
 const DashboardAuth = {
@@ -168,13 +171,26 @@ const DashboardAuth = {
             <!-- File Upload and Controls -->
             <div class="mb-6 space-y-4">
               <div>
-                <input type="file" id="fileInput" accept=".pdf" 
+                <input type="file" id="fileInput" accept=".pdf" multiple
                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <small class="text-gray-600">Select multiple PDF files for bulk processing</small>
+              </div>
+              
+              <!-- Progress bar for bulk processing -->
+              <div id="bulkProgress" class="hidden">
+                <div class="bg-gray-200 rounded-full h-2.5 mb-2">
+                  <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
               </div>
               
               <div class="flex space-x-4">
                 <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Generate Summary
+                  Process Selected Files
+                </button>
+                <button id="bulkProcessBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                  Bulk Process (Skip Duplicates)
+                </button>
                 </button>
                 <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                   Export CSV
@@ -373,8 +389,36 @@ function initializeJusticeDashboard() {
     return "Unknown";
   }
 
-  // Check for duplicates based on file name and summary
+  // Check for duplicates based on file name and summary (optimized for bulk)
   function isDuplicate(fileName, summary) {
+    // Quick cache for performance
+    if (!window.summaryCache) {
+      window.summaryCache = new Set();
+      // Build initial cache
+      const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
+      for (const row of existingRows) {
+        const cells = row.cells;
+        if (cells && cells.length >= 4) {
+          window.summaryCache.add(cells[3].textContent.trim());
+        }
+      }
+    }
+    
+    const trimmedSummary = summary.trim();
+    
+    // Fast exact match check
+    if (window.summaryCache.has(trimmedSummary)) {
+      return { isDupe: true, reason: 'Identical summary content' };
+    }
+    
+    // For bulk operations, skip expensive similarity checks
+    if (isProcessingBulk) {
+      // Add to cache for future checks
+      window.summaryCache.add(trimmedSummary);
+      return { isDupe: false };
+    }
+    
+    // Expensive similarity check only for individual files
     const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
     
     for (const row of existingRows) {
@@ -383,26 +427,17 @@ function initializeJusticeDashboard() {
       
       const existingSummary = cells[3].textContent.trim();
       
-      // Check for exact summary match (primary check)
-      if (existingSummary === summary.trim()) {
-        return { isDupe: true, reason: 'Identical summary content' };
-      }
-      
       // Check for same filename if provided
-      if (fileName) {
-        const viewButton = row.querySelector('button');
-        if (viewButton && viewButton.textContent.includes('View PDF')) {
-          // Try to extract filename from button or check if very similar summary
-          if (existingSummary.length > 10 && summary.length > 10) {
-            const similarity = calculateSimilarity(existingSummary, summary);
-            if (similarity > 0.85) { // 85% similar
-              return { isDupe: true, reason: `${Math.round(similarity * 100)}% similar content` };
-            }
-          }
+      if (fileName && existingSummary.length > 10 && summary.length > 10) {
+        const similarity = calculateSimilarity(existingSummary, summary);
+        if (similarity > 0.85) { // 85% similar
+          return { isDupe: true, reason: `${Math.round(similarity * 100)}% similar content` };
         }
       }
     }
     
+    // Add to cache
+    window.summaryCache.add(trimmedSummary);
     return { isDupe: false };
   }
 
@@ -482,13 +517,76 @@ function initializeJusticeDashboard() {
     saveTable();
   }
 
+  // Silent version of addRow (no alerts)
+  function addRowSilent({ category, child, misconduct, summary, tags, fileURL, fileName }) {
+    const row = trackerBody.insertRow();
+    
+    row.insertCell().innerText = category;
+    row.insertCell().innerText = child;
+    row.insertCell().appendChild(buildMisconductSelect(misconduct));
+    
+    const summaryCell = row.insertCell();
+    summaryCell.textContent = summary;
+    summaryCell.title = summary;
+    summaryCell.className = "max-w-xs truncate";
+    
+    row.insertCell().innerText = tags.join(", ");
+    
+    const actionCell = row.insertCell();
+    if (fileURL) {
+      const viewBtn = document.createElement("button");
+      viewBtn.className = "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
+      viewBtn.innerText = "View PDF";
+      viewBtn.onclick = () => window.open(fileURL, '_blank');
+      actionCell.appendChild(viewBtn);
+    } else {
+      actionCell.innerText = "N/A";
+    }
+    
+    // Save to localStorage (batch save for performance)
+    if (bulkProgress % 10 === 0 || bulkProgress === bulkTotal) {
+      saveTable();
+    }
+  }
+
+  // Optimize saving for bulk operations
+  let saveTimeout;
+  function saveTableDelayed() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      saveTable();
+    }, 1000); // Save after 1 second of no activity
+  }
+
   // Main summarize button handler
   summarizeBtn.onclick = async () => {
-    const hasFile = fileInput?.files?.[0];
+    const files = fileInput?.files;
     const hasText = docInput?.value?.trim();
     
+    if (!files?.length && !hasText) {
+      alert("Upload PDF files or paste text first.");
+      return;
+    }
+    
+    // Handle multiple files
+    if (files?.length > 1) {
+      const proceed = confirm(
+        `You've selected ${files.length} files.\n\n` +
+        `Process all files? This may take a while.`
+      );
+      
+      if (proceed) {
+        await processBulkFiles(Array.from(files), false);
+        return;
+      } else {
+        return;
+      }
+    }
+    
+    // Handle single file or text (original logic)
+    const hasFile = files?.[0];
+    
     if (!hasFile && !hasText) {
-      alert("Upload a PDF or paste text first.");
       return;
     }
 
@@ -543,6 +641,104 @@ function initializeJusticeDashboard() {
     
     alert("Summary added to tracker!");
   };
+
+  // Bulk processing function
+  async function processBulkFiles(files, skipDuplicates = false) {
+    isProcessingBulk = true;
+    bulkTotal = files.length;
+    bulkProgress = 0;
+    
+    const progressDiv = document.getElementById('bulkProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    progressDiv.classList.remove('hidden');
+    
+    let processedCount = 0;
+    let duplicateCount = 0;
+    let errorCount = 0;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      bulkProgress = i + 1;
+      
+      // Update progress
+      const percentage = (bulkProgress / bulkTotal) * 100;
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
+      
+      try {
+        // Add delay to prevent browser freezing
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        const text = await pdfToText(file);
+        const summary = quickSummary(text);
+        const fileURL = URL.createObjectURL(file);
+        
+        // Check for duplicates if requested
+        if (skipDuplicates) {
+          const dupeCheck = isDuplicate(file.name, summary);
+          if (dupeCheck.isDupe) {
+            duplicateCount++;
+            continue;
+          }
+        }
+        
+        // Add row without alerts
+        addRowSilent({
+          category: detectCategory(text, file.name),
+          child: detectChild(text),
+          misconduct: "Review Needed",
+          summary,
+          tags: keywordTags(text),
+          fileURL,
+          fileName: file.name
+        });
+        
+        processedCount++;
+        
+      } catch (error) {
+        console.error(`Error processing ${file.name}:`, error);
+        errorCount++;
+      }
+    }
+    
+    // Hide progress and show results
+    progressDiv.classList.add('hidden');
+    isProcessingBulk = false;
+    
+    alert(
+      `Bulk processing complete!\n\n` +
+      `✅ Processed: ${processedCount} files\n` +
+      `⚠️ Duplicates skipped: ${duplicateCount}\n` +
+      `❌ Errors: ${errorCount}\n` +
+      `📊 Total: ${bulkTotal} files`
+    );
+  }
+
+  // Bulk process button handler
+  const bulkProcessBtn = document.getElementById("bulkProcessBtn");
+  if (bulkProcessBtn) {
+    bulkProcessBtn.onclick = async () => {
+      const files = fileInput?.files;
+      
+      if (!files?.length) {
+        alert("Please select PDF files first.");
+        return;
+      }
+      
+      const proceed = confirm(
+        `Bulk process ${files.length} files?\n\n` +
+        `• Duplicates will be automatically skipped\n` +
+        `• Processing may take several minutes\n` +
+        `• Don't close the browser while processing`
+      );
+      
+      if (proceed) {
+        await processBulkFiles(Array.from(files), true);
+      }
+    };
+  }
 
   // Export to CSV
   if (exportBtn) {
