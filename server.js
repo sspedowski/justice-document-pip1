@@ -68,6 +68,76 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
   }
 });
 
+// AI analysis endpoint
+app.post("/api/ai-analyze", express.json(), async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    // For now, use the fallback logic since we don't have a real AI service configured
+    // You can replace this with actual AI service calls (OpenAI, Anthropic, etc.)
+    const result = detectMisconductFallback(prompt);
+    
+    res.json({ 
+      result: result,
+      status: "success",
+      method: "fallback_logic"
+    });
+    
+  } catch (error) {
+    console.error("AI analysis error:", error);
+    res.status(500).json({ 
+      error: "AI analysis failed",
+      result: "Review Needed"
+    });
+  }
+});
+
+// Fallback misconduct detection function for server
+function detectMisconductFallback(text) {
+  const lowerText = text.toLowerCase();
+  
+  // Medical/HIPAA violations
+  if (/medical|hipaa|health|doctor|hospital|privacy|disclosure|medical records/.test(lowerText)) {
+    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
+  }
+  
+  // Due process violations
+  if (/due process|fourteenth amendment|equal protection|discrimination|unfair treatment/.test(lowerText)) {
+    return "Violation of the Fourteenth Amendment - Due Process and Equal Protection";
+  }
+  
+  // Educational rights
+  if (/school|education|iep|504|special education|educational/.test(lowerText)) {
+    return "Educational Rights Violation";
+  }
+  
+  // CPS misconduct
+  if (/cps|child protective|social services|investigation|removal/.test(lowerText)) {
+    return "CPS/Social Services Misconduct";
+  }
+  
+  // Law enforcement
+  if (/police|officer|arrest|detention|law enforcement/.test(lowerText)) {
+    return "Law Enforcement Misconduct";
+  }
+  
+  // Court/judicial
+  if (/court|judge|hearing|judicial|legal proceedings/.test(lowerText)) {
+    return "Judicial/Court Process Violation";
+  }
+  
+  // Custody issues
+  if (/custody|visitation|parenting time|access/.test(lowerText)) {
+    return "Custody/Visitation Rights Violation";
+  }
+  
+  return "Review Needed";
+}
+
 app.listen(3000, () => {
   console.log("✅ Justice server running at http://localhost:3000");
 });

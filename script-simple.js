@@ -6,7 +6,7 @@ let bulkProgress = 0;
 let bulkTotal = 0;
 
 // DOM Elements (initialized on page load)
-let fileInput, generateBtn, bulkProcessBtn, updateExistingBtn, exportBtn, summaryBox, trackerBody;
+let fileInput, generateBtn, bulkProcessBtn, updateExistingBtn, aiMisconductBtn, exportBtn, summaryBox, trackerBody;
 let categoryFilter, misconductFilter, totalCasesEl, activeCasesEl;
 
 // Initialize when page loads
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   generateBtn = document.getElementById("generateBtn");
   bulkProcessBtn = document.getElementById("bulkProcessBtn");
   updateExistingBtn = document.getElementById("updateExistingBtn");
+  aiMisconductBtn = document.getElementById("aiMisconductBtn");
   exportBtn = document.getElementById("exportBtn");
   summaryBox = document.getElementById("summaryBox");
   trackerBody = document.querySelector("#results");
@@ -112,6 +113,18 @@ function setupEventHandlers() {
       }
     };
   }
+
+  // AI Misconduct Analysis button
+  if (aiMisconductBtn) {
+    aiMisconductBtn.onclick = async () => {
+      try {
+        await updateMisconductWithAI();
+      } catch (error) {
+        console.error('Error running AI misconduct analysis:', error);
+        alert('Error running AI analysis. Please try again.');
+      }
+    };
+  }
 }
 
 // Process a single file
@@ -140,10 +153,13 @@ async function processSingleFile(file) {
       }
     }
     
+    // AI-powered misconduct detection
+    const misconduct = await detectMisconductWithAI(summary, "Review Needed", "Unknown");
+    
     addRow({
       category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
       child: detectChild(text),
-      misconduct: "Review Needed",
+      misconduct,
       summary,
       tags: keywordTags(text),
       fileURL,
@@ -200,11 +216,14 @@ async function processBulkFiles(files, skipDuplicates = false) {
         }
       }
       
+      // AI-powered misconduct detection
+      const misconduct = await detectMisconductWithAI(summary, "Review Needed", "Unknown");
+      
       // Add row without alerts
       addRow({
         category: detectCategoryFromPath(text, file.name, file.webkitRelativePath || file.name),
         child: detectChild(text),
-        misconduct: "Review Needed",
+        misconduct,
         summary,
         tags: keywordTags(text),
         fileURL,
@@ -394,7 +413,12 @@ function buildMisconductSelect(value = "Review Needed") {
   const options = [
     "Review Needed",
     "Denial of Right to Medical Safety and Privacy (HIPAA Violations)",
-    "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
+    "Violation of the Fourteenth Amendment - Due Process and Equal Protection",
+    "Educational Rights Violation",
+    "CPS/Social Services Misconduct", 
+    "Law Enforcement Misconduct",
+    "Judicial/Court Process Violation",
+    "Custody/Visitation Rights Violation"
   ];
 
   options.forEach(opt => {
@@ -704,3 +728,199 @@ function detectCategoryFromContent(content) {
   
   return "General";
 }
+
+// AI-powered misconduct detection
+async function detectMisconductWithAI(summary, category, child) {
+  try {
+    // Prepare context for AI analysis
+    const context = `
+Document Category: ${category}
+Child Involved: ${child}
+Summary: ${summary}
+
+Based on this content, analyze what type of misconduct or violation this document represents. Consider:
+- Civil rights violations
+- Due process violations
+- HIPAA/medical privacy violations
+- Educational rights violations
+- CPS/social services misconduct
+- Law enforcement misconduct
+- Court/judicial misconduct
+
+Respond with one of these specific misconduct types:
+1. "Denial of Right to Medical Safety and Privacy (HIPAA Violations)"
+2. "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
+3. "Educational Rights Violation"
+4. "CPS/Social Services Misconduct"
+5. "Law Enforcement Misconduct"
+6. "Judicial/Court Process Violation"
+7. "Custody/Visitation Rights Violation"
+8. "Review Needed"
+
+Only respond with the exact misconduct type, no explanation.`;
+
+    // Call AI service (you can replace this with your preferred AI service)
+    const response = await callAIService(context);
+    
+    return response || "Review Needed";
+  } catch (error) {
+    console.error('AI misconduct detection failed:', error);
+    return "Review Needed";
+  }
+}
+
+// AI service integration (replace with your preferred service)
+async function callAIService(prompt) {
+  try {
+    // Option 1: Using a simple AI API endpoint
+    const response = await fetch('/api/ai-analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+        max_tokens: 50,
+        temperature: 0.3
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.result || data.response || data.text;
+    }
+  } catch (error) {
+    console.log('AI service not available, using fallback logic');
+  }
+
+  // Fallback: Simple keyword-based detection
+  return detectMisconductFallback(prompt);
+}
+
+// Fallback misconduct detection using keywords
+function detectMisconductFallback(text) {
+  const lowerText = text.toLowerCase();
+  
+  // Medical/HIPAA violations
+  if (/medical|hipaa|health|doctor|hospital|privacy|disclosure|medical records/.test(lowerText)) {
+    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
+  }
+  
+  // Due process violations
+  if (/due process|fourteenth amendment|equal protection|discrimination|unfair treatment/.test(lowerText)) {
+    return "Violation of the Fourteenth Amendment - Due Process and Equal Protection";
+  }
+  
+  // Educational rights
+  if (/school|education|iep|504|special education|educational/.test(lowerText)) {
+    return "Educational Rights Violation";
+  }
+  
+  // CPS misconduct
+  if (/cps|child protective|social services|investigation|removal/.test(lowerText)) {
+    return "CPS/Social Services Misconduct";
+  }
+  
+  // Law enforcement
+  if (/police|officer|arrest|detention|law enforcement/.test(lowerText)) {
+    return "Law Enforcement Misconduct";
+  }
+  
+  // Court/judicial
+  if (/court|judge|hearing|judicial|legal proceedings/.test(lowerText)) {
+    return "Judicial/Court Process Violation";
+  }
+  
+  // Custody issues
+  if (/custody|visitation|parenting time|access/.test(lowerText)) {
+    return "Custody/Visitation Rights Violation";
+  }
+  
+  return "Review Needed";
+}
+
+// AI-powered update function for misconduct types
+window.updateMisconductWithAI = async function() {
+  const rows = Array.from(trackerBody.querySelectorAll('tr'));
+  
+  if (rows.length === 0) {
+    alert('No existing rows to update.');
+    return;
+  }
+  
+  const proceed = confirm(
+    `Update misconduct types using AI analysis for ${rows.length} entries?\n\n` +
+    `This will:\n` +
+    `• Analyze each document's content\n` +
+    `• Suggest appropriate misconduct types\n` +
+    `• Use AI to improve categorization\n` +
+    `• Process may take a few minutes\n\n` +
+    `Continue?`
+  );
+  
+  if (!proceed) return;
+  
+  let updatedCount = 0;
+  let processedCount = 0;
+  const total = rows.length;
+  
+  // Show progress
+  const progressDiv = document.getElementById('bulkProgress');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  
+  if (progressDiv) progressDiv.classList.remove('hidden');
+  
+  for (const row of rows) {
+    try {
+      const cells = row.cells;
+      if (!cells || cells.length < 6) continue;
+      
+      processedCount++;
+      
+      // Update progress
+      const percentage = (processedCount / total) * 100;
+      if (progressBar) progressBar.style.width = `${percentage}%`;
+      if (progressText) progressText.textContent = `Analyzing ${processedCount} of ${total} entries...`;
+      
+      const category = cells[0].textContent.trim();
+      const child = cells[1].textContent.trim();
+      const summary = cells[3].textContent.trim();
+      
+      // Get AI-powered misconduct suggestion
+      const suggestedMisconduct = await detectMisconductWithAI(summary, category, child);
+      
+      // Update the misconduct dropdown
+      const misconductSelect = cells[2].querySelector('select');
+      if (misconductSelect && suggestedMisconduct !== "Review Needed") {
+        // Find and select the suggested option
+        const options = Array.from(misconductSelect.options);
+        const matchingOption = options.find(opt => opt.value === suggestedMisconduct);
+        if (matchingOption) {
+          misconductSelect.value = suggestedMisconduct;
+          updatedCount++;
+        }
+      }
+      
+      // Small delay to prevent overwhelming the AI service
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+    } catch (error) {
+      console.error('Error updating misconduct for row:', error);
+    }
+  }
+  
+  // Hide progress
+  if (progressDiv) progressDiv.classList.add('hidden');
+  
+  // Save updated data
+  saveTable();
+  
+  alert(
+    `AI Misconduct Update Complete!\n\n` +
+    `✅ Processed: ${processedCount} entries\n` +
+    `🤖 AI Updated: ${updatedCount} misconduct types\n` +
+    `💾 Data saved automatically\n\n` +
+    `Note: Entries marked "Review Needed" may need manual review.`
+  );
+};
