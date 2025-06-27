@@ -335,10 +335,22 @@ function detectCategory(text, fileName) {
 
 // Child name detector
 function detectChild(text) {
-  const children = ["Jace", "Josh"];
-  const found = children.filter(name => new RegExp(`\\b${name}\\b`, "i").test(text));
-  if (found.length === 2) return "Both";
-  if (found.length === 1) return found[0];
+  if (!text || typeof text !== 'string') {
+    console.log('detectChild: Invalid text input:', text);
+    return "Unknown";
+  }
+  
+  const cleanText = text.toLowerCase();
+  console.log('detectChild: Analyzing text:', cleanText.substring(0, 100) + '...');
+  
+  const jaceFound = /\bjace\b/i.test(text);
+  const joshFound = /\bjosh\b/i.test(text);
+  
+  console.log('detectChild: Jace found:', jaceFound, 'Josh found:', joshFound);
+  
+  if (jaceFound && joshFound) return "Both";
+  if (jaceFound) return "Jace";
+  if (joshFound) return "Josh";
   return "Unknown";
 }
 
