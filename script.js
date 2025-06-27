@@ -57,12 +57,6 @@ const DashboardAuth = {
       return true;
     }
     
-    // Auto-login for testing (remove this in production)
-    console.log('Auto-logging in as stephanie for testing...');
-    if (this.authenticate('stephanie', 'spedowski2024')) {
-      return true;
-    }
-    
     return false;
   },
 
@@ -274,7 +268,16 @@ function initializeJusticeDashboard() {
   const exportBtn = document.getElementById("exportBtn");
   const askBtn = document.getElementById("askLawGpt");
   const summaryBox = document.getElementById("summaryBox");
-  const trackerBody = document.querySelector("#results");
+  let trackerBody = document.querySelector("#results");
+  
+  // Fallback for trackerBody
+  if (!trackerBody) {
+    trackerBody = document.querySelector("#trackerTable tbody");
+  }
+  if (!trackerBody) {
+    console.error('Could not find tracker table body');
+    return;
+  }
 
   // Dashboard elements
   const categoryFilter = document.getElementById('categoryFilter');
@@ -283,8 +286,15 @@ function initializeJusticeDashboard() {
   // Essential elements check
   if (!summarizeBtn || !trackerBody) {
     console.error('Required DOM elements not found');
+    console.log('Available elements:');
+    console.log('summarizeBtn:', summarizeBtn);
+    console.log('trackerBody:', trackerBody);
+    console.log('fileInput:', fileInput);
+    console.log('Available IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
     return;
   }
+
+  console.log('All essential elements found, initializing dashboard...');
 
   // Clear old localStorage data on load to refresh with new options
   function clearOldData() {
@@ -868,4 +878,27 @@ window.clearOldData = function() {
     trackerBody.innerHTML = "";
   }
   console.log("Justice tracker data cleared");
+};
+
+// Global debugging functions
+window.debugDashboard = function() {
+  console.log('=== Dashboard Debug Info ===');
+  console.log('Authentication status:', isAuthenticated);
+  console.log('Current user:', currentUser);
+  console.log('DOM elements:');
+  console.log('- fileInput:', document.getElementById("fileInput"));
+  console.log('- generateBtn:', document.getElementById("generateBtn"));
+  console.log('- results tbody:', document.querySelector("#results"));
+  console.log('- trackerTable:', document.getElementById("trackerTable"));
+  console.log('All elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+};
+
+window.forceLoadDashboard = function() {
+  console.log('Force loading dashboard...');
+  DashboardAuth.loadDashboard();
+};
+
+window.manualInit = function() {
+  console.log('Manual initialization...');
+  initializeJusticeDashboard();
 };
