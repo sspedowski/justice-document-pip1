@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "postcss justice-dashboard/styles.css -o justice-dashboard/dist/styles.css",
-    "watch:css": "postcss justice-dashboard/styles.css -o justice-dashboard/dist/styles.css --watch"
+"build:css": "postcss ./justice-dashboard/styles.css -o ./justice-dashboard/dist/styles.css",
+    "watch:css": "postcss ./justice-dashboard/styles.css -o ./justice-dashboard/dist/styles.css --watch"
   },
   "keywords": [],
   "author": "",
