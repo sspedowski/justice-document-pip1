@@ -336,7 +336,7 @@ function detectCategory(text, fileName) {
 // Child name detector
 function detectChild(text) {
   const children = ["Jace", "Josh"];
-  const found = children.filter(name => new RegExp(`\\\\b${name}\\\\b`, "i").test(text));
+  const found = children.filter(name => new RegExp(`\\b${name}\\b`, "i").test(text));
   if (found.length === 2) return "Both";
   if (found.length === 1) return found[0];
   return "Unknown";
@@ -345,7 +345,7 @@ function detectChild(text) {
 // Legal keyword tagger
 function keywordTags(text) {
   const keywords = {
-    "Brady Violation": /\\bbrady\\b|exculpatory/i,
+    "Brady Violation": /\bbrady\b|exculpatory/i,
     "Civil Rights": /civil rights|§?1983/i,
     "CPS Negligence": /cps (?:failed|negligence)/i,
     "Custody Interference": /denied visitation|interference/i
