@@ -100,39 +100,44 @@ app.post("/api/ai-analyze", express.json(), async (req, res) => {
 function detectMisconductFallback(text) {
   const lowerText = text.toLowerCase();
   
-  // Medical/HIPAA violations
-  if (/medical|hipaa|health|doctor|hospital|privacy|disclosure|medical records/.test(lowerText)) {
-    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
-  }
-  
-  // Due process violations
-  if (/due process|fourteenth amendment|equal protection|discrimination|unfair treatment/.test(lowerText)) {
-    return "Violation of the Fourteenth Amendment - Due Process and Equal Protection";
-  }
-  
-  // Educational rights
-  if (/school|education|iep|504|special education|educational/.test(lowerText)) {
-    return "Educational Rights Violation";
-  }
-  
-  // CPS misconduct
-  if (/cps|child protective|social services|investigation|removal/.test(lowerText)) {
+  // CPS misconduct (check first - most specific)
+  if (/\bcps\b|child protective services|dcfs|dhs.*child|child.*investigation|family.*investigation|case.*worker|social.*worker.*child/.test(lowerText)) {
     return "CPS/Social Services Misconduct";
   }
   
-  // Law enforcement
-  if (/police|officer|arrest|detention|law enforcement/.test(lowerText)) {
+  // Educational rights (specific school issues)
+  if (/\biep\b|\b504\b|special education|school.*disci|expul|suspen|educational.*rights|school.*denial/.test(lowerText)) {
+    return "Educational Rights Violation";
+  }
+  
+  // Law enforcement (specific police/arrest issues)
+  if (/\bpolice\b|officer.*misconduct|arrest|detention|miranda|excessive.*force|police.*report|law.*enforcement.*violation/.test(lowerText)) {
     return "Law Enforcement Misconduct";
   }
   
-  // Court/judicial
-  if (/court|judge|hearing|judicial|legal proceedings/.test(lowerText)) {
+  // Court/judicial (specific legal process issues)
+  if (/\bcourt\b.*\b(error|bias|misconduct)\b|judge.*bias|judicial.*misconduct|legal.*proceedings.*flawed|hearing.*denied/.test(lowerText)) {
     return "Judicial/Court Process Violation";
   }
   
-  // Custody issues
-  if (/custody|visitation|parenting time|access/.test(lowerText)) {
+  // Custody issues (specific custody/visitation problems)
+  if (/custody.*denied|visitation.*denied|parenting.*time.*blocked|access.*child.*denied|custody.*interference/.test(lowerText)) {
     return "Custody/Visitation Rights Violation";
+  }
+  
+  // Medical/HIPAA violations (more specific medical privacy issues)
+  if (/hipaa.*violation|medical.*records.*disclosed|health.*information.*shared|medical.*privacy.*breach|unauthorized.*medical/.test(lowerText)) {
+    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
+  }
+  
+  // Due process violations (broader constitutional issues)
+  if (/due.*process|fourteenth.*amendment|equal.*protection|constitutional.*violation|rights.*violated|discrimination/.test(lowerText)) {
+    return "Violation of the Fourteenth Amendment - Due Process and Equal Protection";
+  }
+  
+  // General medical (less specific, fallback for medical content)
+  if (/doctor|hospital|medical.*treatment|health.*care|medical.*appointment/.test(lowerText)) {
+    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
   }
   
   return "Review Needed";
