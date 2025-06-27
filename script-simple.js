@@ -6,7 +6,7 @@ let bulkProgress = 0;
 let bulkTotal = 0;
 
 // DOM Elements (initialized on page load)
-let fileInput, generateBtn, bulkProcessBtn, exportBtn, summaryBox, trackerBody;
+let fileInput, generateBtn, bulkProcessBtn, updateExistingBtn, exportBtn, summaryBox, trackerBody;
 let categoryFilter, misconductFilter, totalCasesEl, activeCasesEl;
 
 // Initialize when page loads
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
   fileInput = document.getElementById("fileInput");
   generateBtn = document.getElementById("generateBtn");
   bulkProcessBtn = document.getElementById("bulkProcessBtn");
+  updateExistingBtn = document.getElementById("updateExistingBtn");
   exportBtn = document.getElementById("exportBtn");
   summaryBox = document.getElementById("summaryBox");
   trackerBody = document.querySelector("#results");
@@ -98,6 +99,18 @@ function setupEventHandlers() {
   // Export button
   if (exportBtn) {
     exportBtn.onclick = exportToCSV;
+  }
+
+  // Update existing entries button
+  if (updateExistingBtn) {
+    updateExistingBtn.onclick = () => {
+      try {
+        smartUpdateRows();
+      } catch (error) {
+        console.error('Error updating existing rows:', error);
+        alert('Error updating entries. Please try again.');
+      }
+    };
   }
 }
 

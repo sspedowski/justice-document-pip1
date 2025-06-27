@@ -44,12 +44,15 @@
           <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
         </div>
         
-        <div class="flex space-x-4">
+        <div class="flex space-x-4 flex-wrap gap-2">
           <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Process Selected Files
           </button>
           <button id="bulkProcessBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
             Bulk Process (Skip Duplicates)
+          </button>
+          <button id="updateExistingBtn" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" title="Update existing entries with improved categorization">
+            Update Existing Entries
           </button>
           <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Export CSV
