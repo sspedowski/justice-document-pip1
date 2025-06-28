@@ -1,0 +1,10 @@
+# Browsers that we support
+
+last 2 versions
+not dead
+not ie <= 11
+not op_mini all
+Chrome >= 54
+Firefox >= 60
+Safari >= 12
+Edge >= 79
