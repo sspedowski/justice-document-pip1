@@ -1,26 +1,30 @@
-import express from 'express';
-import multer from 'multer';
-import pdfParse from 'pdf-parse';
-import { createWorker } from 'tesseract.js';
-import { OpenAI } from 'openai';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const { createWorker } = require('tesseract.js');
+const cors = require('cors');
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+const path = require('path');
+const fs = require('fs');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.join(__dirname, '../.env') });
+// Try to import OpenAI, fallback if not available
+let OpenAI;
+try {
+  OpenAI = require('openai').OpenAI;
+} catch (error) {
+  console.log('OpenAI module not available, AI summarization disabled');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Initialize OpenAI if available
+let openai;
+if (OpenAI && process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
 
 // Middleware
 app.use(cors());
@@ -121,8 +125,8 @@ async function performOCR(filePath) {
 
 // OpenAI summarization function
 async function generateSummary(text, fileName) {
-  if (!process.env.OPENAI_API_KEY) {
-    return `Document: ${fileName}. AI summarization unavailable (no API key).`;
+  if (!openai) {
+    return `Document: ${fileName}. AI summarization unavailable (no API key or module).`;
   }
 
   try {
@@ -220,7 +224,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
-    openaiConfigured: !!process.env.OPENAI_API_KEY
+    openaiConfigured: !!openai
   });
 });
 
@@ -229,7 +233,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Justice Server running on http://localhost:${PORT}`);
   console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/summarize`);
   console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🤖 OpenAI configured: ${!!process.env.OPENAI_API_KEY}`);
+  console.log(`🤖 OpenAI configured: ${!!openai}`);
 });
 
-export default app;
+module.exports = app;
