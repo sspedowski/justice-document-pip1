@@ -2,13 +2,15 @@
   "name": "justice-dashboard",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-"build:css": "npx postcss ./justice-dashboard/styles.css -o ./dist/styles.css",
-    "watch:css": "npx postcss ./justice-dashboard/styles.css -o ./justice-dashboard/dist/styles.css --watch",
-    "start": "echo \"Opening Justice Dashboard...\" && start ./justice-dashboard/index.html",
-    "dev": "npm run build:css && npm run start"
-  },
+"scripts": {
+  "dev": "npm-run-all --parallel dev:*",
+  "dev:client": "vite --host",
+  "dev:server": "nodemon server/server.js",
+  "build:css": "postcss client/styles.css -o client/dist/styles.css",
+  "watch:css": "postcss client/styles.css -o client/dist/styles.css --watch",
+  "build": "npm run build:css && vite build",
+  "start": "node server/server.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
