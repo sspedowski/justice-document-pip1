@@ -180,11 +180,12 @@ Available misconduct classifications:
 
 ### CSS Development
 
-The project uses Tailwind CSS with a custom build process:
+The project uses Tailwind CSS with a custom build process and optimized browser compatibility:
 
 1. **Source CSS**: `justice-dashboard/styles.css`
-2. **Compiled CSS**: `justice-dashboard/dist/styles.css`
-3. **Configuration**: `tailwind.config.js` and `postcss.config.js`
+2. **Compiled CSS**: `justice-dashboard/dist/styles.css`  
+3. **Configuration**: `tailwind.config.js`, `postcss.config.js`, and `browserslist` in `package.json`
+4. **Browser Support**: Modern browsers (Chrome 54+, Firefox 60+, Safari 12+, Edge 79+)
 
 To make style changes:
 
