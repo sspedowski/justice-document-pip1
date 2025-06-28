@@ -2,6 +2,25 @@
 
 A web-based application for managing and analyzing justice-related documents with intelligent categorization, child detection, and misconduct type assignment.
 
+## Quick Start
+
+1. **Install Node.js** (if not already installed)
+2. **Navigate to project folder**:
+   ```powershell
+   cd c:\path\to\justice-dashboard\justice-dashboard
+   ```
+3. **Install dependencies**:
+   ```powershell
+   npm install
+   ```
+4. **Build CSS**:
+   ```powershell
+   npm run build:css
+   ```
+5. **Open application**: Navigate to `justice-dashboard/index.html` in your browser
+
+That's it! The dashboard is ready to use.
+
 ## Features
 
 - **Bulk PDF Upload**: Upload multiple PDF files simultaneously
