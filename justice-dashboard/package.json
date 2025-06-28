@@ -40,8 +40,6 @@
     "pdf-parse": "^1.1.1",
     "pdf2pic": "^3.2.0",
     "tesseract.js": "^6.0.1",
-    "firebase": "^10.8.0",
-    "firebase/app": "^10.8.0",
-    "firebase/firestore": "^10.8.0"
+    "firebase": "^10.8.0"
   }
 }
