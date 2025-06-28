@@ -9,47 +9,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = fileInput.files[0];
     
     try {
-      // For now, create a mock summary since we don't have a server
-      const fileName = file.name;
-      const fileSize = file.size;
-      const fileType = file.type;
-      
-      // Simple category detection based on filename
-      let category = "General";
-      if (/medical|health|doctor|hospital/i.test(fileName)) category = "Medical";
-      if (/school|education|grades/i.test(fileName)) category = "School";  
-      if (/court|legal|police|case/i.test(fileName)) category = "Legal";
-      
-      // Simple child detection based on filename
-      let child = "Unknown";
-      if (/jace/i.test(fileName)) child = "Jace";
-      if (/josh/i.test(fileName)) child = "Josh";
-      if (/jace/i.test(fileName) && /josh/i.test(fileName)) child = "Both";
-      
-      // Create summary
-      const summary = `${fileName} (${(fileSize/1024).toFixed(1)}KB, ${fileType || 'unknown type'})`;
-      
-      // Add row to table
-      const row = document.createElement("tr");
-      row.className = "border-b";
-      row.innerHTML = `
-        <td class="p-2">${category}</td>
-        <td class="p-2">${child}</td>
-        <td class="p-2">
-          <select class="text-xs border p-1">
-            <option>Review Needed</option>
-            <option>HIPAA Violation</option>
-            <option>Due Process Violation</option>
-            <option>Educational Rights</option>
-            <option>CPS Misconduct</option>
-          </select>
-        </td>
-        <td class="p-2 max-w-xs truncate" title="${summary}">${summary}</td>
-        <td class="p-2">
-          <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" onclick="alert('File: ${fileName}')">View</button>
-        </td>
-      `;
-      results.appendChild(row);
+      // Check if file is PDF
+      if (file.type !== 'application/pdf') {
+        return alert("Please select a PDF file");
+      }
+
+      // Show processing message
+      btn.textContent = "Processing...";
+      btn.disabled = true;
+
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload to server
+      const res = await fetch('http://localhost:3000/api/summarize', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('Server response:', data);
+
+      // Add row to table with server data
+      addRowToTable(data);
       
       // Clear file input
       fileInput.value = "";
@@ -59,8 +46,42 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error('Error processing file:', error);
       alert("Error processing file: " + error.message);
+    } finally {
+      // Reset button
+      btn.textContent = "Generate Summary";
+      btn.disabled = false;
     }
   });
+
+  // Function to add row to table
+  function addRowToTable(data) {
+    const row = document.createElement("tr");
+    row.className = "border-b";
+    row.innerHTML = `
+      <td class="p-2">${data.category}</td>
+      <td class="p-2">${data.child}</td>
+      <td class="p-2">
+        <select class="text-xs border p-1">
+          <option selected>${data.misconduct || 'Review Needed'}</option>
+          <option>Physical Abuse</option>
+          <option>Emotional Abuse</option>
+          <option>Neglect</option>
+          <option>Educational Neglect</option>
+          <option>Medical Neglect</option>
+          <option>Inappropriate Supervision</option>
+          <option>Failure to Protect</option>
+          <option>Substance Abuse</option>
+          <option>Domestic Violence</option>
+          <option>Other/Multiple</option>
+        </select>
+      </td>
+      <td class="p-2 max-w-xs truncate" title="${data.summary}">${data.summary}</td>
+      <td class="p-2">
+        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" onclick="window.open('${data.fileURL}', '_blank')">View</button>
+      </td>
+    `;
+    results.appendChild(row);
+  }
   
   // Add CSV export functionality
   const exportBtn = document.querySelector("button:last-of-type");

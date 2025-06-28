@@ -1,0 +1,12 @@
+{
+  "name": "justice-root",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix justice-server run dev\" \"npm --prefix justice-dashboard run dev\"",
+    "start:server": "npm --prefix justice-server run start",
+    "start:frontend": "npm --prefix justice-dashboard run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
