@@ -1,9 +1,9 @@
-module.exports = { plugins: [require('tailwindcss'), require('autoprefixer')] }
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {
+module.exports = {
+  plugins: [
+    require('tailwindcss'),
+    require('autoprefixer')({
       flexbox: 'no-2009',
       grid: 'autoplace'
-    }
-  }
+    })
+  ]
 }
