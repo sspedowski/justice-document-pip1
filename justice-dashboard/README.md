@@ -98,6 +98,7 @@ npm run watch:css
 #### Client-Only Mode (Recommended)
 
 1. **Build the CSS** (if not already done):
+
    ```powershell
    npm run build:css
    ```
@@ -112,6 +113,7 @@ npm run watch:css
 If you want to use the optional server for AI-powered document summarization:
 
 1. **Start the server**:
+
    ```powershell
    node justice-server/server.js
    ```
@@ -204,6 +206,7 @@ The main application logic is in `justice-dashboard/script.js`. Key functions:
 ### CSS Not Loading
 
 1. **Ensure CSS is built**:
+
    ```powershell
    npm run build:css
    ```
@@ -215,6 +218,7 @@ The main application logic is in `justice-dashboard/script.js`. Key functions:
 ### Build Errors
 
 1. **Clear node_modules and reinstall**:
+
    ```powershell
    Remove-Item -Recurse -Force node_modules
    Remove-Item package-lock.json
@@ -222,6 +226,7 @@ The main application logic is in `justice-dashboard/script.js`. Key functions:
    ```
 
 2. **Check Node.js version**:
+
    ```powershell
    node --version
    npm --version
