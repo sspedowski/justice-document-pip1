@@ -259,6 +259,7 @@ The main application logic is in `justice-dashboard/script.js`. Key functions:
 The application can be deployed to any static hosting service:
 
 1. **Build CSS**:
+
    ```powershell
    npm run build:css
    ```
