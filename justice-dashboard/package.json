@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-"build:css": "npx postcss ./styles.css -o ./dist/styles.css",
+"build:css": "npx postcss ./justice-dashboard/styles.css -o ./dist/styles.css",
     "watch:css": "npx postcss ./justice-dashboard/styles.css -o ./justice-dashboard/dist/styles.css --watch",
     "start": "echo \"Opening Justice Dashboard...\" && start ./justice-dashboard/index.html",
     "dev": "npm run build:css && npm run start"
