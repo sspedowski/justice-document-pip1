@@ -1,3 +1,5 @@
+import { db } from '../firebase.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.querySelector("#generateBtn");
   const fileInput = document.querySelector("#fileInput");
