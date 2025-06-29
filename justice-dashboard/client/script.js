@@ -250,7 +250,33 @@ function filterRows() {
   });
 }
 
-// ===== 7. Hot‑reload support (Vite) =====
+// ===== 7. Login form handling =====
+document.addEventListener("DOMContentLoaded", () => {
+  const box      = document.getElementById("loginBox");
+  const dash     = document.getElementById("dashboard");     // wrap the main UI in a #dashboard div
+  const btn      = document.getElementById("loginBtn");
+  const errLabel = document.getElementById("loginErr");
+
+  if (dash) dash.classList.add("hidden");          // hide dashboard until logged in
+
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      const ok = await tryLogin(
+        document.getElementById("userInput").value,
+        document.getElementById("passInput").value
+      );
+      if (ok) {
+        if (box) box.classList.add("hidden");
+        if (dash) dash.classList.remove("hidden");   // show dashboard
+        if (errLabel) errLabel.classList.add("hidden");
+      } else {
+        if (errLabel) errLabel.classList.remove("hidden");
+      }
+    });
+  }
+});
+
+// ===== 8. Hot‑reload support (Vite) =====
 if (import.meta.hot) {
   import.meta.hot.accept();
 }

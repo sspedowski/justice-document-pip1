@@ -90,8 +90,21 @@
           ></textarea>
     </div>
 
+    <!-- Minimal login -->
+    <div id="loginBox" class="mb-4">
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">Login Required</h2>
+        <div class="flex items-center gap-2">
+          <input id="userInput" type="text" placeholder="Username" class="border border-gray-300 rounded px-3 py-2"/>
+          <input id="passInput" type="password" placeholder="Password" class="border border-gray-300 rounded px-3 py-2"/>
+          <button id="loginBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Log in</button>
+          <span id="loginErr" class="text-red-600 ml-2 hidden">Bad credentials</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Document Processing Dashboard -->
-    <div class="bg-white p-6 rounded shadow">
+    <div id="dashboard" class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-semibold mb-4">Justice Dashboard</h2>
       
       <!-- File Upload Section -->
