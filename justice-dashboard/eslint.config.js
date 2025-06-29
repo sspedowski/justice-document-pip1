@@ -16,16 +16,40 @@ export default [
         crypto: 'readonly',
         URL: 'readonly',
         Blob: 'readonly',
-        FormData: 'readonly',
+        FormData: 'readonly'
+      }
+    },
+    files: ['client/**/*.js'],
+    rules: {
+      'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+      'no-console': 'off'
+    }
+  },
+  {
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: 'commonjs',
+      globals: {
         // Node.js globals
         process: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
         Buffer: 'readonly',
-        global: 'readonly'
+        global: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        console: 'readonly'
       }
     },
-    files: ['**/*.js', '**/*.mjs'],
+    files: ['server/**/*.js', '*.js'],
+    ignores: ['client/**/*.js'],
+    rules: {
+      'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+      'no-console': 'off'
+    }
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',
@@ -33,11 +57,6 @@ export default [
       'uploads/**',
       'server/uploads/**',
       'server/public/uploads/**'
-    ],
-    rules: {
-      'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
-      'no-console': 'off',
-      'no-undef': 'error'
-    }
+    ]
   }
 ];
