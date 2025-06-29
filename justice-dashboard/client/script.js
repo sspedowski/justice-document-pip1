@@ -1,4 +1,13 @@
-/* Justice Dashboard — client/script.js (v2)
+/* Justice Dashboard — clientfunction downloadCSV(rows) {
+  const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate'];
+  const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
+  const csv = [header.join(','), ...body].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'tracker.csv'; a.click();
+  URL.revokeObjectURL(url);
+} (v2)
    ----------------------------------------------------------------------
    Features added:
    • Multi‑file upload (drag‑and‑drop or file input)
@@ -111,6 +120,7 @@ async function handleFiles(e) {
         summary: 'Duplicate file detected',
         category: 'Duplicate',
         child: 'N/A',
+        misconduct: 'N/A',
         duplicate: true,
         hash
       };
@@ -124,6 +134,7 @@ async function handleFiles(e) {
       summary: 'Uploading…',
       category: '—',
       child: '—',
+      misconduct: '—',
       duplicate: false,
       hash
     };
