@@ -93,18 +93,59 @@
     <!-- Document Processing Dashboard -->
     <div class="bg-white p-6 rounded shadow">
       <h2 class="text-xl font-semibold mb-4">Justice Dashboard</h2>
-      <label for="fileInput" class="block mb-1">Upload Files (PDFs)</label>
-      <input type="file" id="fileInput" class="mb-2 border p-1" multiple accept=".pdf" title="Choose PDF files to upload" />
-      <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2" aria-label="Generate summary from uploaded files">Generate Summary</button>
-      <table class="w-full mt-4 text-sm">
+      
+      <!-- File Upload Section -->
+      <div class="mb-4">
+        <label for="fileInput" class="block mb-2 text-sm font-medium">Upload Files (PDFs)</label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+          <input id="fileInput" type="file" multiple accept=".pdf" class="hidden" />
+          <div class="cursor-pointer" onclick="document.getElementById('fileInput').click()">
+            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <p class="mt-2 text-sm text-gray-600">
+              <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
+            </p>
+            <p class="text-xs text-gray-500">PDF files only, multiple files supported</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search and Filter Controls -->
+      <div class="mb-4 flex gap-4 items-center">
+        <div>
+          <label for="searchInput" class="block text-sm font-medium mb-1">Search:</label>
+          <input type="text" id="searchInput" placeholder="Search documents..." 
+                 class="border border-gray-300 rounded px-3 py-2 w-64">
+        </div>
+        <div>
+          <label for="childFilter" class="block text-sm font-medium mb-1">Filter by Child:</label>
+          <select id="childFilter" class="border border-gray-300 rounded px-3 py-2">
+            <option value="">All</option>
+            <option value="Jace">Jace</option>
+            <option value="Josh">Josh</option>
+            <option value="Both">Both</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Results Table -->
+      <table id="trackerTable" class="w-full mt-4 text-sm border-collapse border border-gray-300">
         <thead>
           <tr class="bg-gray-200">
-            <th>Category</th><th>Child</th><th>Misconduct</th><th>Summary</th><th>Actions</th>
+            <th class="border border-gray-300 p-2">Filename</th>
+            <th class="border border-gray-300 p-2">Summary</th>
+            <th class="border border-gray-300 p-2">Category</th>
+            <th class="border border-gray-300 p-2">Child</th>
+            <th class="border border-gray-300 p-2">Duplicate</th>
           </tr>
         </thead>
-        <tbody id="results"></tbody>
+        <tbody></tbody>
       </table>
-      <button class="mt-4 bg-green-600 text-white px-4 py-2">Export CSV</button>
+      
+      <!-- Export Button -->
+      <button id="exportCsv" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export CSV</button>
     </div>
   </div>
   

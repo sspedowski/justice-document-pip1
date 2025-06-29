@@ -219,6 +219,69 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
   }
 });
 
+// New simplified upload endpoint for v2 client
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    console.log('Processing file for v2 client:', req.file.originalname);
+    const filePath = req.file.path;
+    const fileName = req.file.originalname;
+
+    let textContent = '';
+
+    try {
+      // Attempt PDF text extraction
+      const dataBuffer = fs.readFileSync(filePath);
+      const pdfData = await pdfParse(dataBuffer);
+      textContent = pdfData.text;
+      console.log('PDF text extracted, length:', textContent.length);
+      
+      // If extracted text is too short, try OCR
+      if (textContent.length < 100) {
+        console.log('Text too short, attempting OCR fallback...');
+        const ocrText = await performOCR(filePath);
+        if (ocrText.length > textContent.length) {
+          textContent = ocrText;
+          console.log('OCR provided better results');
+        }
+      }
+    } catch (pdfError) {
+      console.log('PDF extraction failed, using OCR fallback:', pdfError.message);
+      textContent = await performOCR(filePath);
+    }
+
+    // Smart categorization and detection
+    const category = categorizeDocument(fileName, textContent);
+    const child = detectChild(fileName, textContent);
+
+    // Generate AI summary
+    const summary = await generateSummary(textContent, fileName);
+
+    // Simplified response object for v2 client
+    const result = {
+      summary,
+      category,
+      child
+    };
+
+    console.log('V2 processing complete:', {
+      fileName,
+      category,
+      child,
+      summaryLength: summary.length
+    });
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('V2 processing error:', error);
+    res.status(500).json({ error: 'File processing failed: ' + error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -231,7 +294,8 @@ app.get('/api/health', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Justice Server running on http://localhost:${PORT}`);
-  console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/summarize`);
+  console.log(`📁 Upload endpoint (v2): http://localhost:${PORT}/upload`);
+  console.log(`📁 Upload endpoint (v1): http://localhost:${PORT}/api/summarize`);
   console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🤖 OpenAI configured: ${!!openai}`);
 });
