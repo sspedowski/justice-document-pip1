@@ -212,6 +212,8 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
     const child = detectChild(fileName, textContent);
     const misconduct = detectMisconduct(fileName, textContent);
 
+    console.log('Detection results:', { category, child, misconduct });
+
     // Generate AI summary
     const summary = await generateSummary(textContent, fileName);
 
