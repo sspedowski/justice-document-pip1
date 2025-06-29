@@ -28,7 +28,7 @@ async function sha256(file) {
 }
 
 async function tryLogin(username, password) {
-  const r = await fetch("/api/login", {
+  const r = await fetch("http://localhost:3000/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -158,7 +158,7 @@ async function handleFiles(e) {
     formData.append('file', file, fname);
 
     try {
-      const res = await fetch('/upload', { method: 'POST', body: formData });
+      const res = await fetch('http://localhost:3000/upload', { method: 'POST', body: formData });
       
       if (!res.ok) {
         // Handle HTTP error responses
