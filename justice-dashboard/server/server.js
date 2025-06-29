@@ -60,7 +60,7 @@ const upload = multer({
       cb(new Error('Only PDF files are allowed'));
     }
   },
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit (increased from 10MB)
 });
 
 // Smart categorization function
@@ -110,16 +110,25 @@ function detectMisconduct(fileName, content) {
 
 // OCR fallback function
 async function performOCR(filePath) {
+  let worker;
   try {
     console.log('Attempting OCR on:', filePath);
-    const worker = await createWorker('eng');
+    worker = await createWorker('eng');
     const { data: { text } } = await worker.recognize(filePath);
-    await worker.terminate();
     console.log('OCR completed, extracted text length:', text.length);
-    return text;
+    return text || '';
   } catch (error) {
     console.error('OCR failed:', error.message);
     return '';
+  } finally {
+    // Always terminate the worker to prevent memory leaks
+    if (worker) {
+      try {
+        await worker.terminate();
+      } catch (terminateError) {
+        console.error('Error terminating OCR worker:', terminateError.message);
+      }
+    }
   }
 }
 
@@ -239,26 +248,45 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       textContent = pdfData.text;
       console.log('PDF text extracted, length:', textContent.length);
       
-      // If extracted text is too short, try OCR
+      // If extracted text is too short, try OCR (with better error handling)
       if (textContent.length < 100) {
         console.log('Text too short, attempting OCR fallback...');
-        const ocrText = await performOCR(filePath);
-        if (ocrText.length > textContent.length) {
-          textContent = ocrText;
-          console.log('OCR provided better results');
+        try {
+          const ocrText = await performOCR(filePath);
+          if (ocrText && ocrText.length > textContent.length) {
+            textContent = ocrText;
+            console.log('OCR provided better results');
+          } else {
+            console.log('OCR did not improve text extraction');
+          }
+        } catch (ocrError) {
+          console.log('OCR failed, continuing with extracted text:', ocrError.message);
+          // Don't throw - continue with whatever text we have
         }
       }
     } catch (pdfError) {
-      console.log('PDF extraction failed, using OCR fallback:', pdfError.message);
-      textContent = await performOCR(filePath);
+      console.log('PDF extraction failed, trying OCR fallback:', pdfError.message);
+      try {
+        textContent = await performOCR(filePath);
+        console.log('OCR fallback succeeded');
+      } catch (ocrError) {
+        console.log('Both PDF extraction and OCR failed, using filename only');
+        textContent = fileName; // Fallback to just the filename
+      }
     }
 
     // Smart categorization and detection
     const category = categorizeDocument(fileName, textContent);
     const child = detectChild(fileName, textContent);
 
-    // Generate AI summary
-    const summary = await generateSummary(textContent, fileName);
+    // Generate AI summary (with better error handling)
+    let summary;
+    try {
+      summary = await generateSummary(textContent, fileName);
+    } catch (summaryError) {
+      console.log('AI summary failed, using fallback:', summaryError.message);
+      summary = `Document: ${fileName}. Content processed but AI summary unavailable.`;
+    }
 
     // Simplified response object for v2 client
     const result = {
@@ -278,7 +306,13 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
   } catch (error) {
     console.error('V2 processing error:', error);
-    res.status(500).json({ error: 'File processing failed: ' + error.message });
+    // Always return JSON, never let the server crash
+    res.status(500).json({ 
+      error: error.message || 'Server error during file processing',
+      summary: `Error processing ${req.file?.originalname || 'file'}`,
+      category: 'Error',
+      child: 'Unknown'
+    });
   }
 });
 
