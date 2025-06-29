@@ -51,19 +51,47 @@ const childFilter = $('#childFilter');
 const exportBtn   = $('#exportCsv');
 
 // ===== 4. Render existing tracker =====
-tracker.forEach(addRowToTable);
+function initializeTracker() {
+  // Clear existing table content
+  tbody.innerHTML = '';
+  // Render all tracker items
+  tracker.forEach(addRowToTable);
+}
+
+// Auto-load tracker on page load
+document.addEventListener('DOMContentLoaded', initializeTracker);
+// Also initialize immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+  // DOMContentLoaded will handle it
+} else {
+  // DOM is already ready
+  initializeTracker();
+}
 
 // ===== 5. Event wiring =====
-fileInput.addEventListener('change', handleFiles);
-searchInput.addEventListener('keyup', filterRows);
-childFilter.addEventListener('change', filterRows);
-exportBtn.addEventListener('click', () => downloadCSV(tracker));
+function wireEvents() {
+  // Ensure DOM elements exist before wiring events
+  if (fileInput) fileInput.addEventListener('change', handleFiles);
+  if (searchInput) searchInput.addEventListener('keyup', filterRows);
+  if (childFilter) childFilter.addEventListener('change', filterRows);
+  if (exportBtn) exportBtn.addEventListener('click', () => downloadCSV(tracker));
 
-// Drag‑and‑drop (optional UI — ensure drop zone exists)
-['dragover','drop'].forEach(evt => document.addEventListener(evt, e => {
-  if(['dragover','drop'].includes(e.type)) e.preventDefault();
-  if(e.type==='drop') handleFiles({ target: { files: e.dataTransfer.files }});
-}, false));
+  // Drag‑and‑drop (optional UI — ensure drop zone exists)
+  ['dragover','drop'].forEach(evt => document.addEventListener(evt, e => {
+    if(['dragover','drop'].includes(e.type)) e.preventDefault();
+    if(e.type==='drop') handleFiles({ target: { files: e.dataTransfer.files }});
+  }, false));
+}
+
+// Wire events when DOM is ready
+document.addEventListener('DOMContentLoaded', wireEvents);
+// Also wire immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+  // DOMContentLoaded will handle it
+} else {
+  // DOM is already ready
+  wireEvents();
+}
 
 // ===== 6. Core functions =====
 async function handleFiles(e) {
@@ -71,41 +99,65 @@ async function handleFiles(e) {
   if (!files.length) return;
 
   for (const file of files) {
+    const fname = file.name; // ⇢ cache synchronously before any async operations
+
     // 6.1 Duplicate detection (hash)
     const hash = await sha256(file);
     if (hashSet.has(hash)) {
-      console.warn(`${file.name} skipped (duplicate)`);
+      console.warn(`${fname} skipped (duplicate)`);
+      // Add duplicate row to table
+      const duplicateRow = {
+        filename: fname,
+        summary: 'Duplicate file detected',
+        category: 'Duplicate',
+        child: 'N/A',
+        duplicate: true,
+        hash
+      };
+      addRowToTable(duplicateRow);
       continue;
     }
 
-    // 6.2 Send to server
-    const formData = new FormData();
-    formData.append('file', file, file.name);
-
-    let summaryPayload;
-    try {
-      const res = await fetch('/upload', { method: 'POST', body: formData });
-      summaryPayload = await res.json();
-    } catch (err) {
-      console.error('Upload failed', err);
-      continue;
-    }
-
-    // Expected response shape:
-    // { summary, category, child }
-    const rowObj = {
-      filename: file.name,
-      summary: summaryPayload.summary || '—',
-      category: summaryPayload.category || 'Uncategorized',
-      child: summaryPayload.child || 'Unknown',
+    // Create optimistic placeholder row
+    const placeholder = {
+      filename: fname,
+      summary: 'Uploading…',
+      category: '—',
+      child: '—',
       duplicate: false,
       hash
     };
+    
+    // Add optimistic UI immediately
+    const rowIndex = tracker.length;
+    tracker.push(placeholder);
+    addRowToTable(placeholder);
 
-    tracker.push(rowObj);
-    hashSet.add(hash);
-    addRowToTable(rowObj);
-    saveTracker(tracker);
+    // 6.2 Send to server
+    const formData = new FormData();
+    formData.append('file', file, fname);
+
+    try {
+      const res = await fetch('/upload', { method: 'POST', body: formData });
+      const { summary, category, child } = await res.json();
+      
+      // Update the existing row object
+      placeholder.summary = summary || '—';
+      placeholder.category = category || 'Uncategorized';
+      placeholder.child = child || 'Unknown';
+      
+      // Update the DOM row (find by index)
+      updateRowInTable(rowIndex, placeholder);
+      hashSet.add(hash);
+      saveTracker(tracker);
+      
+    } catch (err) {
+      console.error('Upload failed', err);
+      // Update row to show error
+      placeholder.summary = 'Upload failed';
+      placeholder.category = 'Error';
+      updateRowInTable(rowIndex, placeholder);
+    }
   }
 
   // reset input so same file list can be selected again
@@ -117,6 +169,19 @@ function addRowToTable(row) {
   tr.innerHTML = [row.filename, row.summary, row.category, row.child, row.duplicate ? 'Yes' : 'No']
     .map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
   tbody.appendChild(tr);
+}
+
+function updateRowInTable(rowIndex, updatedRow) {
+  const rows = tbody.querySelectorAll('tr');
+  if (rows[rowIndex]) {
+    rows[rowIndex].innerHTML = [
+      updatedRow.filename, 
+      updatedRow.summary, 
+      updatedRow.category, 
+      updatedRow.child, 
+      updatedRow.duplicate ? 'Yes' : 'No'
+    ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
+  }
 }
 
 function filterRows() {
