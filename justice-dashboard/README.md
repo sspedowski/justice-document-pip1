@@ -309,7 +309,7 @@ If using the optional server features:
 
 ## License
 
-This project is licensed under the ISC License.
+This project is released under the **MIT License** (see `LICENSE`).
 
 ## Support
 
