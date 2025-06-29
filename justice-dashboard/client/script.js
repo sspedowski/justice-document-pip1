@@ -53,7 +53,7 @@ const hashSet = new Set(tracker.map(r => r.hash));
 
 // ===== 3. DOM refs =====
 const fileInput   = $('#fileInput');
-const uploadBtn   = $('#uploadBtn');
+// const uploadBtn   = $('#uploadBtn'); // Currently unused
 const tbody       = $('#trackerTable tbody');
 const searchInput = $('#searchInput');
 const childFilter = $('#childFilter');
