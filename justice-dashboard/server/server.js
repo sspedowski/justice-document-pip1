@@ -243,121 +243,76 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
   }
 });
 
-// New simplified upload endpoint for v2 client
-app.post('/upload', upload.single('file'), async (req, res) => {
+// Consolidated PDF processing function
+async function summarizePdf(file) {
+  const filePath = file.path;
+  const fileName = file.originalname;
+  
+  console.log('Processing file for v2 client:', fileName);
+  
+  let textContent = '';
+
   try {
-    // Validate file upload
+    // Attempt PDF text extraction
+    const dataBuffer = fs.readFileSync(filePath);
+    const pdfData = await pdfParse(dataBuffer);
+    textContent = pdfData.text;
+    console.log('PDF text extracted, length:', textContent.length);
+  } catch (pdfError) {
+    console.log('PDF extraction failed:', pdfError.message);
+    textContent = fileName; // Fallback to filename
+  }
+
+  // Ensure we have some content to work with
+  if (!textContent || textContent.trim().length === 0) {
+    textContent = fileName;
+  }
+
+  // Smart categorization and detection
+  const category = categorizeDocument(fileName, textContent);
+  const child = detectChild(fileName, textContent);
+
+  // Generate AI summary (with error handling)
+  let summary;
+  try {
+    if (openai && process.env.OPENAI_API_KEY) {
+      summary = await generateSummary(textContent, fileName);
+    } else {
+      summary = `Document: ${fileName}. Content extracted (${textContent.length} characters). AI summarization disabled.`;
+    }
+  } catch (summaryError) {
+    console.log('AI summary failed:', summaryError.message);
+    summary = `Document: ${fileName}. Content processed but AI summary unavailable.`;
+  }
+
+  return {
+    summary: summary || `Document: ${fileName}`,
+    category: category || 'General',
+    child: child || 'Unknown'
+  };
+}
+
+// New simplified upload endpoint for v2 client
+app.post("/upload", upload.single("file"), async (req, res) => {
+  try {
     if (!req.file) {
-      return res.status(400).json({ 
-        error: 'No file received',
-        summary: 'Upload failed - no file',
-        category: 'Error',
-        child: 'Unknown'
-      });
+      return res.status(400).json({ error: "no file received" });
     }
 
-    console.log('Processing file for v2 client:', req.file.originalname);
-    const filePath = req.file.path;
-    const fileName = req.file.originalname;
+    // --- your existing PDF parsing / OpenAI summarisation -------
+    const { summary, category, child } = await summarizePdf(req.file);
+    // ------------------------------------------------------------
 
-    // Validate file type
-    if (req.file.mimetype !== 'application/pdf') {
-      return res.status(400).json({
-        error: 'Only PDF files are supported',
-        summary: 'Upload failed - invalid file type',
-        category: 'Error', 
-        child: 'Unknown'
-      });
+    return res.json({ summary, category, child });
+  } catch (err) {
+    console.error("Upload failed:", err);
+
+    // Multer size limit
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ error: "file too large" });
     }
 
-    let textContent = '';
-
-    try {
-      // Attempt PDF text extraction
-      const dataBuffer = fs.readFileSync(filePath);
-      const pdfData = await pdfParse(dataBuffer);
-      textContent = pdfData.text;
-      console.log('PDF text extracted, length:', textContent.length);
-      
-      // For PDFs with very short text, we'll just use what we have
-      // OCR on PDFs is not supported by Tesseract
-      if (textContent.length < 100) {
-        console.log('PDF has minimal text content, proceeding with extracted text');
-      }
-      
-    } catch (pdfError) {
-      console.log('PDF extraction failed:', pdfError.message);
-      // If PDF extraction fails completely, use filename as fallback
-      textContent = fileName;
-    }
-
-    // Ensure we have some content to work with
-    if (!textContent || textContent.trim().length === 0) {
-      textContent = fileName; // Ultimate fallback
-    }
-
-    // Smart categorization and detection
-    const category = categorizeDocument(fileName, textContent);
-    const child = detectChild(fileName, textContent);
-
-    // Generate AI summary (with error handling)
-    let summary;
-    try {
-      if (openai && process.env.OPENAI_API_KEY) {
-        summary = await generateSummary(textContent, fileName);
-      } else {
-        summary = `Document: ${fileName}. Content extracted (${textContent.length} characters). AI summarization disabled.`;
-      }
-    } catch (summaryError) {
-      console.log('AI summary failed:', summaryError.message);
-      summary = `Document: ${fileName}. Content processed but AI summary unavailable.`;
-    }
-
-    // Simplified response object for v2 client - always return valid JSON
-    const result = {
-      summary: summary || `Document: ${fileName}`,
-      category: category || 'General',
-      child: child || 'Unknown'
-    };
-
-    console.log('V2 processing complete:', {
-      fileName,
-      category,
-      child,
-      summaryLength: result.summary.length
-    });
-
-    res.json(result);
-
-  } catch (error) {
-    console.error('V2 processing error:', error);
-    
-    // Handle specific multer errors
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(413).json({
-        error: 'File too large (max 25MB)',
-        summary: 'Upload failed - file too big',
-        category: 'Error',
-        child: 'Unknown'
-      });
-    }
-
-    if (error.message && error.message.includes('Only PDF files are allowed')) {
-      return res.status(400).json({
-        error: 'Only PDF files are allowed',
-        summary: 'Upload failed - invalid file type',
-        category: 'Error',
-        child: 'Unknown'
-      });
-    }
-
-    // Generic error response - always return JSON
-    res.status(500).json({ 
-      error: error.message || 'Server error during file processing',
-      summary: `Error processing ${req.file?.originalname || 'file'}: ${error.message || 'Unknown error'}`,
-      category: 'Error',
-      child: 'Unknown'
-    });
+    return res.status(500).json({ error: err.message || "server error" });
   }
 });
 
@@ -380,6 +335,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-/ /   F o r c e   r e s t a r t 
- 
- 
