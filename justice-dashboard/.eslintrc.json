@@ -34,7 +34,10 @@
       }
     },
     {
-      "files": ["client/**/*.js"],
+      "files": ["client/**/*.js", "vite.config.js"],
+      "parserOptions": {
+        "sourceType": "module"
+      },
       "env": {
         "browser": true,
         "node": false
