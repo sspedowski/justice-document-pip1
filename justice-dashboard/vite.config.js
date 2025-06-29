@@ -5,8 +5,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // anything hitting /upload (or /api/* later) goes to Express on 4000
-      '/upload': 'http://localhost:4000'
+      '/upload': 'http://localhost:3000'
     }
   },
   build: {
