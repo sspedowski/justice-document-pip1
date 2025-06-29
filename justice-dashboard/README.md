@@ -168,7 +168,7 @@ Documents are automatically classified into:
 The system identifies documents related to:
 
 - **Jace**: Documents containing "jace" in filename
-- **Josh**: Documents containing "josh" in filename  
+- **Josh**: Documents containing "josh" in filename
 - **Both**: Documents containing both names
 - **Unknown**: Documents with unclear associations
 
@@ -194,7 +194,7 @@ Available misconduct classifications:
 The project uses Tailwind CSS with a custom build process and optimized browser compatibility:
 
 1. **Source CSS**: `justice-dashboard/styles.css`
-2. **Compiled CSS**: `justice-dashboard/dist/styles.css`  
+2. **Compiled CSS**: `justice-dashboard/dist/styles.css`
 3. **Configuration**: `tailwind.config.js`, `postcss.config.js`, and `browserslist` in `package.json`
 4. **Browser Support**: Modern browsers (Chrome 54+, Firefox 60+, Safari 12+, Edge 79+)
 
