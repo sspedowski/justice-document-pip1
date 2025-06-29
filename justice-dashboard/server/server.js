@@ -271,6 +271,7 @@ async function summarizePdf(file) {
   // Smart categorization and detection
   const category = categorizeDocument(fileName, textContent);
   const child = detectChild(fileName, textContent);
+  const misconduct = detectMisconduct(fileName, textContent);
 
   // Generate AI summary (with error handling)
   let summary;
@@ -288,7 +289,8 @@ async function summarizePdf(file) {
   return {
     summary: summary || `Document: ${fileName}`,
     category: category || 'General',
-    child: child || 'Unknown'
+    child: child || 'Unknown',
+    misconduct: misconduct || 'Other/Multiple'
   };
 }
 
@@ -300,10 +302,10 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     }
 
     // --- your existing PDF parsing / OpenAI summarisation -------
-    const { summary, category, child } = await summarizePdf(req.file);
+    const { summary, category, child, misconduct } = await summarizePdf(req.file);
     // ------------------------------------------------------------
 
-    return res.json({ summary, category, child });
+    return res.json({ summary, category, child, misconduct });
   } catch (err) {
     console.error("Upload failed:", err);
 

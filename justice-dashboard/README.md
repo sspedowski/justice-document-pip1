@@ -112,13 +112,24 @@ npm run watch:css
 
 If you want to use the optional server for AI-powered document summarization:
 
-1. **Start the server**:
+1. **Set up environment variables**:
+   
+   Create a `.env` file in the root directory:
+   
+   ```bash
+   OPENAI_API_KEY=your_openai_api_key_here
+   PORT=3000
+   ```
+   
+   **Note**: Without `OPENAI_API_KEY`, the server will run but AI summarization will be disabled. Documents will still be processed with basic categorization.
+
+2. **Start the server**:
 
    ```powershell
    node justice-server/server.js
    ```
 
-2. **Open the application** at `http://localhost:3000`
+3. **Open the application** at `http://localhost:3000`
 
 ## Usage
 

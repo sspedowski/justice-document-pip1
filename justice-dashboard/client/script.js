@@ -139,12 +139,13 @@ async function handleFiles(e) {
 
     try {
       const res = await fetch('/upload', { method: 'POST', body: formData });
-      const { summary, category, child } = await res.json();
+      const { summary, category, child, misconduct } = await res.json();
       
       // Update the existing row object
       placeholder.summary = summary || '—';
       placeholder.category = category || 'Uncategorized';
       placeholder.child = child || 'Unknown';
+      placeholder.misconduct = misconduct || 'Other/Multiple';
       
       // Update the DOM row (find by index)
       updateRowInTable(rowIndex, placeholder);
@@ -156,6 +157,7 @@ async function handleFiles(e) {
       // Update row to show error
       placeholder.summary = 'Upload failed';
       placeholder.category = 'Error';
+      placeholder.misconduct = 'Error';
       updateRowInTable(rowIndex, placeholder);
     }
   }
@@ -166,8 +168,14 @@ async function handleFiles(e) {
 
 function addRowToTable(row) {
   const tr = document.createElement('tr');
-  tr.innerHTML = [row.filename, row.summary, row.category, row.child, row.duplicate ? 'Yes' : 'No']
-    .map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
+  tr.innerHTML = [
+    row.filename, 
+    row.summary, 
+    row.category, 
+    row.child, 
+    row.misconduct || 'Other/Multiple', 
+    row.duplicate ? 'Yes' : 'No'
+  ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
   tbody.appendChild(tr);
 }
 
@@ -179,6 +187,7 @@ function updateRowInTable(rowIndex, updatedRow) {
       updatedRow.summary, 
       updatedRow.category, 
       updatedRow.child, 
+      updatedRow.misconduct || 'Other/Multiple',
       updatedRow.duplicate ? 'Yes' : 'No'
     ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
   }
