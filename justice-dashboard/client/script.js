@@ -150,6 +150,20 @@ async function handleFiles(e) {
 
     try {
       const res = await fetch('/upload', { method: 'POST', body: formData });
+      
+      if (!res.ok) {
+        // Handle HTTP error responses
+        let errorMessage = `HTTP ${res.status}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // Failed to parse error JSON, use status text
+          errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
       const { summary, category, child, misconduct } = await res.json();
       
       // Update the existing row object
@@ -165,8 +179,19 @@ async function handleFiles(e) {
       
     } catch (err) {
       console.error('Upload failed', err);
-      // Update row to show error
-      placeholder.summary = 'Upload failed';
+      
+      // Handle different types of errors
+      let errorMessage = 'Upload failed';
+      if (err.message.includes('Failed to fetch') || err.message.includes('ERR_CONNECTION_RESET')) {
+        errorMessage = 'Connection error - server may be processing';
+      } else if (err.message.includes('file too large')) {
+        errorMessage = 'File too large (max 50MB)';
+      } else if (err.message) {
+        errorMessage = `Upload failed: ${err.message}`;
+      }
+      
+      // Update row to show specific error
+      placeholder.summary = errorMessage;
       placeholder.category = 'Error';
       placeholder.misconduct = 'Error';
       updateRowInTable(rowIndex, placeholder);

@@ -66,7 +66,7 @@ const upload = multer({
       cb(new Error('Only PDF files are allowed'));
     }
   },
-  limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit (increased from 10MB)
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit (increased to prevent connection resets)
 });
 
 // Smart categorization function
@@ -325,6 +325,17 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     openaiConfigured: !!openai
   });
+});
+
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Don't exit the process - keep server running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process - keep server running
 });
 
 // Start server
