@@ -114,11 +114,20 @@ function detectMisconduct(fileName, content) {
   return 'Other/Multiple';
 }
 
-// OCR fallback function
+// OCR fallback function - only works with image files, not PDFs
 async function performOCR(filePath) {
   let worker;
   try {
-    console.log('Attempting OCR on:', filePath);
+    // Check if file is an image format that Tesseract can handle
+    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'];
+    const fileExtension = path.extname(filePath).toLowerCase();
+    
+    if (!supportedExtensions.includes(fileExtension)) {
+      console.log('OCR skipped: File format not supported by Tesseract:', fileExtension);
+      return '';
+    }
+
+    console.log('Attempting OCR on supported image format:', filePath);
     worker = await createWorker('eng');
     const { data: { text } } = await worker.recognize(filePath);
     console.log('OCR completed, extracted text length:', text.length);
@@ -237,13 +246,29 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
 // New simplified upload endpoint for v2 client
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    // Validate file upload
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ 
+        error: 'No file received',
+        summary: 'Upload failed - no file',
+        category: 'Error',
+        child: 'Unknown'
+      });
     }
 
     console.log('Processing file for v2 client:', req.file.originalname);
     const filePath = req.file.path;
     const fileName = req.file.originalname;
+
+    // Validate file type
+    if (req.file.mimetype !== 'application/pdf') {
+      return res.status(400).json({
+        error: 'Only PDF files are supported',
+        summary: 'Upload failed - invalid file type',
+        category: 'Error', 
+        child: 'Unknown'
+      });
+    }
 
     let textContent = '';
 
@@ -254,68 +279,82 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       textContent = pdfData.text;
       console.log('PDF text extracted, length:', textContent.length);
       
-      // If extracted text is too short, try OCR (with better error handling)
+      // For PDFs with very short text, we'll just use what we have
+      // OCR on PDFs is not supported by Tesseract
       if (textContent.length < 100) {
-        console.log('Text too short, attempting OCR fallback...');
-        try {
-          const ocrText = await performOCR(filePath);
-          if (ocrText && ocrText.length > textContent.length) {
-            textContent = ocrText;
-            console.log('OCR provided better results');
-          } else {
-            console.log('OCR did not improve text extraction');
-          }
-        } catch (ocrError) {
-          console.log('OCR failed, continuing with extracted text:', ocrError.message);
-          // Don't throw - continue with whatever text we have
-        }
+        console.log('PDF has minimal text content, proceeding with extracted text');
       }
+      
     } catch (pdfError) {
-      console.log('PDF extraction failed, trying OCR fallback:', pdfError.message);
-      try {
-        textContent = await performOCR(filePath);
-        console.log('OCR fallback succeeded');
-      } catch (ocrError) {
-        console.log('Both PDF extraction and OCR failed, using filename only');
-        textContent = fileName; // Fallback to just the filename
-      }
+      console.log('PDF extraction failed:', pdfError.message);
+      // If PDF extraction fails completely, use filename as fallback
+      textContent = fileName;
+    }
+
+    // Ensure we have some content to work with
+    if (!textContent || textContent.trim().length === 0) {
+      textContent = fileName; // Ultimate fallback
     }
 
     // Smart categorization and detection
     const category = categorizeDocument(fileName, textContent);
     const child = detectChild(fileName, textContent);
 
-    // Generate AI summary (with better error handling)
+    // Generate AI summary (with error handling)
     let summary;
     try {
-      summary = await generateSummary(textContent, fileName);
+      if (openai && process.env.OPENAI_API_KEY) {
+        summary = await generateSummary(textContent, fileName);
+      } else {
+        summary = `Document: ${fileName}. Content extracted (${textContent.length} characters). AI summarization disabled.`;
+      }
     } catch (summaryError) {
-      console.log('AI summary failed, using fallback:', summaryError.message);
+      console.log('AI summary failed:', summaryError.message);
       summary = `Document: ${fileName}. Content processed but AI summary unavailable.`;
     }
 
-    // Simplified response object for v2 client
+    // Simplified response object for v2 client - always return valid JSON
     const result = {
-      summary,
-      category,
-      child
+      summary: summary || `Document: ${fileName}`,
+      category: category || 'General',
+      child: child || 'Unknown'
     };
 
     console.log('V2 processing complete:', {
       fileName,
       category,
       child,
-      summaryLength: summary.length
+      summaryLength: result.summary.length
     });
 
     res.json(result);
 
   } catch (error) {
     console.error('V2 processing error:', error);
-    // Always return JSON, never let the server crash
+    
+    // Handle specific multer errors
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        error: 'File too large (max 25MB)',
+        summary: 'Upload failed - file too big',
+        category: 'Error',
+        child: 'Unknown'
+      });
+    }
+
+    if (error.message && error.message.includes('Only PDF files are allowed')) {
+      return res.status(400).json({
+        error: 'Only PDF files are allowed',
+        summary: 'Upload failed - invalid file type',
+        category: 'Error',
+        child: 'Unknown'
+      });
+    }
+
+    // Generic error response - always return JSON
     res.status(500).json({ 
       error: error.message || 'Server error during file processing',
-      summary: `Error processing ${req.file?.originalname || 'file'}`,
+      summary: `Error processing ${req.file?.originalname || 'file'}: ${error.message || 'Unknown error'}`,
       category: 'Error',
       child: 'Unknown'
     });
