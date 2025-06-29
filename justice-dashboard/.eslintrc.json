@@ -1,0 +1,22 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": "latest"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "client/dist/",
+    "server/*.js"
+  ],
+  "rules": {
+    /* add project-specific tweaks here */
+  }
+}
