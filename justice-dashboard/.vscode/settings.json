@@ -1,0 +1,4 @@
+{
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "eslint.workingDirectories": ["./client", "./server"]
+}
