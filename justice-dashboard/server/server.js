@@ -311,6 +311,10 @@ async function summarizePdf(file) {
   };
 }
 
+// Ensure uploads directory exists
+const uploadsDir2 = path.join(__dirname, "public");
+if (!fs.existsSync(uploadsDir2)) fs.mkdirSync(uploadsDir2, { recursive: true });
+
 // New simplified upload endpoint for v2 client
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
