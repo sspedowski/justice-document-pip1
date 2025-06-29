@@ -9,7 +9,8 @@
     "build:css": "postcss client/styles.css -o client/dist/styles.css",
     "watch:css": "postcss client/styles.css -o client/dist/styles.css --watch",
     "build": "npm run build:css && vite build",
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "check": "node check-files.js"
   },
   "keywords": [],
   "author": "",
