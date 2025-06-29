@@ -27,6 +27,15 @@ async function sha256(file) {
   return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+async function tryLogin(username, password) {
+  const r = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  return r.ok;
+}
+
 function saveTracker(data) {
   localStorage.setItem('tracker', JSON.stringify(data));
 }

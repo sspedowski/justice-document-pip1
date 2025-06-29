@@ -170,6 +170,18 @@ async function generateSummary(text, fileName) {
   }
 }
 
+// Authentication endpoint
+app.post("/api/login", express.json(), (req, res) => {
+  const { username, password } = req.body;
+  if (
+    username === process.env.DASH_USER &&
+    password === process.env.DASH_PASS
+  ) {
+    return res.json({ ok: true });
+  }
+  return res.status(401).json({ ok: false, error: "bad credentials" });
+});
+
 // Main upload and processing endpoint
 app.post('/api/summarize', upload.single('file'), async (req, res) => {
   try {
