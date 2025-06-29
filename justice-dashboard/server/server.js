@@ -36,6 +36,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Also create public/uploads for additional file storage if needed
+const publicUploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(publicUploadsDir)) {
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
+}
+
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 
