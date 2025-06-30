@@ -27,6 +27,58 @@ async function sha256(file) {
   return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Remove duplicates by filename (case-insensitive)
+function removeDuplicates(docs) {
+  const seen = new Set();
+  return docs.filter(doc => {
+    const key = doc.filename.toLowerCase(); // Normalize
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// Legal statute tagging logic
+function tagStatutes(doc) {
+  const statutes = [];
+  const text = (doc.content || doc.summary || doc.filename || '').toLowerCase();
+
+  if (text.includes("722.628")) statutes.push("MCL 722.628 – CPS Duty to Investigate");
+  if (text.includes("brady v. maryland") || text.includes("exculpatory")) statutes.push("Brady v. Maryland – Suppression of Evidence");
+  if (text.includes("42 u.s.c. § 1983") || text.includes("civil rights")) statutes.push("42 U.S.C. § 1983 – Civil Rights Violation");
+  if (text.includes("capta") || text.includes("child abuse prevention")) statutes.push("CAPTA – Federal Child Protection Standards");
+  if (text.includes("due process") || text.includes("14th amendment")) statutes.push("14th Amendment – Due Process");
+  if (text.includes("1st amendment") || text.includes("free speech")) statutes.push("1st Amendment – Free Speech");
+  if (text.includes("search warrant") || text.includes("4th amendment")) statutes.push("4th Amendment – Search and Seizure");
+  if (text.includes("contempt") || text.includes("600.1701")) statutes.push("MCL 600.1701 – Court Contempt Authority");
+  if (text.includes("722.623") || text.includes("mandatory report")) statutes.push("MCL 722.623 – Mandatory Reporting");
+  if (text.includes("764.15c") || text.includes("retaliation")) statutes.push("MCL 764.15c – Illegal Retaliation");
+
+  return statutes;
+}
+
+// Enhanced summarization with legal focus
+function generateSummary(text, filename) {
+  if (!text || text.length < 50) {
+    return `Document: ${filename}. Content too brief for analysis.`;
+  }
+
+  // Extract first meaningful sentences for summary
+  const sentences = text
+    .replace(/\s+/g, ' ')
+    .split(/[.!?]+/)
+    .filter(s => s.trim().length > 20)
+    .slice(0, 3)
+    .map(s => s.trim())
+    .join('. ');
+
+  // Add legal context if detected
+  const hasLegalContent = /court|judge|hearing|motion|order|custody|visitation|cps|child|parent/i.test(text);
+  const prefix = hasLegalContent ? "Legal Document Summary: " : "Document Summary: ";
+  
+  return `${prefix}${sentences}${sentences.endsWith('.') ? '' : '.'}`;
+}
+
 async function tryLogin(username, password) {
   const r = await fetch("/api/login", {
     method: "POST",
@@ -46,13 +98,24 @@ function loadTracker() {
 }
 
 function downloadCSV(rows) {
-  const header = ['Filename','Summary','Category','Child','Duplicate'];
-  const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
+  const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate','Legal_Statutes'];
+  const body = rows.map(r => {
+    const row = {
+      filename: r.filename || '',
+      summary: r.summary || '',
+      category: r.category || '',
+      child: r.child || '',
+      misconduct: r.misconduct || '',
+      duplicate: r.duplicate ? 'Yes' : 'No',
+      legal_statutes: (r.statutes || []).join('; ')
+    };
+    return header.map(h => JSON.stringify(row[h.toLowerCase()] ?? '')).join(',');
+  });
   const csv = [header.join(','), ...body].join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'tracker.csv'; a.click();
+  a.href = url; a.download = 'justice_tracker_enhanced.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -175,16 +238,29 @@ async function handleFiles(e) {
       
       const { summary, category, child, misconduct } = await res.json();
       
+      // Enhance summary with legal content detection if needed
+      const enhancedSummary = summary || generateSummary(summary || '', fname);
+      
       // Update the existing row object
-      placeholder.summary = summary || '—';
+      placeholder.summary = enhancedSummary;
       placeholder.category = category || 'Uncategorized';
       placeholder.child = child || 'Unknown';
       placeholder.misconduct = misconduct || 'Other/Multiple';
       
+      // Add legal statute tags
+      placeholder.statutes = tagStatutes({
+        content: summary || '',
+        filename: fname,
+        summary: enhancedSummary
+      });
+      
       // Update the DOM row (find by index)
       updateRowInTable(rowIndex, placeholder);
       hashSet.add(hash);
-      saveTracker(tracker);
+      
+      // Clean up duplicates before saving
+      const cleanTracker = removeDuplicates(tracker);
+      saveTracker(cleanTracker);
       
     } catch (err) {
       console.error('Upload failed', err);
@@ -213,12 +289,17 @@ async function handleFiles(e) {
 
 function addRowToTable(row) {
   const tr = document.createElement('tr');
+  const statutesText = (row.statutes || []).length > 0 
+    ? (row.statutes || []).join(', ') 
+    : '—';
+  
   tr.innerHTML = [
     row.filename, 
     row.summary, 
     row.category, 
     row.child, 
-    row.misconduct || 'Other/Multiple', 
+    row.misconduct || 'Other/Multiple',
+    statutesText,
     row.duplicate ? 'Yes' : 'No'
   ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
   tbody.appendChild(tr);
@@ -227,12 +308,17 @@ function addRowToTable(row) {
 function updateRowInTable(rowIndex, updatedRow) {
   const rows = tbody.querySelectorAll('tr');
   if (rows[rowIndex]) {
+    const statutesText = (updatedRow.statutes || []).length > 0 
+      ? (updatedRow.statutes || []).join(', ') 
+      : '—';
+    
     rows[rowIndex].innerHTML = [
       updatedRow.filename, 
       updatedRow.summary, 
       updatedRow.category, 
       updatedRow.child, 
       updatedRow.misconduct || 'Other/Multiple',
+      statutesText,
       updatedRow.duplicate ? 'Yes' : 'No'
     ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
   }
