@@ -15,7 +15,17 @@
    • Tracker persisted in localStorage (key: "tracker")
    • Search bar + child filter
    • CSV export including new columns: child, category, duplicate
+   • Enhanced legal statute tagging with document-specific detection
+   • Summary cards for detailed document analysis
+   • Toggle view for summary cards with legal significance indicators
    ---------------------------------------------------------------------- */
+
+// ===== Configuration =====
+const CONFIG = {
+  aiSummarization: false, // Set to true when OpenAI API key is configured
+  enhancedLegalTagging: true, // Enhanced document-specific legal statute detection
+  summaryCardsEnabled: true // Enable per-document summary cards
+};
 
 // ===== 1. Utility helpers =====
 const $ = (sel) => document.querySelector(sel);
@@ -83,6 +93,22 @@ function tagStatutes(doc) {
   if (text.includes("notice of hearing") || text.includes("hearing notice")) 
     statutes.push("Due Process Notice Violation");
 
+  // Enhanced Document-Specific Detection (as mentioned in requirements)
+  if (CONFIG.enhancedLegalTagging) {
+    if (text.includes("independent review of marsh cps")) {
+      statutes.push("MCL 722.628 – CPS Duty to Investigate", "CAPTA – Federal Child Protection Standards", "42 U.S.C. § 1983 – Civil Rights Violation");
+    }
+    if (text.includes("battle creek counseling psychological eval") || text.includes("8.31.20")) {
+      statutes.push("14th Amendment – Due Process", "MCL 712A.19b – Parental Rights Termination");
+    }
+    if (text.includes("1.5.23 holiday lawyer discuss")) {
+      statutes.push("Brady v. Maryland – Suppression of Evidence", "MCL 552.14 – Custody Modification");
+    }
+    if (text.includes("1.26.21 notice of hearing")) {
+      statutes.push("14th Amendment – Due Process", "MCL 600.1701 – Court Contempt Authority");
+    }
+  }
+
   return statutes;
 }
 
@@ -144,7 +170,6 @@ function generateSummary(text, filename) {
 }
 
 // Generate structured document summary card
-// eslint-disable-next-line no-unused-vars
 function generateDocumentCard(doc) {
   const card = {
     title: doc.filename.replace(/\.[^/.]+$/, ""), // Remove file extension
@@ -231,6 +256,9 @@ const tbody       = $('#trackerTable tbody');
 const searchInput = $('#searchInput');
 const childFilter = $('#childFilter');
 const exportBtn   = $('#exportCsv');
+const toggleCardsBtn = $('#toggleCards');
+const summaryCardsSection = $('#summaryCards');
+const cardsContainer = $('#cardsContainer');
 
 // ===== 4. Render existing tracker =====
 function initializeTracker() {
@@ -257,6 +285,7 @@ function wireEvents() {
   if (searchInput) searchInput.addEventListener('keyup', filterRows);
   if (childFilter) childFilter.addEventListener('change', filterRows);
   if (exportBtn) exportBtn.addEventListener('click', () => downloadCSV(tracker));
+  if (toggleCardsBtn) toggleCardsBtn.addEventListener('click', toggleSummaryCards);
 
   // Drag‑and‑drop (optional UI — ensure drop zone exists)
   ['dragover','drop'].forEach(evt => document.addEventListener(evt, e => {
@@ -466,4 +495,62 @@ document.addEventListener("DOMContentLoaded", () => {
 // ===== 8. Hot‑reload support (Vite) =====
 if (import.meta.hot) {
   import.meta.hot.accept();
+}
+
+// Toggle summary cards display
+function toggleSummaryCards() {
+  if (summaryCardsSection && cardsContainer) {
+    const isHidden = summaryCardsSection.classList.contains('hidden');
+    
+    if (isHidden) {
+      summaryCardsSection.classList.remove('hidden');
+      renderSummaryCards();
+      if (toggleCardsBtn) toggleCardsBtn.textContent = 'Hide Summary Cards';
+    } else {
+      summaryCardsSection.classList.add('hidden');
+      if (toggleCardsBtn) toggleCardsBtn.textContent = 'View Summary Cards';
+    }
+  }
+}
+
+// Render summary cards for all documents
+function renderSummaryCards() {
+  if (!cardsContainer) return;
+  
+  cardsContainer.innerHTML = '';
+  
+  tracker.forEach(doc => {
+    if (doc.duplicate) return; // Skip duplicates
+    
+    const card = generateDocumentCard(doc);
+    const cardElement = createCardElement(card);
+    cardsContainer.appendChild(cardElement);
+  });
+}
+
+// Create HTML element for a summary card
+function createCardElement(card) {
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'bg-white p-4 rounded-lg shadow border-l-4 border-blue-500';
+  
+  const tagsHtml = card.tags.length > 0 
+    ? `<div class="flex flex-wrap gap-1 mb-2">
+         ${card.tags.map(tag => `<span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">${tag}</span>`).join('')}
+       </div>`
+    : '';
+  
+  cardDiv.innerHTML = `
+    <h4 class="font-semibold text-sm mb-2 text-gray-800">${card.title}</h4>
+    <p class="text-xs text-gray-600 mb-3">${card.summary}</p>
+    ${tagsHtml}
+    <div class="text-xs text-gray-500 mb-2">
+      <strong>Category:</strong> ${card.category} | 
+      <strong>Child:</strong> ${card.child} | 
+      <strong>Type:</strong> ${card.misconduct}
+    </div>
+    <div class="text-xs text-blue-700 font-medium mb-2">${card.legal_significance}</div>
+    <div class="text-xs text-gray-600 italic">${card.linked_argument}</div>
+  `;
+  
+  return cardDiv;
 }
