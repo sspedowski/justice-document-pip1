@@ -43,16 +43,45 @@ function tagStatutes(doc) {
   const statutes = [];
   const text = (doc.content || doc.summary || doc.filename || '').toLowerCase();
 
-  if (text.includes("722.628")) statutes.push("MCL 722.628 – CPS Duty to Investigate");
-  if (text.includes("brady v. maryland") || text.includes("exculpatory")) statutes.push("Brady v. Maryland – Suppression of Evidence");
-  if (text.includes("42 u.s.c. § 1983") || text.includes("civil rights")) statutes.push("42 U.S.C. § 1983 – Civil Rights Violation");
-  if (text.includes("capta") || text.includes("child abuse prevention")) statutes.push("CAPTA – Federal Child Protection Standards");
-  if (text.includes("due process") || text.includes("14th amendment")) statutes.push("14th Amendment – Due Process");
-  if (text.includes("1st amendment") || text.includes("free speech")) statutes.push("1st Amendment – Free Speech");
-  if (text.includes("search warrant") || text.includes("4th amendment")) statutes.push("4th Amendment – Search and Seizure");
-  if (text.includes("contempt") || text.includes("600.1701")) statutes.push("MCL 600.1701 – Court Contempt Authority");
-  if (text.includes("722.623") || text.includes("mandatory report")) statutes.push("MCL 722.623 – Mandatory Reporting");
-  if (text.includes("764.15c") || text.includes("retaliation")) statutes.push("MCL 764.15c – Illegal Retaliation");
+  // Constitutional Violations
+  if (text.includes("due process") || text.includes("14th amendment")) 
+    statutes.push("14th Amendment – Due Process");
+  if (text.includes("1st amendment") || text.includes("free speech")) 
+    statutes.push("1st Amendment – Free Speech");
+  if (text.includes("search warrant") || text.includes("4th amendment")) 
+    statutes.push("4th Amendment – Search and Seizure");
+
+  // Federal Statutes
+  if (text.includes("brady v. maryland") || text.includes("exculpatory") || text.includes("suppressed evidence")) 
+    statutes.push("Brady v. Maryland – Suppression of Evidence");
+  if (text.includes("42 u.s.c. § 1983") || text.includes("civil rights") || text.includes("color of law")) 
+    statutes.push("42 U.S.C. § 1983 – Civil Rights Violation");
+  if (text.includes("capta") || text.includes("child abuse prevention") || text.includes("federal child protection")) 
+    statutes.push("CAPTA – Federal Child Protection Standards");
+
+  // Michigan MCL Violations
+  if (text.includes("722.628") || text.includes("cps duty") || text.includes("failure to investigate")) 
+    statutes.push("MCL 722.628 – CPS Duty to Investigate");
+  if (text.includes("722.623") || text.includes("mandatory report") || text.includes("reporting requirements")) 
+    statutes.push("MCL 722.623 – Mandatory Reporting");
+  if (text.includes("764.15c") || text.includes("retaliation") || text.includes("illegal retaliation")) 
+    statutes.push("MCL 764.15c – Illegal Retaliation");
+  if (text.includes("600.1701") || text.includes("contempt") || text.includes("court misconduct")) 
+    statutes.push("MCL 600.1701 – Court Contempt Authority");
+  if (text.includes("712a.19b") || text.includes("termination") || text.includes("parental rights")) 
+    statutes.push("MCL 712A.19b – Parental Rights Termination");
+  if (text.includes("552.14") || text.includes("custody modification")) 
+    statutes.push("MCL 552.14 – Custody Modification");
+
+  // Case-Specific Detection
+  if (text.includes("marsh cps") || text.includes("independent review")) 
+    statutes.push("Independent Review Evidence");
+  if (text.includes("psychological eval") || text.includes("trauma") || text.includes("battle creek counseling")) 
+    statutes.push("Psychological Evidence");
+  if (text.includes("holiday lawyer") || text.includes("legal strategy")) 
+    statutes.push("Legal Strategy Evidence");
+  if (text.includes("notice of hearing") || text.includes("hearing notice")) 
+    statutes.push("Due Process Notice Violation");
 
   return statutes;
 }
@@ -72,11 +101,82 @@ function generateSummary(text, filename) {
     .map(s => s.trim())
     .join('. ');
 
-  // Add legal context if detected
-  const hasLegalContent = /court|judge|hearing|motion|order|custody|visitation|cps|child|parent/i.test(text);
-  const prefix = hasLegalContent ? "Legal Document Summary: " : "Document Summary: ";
+  // Detect specific legal document types
+  const lowerText = text.toLowerCase();
+  const lowerFilename = filename.toLowerCase();
   
-  return `${prefix}${sentences}${sentences.endsWith('.') ? '' : '.'}`;
+  let prefix = "Document Summary: ";
+  let specialContext = "";
+
+  // CPS-related documents
+  if (lowerText.includes("cps") || lowerText.includes("child protective") || lowerFilename.includes("cps")) {
+    prefix = "CPS Document Summary: ";
+    if (lowerText.includes("investigation") || lowerText.includes("report")) {
+      specialContext = " [Potential MCL 722.628 violation evidence]";
+    }
+  }
+  
+  // Court documents
+  else if (lowerText.includes("court") || lowerText.includes("judge") || lowerText.includes("hearing") || lowerFilename.includes("court")) {
+    prefix = "Court Document Summary: ";
+    if (lowerText.includes("notice") || lowerText.includes("hearing")) {
+      specialContext = " [Due process implications]";
+    }
+  }
+  
+  // Medical/Psychological documents
+  else if (lowerText.includes("psychological") || lowerText.includes("medical") || lowerText.includes("therapy") || lowerFilename.includes("psych")) {
+    prefix = "Medical/Psychological Summary: ";
+    specialContext = " [Evidence of harm/trauma]";
+  }
+  
+  // Legal correspondence
+  else if (lowerText.includes("attorney") || lowerText.includes("lawyer") || lowerFilename.includes("legal")) {
+    prefix = "Legal Correspondence Summary: ";
+    if (lowerText.includes("brady") || lowerText.includes("evidence")) {
+      specialContext = " [Potential Brady violation evidence]";
+    }
+  }
+
+  const finalSummary = `${prefix}${sentences}${sentences.endsWith('.') ? '' : '.'}${specialContext}`;
+  
+  return finalSummary;
+}
+
+// Generate structured document summary card
+function generateDocumentCard(doc) {
+  const card = {
+    title: doc.filename.replace(/\.[^/.]+$/, ""), // Remove file extension
+    summary: doc.summary || "Processing...",
+    category: doc.category || "Uncategorized",
+    child: doc.child || "Unknown",
+    misconduct: doc.misconduct || "Other/Multiple",
+    tags: doc.statutes || [],
+    legal_significance: "",
+    linked_argument: ""
+  };
+
+  // Add legal significance based on content
+  const text = (doc.summary || doc.filename || '').toLowerCase();
+  
+  if (text.includes("cps") && text.includes("investigation")) {
+    card.legal_significance = "Demonstrates CPS failure to investigate per MCL 722.628";
+    card.linked_argument = "This document corroborates systemic CPS misconduct and failure to protect children.";
+  } else if (text.includes("psychological") || text.includes("trauma")) {
+    card.legal_significance = "Documents psychological harm and trauma to children";
+    card.linked_argument = "Supports claims of long-term damage due to state misconduct and due process violations.";
+  } else if (text.includes("court") || text.includes("hearing")) {
+    card.legal_significance = "Evidence of judicial misconduct or due process violations";
+    card.linked_argument = "Demonstrates pattern of court bias and constitutional rights violations.";
+  } else if (text.includes("brady") || text.includes("evidence")) {
+    card.legal_significance = "Potential Brady v. Maryland evidence suppression";
+    card.linked_argument = "Shows state withholding of exculpatory evidence in violation of federal law.";
+  } else {
+    card.legal_significance = "Supporting documentation for justice case";
+    card.linked_argument = "Provides context and evidence supporting overall case for justice and accountability.";
+  }
+
+  return card;
 }
 
 async function tryLogin(username, password) {
