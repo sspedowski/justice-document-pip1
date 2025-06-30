@@ -144,6 +144,7 @@ function generateSummary(text, filename) {
 }
 
 // Generate structured document summary card
+// eslint-disable-next-line no-unused-vars
 function generateDocumentCard(doc) {
   const card = {
     title: doc.filename.replace(/\.[^/.]+$/, ""), // Remove file extension
