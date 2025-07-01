@@ -1,16 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 
-// File paths to check
+// File paths to check - updated for current project structure
 const FILES_TO_CHECK = [
-  'server/server.js',
-  'client/script.js',
-  'client/index.html',
-  'client/styles.css',
-  'client/firebase.js',
+  'backend/server.js',
+  'frontend/script.js',
+  'frontend/index.html',
+  'frontend/styles.css',
+  'frontend/firebase.js',
   'package.json',
   'vite.config.js',
-  '.eslintrc.json',
+  '.eslintrc.js',
+  '.env.example',
 ];
 
 console.log('🔍 Checking file structure...\n');

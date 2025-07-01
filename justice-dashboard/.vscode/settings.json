@@ -1,4 +1,7 @@
 {
   "eslint.validate": ["javascript", "javascriptreact"],
-  "eslint.workingDirectories": ["./client", "./server"]
+  "eslint.workingDirectories": ["./frontend", "./backend"],
+  "prettier.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

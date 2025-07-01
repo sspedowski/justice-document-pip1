@@ -57,3 +57,4 @@ jobs:
             cd backend && npm run build 2>/dev/null || echo "No build script in backend"
             cd ..
           fi
+          npm run build
