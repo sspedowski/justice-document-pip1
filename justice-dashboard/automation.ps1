@@ -33,6 +33,10 @@ function Test-Prerequisites {
 }
 
 function Show-Menu {
+    Clear-Host
+    Write-Host "Justice Dashboard Automation Scripts" -ForegroundColor Cyan
+    Write-Host "====================================" -ForegroundColor Cyan
+    Write-Host ""
     Write-Host "Please select an option:" -ForegroundColor Yellow
     Write-Host "1. Extract environment variables" -ForegroundColor White
     Write-Host "2. Clean up and restructure project" -ForegroundColor White
@@ -40,9 +44,12 @@ function Show-Menu {
     Write-Host "4. Format code" -ForegroundColor White
     Write-Host "5. Update PDF links" -ForegroundColor White
     Write-Host "6. Install dependencies" -ForegroundColor White
-    Write-Host "7. Exit" -ForegroundColor White
+    Write-Host "7. Quick setup (runs 1,6,3,4)" -ForegroundColor Green
+    Write-Host "8. Show project status" -ForegroundColor Cyan
+    Write-Host "9. Show help guide" -ForegroundColor Magenta
+    Write-Host "0. Exit" -ForegroundColor Red
     Write-Host ""
-    Write-Host "💡 Tip: Enter only the number (1-7), no extra text" -ForegroundColor Gray
+    Write-Host "💡 Tip: Enter only the number, no extra text" -ForegroundColor Gray
 }
 
 function Extract-Environment {
@@ -202,13 +209,130 @@ function Install-Dependencies {
     Write-Host "Dependencies installation completed!" -ForegroundColor Green
 }
 
+function Show-ProjectStatus {
+    Write-Host "📊 Justice Dashboard Project Status" -ForegroundColor Cyan
+    Write-Host "===================================" -ForegroundColor Cyan
+    Write-Host ""
+    
+    # Check project structure
+    $directories = @("client", "server", "frontend", "backend", "docs")
+    Write-Host "📁 Project Structure:" -ForegroundColor Yellow
+    foreach ($dir in $directories) {
+        if (Test-Path $dir) {
+            $fileCount = (Get-ChildItem $dir -Recurse -File -ErrorAction SilentlyContinue).Count
+            Write-Host "   ✅ $dir/ ($fileCount files)" -ForegroundColor Green
+        } else {
+            Write-Host "   ❌ $dir/ (not found)" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host ""
+    
+    # Check for key files
+    $keyFiles = @("package.json", ".env", ".env.example", ".eslintrc.js", ".prettierrc")
+    Write-Host "📄 Key Files:" -ForegroundColor Yellow
+    foreach ($file in $keyFiles) {
+        if (Test-Path $file) {
+            Write-Host "   ✅ $file" -ForegroundColor Green
+        } else {
+            Write-Host "   ❌ $file (missing)" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host ""
+    
+    # Check PDF files
+    $pdfCount = 0
+    if (Test-Path "server\uploads") {
+        $pdfCount = (Get-ChildItem "server\uploads\*.pdf" -ErrorAction SilentlyContinue).Count
+    }
+    Write-Host "📋 Legal Documents:" -ForegroundColor Yellow
+    Write-Host "   📄 PDF files in uploads: $pdfCount" -ForegroundColor Cyan
+    
+    Write-Host ""
+    Write-Host "💡 Use other menu options to set up missing components." -ForegroundColor Gray
+}
+
+function Show-HelpGuide {
+    Write-Host "📖 Justice Dashboard Help Guide" -ForegroundColor Cyan
+    Write-Host "===============================" -ForegroundColor Cyan
+    Write-Host ""
+    
+    Write-Host "🎯 Quick Start:" -ForegroundColor Yellow
+    Write-Host "   1. Install dependencies (Option 6)" -ForegroundColor White
+    Write-Host "   2. Extract environment variables (Option 1)" -ForegroundColor White
+    Write-Host "   3. Check project status (Option 8)" -ForegroundColor White
+    Write-Host "   4. Process PDFs as needed (Option 5)" -ForegroundColor White
+    Write-Host ""
+    
+    Write-Host "📂 File Locations:" -ForegroundColor Yellow
+    Write-Host "   • Configuration: .env, package.json" -ForegroundColor White
+    Write-Host "   • Legal PDFs: server/uploads/" -ForegroundColor White
+    Write-Host "   • Documentation: *.md files" -ForegroundColor White
+    Write-Host "   • Scripts: *.js, *.ps1, *.sh files" -ForegroundColor White
+    Write-Host ""
+    
+    Write-Host "🔧 Troubleshooting:" -ForegroundColor Yellow
+    Write-Host "   • Check COMPREHENSIVE_WINDOWS_GUIDE.md" -ForegroundColor White
+    Write-Host "   • Check QUICK_FIX_GUIDE.md" -ForegroundColor White
+    Write-Host "   • Ensure you're in: justice-dashboard/justice-dashboard/" -ForegroundColor White
+    Write-Host ""
+    
+    Write-Host "💬 Common Issues:" -ForegroundColor Yellow
+    Write-Host "   • 'Command not found' → Install Node.js, Python, or Git" -ForegroundColor White
+    Write-Host "   • 'No PDFs found' → Check server/uploads/ folder" -ForegroundColor White
+    Write-Host "   • 'Permission denied' → Run as administrator" -ForegroundColor White
+}
+
+function Run-QuickSetup {
+    Write-Host "🚀 Quick Setup for Justice Dashboard" -ForegroundColor Cyan
+    Write-Host "====================================" -ForegroundColor Cyan
+    Write-Host ""
+    
+    Write-Host "This will run the essential setup steps automatically." -ForegroundColor Yellow
+    Write-Host "Steps: Install dependencies → Extract env vars → Run lint/format" -ForegroundColor Gray
+    Write-Host ""
+    
+    $confirm = Read-Host "Continue with quick setup? (y/N)"
+    if ($confirm -eq 'y' -or $confirm -eq 'Y') {
+        Write-Host ""
+        Write-Host "🔄 Running quick setup..." -ForegroundColor Green
+        
+        # Step 1: Install dependencies
+        Write-Host ""
+        Write-Host "📦 Step 1/4: Installing dependencies..." -ForegroundColor Yellow
+        Install-Dependencies
+        
+        # Step 2: Extract environment variables  
+        Write-Host ""
+        Write-Host "🔧 Step 2/4: Extracting environment variables..." -ForegroundColor Yellow
+        Extract-Environment
+        
+        # Step 3: Run linting
+        Write-Host ""
+        Write-Host "🔍 Step 3/4: Running code linting..." -ForegroundColor Yellow
+        Run-Linting
+        
+        # Step 4: Format code
+        Write-Host ""
+        Write-Host "✨ Step 4/4: Formatting code..." -ForegroundColor Yellow
+        Format-Code
+        
+        Write-Host ""
+        Write-Host "✅ Quick setup completed!" -ForegroundColor Green
+        Write-Host "💡 Your Justice Dashboard is now ready for development." -ForegroundColor Cyan
+    } else {
+        Write-Host "Quick setup cancelled." -ForegroundColor Gray
+    }
+}
+
 # Run prerequisite check on startup
 Test-Prerequisites
 
 # Main loop
 do {
     Show-Menu
-    $choice = Read-Host "Enter your choice (1-7)"
+    $choice = Read-Host "Enter your choice (0-9)"
     
     switch ($choice) {
         "1" { Extract-Environment }
@@ -217,18 +341,26 @@ do {
         "4" { Format-Code }
         "5" { Update-PDFLinks }
         "6" { Install-Dependencies }
-        "7" { 
-            Write-Host "Goodbye!" -ForegroundColor Cyan
-            exit 
+        "7" { Run-QuickSetup }
+        "8" { Show-ProjectStatus }
+        "9" { Show-HelpGuide }
+        "0" { 
+            Write-Host ""
+            Write-Host "👋 Thank you for using Justice Dashboard Automation!" -ForegroundColor Cyan
+            Write-Host "Your legal document management system is ready." -ForegroundColor Green
+            Write-Host ""
+            break
         }
         default { 
-            Write-Host "Invalid choice. Please try again." -ForegroundColor Red 
+            Write-Host ""
+            Write-Host "❌ Invalid choice. Please enter a number from 0-9." -ForegroundColor Red
         }
     }
     
-    Write-Host ""
-    Write-Host "Press any key to continue..." -ForegroundColor Gray
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    Clear-Host
+    if ($choice -ne "0") {
+        Write-Host ""
+        Write-Host "Press any key to continue..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
     
-} while ($choice -ne "7")
+} while ($choice -ne "0")
