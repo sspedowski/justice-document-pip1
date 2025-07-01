@@ -20,7 +20,8 @@
     "cleanup": "bash cleanup-and-structure.sh",
     "cleanup:windows": "powershell -ExecutionPolicy Bypass -File cleanup-and-structure.ps1",
     "test-pdf": "python test_pdf_processing.py",
-    "update-pdf": "python update_pdf_links.py"
+    "update-pdf": "python update_pdf_links.py",
+    "update-pdf-links": "node scripts/update-pdf-links.js"
   },
   "keywords": [],
   "author": "",
