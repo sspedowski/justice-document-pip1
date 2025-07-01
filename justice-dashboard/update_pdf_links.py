@@ -26,7 +26,15 @@ def update_pdf_links(input_file, output_file=None):
     """
     
     if not os.path.exists(input_file):
-        print(f"Error: Input file '{input_file}' not found.")
+        print(f"\nError: Input file '{input_file}' not found.")
+        print("\nTroubleshooting steps:")
+        print("1. Check if the file exists in these locations:")
+        print("   • server/uploads/")
+        print("   • uploads/")
+        print("   • current directory")
+        print("2. Verify file permissions")
+        print("3. Try using the full absolute path")
+        print("\nExample: python update_pdf_links.py C:\\Users\\ssped\\Documents\\input.pdf")
         return False
     
     if output_file is None:

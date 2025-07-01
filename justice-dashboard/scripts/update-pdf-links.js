@@ -64,13 +64,17 @@ function findPDFFiles() {
 function displayPDFFiles(pdfs) {
   if (pdfs.length === 0) {
     log('\n[ERROR] No PDF files found in common locations:', 'red');
+    log('Expected locations:', 'yellow');
     log('   • server/uploads/', 'gray');
     log('   • uploads/', 'gray');
-    log('   • current directory', 'gray');
-    log(
-      "\nTIP: You'll need to provide the full absolute path to your PDF file.",
-      'yellow'
-    );
+    log('   • current directory (.)', 'gray');
+    log('\nTroubleshooting steps:', 'yellow');
+    log('1. Check if PDFs exist in any of the above folders', 'gray');
+    log('2. Ensure you have read permissions for these locations', 'gray');
+    log('3. Try providing the full absolute path to your PDF file:', 'gray');
+    log('   Example: C:\\Users\\ssped\\Documents\\input.pdf', 'gray');
+    log('\nUsage:', 'yellow');
+    log('  node scripts/update-pdf-links.js <input.pdf> [output.pdf]', 'gray');
     return;
   }
 
