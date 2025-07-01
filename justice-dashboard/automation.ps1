@@ -272,16 +272,24 @@ function Show-HelpGuide {
     Write-Host "   - Scripts: *.js, *.ps1, *.sh files" -ForegroundColor White
     Write-Host ""
     
+    Write-Host "Documentation Files:" -ForegroundColor Yellow
+    Write-Host "   - PDF_PROCESSING_GUIDE.md - Detailed PDF input/output instructions" -ForegroundColor White
+    Write-Host "   - COMPREHENSIVE_WINDOWS_GUIDE.md - Complete Windows setup guide" -ForegroundColor White
+    Write-Host "   - QUICK_FIX_GUIDE.md - Common troubleshooting solutions" -ForegroundColor White
+    Write-Host "   - AUTOMATION_README.md - Technical automation documentation" -ForegroundColor White
+    Write-Host ""
+    
     Write-Host "Troubleshooting:" -ForegroundColor Yellow
-    Write-Host "   - Check COMPREHENSIVE_WINDOWS_GUIDE.md" -ForegroundColor White
-    Write-Host "   - Check QUICK_FIX_GUIDE.md" -ForegroundColor White
+    Write-Host "   - Check the documentation files above for specific help" -ForegroundColor White
     Write-Host "   - Ensure you're in: justice-dashboard/justice-dashboard/" -ForegroundColor White
+    Write-Host "   - Run prerequisite check shows what tools are missing" -ForegroundColor White
     Write-Host ""
     
     Write-Host "Common Issues:" -ForegroundColor Yellow
     Write-Host "   - 'Command not found' -> Install Node.js, Python, or Git" -ForegroundColor White
-    Write-Host "   - 'No PDFs found' -> Check server/uploads/ folder" -ForegroundColor White
+    Write-Host "   - 'No PDFs found' -> Check server/uploads/ folder or use absolute paths" -ForegroundColor White
     Write-Host "   - 'Permission denied' -> Run as administrator" -ForegroundColor White
+    Write-Host "   - PDF processing fails -> Check PDF_PROCESSING_GUIDE.md for details" -ForegroundColor White
 }
 
 function Run-QuickSetup {
