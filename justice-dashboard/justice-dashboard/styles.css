@@ -9,7 +9,8 @@
     text-size-adjust: 100%;
   }
 
-  select, input[type="file"] {
+  select,
+  input[type='file'] {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;

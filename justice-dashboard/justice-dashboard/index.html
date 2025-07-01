@@ -1,113 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Justice Dashboard – Legal Summary</title>
-<link rel="stylesheet" href="../dist/styles.css">
-  <script type="module" src="./client/firebase.js"></script>
-  <script type="module" src="./client/script.js"></script>
-  <script>
-    // Debug CSS loading
-    window.addEventListener('load', function() {
-      console.log('Page loaded');
-      const link = document.querySelector('link[rel="stylesheet"]');
-      if (link) {
-        console.log('CSS link found:', link.href);
-        link.addEventListener('load', () => console.log('CSS loaded successfully'));
-        link.addEventListener('error', () => console.log('CSS failed to load'));
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Justice Dashboard – Legal Summary</title>
+    <link rel="stylesheet" href="../dist/styles.css" />
+    <script type="module" src="./client/firebase.js"></script>
+    <script type="module" src="./client/script.js"></script>
+    <script>
+      // Debug CSS loading
+      window.addEventListener('load', function () {
+        console.log('Page loaded');
+        const link = document.querySelector('link[rel="stylesheet"]');
+        if (link) {
+          console.log('CSS link found:', link.href);
+          link.addEventListener('load', () =>
+            console.log('CSS loaded successfully')
+          );
+          link.addEventListener('error', () =>
+            console.log('CSS failed to load')
+          );
+        }
+      });
+    </script>
+    <style>
+      /* Fallback styles in case CSS doesn't load */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f3f4f6;
       }
-    });
-  </script>
-  <style>
-    /* Fallback styles in case CSS doesn't load */
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0; 
-      padding: 20px; 
-      background-color: #f3f4f6; 
-    }
-    .max-w-4xl { max-width: 56rem; margin: 0 auto; }
-    .bg-white { background-color: white; }
-    .p-6 { padding: 1.5rem; }
-    .rounded { border-radius: 0.375rem; }
-    .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    /* Legal Summary Styles */
-    h2.legal-title { color: #8B0000; }
-    h3 { margin-top: 1.5em; color: #333; }
-    ul { line-height: 1.6; }
-    a { color: #1a73e8; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body class="bg-gray-100">
-  <div class="max-w-4xl mx-auto p-6">
-    <!-- Legal Violations Summary Section -->
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <h2 class="legal-title text-2xl font-bold mb-4">🧾 Legal Violations & Statutory Summary</h2>
+      .max-w-4xl {
+        max-width: 56rem;
+        margin: 0 auto;
+      }
+      .bg-white {
+        background-color: white;
+      }
+      .p-6 {
+        padding: 1.5rem;
+      }
+      .rounded {
+        border-radius: 0.375rem;
+      }
+      .shadow {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      /* Legal Summary Styles */
+      h2.legal-title {
+        color: #8b0000;
+      }
+      h3 {
+        margin-top: 1.5em;
+        color: #333;
+      }
+      ul {
+        line-height: 1.6;
+      }
+      a {
+        color: #1a73e8;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6">
+      <!-- Legal Violations Summary Section -->
+      <div class="bg-white p-6 rounded shadow mb-6">
+        <h2 class="legal-title text-2xl font-bold mb-4">
+          🧾 Legal Violations & Statutory Summary
+        </h2>
 
-      <h3 class="text-lg font-semibold">🔒 Constitutional Violations</h3>
-      <ul class="mb-4">
-        <li><strong>14th Amendment – Due Process:</strong> Stephanie was denied a fair hearing and the right to testify or present evidence.</li>
-        <li><strong>1st Amendment – Advocacy Suppression:</strong> She faced intimidation for protected speech while advocating for her children.</li>
-      </ul>
+        <h3 class="text-lg font-semibold">🔒 Constitutional Violations</h3>
+        <ul class="mb-4">
+          <li>
+            <strong>14th Amendment – Due Process:</strong> Stephanie was denied
+            a fair hearing and the right to testify or present evidence.
+          </li>
+          <li>
+            <strong>1st Amendment – Advocacy Suppression:</strong> She faced
+            intimidation for protected speech while advocating for her children.
+          </li>
+        </ul>
 
-      <h3 class="text-lg font-semibold">⚖️ Federal Violations</h3>
-      <ul class="mb-4">
-        <li><strong>Brady v. Maryland (373 U.S. 83):</strong> CPS withheld reports that would have favored the mother's case.</li>
-        <li><strong>42 U.S. Code § 1983:</strong> Officials acting under color of law deprived her of constitutional rights.</li>
-        <li><strong>CAPTA:</strong> CPS failed to conduct proper investigations and protect children as required by law.</li>
-      </ul>
+        <h3 class="text-lg font-semibold">⚖️ Federal Violations</h3>
+        <ul class="mb-4">
+          <li>
+            <strong>Brady v. Maryland (373 U.S. 83):</strong> CPS withheld
+            reports that would have favored the mother's case.
+          </li>
+          <li>
+            <strong>42 U.S. Code § 1983:</strong> Officials acting under color
+            of law deprived her of constitutional rights.
+          </li>
+          <li>
+            <strong>CAPTA:</strong> CPS failed to conduct proper investigations
+            and protect children as required by law.
+          </li>
+        </ul>
 
-      <h3 class="text-lg font-semibold">📜 Michigan MCL Violations</h3>
-      <ul class="mb-4">
-        <li><strong>MCL 722.628:</strong> Failure to investigate suspected abuse.</li>
-        <li><strong>MCL 722.623:</strong> Mandatory reporting requirements ignored.</li>
-        <li><strong>MCL 764.15c:</strong> Illegal retaliation against a parent for reporting concerns.</li>
-        <li><strong>MCL 600.1701:</strong> Court misconduct and misuse of contempt authority.</li>
-      </ul>
+        <h3 class="text-lg font-semibold">📜 Michigan MCL Violations</h3>
+        <ul class="mb-4">
+          <li>
+            <strong>MCL 722.628:</strong> Failure to investigate suspected
+            abuse.
+          </li>
+          <li>
+            <strong>MCL 722.623:</strong> Mandatory reporting requirements
+            ignored.
+          </li>
+          <li>
+            <strong>MCL 764.15c:</strong> Illegal retaliation against a parent
+            for reporting concerns.
+          </li>
+          <li>
+            <strong>MCL 600.1701:</strong> Court misconduct and misuse of
+            contempt authority.
+          </li>
+        </ul>
 
-      <h3 class="text-lg font-semibold">📁 Key Evidence Links</h3>
-      <ul class="mb-4">
-        <li><a href="https://drive.google.com/file/d/1JhBVCk_AxPYDfROgkpQhzR3wkOl-NybD/view" target="_blank" rel="noopener noreferrer">📄 MCL + Federal Law Misconduct Analysis PDF</a></li>
-        <li><a href="https://drive.google.com/drive/folders/1PJMN5h7n0edWHAd4W7n4qTHE490Uz4x6" target="_blank" rel="noopener noreferrer">📂 Full Justice Exhibit Folder</a></li>
-      </ul>
+        <h3 class="text-lg font-semibold">📁 Key Evidence Links</h3>
+        <ul class="mb-4">
+          <li>
+            <a
+              href="https://drive.google.com/file/d/1JhBVCk_AxPYDfROgkpQhzR3wkOl-NybD/view"
+              target="_blank"
+              rel="noopener noreferrer"
+              >📄 MCL + Federal Law Misconduct Analysis PDF</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://drive.google.com/drive/folders/1PJMN5h7n0edWHAd4W7n4qTHE490Uz4x6"
+              target="_blank"
+              rel="noopener noreferrer"
+              >📂 Full Justice Exhibit Folder</a
+            >
+          </li>
+        </ul>
 
-      <p class="text-sm italic">✝️ Prepared by <strong>Stephanie Spedowski</strong> in testimony of God's mercy and justice, for legal, oversight, and media review.</p>
+        <p class="text-sm italic">
+          ✝️ Prepared by <strong>Stephanie Spedowski</strong> in testimony of
+          God's mercy and justice, for legal, oversight, and media review.
+        </p>
+      </div>
+
+      <!-- Scripture and Prayer Section -->
+      <div class="bg-white p-6 rounded shadow mb-6">
+        <h1 class="text-2xl font-bold mb-4">📖 Daily Scripture & Prayer</h1>
+        <blockquote class="bg-blue-100 p-4 italic mb-6">
+          Proverbs 21:15 - Justice brings joy to the righteous.
+        </blockquote>
+        <label for="prayer" class="block mb-2">✍️ Your Prayer for Today</label>
+        <textarea
+          id="prayer"
+          name="prayer"
+          class="w-full border p-2 mb-6"
+          placeholder="Write your prayer here..."
+          aria-label="Enter your prayer for today"
+        ></textarea>
+      </div>
+
+      <!-- Document Processing Dashboard -->
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">Justice Dashboard</h2>
+        <label for="fileInput" class="block mb-1">Upload File</label>
+        <input
+          type="file"
+          id="fileInput"
+          class="mb-2 border p-1"
+          title="Choose a file to upload"
+        />
+        <button
+          id="generateBtn"
+          class="bg-blue-600 text-white px-4 py-2"
+          aria-label="Generate summary from uploaded file"
+        >
+          Generate Summary
+        </button>
+        <table class="w-full mt-4 text-sm">
+          <thead>
+            <tr class="bg-gray-200">
+              <th>Category</th>
+              <th>Child</th>
+              <th>Misconduct</th>
+              <th>Summary</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="results"></tbody>
+        </table>
+        <button class="mt-4 bg-green-600 text-white px-4 py-2">
+          Export CSV
+        </button>
+      </div>
     </div>
-
-    <!-- Scripture and Prayer Section -->
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <h1 class="text-2xl font-bold mb-4">📖 Daily Scripture & Prayer</h1>
-      <blockquote class="bg-blue-100 p-4 italic mb-6">
-        Proverbs 21:15 - Justice brings joy to the righteous.
-      </blockquote>
-      <label for="prayer" class="block mb-2">✍️ Your Prayer for Today</label>
-      <textarea 
-        id="prayer"
-        name="prayer"
-        class="w-full border p-2 mb-6" 
-        placeholder="Write your prayer here..."
-        aria-label="Enter your prayer for today"
-          ></textarea>
-    </div>
-
-    <!-- Document Processing Dashboard -->
-    <div class="bg-white p-6 rounded shadow">
-      <h2 class="text-xl font-semibold mb-4">Justice Dashboard</h2>
-      <label for="fileInput" class="block mb-1">Upload File</label>
-      <input type="file" id="fileInput" class="mb-2 border p-1" title="Choose a file to upload" />
-      <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2" aria-label="Generate summary from uploaded file">Generate Summary</button>
-      <table class="w-full mt-4 text-sm">
-        <thead>
-          <tr class="bg-gray-200">
-            <th>Category</th><th>Child</th><th>Misconduct</th><th>Summary</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
-      <button class="mt-4 bg-green-600 text-white px-4 py-2">Export CSV</button>
-    </div>
-  </div>
-</body>
+  </body>
 </html>

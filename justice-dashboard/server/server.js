@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 let openai;
 if (OpenAI && process.env.OPENAI_API_KEY) {
   openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY,
   });
 }
 
@@ -46,7 +46,7 @@ if (!fs.existsSync(publicUploadsDir)) {
 app.use('/uploads', express.static(uploadsDir));
 
 // Serve client build files
-app.use(express.static(path.join(__dirname, "..", "client", "dist")));
+app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
@@ -57,10 +57,10 @@ const storage = multer.diskStorage({
     const timestamp = Date.now();
     const cleanName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
     cb(null, `${timestamp}-${cleanName}`);
-  }
+  },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
@@ -69,20 +69,32 @@ const upload = multer({
       cb(new Error('Only PDF files are allowed'));
     }
   },
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit (increased to prevent connection resets)
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit (increased to prevent connection resets)
 });
 
 // Smart categorization function
 function categorizeDocument(fileName, content) {
   const text = (fileName + ' ' + content).toLowerCase();
-  
-  if (/medical|health|doctor|hospital|therapy|psychiatric|diagnosis|medication|treatment/i.test(text)) {
+
+  if (
+    /medical|health|doctor|hospital|therapy|psychiatric|diagnosis|medication|treatment/i.test(
+      text
+    )
+  ) {
     return 'Medical';
   }
-  if (/school|education|iep|grades|teacher|principal|classroom|academic|special.?education/i.test(text)) {
+  if (
+    /school|education|iep|grades|teacher|principal|classroom|academic|special.?education/i.test(
+      text
+    )
+  ) {
     return 'School';
   }
-  if (/court|legal|police|case|judge|attorney|lawyer|custody|hearing|order/i.test(text)) {
+  if (
+    /court|legal|police|case|judge|attorney|lawyer|custody|hearing|order/i.test(
+      text
+    )
+  ) {
     return 'Legal';
   }
   return 'General';
@@ -93,7 +105,7 @@ function detectChild(fileName, content) {
   const text = (fileName + ' ' + content).toLowerCase();
   const hasJace = /jace/i.test(text);
   const hasJosh = /josh/i.test(text);
-  
+
   if (hasJace && hasJosh) return 'Both';
   if (hasJace) return 'Jace';
   if (hasJosh) return 'Josh';
@@ -103,17 +115,20 @@ function detectChild(fileName, content) {
 // Misconduct type detection
 function detectMisconduct(fileName, content) {
   const text = (fileName + ' ' + content).toLowerCase();
-  
-  if (/physical.?abuse|hitting|violence|injury/i.test(text)) return 'Physical Abuse';
-  if (/emotional.?abuse|psychological|threatening/i.test(text)) return 'Emotional Abuse';
+
+  if (/physical.?abuse|hitting|violence|injury/i.test(text))
+    return 'Physical Abuse';
+  if (/emotional.?abuse|psychological|threatening/i.test(text))
+    return 'Emotional Abuse';
   if (/neglect|failure.?to|inadequate/i.test(text)) return 'Neglect';
-  if (/educational.?neglect|school.?failure/i.test(text)) return 'Educational Neglect';
+  if (/educational.?neglect|school.?failure/i.test(text))
+    return 'Educational Neglect';
   if (/medical.?neglect|healthcare/i.test(text)) return 'Medical Neglect';
   if (/supervision|monitoring/i.test(text)) return 'Inappropriate Supervision';
   if (/failure.?to.?protect/i.test(text)) return 'Failure to Protect';
   if (/substance|drug|alcohol/i.test(text)) return 'Substance Abuse';
   if (/domestic.?violence/i.test(text)) return 'Domestic Violence';
-  
+
   return 'Other/Multiple';
 }
 
@@ -122,17 +137,29 @@ async function performOCR(filePath) {
   let worker;
   try {
     // Check if file is an image format that Tesseract can handle
-    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'];
+    const supportedExtensions = [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.tiff',
+      '.bmp',
+      '.gif',
+    ];
     const fileExtension = path.extname(filePath).toLowerCase();
-    
+
     if (!supportedExtensions.includes(fileExtension)) {
-      console.log('OCR skipped: File format not supported by Tesseract:', fileExtension);
+      console.log(
+        'OCR skipped: File format not supported by Tesseract:',
+        fileExtension
+      );
       return '';
     }
 
     console.log('Attempting OCR on supported image format:', filePath);
     worker = await createWorker('eng');
-    const { data: { text } } = await worker.recognize(filePath);
+    const {
+      data: { text },
+    } = await worker.recognize(filePath);
     console.log('OCR completed, extracted text length:', text.length);
     return text || '';
   } catch (error) {
@@ -158,12 +185,12 @@ async function generateSummary(text, fileName) {
 
   try {
     const prompt = `Summarize this legal document in 2-3 sentences, focusing on key facts, dates, and legal issues: ${text.substring(0, 3000)}`;
-    
+
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 150,
-      temperature: 0.3
+      temperature: 0.3,
     });
 
     return response.choices[0].message.content.trim();
@@ -174,7 +201,7 @@ async function generateSummary(text, fileName) {
 }
 
 // Authentication endpoint
-app.post("/api/login", express.json(), (req, res) => {
+app.post('/api/login', express.json(), (req, res) => {
   const { username, password } = req.body;
   if (
     username === process.env.DASH_USER &&
@@ -182,7 +209,7 @@ app.post("/api/login", express.json(), (req, res) => {
   ) {
     return res.json({ ok: true });
   }
-  return res.status(401).json({ ok: false, error: "bad credentials" });
+  return res.status(401).json({ ok: false, error: 'bad credentials' });
 });
 
 // Main upload and processing endpoint
@@ -195,7 +222,7 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
     console.log('Processing file:', req.file.originalname);
     const filePath = req.file.path;
     const fileName = req.file.originalname;
-    
+
     // Generate file URL for frontend access
     const fileURL = `http://localhost:${PORT}/uploads/${req.file.filename}`;
 
@@ -207,7 +234,7 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
       const pdfData = await pdfParse(dataBuffer);
       textContent = pdfData.text;
       console.log('PDF text extracted, length:', textContent.length);
-      
+
       // If extracted text is too short, try OCR
       if (textContent.length < 100) {
         console.log('Text too short, attempting OCR fallback...');
@@ -218,7 +245,10 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
         }
       }
     } catch (pdfError) {
-      console.log('PDF extraction failed, using OCR fallback:', pdfError.message);
+      console.log(
+        'PDF extraction failed, using OCR fallback:',
+        pdfError.message
+      );
       textContent = await performOCR(filePath);
     }
 
@@ -241,7 +271,7 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
       misconduct,
       summary,
       textLength: textContent.length,
-      processed: new Date().toISOString()
+      processed: new Date().toISOString(),
     };
 
     console.log('Processing complete:', {
@@ -249,11 +279,10 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
       category,
       child,
       misconduct,
-      textLength: textContent.length
+      textLength: textContent.length,
     });
 
     res.json(result);
-
   } catch (error) {
     console.error('Processing error:', error);
     res.status(500).json({ error: 'File processing failed: ' + error.message });
@@ -264,9 +293,9 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
 async function summarizePdf(file) {
   const filePath = file.path;
   const fileName = file.originalname;
-  
+
   console.log('Processing file for v2 client:', fileName);
-  
+
   let textContent = '';
 
   try {
@@ -307,49 +336,51 @@ async function summarizePdf(file) {
     summary: summary || `Document: ${fileName}`,
     category: category || 'General',
     child: child || 'Unknown',
-    misconduct: misconduct || 'Other/Multiple'
+    misconduct: misconduct || 'Other/Multiple',
   };
 }
 
 // Ensure uploads directory exists
-const uploadsDir2 = path.join(__dirname, "public");
+const uploadsDir2 = path.join(__dirname, 'public');
 if (!fs.existsSync(uploadsDir2)) fs.mkdirSync(uploadsDir2, { recursive: true });
 
 // New simplified upload endpoint for v2 client
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "no file received" });
+      return res.status(400).json({ error: 'no file received' });
     }
 
     // --- your existing PDF parsing / OpenAI summarisation -------
-    const { summary, category, child, misconduct } = await summarizePdf(req.file);
+    const { summary, category, child, misconduct } = await summarizePdf(
+      req.file
+    );
     // ------------------------------------------------------------
 
     return res.json({ summary, category, child, misconduct });
   } catch (err) {
-    console.error("Upload failed:", err);
+    console.error('Upload failed:', err);
 
     // Multer size limit
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(413).json({ error: "file too large" });
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'file too large' });
     }
 
-    return res.status(500).json({ error: err.message || "server error" });
+    return res.status(500).json({ error: err.message || 'server error' });
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    openaiConfigured: !!openai
+    openaiConfigured: !!openai,
   });
 });
 
 // Global error handlers to prevent server crashes
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('Uncaught Exception:', err);
   // Don't exit the process - keep server running
 });
@@ -363,7 +394,9 @@ process.on('unhandledRejection', (reason, promise) => {
 app.listen(PORT, () => {
   console.log(`🚀 Justice Server running on http://localhost:${PORT}`);
   console.log(`📁 Upload endpoint (v2): http://localhost:${PORT}/upload`);
-  console.log(`📁 Upload endpoint (v1): http://localhost:${PORT}/api/summarize`);
+  console.log(
+    `📁 Upload endpoint (v1): http://localhost:${PORT}/api/summarize`
+  );
   console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🤖 OpenAI configured: ${!!openai}`);
 });

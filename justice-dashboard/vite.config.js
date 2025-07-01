@@ -6,11 +6,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/upload': 'http://localhost:4000',
-      '/api': 'http://localhost:4000'
-    }
+      '/api': 'http://localhost:4000',
+    },
   },
   build: {
     outDir: '../dist',
-    emptyOutDir: true
-  }
+    emptyOutDir: true,
+  },
 });

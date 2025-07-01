@@ -3,6 +3,7 @@
 This folder contains all correspondence sent to the Michigan Attorney General's office.
 
 ## Document Types
+
 - Formal complaints
 - Follow-up letters
 - Evidence submissions
@@ -10,6 +11,7 @@ This folder contains all correspondence sent to the Michigan Attorney General's 
 - Tracking correspondence
 
 ## Key Focus Areas
+
 - Civil rights violations
 - Government misconduct
 - Judicial misconduct
@@ -17,7 +19,9 @@ This folder contains all correspondence sent to the Michigan Attorney General's 
 - Constitutional violations
 
 ## Filing Strategy
+
 Each submission should reference specific legal statutes and include:
+
 - Case timeline
 - Supporting evidence
 - Legal citations

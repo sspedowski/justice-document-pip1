@@ -3,19 +3,23 @@
 ## 📊 Document Processing Summary
 
 ### Legal Statute Detection
+
 The Justice Dashboard now automatically detects and tags documents with relevant legal statutes:
 
 #### Constitutional Violations
+
 - **14th Amendment – Due Process**
 - **1st Amendment – Free Speech**
 - **4th Amendment – Search and Seizure**
 
 #### Federal Violations
+
 - **Brady v. Maryland – Suppression of Evidence**
 - **42 U.S.C. § 1983 – Civil Rights Violation**
 - **CAPTA – Federal Child Protection Standards**
 
 #### Michigan MCL Violations
+
 - **MCL 722.628 – CPS Duty to Investigate**
 - **MCL 722.623 – Mandatory Reporting**
 - **MCL 764.15c – Illegal Retaliation**
@@ -24,6 +28,7 @@ The Justice Dashboard now automatically detects and tags documents with relevant
 ### Document Organization
 
 #### Folder Structure Recommended:
+
 ```
 📁 Legal_Evidence/
 ├── Josh/

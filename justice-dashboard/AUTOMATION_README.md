@@ -9,6 +9,7 @@ This directory contains automation scripts to help maintain and structure the Ju
 **Purpose**: Removes Windows shortcuts/backups and restructures the project into a clean frontend/backend architecture.
 
 **Usage**:
+
 ```bash
 # Make script executable (Git Bash/WSL)
 chmod +x cleanup-and-structure.sh
@@ -18,6 +19,7 @@ chmod +x cleanup-and-structure.sh
 ```
 
 **What it does**:
+
 - Removes `*.lnk` files and backup scripts
 - Creates `frontend/` and `backend/` directories
 - Moves client files to `frontend/`
@@ -29,6 +31,7 @@ chmod +x cleanup-and-structure.sh
 **Purpose**: Scans configuration files for hard-coded credentials and creates `.env` files.
 
 **Usage**:
+
 ```bash
 # Run with npm script
 npm run extract-env
@@ -38,6 +41,7 @@ node extract-env.js
 ```
 
 **What it does**:
+
 - Scans `frontend/`, `backend/`, `client/`, and `server/` for configuration files
 - Extracts API keys, database passwords, and Firebase config
 - Creates `.env` file with found variables
@@ -47,15 +51,18 @@ node extract-env.js
 ### 3. Code Quality Tools
 
 **ESLint Configuration** (`.eslintrc.js`):
+
 - Configured for React and Node.js environments
 - Extends recommended rules and Prettier integration
 - Custom rules for unused variables and console statements
 
 **Prettier Configuration** (`.prettierrc`):
+
 - Consistent code formatting
 - Single quotes, trailing commas, 80-character line width
 
 **Available Commands**:
+
 ```bash
 # Lint code
 npm run lint
@@ -75,6 +82,7 @@ npm run format:check
 **Purpose**: Automated testing and building on pull requests and main branch pushes.
 
 **Features**:
+
 - Node.js 18 environment
 - Dependency installation for frontend and backend
 - Linting and formatting checks
@@ -86,6 +94,7 @@ npm run format:check
 **Purpose**: Updates hyperlinks and adds bookmarks to legal PDF documents.
 
 **Usage**:
+
 ```bash
 # Install Python dependencies (if needed)
 pip install PyPDF2
@@ -98,6 +107,7 @@ python update_pdf_links.py input.pdf "MCL, Federal Law- Misconduct Analysis (2).
 ```
 
 **What it does**:
+
 - Updates PDF hyperlinks
 - Adds structured bookmarks for legal documents
 - Processes annotations safely
@@ -106,16 +116,19 @@ python update_pdf_links.py input.pdf "MCL, Federal Law- Misconduct Analysis (2).
 ## Installation and Setup
 
 1. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Extract environment variables**:
+
    ```bash
    npm run extract-env
    ```
 
 3. **Set up your `.env` file** with actual values:
+
    ```bash
    cp .env.example .env
    # Edit .env with your actual API keys and configuration
@@ -154,13 +167,16 @@ justice-dashboard/
 The following environment variables are supported:
 
 ### Authentication
+
 - `DASH_USER` - Dashboard username
 - `DASH_PASS` - Dashboard password
 
 ### APIs
+
 - `OPENAI_API_KEY` - OpenAI API key for AI features
 
 ### Firebase (Frontend)
+
 - `VITE_FIREBASE_API_KEY` - Firebase API key
 - `VITE_FIREBASE_AUTH_DOMAIN` - Firebase auth domain
 - `VITE_FIREBASE_PROJECT_ID` - Firebase project ID
@@ -169,6 +185,7 @@ The following environment variables are supported:
 - `VITE_FIREBASE_APP_ID` - Firebase app ID
 
 ### Server Configuration
+
 - `VITE_API_URL` - Backend API URL (default: http://localhost:4000)
 
 ## Contributing
@@ -185,6 +202,7 @@ The following environment variables are supported:
 ## Troubleshooting
 
 ### Windows Users
+
 - Use Git Bash or WSL to run bash scripts
 - Ensure Python is installed for PDF processing
 - Use PowerShell as an alternative:
@@ -195,11 +213,13 @@ The following environment variables are supported:
   ```
 
 ### Missing Dependencies
+
 - Run `npm install` to install Node.js dependencies
 - Run `pip install PyPDF2` for PDF processing
 - Install Git Bash for script execution on Windows
 
 ### Permission Issues
+
 - Make scripts executable: `chmod +x *.sh`
 - Run as administrator if needed on Windows
 - Check file permissions in the project directory

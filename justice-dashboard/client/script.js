@@ -24,17 +24,19 @@
 const CONFIG = {
   aiSummarization: false, // Set to true when OpenAI API key is configured
   enhancedLegalTagging: true, // Enhanced document-specific legal statute detection
-  summaryCardsEnabled: true // Enable per-document summary cards
+  summaryCardsEnabled: true, // Enable per-document summary cards
 };
 
 // ===== 1. Utility helpers =====
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => [...document.querySelectorAll(sel)];
+const $ = sel => document.querySelector(sel);
+const $$ = sel => [...document.querySelectorAll(sel)];
 
 async function sha256(file) {
   const buffer = await file.arrayBuffer();
   const hash = await crypto.subtle.digest('SHA-256', buffer);
-  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
+  return [...new Uint8Array(hash)]
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 // Remove duplicates by filename (case-insensitive)
@@ -54,58 +56,110 @@ function tagStatutes(doc) {
   const text = (doc.content || doc.summary || doc.filename || '').toLowerCase();
 
   // Constitutional Violations
-  if (text.includes("due process") || text.includes("14th amendment")) 
-    statutes.push("14th Amendment – Due Process");
-  if (text.includes("1st amendment") || text.includes("free speech")) 
-    statutes.push("1st Amendment – Free Speech");
-  if (text.includes("search warrant") || text.includes("4th amendment")) 
-    statutes.push("4th Amendment – Search and Seizure");
+  if (text.includes('due process') || text.includes('14th amendment'))
+    statutes.push('14th Amendment – Due Process');
+  if (text.includes('1st amendment') || text.includes('free speech'))
+    statutes.push('1st Amendment – Free Speech');
+  if (text.includes('search warrant') || text.includes('4th amendment'))
+    statutes.push('4th Amendment – Search and Seizure');
 
   // Federal Statutes
-  if (text.includes("brady v. maryland") || text.includes("exculpatory") || text.includes("suppressed evidence")) 
-    statutes.push("Brady v. Maryland – Suppression of Evidence");
-  if (text.includes("42 u.s.c. § 1983") || text.includes("civil rights") || text.includes("color of law")) 
-    statutes.push("42 U.S.C. § 1983 – Civil Rights Violation");
-  if (text.includes("capta") || text.includes("child abuse prevention") || text.includes("federal child protection")) 
-    statutes.push("CAPTA – Federal Child Protection Standards");
+  if (
+    text.includes('brady v. maryland') ||
+    text.includes('exculpatory') ||
+    text.includes('suppressed evidence')
+  )
+    statutes.push('Brady v. Maryland – Suppression of Evidence');
+  if (
+    text.includes('42 u.s.c. § 1983') ||
+    text.includes('civil rights') ||
+    text.includes('color of law')
+  )
+    statutes.push('42 U.S.C. § 1983 – Civil Rights Violation');
+  if (
+    text.includes('capta') ||
+    text.includes('child abuse prevention') ||
+    text.includes('federal child protection')
+  )
+    statutes.push('CAPTA – Federal Child Protection Standards');
 
   // Michigan MCL Violations
-  if (text.includes("722.628") || text.includes("cps duty") || text.includes("failure to investigate")) 
-    statutes.push("MCL 722.628 – CPS Duty to Investigate");
-  if (text.includes("722.623") || text.includes("mandatory report") || text.includes("reporting requirements")) 
-    statutes.push("MCL 722.623 – Mandatory Reporting");
-  if (text.includes("764.15c") || text.includes("retaliation") || text.includes("illegal retaliation")) 
-    statutes.push("MCL 764.15c – Illegal Retaliation");
-  if (text.includes("600.1701") || text.includes("contempt") || text.includes("court misconduct")) 
-    statutes.push("MCL 600.1701 – Court Contempt Authority");
-  if (text.includes("712a.19b") || text.includes("termination") || text.includes("parental rights")) 
-    statutes.push("MCL 712A.19b – Parental Rights Termination");
-  if (text.includes("552.14") || text.includes("custody modification")) 
-    statutes.push("MCL 552.14 – Custody Modification");
+  if (
+    text.includes('722.628') ||
+    text.includes('cps duty') ||
+    text.includes('failure to investigate')
+  )
+    statutes.push('MCL 722.628 – CPS Duty to Investigate');
+  if (
+    text.includes('722.623') ||
+    text.includes('mandatory report') ||
+    text.includes('reporting requirements')
+  )
+    statutes.push('MCL 722.623 – Mandatory Reporting');
+  if (
+    text.includes('764.15c') ||
+    text.includes('retaliation') ||
+    text.includes('illegal retaliation')
+  )
+    statutes.push('MCL 764.15c – Illegal Retaliation');
+  if (
+    text.includes('600.1701') ||
+    text.includes('contempt') ||
+    text.includes('court misconduct')
+  )
+    statutes.push('MCL 600.1701 – Court Contempt Authority');
+  if (
+    text.includes('712a.19b') ||
+    text.includes('termination') ||
+    text.includes('parental rights')
+  )
+    statutes.push('MCL 712A.19b – Parental Rights Termination');
+  if (text.includes('552.14') || text.includes('custody modification'))
+    statutes.push('MCL 552.14 – Custody Modification');
 
   // Case-Specific Detection
-  if (text.includes("marsh cps") || text.includes("independent review")) 
-    statutes.push("Independent Review Evidence");
-  if (text.includes("psychological eval") || text.includes("trauma") || text.includes("battle creek counseling")) 
-    statutes.push("Psychological Evidence");
-  if (text.includes("holiday lawyer") || text.includes("legal strategy")) 
-    statutes.push("Legal Strategy Evidence");
-  if (text.includes("notice of hearing") || text.includes("hearing notice")) 
-    statutes.push("Due Process Notice Violation");
+  if (text.includes('marsh cps') || text.includes('independent review'))
+    statutes.push('Independent Review Evidence');
+  if (
+    text.includes('psychological eval') ||
+    text.includes('trauma') ||
+    text.includes('battle creek counseling')
+  )
+    statutes.push('Psychological Evidence');
+  if (text.includes('holiday lawyer') || text.includes('legal strategy'))
+    statutes.push('Legal Strategy Evidence');
+  if (text.includes('notice of hearing') || text.includes('hearing notice'))
+    statutes.push('Due Process Notice Violation');
 
   // Enhanced Document-Specific Detection (as mentioned in requirements)
   if (CONFIG.enhancedLegalTagging) {
-    if (text.includes("independent review of marsh cps")) {
-      statutes.push("MCL 722.628 – CPS Duty to Investigate", "CAPTA – Federal Child Protection Standards", "42 U.S.C. § 1983 – Civil Rights Violation");
+    if (text.includes('independent review of marsh cps')) {
+      statutes.push(
+        'MCL 722.628 – CPS Duty to Investigate',
+        'CAPTA – Federal Child Protection Standards',
+        '42 U.S.C. § 1983 – Civil Rights Violation'
+      );
     }
-    if (text.includes("battle creek counseling psychological eval") || text.includes("8.31.20")) {
-      statutes.push("14th Amendment – Due Process", "MCL 712A.19b – Parental Rights Termination");
+    if (
+      text.includes('battle creek counseling psychological eval') ||
+      text.includes('8.31.20')
+    ) {
+      statutes.push(
+        '14th Amendment – Due Process',
+        'MCL 712A.19b – Parental Rights Termination'
+      );
     }
-    if (text.includes("1.5.23 holiday lawyer discuss")) {
-      statutes.push("Brady v. Maryland – Suppression of Evidence", "MCL 552.14 – Custody Modification");
+    if (text.includes('1.5.23 holiday lawyer discuss')) {
+      statutes.push(
+        'Brady v. Maryland – Suppression of Evidence',
+        'MCL 552.14 – Custody Modification'
+      );
     }
-    if (text.includes("1.26.21 notice of hearing")) {
-      statutes.push("14th Amendment – Due Process", "MCL 600.1701 – Court Contempt Authority");
+    if (text.includes('1.26.21 notice of hearing')) {
+      statutes.push(
+        '14th Amendment – Due Process',
+        'MCL 600.1701 – Court Contempt Authority'
+      );
     }
   }
 
@@ -130,86 +184,113 @@ function generateSummary(text, filename) {
   // Detect specific legal document types
   const lowerText = text.toLowerCase();
   const lowerFilename = filename.toLowerCase();
-  
-  let prefix = "Document Summary: ";
-  let specialContext = "";
+
+  let prefix = 'Document Summary: ';
+  let specialContext = '';
 
   // CPS-related documents
-  if (lowerText.includes("cps") || lowerText.includes("child protective") || lowerFilename.includes("cps")) {
-    prefix = "CPS Document Summary: ";
-    if (lowerText.includes("investigation") || lowerText.includes("report")) {
-      specialContext = " [Potential MCL 722.628 violation evidence]";
+  if (
+    lowerText.includes('cps') ||
+    lowerText.includes('child protective') ||
+    lowerFilename.includes('cps')
+  ) {
+    prefix = 'CPS Document Summary: ';
+    if (lowerText.includes('investigation') || lowerText.includes('report')) {
+      specialContext = ' [Potential MCL 722.628 violation evidence]';
     }
   }
-  
+
   // Court documents
-  else if (lowerText.includes("court") || lowerText.includes("judge") || lowerText.includes("hearing") || lowerFilename.includes("court")) {
-    prefix = "Court Document Summary: ";
-    if (lowerText.includes("notice") || lowerText.includes("hearing")) {
-      specialContext = " [Due process implications]";
+  else if (
+    lowerText.includes('court') ||
+    lowerText.includes('judge') ||
+    lowerText.includes('hearing') ||
+    lowerFilename.includes('court')
+  ) {
+    prefix = 'Court Document Summary: ';
+    if (lowerText.includes('notice') || lowerText.includes('hearing')) {
+      specialContext = ' [Due process implications]';
     }
   }
-  
+
   // Medical/Psychological documents
-  else if (lowerText.includes("psychological") || lowerText.includes("medical") || lowerText.includes("therapy") || lowerFilename.includes("psych")) {
-    prefix = "Medical/Psychological Summary: ";
-    specialContext = " [Evidence of harm/trauma]";
+  else if (
+    lowerText.includes('psychological') ||
+    lowerText.includes('medical') ||
+    lowerText.includes('therapy') ||
+    lowerFilename.includes('psych')
+  ) {
+    prefix = 'Medical/Psychological Summary: ';
+    specialContext = ' [Evidence of harm/trauma]';
   }
-  
+
   // Legal correspondence
-  else if (lowerText.includes("attorney") || lowerText.includes("lawyer") || lowerFilename.includes("legal")) {
-    prefix = "Legal Correspondence Summary: ";
-    if (lowerText.includes("brady") || lowerText.includes("evidence")) {
-      specialContext = " [Potential Brady violation evidence]";
+  else if (
+    lowerText.includes('attorney') ||
+    lowerText.includes('lawyer') ||
+    lowerFilename.includes('legal')
+  ) {
+    prefix = 'Legal Correspondence Summary: ';
+    if (lowerText.includes('brady') || lowerText.includes('evidence')) {
+      specialContext = ' [Potential Brady violation evidence]';
     }
   }
 
   const finalSummary = `${prefix}${sentences}${sentences.endsWith('.') ? '' : '.'}${specialContext}`;
-  
+
   return finalSummary;
 }
 
 // Generate structured document summary card
 function generateDocumentCard(doc) {
   const card = {
-    title: doc.filename.replace(/\.[^/.]+$/, ""), // Remove file extension
-    summary: doc.summary || "Processing...",
-    category: doc.category || "Uncategorized",
-    child: doc.child || "Unknown",
-    misconduct: doc.misconduct || "Other/Multiple",
+    title: doc.filename.replace(/\.[^/.]+$/, ''), // Remove file extension
+    summary: doc.summary || 'Processing...',
+    category: doc.category || 'Uncategorized',
+    child: doc.child || 'Unknown',
+    misconduct: doc.misconduct || 'Other/Multiple',
     tags: doc.statutes || [],
-    legal_significance: "",
-    linked_argument: ""
+    legal_significance: '',
+    linked_argument: '',
   };
 
   // Add legal significance based on content
   const text = (doc.summary || doc.filename || '').toLowerCase();
-  
-  if (text.includes("cps") && text.includes("investigation")) {
-    card.legal_significance = "Demonstrates CPS failure to investigate per MCL 722.628";
-    card.linked_argument = "This document corroborates systemic CPS misconduct and failure to protect children.";
-  } else if (text.includes("psychological") || text.includes("trauma")) {
-    card.legal_significance = "Documents psychological harm and trauma to children";
-    card.linked_argument = "Supports claims of long-term damage due to state misconduct and due process violations.";
-  } else if (text.includes("court") || text.includes("hearing")) {
-    card.legal_significance = "Evidence of judicial misconduct or due process violations";
-    card.linked_argument = "Demonstrates pattern of court bias and constitutional rights violations.";
-  } else if (text.includes("brady") || text.includes("evidence")) {
-    card.legal_significance = "Potential Brady v. Maryland evidence suppression";
-    card.linked_argument = "Shows state withholding of exculpatory evidence in violation of federal law.";
+
+  if (text.includes('cps') && text.includes('investigation')) {
+    card.legal_significance =
+      'Demonstrates CPS failure to investigate per MCL 722.628';
+    card.linked_argument =
+      'This document corroborates systemic CPS misconduct and failure to protect children.';
+  } else if (text.includes('psychological') || text.includes('trauma')) {
+    card.legal_significance =
+      'Documents psychological harm and trauma to children';
+    card.linked_argument =
+      'Supports claims of long-term damage due to state misconduct and due process violations.';
+  } else if (text.includes('court') || text.includes('hearing')) {
+    card.legal_significance =
+      'Evidence of judicial misconduct or due process violations';
+    card.linked_argument =
+      'Demonstrates pattern of court bias and constitutional rights violations.';
+  } else if (text.includes('brady') || text.includes('evidence')) {
+    card.legal_significance =
+      'Potential Brady v. Maryland evidence suppression';
+    card.linked_argument =
+      'Shows state withholding of exculpatory evidence in violation of federal law.';
   } else {
-    card.legal_significance = "Supporting documentation for justice case";
-    card.linked_argument = "Provides context and evidence supporting overall case for justice and accountability.";
+    card.legal_significance = 'Supporting documentation for justice case';
+    card.linked_argument =
+      'Provides context and evidence supporting overall case for justice and accountability.';
   }
 
   return card;
 }
 
 async function tryLogin(username, password) {
-  const r = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+  const r = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
   });
   return r.ok;
 }
@@ -219,12 +300,23 @@ function saveTracker(data) {
 }
 
 function loadTracker() {
-  try { return JSON.parse(localStorage.getItem('tracker')) ?? []; }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem('tracker')) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 function downloadCSV(rows) {
-  const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate','Legal_Statutes'];
+  const header = [
+    'Filename',
+    'Summary',
+    'Category',
+    'Child',
+    'Misconduct',
+    'Duplicate',
+    'Legal_Statutes',
+  ];
   const body = rows.map(r => {
     const row = {
       filename: r.filename || '',
@@ -233,29 +325,33 @@ function downloadCSV(rows) {
       child: r.child || '',
       misconduct: r.misconduct || '',
       duplicate: r.duplicate ? 'Yes' : 'No',
-      legal_statutes: (r.statutes || []).join('; ')
+      legal_statutes: (r.statutes || []).join('; '),
     };
-    return header.map(h => JSON.stringify(row[h.toLowerCase()] ?? '')).join(',');
+    return header
+      .map(h => JSON.stringify(row[h.toLowerCase()] ?? ''))
+      .join(',');
   });
   const csv = [header.join(','), ...body].join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
+  const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'justice_tracker_enhanced.csv'; a.click();
+  a.href = url;
+  a.download = 'justice_tracker_enhanced.csv';
+  a.click();
   URL.revokeObjectURL(url);
 }
 
 // ===== 2. State =====
-const tracker = loadTracker();           // array of row objects
+const tracker = loadTracker(); // array of row objects
 const hashSet = new Set(tracker.map(r => r.hash));
 
 // ===== 3. DOM refs =====
-const fileInput   = $('#fileInput');
+const fileInput = $('#fileInput');
 // const uploadBtn   = $('#uploadBtn'); // Currently unused
-const tbody       = $('#trackerTable tbody');
+const tbody = $('#trackerTable tbody');
 const searchInput = $('#searchInput');
 const childFilter = $('#childFilter');
-const exportBtn   = $('#exportCsv');
+const exportBtn = $('#exportCsv');
 const toggleCardsBtn = $('#toggleCards');
 const summaryCardsSection = $('#summaryCards');
 const cardsContainer = $('#cardsContainer');
@@ -284,14 +380,23 @@ function wireEvents() {
   if (fileInput) fileInput.addEventListener('change', handleFiles);
   if (searchInput) searchInput.addEventListener('keyup', filterRows);
   if (childFilter) childFilter.addEventListener('change', filterRows);
-  if (exportBtn) exportBtn.addEventListener('click', () => downloadCSV(tracker));
-  if (toggleCardsBtn) toggleCardsBtn.addEventListener('click', toggleSummaryCards);
+  if (exportBtn)
+    exportBtn.addEventListener('click', () => downloadCSV(tracker));
+  if (toggleCardsBtn)
+    toggleCardsBtn.addEventListener('click', toggleSummaryCards);
 
   // Drag‑and‑drop (optional UI — ensure drop zone exists)
-  ['dragover','drop'].forEach(evt => document.addEventListener(evt, e => {
-    if(['dragover','drop'].includes(e.type)) e.preventDefault();
-    if(e.type==='drop') handleFiles({ target: { files: e.dataTransfer.files }});
-  }, false));
+  ['dragover', 'drop'].forEach(evt =>
+    document.addEventListener(
+      evt,
+      e => {
+        if (['dragover', 'drop'].includes(e.type)) e.preventDefault();
+        if (e.type === 'drop')
+          handleFiles({ target: { files: e.dataTransfer.files } });
+      },
+      false
+    )
+  );
 }
 
 // Wire events when DOM is ready
@@ -324,7 +429,7 @@ async function handleFiles(e) {
         child: 'N/A',
         misconduct: 'N/A',
         duplicate: true,
-        hash
+        hash,
       };
       addRowToTable(duplicateRow);
       continue;
@@ -338,9 +443,9 @@ async function handleFiles(e) {
       child: '—',
       misconduct: '—',
       duplicate: false,
-      hash
+      hash,
     };
-    
+
     // Add optimistic UI immediately
     const rowIndex = tracker.length;
     tracker.push(placeholder);
@@ -352,7 +457,7 @@ async function handleFiles(e) {
 
     try {
       const res = await fetch('/upload', { method: 'POST', body: formData });
-      
+
       if (!res.ok) {
         // Handle HTTP error responses
         let errorMessage = `HTTP ${res.status}`;
@@ -365,46 +470,48 @@ async function handleFiles(e) {
         }
         throw new Error(errorMessage);
       }
-      
+
       const { summary, category, child, misconduct } = await res.json();
-      
+
       // Enhance summary with legal content detection if needed
       const enhancedSummary = summary || generateSummary(summary || '', fname);
-      
+
       // Update the existing row object
       placeholder.summary = enhancedSummary;
       placeholder.category = category || 'Uncategorized';
       placeholder.child = child || 'Unknown';
       placeholder.misconduct = misconduct || 'Other/Multiple';
-      
+
       // Add legal statute tags
       placeholder.statutes = tagStatutes({
         content: summary || '',
         filename: fname,
-        summary: enhancedSummary
+        summary: enhancedSummary,
       });
-      
+
       // Update the DOM row (find by index)
       updateRowInTable(rowIndex, placeholder);
       hashSet.add(hash);
-      
+
       // Clean up duplicates before saving
       const cleanTracker = removeDuplicates(tracker);
       saveTracker(cleanTracker);
-      
     } catch (err) {
       console.error('Upload failed', err);
-      
+
       // Handle different types of errors
       let errorMessage = 'Upload failed';
-      if (err.message.includes('Failed to fetch') || err.message.includes('ERR_CONNECTION_RESET')) {
+      if (
+        err.message.includes('Failed to fetch') ||
+        err.message.includes('ERR_CONNECTION_RESET')
+      ) {
         errorMessage = 'Connection error - server may be processing';
       } else if (err.message.includes('file too large')) {
         errorMessage = 'File too large (max 50MB)';
       } else if (err.message) {
         errorMessage = `Upload failed: ${err.message}`;
       }
-      
+
       // Update row to show specific error
       placeholder.summary = errorMessage;
       placeholder.category = 'Error';
@@ -419,38 +526,42 @@ async function handleFiles(e) {
 
 function addRowToTable(row) {
   const tr = document.createElement('tr');
-  const statutesText = (row.statutes || []).length > 0 
-    ? (row.statutes || []).join(', ') 
-    : '—';
-  
+  const statutesText =
+    (row.statutes || []).length > 0 ? (row.statutes || []).join(', ') : '—';
+
   tr.innerHTML = [
-    row.filename, 
-    row.summary, 
-    row.category, 
-    row.child, 
+    row.filename,
+    row.summary,
+    row.category,
+    row.child,
     row.misconduct || 'Other/Multiple',
     statutesText,
-    row.duplicate ? 'Yes' : 'No'
-  ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
+    row.duplicate ? 'Yes' : 'No',
+  ]
+    .map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`)
+    .join('');
   tbody.appendChild(tr);
 }
 
 function updateRowInTable(rowIndex, updatedRow) {
   const rows = tbody.querySelectorAll('tr');
   if (rows[rowIndex]) {
-    const statutesText = (updatedRow.statutes || []).length > 0 
-      ? (updatedRow.statutes || []).join(', ') 
-      : '—';
-    
+    const statutesText =
+      (updatedRow.statutes || []).length > 0
+        ? (updatedRow.statutes || []).join(', ')
+        : '—';
+
     rows[rowIndex].innerHTML = [
-      updatedRow.filename, 
-      updatedRow.summary, 
-      updatedRow.category, 
-      updatedRow.child, 
+      updatedRow.filename,
+      updatedRow.summary,
+      updatedRow.category,
+      updatedRow.child,
       updatedRow.misconduct || 'Other/Multiple',
       statutesText,
-      updatedRow.duplicate ? 'Yes' : 'No'
-    ].map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`).join('');
+      updatedRow.duplicate ? 'Yes' : 'No',
+    ]
+      .map(val => `<td class="border px-2 py-1 text-sm">${val}</td>`)
+      .join('');
   }
 }
 
@@ -459,34 +570,35 @@ function filterRows() {
   const child = childFilter.value;
   $$('#trackerTable tbody tr').forEach(tr => {
     const cells = tr.children;
-    const textMatch = cells[1].textContent.toLowerCase().includes(query) ||
-                      cells[0].textContent.toLowerCase().includes(query);
+    const textMatch =
+      cells[1].textContent.toLowerCase().includes(query) ||
+      cells[0].textContent.toLowerCase().includes(query);
     const childMatch = !child || cells[3].textContent === child;
-    tr.style.display = (textMatch && childMatch) ? '' : 'none';
+    tr.style.display = textMatch && childMatch ? '' : 'none';
   });
 }
 
 // ===== 7. Login form handling =====
-document.addEventListener("DOMContentLoaded", () => {
-  const box      = document.getElementById("loginBox");
-  const dash     = document.getElementById("dashboard");     // wrap the main UI in a #dashboard div
-  const btn      = document.getElementById("loginBtn");
-  const errLabel = document.getElementById("loginErr");
+document.addEventListener('DOMContentLoaded', () => {
+  const box = document.getElementById('loginBox');
+  const dash = document.getElementById('dashboard'); // wrap the main UI in a #dashboard div
+  const btn = document.getElementById('loginBtn');
+  const errLabel = document.getElementById('loginErr');
 
-  if (dash) dash.classList.add("hidden");          // hide dashboard until logged in
+  if (dash) dash.classList.add('hidden'); // hide dashboard until logged in
 
   if (btn) {
-    btn.addEventListener("click", async () => {
+    btn.addEventListener('click', async () => {
       const ok = await tryLogin(
-        document.getElementById("userInput").value,
-        document.getElementById("passInput").value
+        document.getElementById('userInput').value,
+        document.getElementById('passInput').value
       );
       if (ok) {
-        if (box) box.classList.add("hidden");
-        if (dash) dash.classList.remove("hidden");   // show dashboard
-        if (errLabel) errLabel.classList.add("hidden");
+        if (box) box.classList.add('hidden');
+        if (dash) dash.classList.remove('hidden'); // show dashboard
+        if (errLabel) errLabel.classList.add('hidden');
       } else {
-        if (errLabel) errLabel.classList.remove("hidden");
+        if (errLabel) errLabel.classList.remove('hidden');
       }
     });
   }
@@ -501,7 +613,7 @@ if (import.meta.hot) {
 function toggleSummaryCards() {
   if (summaryCardsSection && cardsContainer) {
     const isHidden = summaryCardsSection.classList.contains('hidden');
-    
+
     if (isHidden) {
       summaryCardsSection.classList.remove('hidden');
       renderSummaryCards();
@@ -516,12 +628,12 @@ function toggleSummaryCards() {
 // Render summary cards for all documents
 function renderSummaryCards() {
   if (!cardsContainer) return;
-  
+
   cardsContainer.innerHTML = '';
-  
+
   tracker.forEach(doc => {
     if (doc.duplicate) return; // Skip duplicates
-    
+
     const card = generateDocumentCard(doc);
     const cardElement = createCardElement(card);
     cardsContainer.appendChild(cardElement);
@@ -531,14 +643,16 @@ function renderSummaryCards() {
 // Create HTML element for a summary card
 function createCardElement(card) {
   const cardDiv = document.createElement('div');
-  cardDiv.className = 'bg-white p-4 rounded-lg shadow border-l-4 border-blue-500';
-  
-  const tagsHtml = card.tags.length > 0 
-    ? `<div class="flex flex-wrap gap-1 mb-2">
+  cardDiv.className =
+    'bg-white p-4 rounded-lg shadow border-l-4 border-blue-500';
+
+  const tagsHtml =
+    card.tags.length > 0
+      ? `<div class="flex flex-wrap gap-1 mb-2">
          ${card.tags.map(tag => `<span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">${tag}</span>`).join('')}
        </div>`
-    : '';
-  
+      : '';
+
   cardDiv.innerHTML = `
     <h4 class="font-semibold text-sm mb-2 text-gray-800">${card.title}</h4>
     <p class="text-xs text-gray-600 mb-3">${card.summary}</p>
@@ -551,6 +665,6 @@ function createCardElement(card) {
     <div class="text-xs text-blue-700 font-medium mb-2">${card.legal_significance}</div>
     <div class="text-xs text-gray-600 italic">${card.linked_argument}</div>
   `;
-  
+
   return cardDiv;
 }
