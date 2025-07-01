@@ -80,19 +80,23 @@ class ErrorModal {
     `;
 
     // Add event listeners
-    this.modalElement.addEventListener('click', (e) => {
+    this.modalElement.addEventListener('click', e => {
       if (e.target === this.modalElement) {
         this.close();
       }
     });
 
-    this.modalElement.querySelector('.close-btn').addEventListener('click', () => {
-      this.close();
-    });
+    this.modalElement
+      .querySelector('.close-btn')
+      .addEventListener('click', () => {
+        this.close();
+      });
 
-    this.modalElement.querySelector('.submit-btn').addEventListener('click', () => {
-      this.submitErrorReport();
-    });
+    this.modalElement
+      .querySelector('.submit-btn')
+      .addEventListener('click', () => {
+        this.submitErrorReport();
+      });
 
     // Add to document
     document.body.appendChild(this.modalElement);
@@ -106,10 +110,10 @@ class ErrorModal {
     // Update modal content
     this.modalElement.querySelector('.error-message').textContent = error;
     this.modalElement.querySelector('.status-message').style.display = 'none';
-    
+
     // Show modal
     this.modalElement.style.display = 'flex';
-    
+
     // Reset submit button
     const submitBtn = this.modalElement.querySelector('.submit-btn');
     submitBtn.disabled = false;
@@ -127,7 +131,7 @@ class ErrorModal {
   async submitErrorReport() {
     const submitBtn = this.modalElement.querySelector('.submit-btn');
     const statusDiv = this.modalElement.querySelector('.status-message');
-    
+
     // Disable button and show loading state
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
@@ -145,7 +149,7 @@ class ErrorModal {
           documentId: this.currentDocumentId,
           context: window.location.href,
           userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
       });
 
@@ -162,12 +166,12 @@ class ErrorModal {
       setTimeout(() => {
         this.close();
       }, 2000);
-
     } catch (err) {
       console.error('Error submitting report:', err);
-      
+
       // Show error message
-      statusDiv.textContent = 'Failed to submit error report. Please try again.';
+      statusDiv.textContent =
+        'Failed to submit error report. Please try again.';
       statusDiv.style.color = '#dc2626';
       statusDiv.style.display = 'block';
 
