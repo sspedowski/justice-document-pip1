@@ -294,7 +294,7 @@ If using the optional server features:
 
 1. **Environment setup** on your server
 2. **Install dependencies**: `npm install --production`
-3. **Start server**: `node justice-server/server.js`
+3. **Start server**: `node backend/server.js`
 4. **Configure reverse proxy** (nginx, Apache) if needed
 
 ## Contributing
