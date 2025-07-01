@@ -292,7 +292,7 @@ function Show-HelpGuide {
     Write-Host "   - PDF processing fails -> Check PDF_PROCESSING_GUIDE.md for details" -ForegroundColor White
 }
 
-function Run-QuickSetup {
+function Invoke-QuickSetup {
     Write-Host "Quick Setup for Justice Dashboard" -ForegroundColor Cyan
     Write-Host "=================================" -ForegroundColor Cyan
     Write-Host ""
@@ -314,12 +314,12 @@ function Run-QuickSetup {
         # Step 2: Extract environment variables  
         Write-Host ""
         Write-Host "Step 2/4: Extracting environment variables..." -ForegroundColor Yellow
-        Extract-Environment
+        Get-Environment
         
         # Step 3: Run linting
         Write-Host ""
         Write-Host "Step 3/4: Running code linting..." -ForegroundColor Yellow
-        Run-Linting
+        Invoke-Linting
         
         # Step 4: Format code
         Write-Host ""
@@ -343,13 +343,13 @@ do {
     $choice = Read-Host "Enter your choice (0-9)"
     
     switch ($choice) {
-        "1" { Extract-Environment }
-        "2" { Cleanup-Project }
-        "3" { Run-Linting }
+        "1" { Get-Environment }
+        "2" { Reset-Project }
+        "3" { Invoke-Linting }
         "4" { Format-Code }
         "5" { Update-PDFLinks }
         "6" { Install-Dependencies }
-        "7" { Run-QuickSetup }
+        "7" { Invoke-QuickSetup }
         "8" { Show-ProjectStatus }
         "9" { Show-HelpGuide }
         "0" { 
