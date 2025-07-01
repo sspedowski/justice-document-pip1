@@ -27,12 +27,12 @@ describe('Justice Dashboard', () => {
       // These would typically come from process.env in a real test
       const requiredEnvVars = [
         'DASH_USER',
-        'DASH_PASS', 
+        'DASH_PASS',
         'OPENAI_API_KEY',
         'VITE_FIREBASE_API_KEY',
-        'VITE_API_URL'
+        'VITE_API_URL',
       ];
-      
+
       expect(requiredEnvVars.length).toBeGreaterThan(0);
       expect(requiredEnvVars).toContain('DASH_USER');
     });
@@ -40,7 +40,7 @@ describe('Justice Dashboard', () => {
 
   describe('Utility functions', () => {
     test('should be able to parse file extensions', () => {
-      const getFileExtension = (filename) => {
+      const getFileExtension = filename => {
         return filename.split('.').pop().toLowerCase();
       };
 
@@ -50,7 +50,7 @@ describe('Justice Dashboard', () => {
     });
 
     test('should be able to validate PDF files', () => {
-      const isPDFFile = (filename) => {
+      const isPDFFile = filename => {
         return filename.toLowerCase().endsWith('.pdf');
       };
 
