@@ -18,6 +18,8 @@
     "test": "echo \"No tests specified yet\" && exit 0",
     "extract-env": "node extract-env.js",
     "cleanup": "bash cleanup-and-structure.sh",
+    "cleanup:windows": "powershell -ExecutionPolicy Bypass -File cleanup-and-structure.ps1",
+    "test-pdf": "python test_pdf_processing.py",
     "update-pdf": "python update_pdf_links.py"
   },
   "keywords": [],
