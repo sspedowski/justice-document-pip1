@@ -33,6 +33,9 @@ Thumbs.db
 # Build outputs
 dist/
 build/
+output.css
+styles/output.css
+*.min.js
 
 # Logs
 *.log
