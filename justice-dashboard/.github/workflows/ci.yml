@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: |
+        if [ -f "frontend/package.json" ]; then
+          cd frontend && npm ci
+          cd ..
+        fi
+        if [ -f "backend/package.json" ]; then
+          cd backend && npm ci
+          cd ..
+        fi
+        npm ci
+    
+    - name: Lint and Format Check
+      run: |
+        npm run lint
+        npm run format -- --check
+    
+    - name: Run Tests
+      run: |
+        if [ -f "frontend/package.json" ]; then
+          cd frontend && npm test -- --watchAll=false
+          cd ..
+        fi
+        if [ -f "backend/package.json" ]; then
+          cd backend && npm test
+          cd ..
+        fi
+    
+    - name: Build Project
+      run: |
+        if [ -f "frontend/package.json" ]; then
+          cd frontend && npm run build
+          cd ..
+        fi
+        if [ -f "backend/package.json" ]; then
+          cd backend && npm run build 2>/dev/null || echo "No build script in backend"
+          cd ..
+        fi

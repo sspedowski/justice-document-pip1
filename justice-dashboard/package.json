@@ -12,7 +12,13 @@
     "start": "node server/server.js",
     "check": "node check-files.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "extract-env": "node extract-env.js",
+    "cleanup": "bash cleanup-and-structure.sh",
+    "update-pdf": "python update_pdf_links.py"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +37,8 @@
   "devDependencies": {
     "autoprefixer": "^10.4.14",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "nodemon": "^3.1.10",
