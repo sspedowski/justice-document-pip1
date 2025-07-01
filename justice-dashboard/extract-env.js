@@ -6,7 +6,7 @@ console.log('Extracting environment variables from configuration files...');
 const targetFiles = [
   // Current project structure
   'frontend/firebase.js',
-  'backend/server.js', 
+  'backend/server.js',
   // Check for files that were moved to frontend/backend
   'frontend/script.js',
   'frontend/index.html',
@@ -17,12 +17,12 @@ const targetFiles = [
   'client/script.js',
   // Check parent directory structure
   '../client/firebase.js',
-  '../server/server.js', 
+  '../server/server.js',
   '../client/script.js',
   // Also check main package.json and config files
   'package.json',
   'vite.config.js',
-  'tailwind.config.js'
+  'tailwind.config.js',
 ];
 
 let envVars = new Map();
