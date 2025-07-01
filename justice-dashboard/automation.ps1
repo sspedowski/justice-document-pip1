@@ -111,7 +111,10 @@ function Format-Code {
 }
 
 function Update-PDFLinks {
-    Write-Host "Available PDF files:" -ForegroundColor Yellow
+    Write-Host "📄 PDF Link Updater" -ForegroundColor Cyan
+    Write-Host "==================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Scanning for PDF files in common locations..." -ForegroundColor Yellow
     
     # Check for PDF files in common locations
     $pdfPaths = @("server\uploads", "uploads", ".")
@@ -127,33 +130,65 @@ function Update-PDFLinks {
     }
     
     if ($foundPdfs.Count -eq 0) {
-        Write-Host "No PDF files found in common locations." -ForegroundColor Red
-        Write-Host "Expected locations: server\uploads\, uploads\, current directory" -ForegroundColor Yellow
+        Write-Host "❌ No PDF files found in common locations:" -ForegroundColor Red
+        Write-Host "   • server\uploads\" -ForegroundColor Gray
+        Write-Host "   • uploads\" -ForegroundColor Gray  
+        Write-Host "   • current directory" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "💡 You'll need to provide the full absolute path to your PDF file." -ForegroundColor Yellow
     } else {
-        for ($i = 0; $i -lt [Math]::Min($foundPdfs.Count, 5); $i++) {
-            Write-Host "  $($i + 1). $($foundPdfs[$i])" -ForegroundColor Cyan
+        Write-Host "✅ Found $($foundPdfs.Count) PDF file(s):" -ForegroundColor Green
+        for ($i = 0; $i -lt [Math]::Min($foundPdfs.Count, 10); $i++) {
+            $fileSize = try { (Get-Item $foundPdfs[$i]).Length / 1KB } catch { 0 }
+            Write-Host "   $($i + 1). $($foundPdfs[$i]) ($([math]::Round($fileSize))KB)" -ForegroundColor Cyan
         }
-        if ($foundPdfs.Count -gt 5) {
-            Write-Host "  ... and $($foundPdfs.Count - 5) more files" -ForegroundColor Gray
+        if ($foundPdfs.Count -gt 10) {
+            Write-Host "   ... and $($foundPdfs.Count - 10) more files" -ForegroundColor Gray
         }
+        Write-Host ""
+        Write-Host "💡 Copy and paste one of the paths above, or enter a custom path." -ForegroundColor Yellow
     }
     
     Write-Host ""
-    $inputFile = Read-Host "Enter input PDF file path (copy from above or type custom path)"
-    $outputFile = Read-Host "Enter output PDF file path (or press Enter for default)"
+    $inputFile = Read-Host "📂 Enter input PDF file path"
+    
+    Write-Host ""
+    Write-Host "Output options:" -ForegroundColor Yellow
+    Write-Host "• Press Enter for default: MCL, Federal Law- Misconduct Analysis (2).pdf" -ForegroundColor Gray
+    Write-Host "• Or type a custom name (e.g., C:\Reports\UpdatedMCL.pdf)" -ForegroundColor Gray
+    $outputFile = Read-Host "📝 Enter output PDF file path (or press Enter for default)"
     
     if ([string]::IsNullOrWhiteSpace($outputFile)) {
         $outputFile = "MCL, Federal Law- Misconduct Analysis (2).pdf"
+        Write-Host "Using default output: $outputFile" -ForegroundColor Gray
     }
     
-    Write-Host "Processing PDF..." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "🔄 Processing PDF..." -ForegroundColor Green
+    Write-Host "Input:  $inputFile" -ForegroundColor Gray
+    Write-Host "Output: $outputFile" -ForegroundColor Gray
+    Write-Host ""
+    
     python update_pdf_links.py "$inputFile" "$outputFile"
     
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "PDF processing completed successfully!" -ForegroundColor Green
-        Write-Host "Output saved as: $outputFile" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "✅ PDF processing completed successfully!" -ForegroundColor Green
+        Write-Host "📁 Output saved as: $outputFile" -ForegroundColor Cyan
+        
+        # Show file info if it exists
+        if (Test-Path $outputFile) {
+            $fileInfo = Get-Item $outputFile
+            $fileSizeKB = [math]::Round($fileInfo.Length / 1KB)
+            Write-Host "📊 File size: $fileSizeKB KB" -ForegroundColor Gray
+        }
     } else {
-        Write-Host "PDF processing failed!" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "❌ PDF processing failed!" -ForegroundColor Red
+        Write-Host "💡 Check that:" -ForegroundColor Yellow
+        Write-Host "   • Input file path is correct" -ForegroundColor Gray
+        Write-Host "   • Python and PyPDF2 are installed" -ForegroundColor Gray
+        Write-Host "   • You have write permissions for the output location" -ForegroundColor Gray
     }
 }
 
