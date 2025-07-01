@@ -14,9 +14,9 @@ This guide explains how to run the automation scripts on Windows, both via the i
    ```powershell
    .\automation.ps1
    ```
-3. At the prompt, enter a number 1–7 (no extra characters or comments).
 
-   * **Example**: To extract env vars, type `1` and press **Enter**.
+3. At the prompt, enter a number 1–7 (no extra characters or comments).
+   - **Example**: To extract env vars, type `1` and press **Enter**.
 
 **Batch**
 
@@ -26,6 +26,7 @@ This guide explains how to run the automation scripts on Windows, both via the i
    ```bat
    automation.bat
    ```
+
 3. Enter your choice (1–7) and press **Enter**.
 
 > **Tip**: Do **not** include trailing `#` or comments when typing your selection.
@@ -44,12 +45,12 @@ You can skip the menu and invoke each script directly.
 cd frontend; npm install; cd ..\backend; npm install
 ```
 
-| Extract environment variables | `node extract-env.js`                                                   | Scans for hard‑coded keys and creates `.env` |
-| Clean up & restructure         | Run in Git Bash (or WSL): `bash cleanup-and-structure.sh`               | Windows PowerShell does not include `bash` by default. |
-| Run linting                   | `npm run lint`                                                           | Requires ESLint configured                 |
-| Format code                   | `npm run format`                                                         | Requires Prettier configured              |
-| Update PDF links              | `python update_pdf_links.py`                                             | Default input is `old.pdf`; output is `MCL, Federal Law- Misconduct Analysis (2).pdf` |
-| Exit                          | N/A                                                                       | Simply close the terminal window         |
+| Extract environment variables | `node extract-env.js` | Scans for hard‑coded keys and creates `.env` |
+| Clean up & restructure | Run in Git Bash (or WSL): `bash cleanup-and-structure.sh` | Windows PowerShell does not include `bash` by default. |
+| Run linting | `npm run lint` | Requires ESLint configured |
+| Format code | `npm run format` | Requires Prettier configured |
+| Update PDF links | `python update_pdf_links.py` | Default input is `old.pdf`; output is `MCL, Federal Law- Misconduct Analysis (2).pdf` |
+| Exit | N/A | Simply close the terminal window |
 
 ---
 
@@ -65,12 +66,13 @@ cd frontend; npm install; cd ..\backend; npm install
 
 - **`python update_pdf_links.py input.pdf output.pdf` fails**  
   • The script defaults to:
-    - **Input**: `old.pdf` in the project root.  
-    - **Output**: `MCL, Federal Law- Misconduct Analysis (2).pdf`.  
-  • To specify custom names, run:
-    ```powershell
-    python update_pdf_links.py path\to\your-old.pdf "path\to\MCL, Federal Law- Misconduct Analysis (2).pdf"
-    ```
+  - **Input**: `old.pdf` in the project root.
+  - **Output**: `MCL, Federal Law- Misconduct Analysis (2).pdf`.  
+    • To specify custom names, run:
+
+  ```powershell
+  python update_pdf_links.py path\to\your-old.pdf "path\to\MCL, Federal Law- Misconduct Analysis (2).pdf"
+  ```
 
 - **No environment variables found**  
   • Ensure your configuration files (e.g., `frontend/src/config.js`, `backend/config.js`) exist and contain assignments like `OPENAI_API_KEY = '...'`.
@@ -79,28 +81,33 @@ cd frontend; npm install; cd ..\backend; npm install
 
 ## 4. Recommended Setup Sequence
 
-1. **Install dependencies**:  
+1. **Install dependencies**:
+
    ```powershell
    cd frontend; npm install
    cd ..\backend; npm install
    ```
 
 2. **Clean up & restructure** (in Git Bash or WSL):
+
    ```bash
    bash cleanup-and-structure.sh
    ```
 
 3. **Extract environment variables**:
+
    ```powershell
    node extract-env.js
    ```
 
 4. **Run linting**:
+
    ```powershell
    npm run lint
    ```
 
 5. **Format code**:
+
    ```powershell
    npm run format
    ```
@@ -121,6 +128,7 @@ c:\Users\ssped\justice-dashboard\justice-dashboard\  ← Run scripts from here
 ```
 
 **Quick verification**:
+
 ```powershell
 # Check if you're in the right directory
 ls *.js  # Should show extract-env.js, check-files.js, etc.

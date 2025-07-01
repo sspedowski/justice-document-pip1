@@ -16,7 +16,7 @@ const targetFiles = [
   // Additional paths based on actual project structure
   '../client/firebase.js',
   '../server/server.js',
-  '../client/script.js'
+  '../client/script.js',
 ];
 
 let envVars = new Map();
