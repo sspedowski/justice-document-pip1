@@ -1,16 +1,17 @@
 import { describe, test, expect, beforeEach, jest } from '@jest/globals';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Dashboard from '../Dashboard';
+
 // Mock Firebase
-jest.mock('../firebase', () => ({
+jest.mock('../frontend/firebase', () => ({
   db: {
     collection: jest.fn(),
   },
 }));
+
 // Mock fetch for API calls
 global.fetch = jest.fn();
-describe('Dashboard Component', () => {
+
+describe('Justice Dashboard Tests', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
