@@ -52,7 +52,7 @@ function Show-Menu {
     Write-Host "TIP: Enter only the number, no extra text" -ForegroundColor Gray
 }
 
-function Extract-Environment {
+function Get-Environment {
     Write-Host "Running environment variable extraction..." -ForegroundColor Green
     node extract-env.js
     if ($LASTEXITCODE -eq 0) {
