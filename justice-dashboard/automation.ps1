@@ -62,7 +62,7 @@ function Get-Environment {
     }
 }
 
-function Cleanup-Project {
+function Reset-Project {
     Write-Host "Running project cleanup and restructuring..." -ForegroundColor Green
     
     # Check if Git Bash is available
@@ -97,7 +97,7 @@ function Cleanup-Project {
     }
 }
 
-function Run-Linting {
+function Invoke-Linting {
     Write-Host "Running ESLint..." -ForegroundColor Green
     npm run lint
     if ($LASTEXITCODE -eq 0) {
