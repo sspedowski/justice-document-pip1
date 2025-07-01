@@ -5,16 +5,44 @@ Write-Host "Justice Dashboard Automation Scripts" -ForegroundColor Cyan
 Write-Host "====================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Quick system check
+function Test-Prerequisites {
+    Write-Host "Checking prerequisites..." -ForegroundColor Yellow
+    
+    $nodeVersion = try { node --version } catch { $null }
+    $pythonVersion = try { python --version } catch { $null }
+    $npmVersion = try { npm --version } catch { $null }
+    
+    if ($nodeVersion) {
+        Write-Host "✅ Node.js: $nodeVersion" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Node.js not found - install from nodejs.org" -ForegroundColor Red
+    }
+    
+    if ($npmVersion) {
+        Write-Host "✅ npm: v$npmVersion" -ForegroundColor Green
+    }
+    
+    if ($pythonVersion) {
+        Write-Host "✅ Python: $pythonVersion" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Python not found - install from python.org" -ForegroundColor Red
+    }
+    
+    Write-Host ""
+}
+
 function Show-Menu {
     Write-Host "Please select an option:" -ForegroundColor Yellow
-    Write-Host "1. Extract environment variables"
-    Write-Host "2. Clean up and restructure project"
-    Write-Host "3. Run linting"
-    Write-Host "4. Format code"
-    Write-Host "5. Update PDF links"
-    Write-Host "6. Install dependencies"
-    Write-Host "7. Exit"
+    Write-Host "1. Extract environment variables" -ForegroundColor White
+    Write-Host "2. Clean up and restructure project" -ForegroundColor White
+    Write-Host "3. Run linting" -ForegroundColor White
+    Write-Host "4. Format code" -ForegroundColor White
+    Write-Host "5. Update PDF links" -ForegroundColor White
+    Write-Host "6. Install dependencies" -ForegroundColor White
+    Write-Host "7. Exit" -ForegroundColor White
     Write-Host ""
+    Write-Host "💡 Tip: Enter only the number (1-7), no extra text" -ForegroundColor Gray
 }
 
 function Extract-Environment {
@@ -138,6 +166,9 @@ function Install-Dependencies {
     
     Write-Host "Dependencies installation completed!" -ForegroundColor Green
 }
+
+# Run prerequisite check on startup
+Test-Prerequisites
 
 # Main loop
 do {
