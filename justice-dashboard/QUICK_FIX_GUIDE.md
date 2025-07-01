@@ -118,9 +118,12 @@ justice-dashboard/
 When the automation menu asks for file paths, here's exactly what to type:
 
 ### Input PDF Path Examples
+
 Copy and paste one of these (your actual files):
+
 ```
 server\uploads\1751231212352-2.21.24_Referee_Recommendation_and_Order_RE_Child_Support__1_.pdf
 server\uploads\1751167951959-1.5.23_HOLIDAY_LAWYER_DISCUSS_2023.pdf
 server\uploads\1751231212020-2.16.24_Plaintiff_s_Response_and_POS_SUPPORT.pdf
 server\uupload
+```
