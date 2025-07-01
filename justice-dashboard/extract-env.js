@@ -4,19 +4,25 @@ console.log('Extracting environment variables from configuration files...');
 
 // Target files that might contain hard-coded credentials
 const targetFiles = [
-  'frontend/src/config.js',
-  'backend/config.js',
+  // Current project structure
+  'frontend/firebase.js',
+  'backend/server.js', 
+  // Check for files that were moved to frontend/backend
+  'frontend/script.js',
+  'frontend/index.html',
+  'backend/package.json',
+  // Original locations (if they still exist)
   'client/firebase.js',
   'server/server.js',
   'client/script.js',
-  // Check current directory structure
-  './client/firebase.js',
-  './server/server.js',
-  './client/script.js',
-  // Additional paths based on actual project structure
+  // Check parent directory structure
   '../client/firebase.js',
-  '../server/server.js',
+  '../server/server.js', 
   '../client/script.js',
+  // Also check main package.json and config files
+  'package.json',
+  'vite.config.js',
+  'tailwind.config.js'
 ];
 
 let envVars = new Map();
