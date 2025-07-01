@@ -113,25 +113,14 @@ justice-dashboard/
 }
 ```
 
-## 💡 Pro Tips
+## 📋 PDF Processing - What to Enter
 
-1. **Always run from the correct directory**:
+When the automation menu asks for file paths, here's exactly what to type:
 
-   ```
-   c:\Users\ssped\justice-dashboard\justice-dashboard\  ← Here
-   ```
-
-2. **Use Tab completion** for file paths to avoid typos
-
-3. **Check what PDFs you have**:
-
-   ```powershell
-   ls server\uploads\*.pdf
-   ```
-
-4. **Test before processing important files**:
-   ```powershell
-   npm run test-pdf
-   ```
-
-Your automation setup is now Windows-friendly and ready to use! 🚀
+### Input PDF Path Examples
+Copy and paste one of these (your actual files):
+```
+server\uploads\1751231212352-2.21.24_Referee_Recommendation_and_Order_RE_Child_Support__1_.pdf
+server\uploads\1751167951959-1.5.23_HOLIDAY_LAWYER_DISCUSS_2023.pdf
+server\uploads\1751231212020-2.16.24_Plaintiff_s_Response_and_POS_SUPPORT.pdf
+server\uupload

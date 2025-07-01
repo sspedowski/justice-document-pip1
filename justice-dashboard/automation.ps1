@@ -83,7 +83,35 @@ function Format-Code {
 }
 
 function Update-PDFLinks {
-    $inputFile = Read-Host "Enter input PDF file path"
+    Write-Host "Available PDF files:" -ForegroundColor Yellow
+    
+    # Check for PDF files in common locations
+    $pdfPaths = @("server\uploads", "uploads", ".")
+    $foundPdfs = @()
+    
+    foreach ($path in $pdfPaths) {
+        if (Test-Path $path) {
+            $pdfs = Get-ChildItem "$path\*.pdf" -ErrorAction SilentlyContinue
+            foreach ($pdf in $pdfs) {
+                $foundPdfs += Join-Path $path $pdf.Name
+            }
+        }
+    }
+    
+    if ($foundPdfs.Count -eq 0) {
+        Write-Host "No PDF files found in common locations." -ForegroundColor Red
+        Write-Host "Expected locations: server\uploads\, uploads\, current directory" -ForegroundColor Yellow
+    } else {
+        for ($i = 0; $i -lt [Math]::Min($foundPdfs.Count, 5); $i++) {
+            Write-Host "  $($i + 1). $($foundPdfs[$i])" -ForegroundColor Cyan
+        }
+        if ($foundPdfs.Count -gt 5) {
+            Write-Host "  ... and $($foundPdfs.Count - 5) more files" -ForegroundColor Gray
+        }
+    }
+    
+    Write-Host ""
+    $inputFile = Read-Host "Enter input PDF file path (copy from above or type custom path)"
     $outputFile = Read-Host "Enter output PDF file path (or press Enter for default)"
     
     if ([string]::IsNullOrWhiteSpace($outputFile)) {
@@ -95,6 +123,7 @@ function Update-PDFLinks {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "PDF processing completed successfully!" -ForegroundColor Green
+        Write-Host "Output saved as: $outputFile" -ForegroundColor Cyan
     } else {
         Write-Host "PDF processing failed!" -ForegroundColor Red
     }
