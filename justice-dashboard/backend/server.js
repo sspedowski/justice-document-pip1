@@ -370,6 +370,27 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Error reporting endpoint
+app.post('/api/report-error', express.json(), async (req, res) => {
+  try {
+    const { errorMessage, documentId, context } = req.body;
+    
+    // Log the error for tracking
+    console.error('Error Report:', {
+      timestamp: new Date().toISOString(),
+      errorMessage,
+      documentId,
+      context
+    });
+    // Here you could also save to database or send notifications
+    
+    res.json({ success: true, message: 'Error reported successfully' });
+  } catch (error) {
+    console.error('Error handling error report:', error);
+    res.status(500).json({ success: false, error: 'Failed to report error' });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
