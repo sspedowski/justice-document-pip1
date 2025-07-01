@@ -34,7 +34,7 @@ function log(message, color = 'reset') {
 
 function findPDFFiles() {
   const foundPdfs = [];
-  let accessErrors = [];
+
   for (const location of COMMON_PDF_LOCATIONS) {
     if (fs.existsSync(location)) {
       try {
