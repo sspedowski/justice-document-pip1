@@ -7,7 +7,7 @@ describe('Justice Dashboard', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
-    
+
     // Reset any global mocks
     if (global.fetch) {
       global.fetch.mockClear();
@@ -55,9 +55,9 @@ describe('Justice Dashboard', () => {
         'DASH_PASS',
         'VITE_FIREBASE_API_KEY',
         'VITE_FIREBASE_AUTH_DOMAIN',
-        'VITE_FIREBASE_PROJECT_ID'
+        'VITE_FIREBASE_PROJECT_ID',
       ];
-      
+
       // Just verify the array exists and has the expected structure
       expect(requiredEnvVars).toHaveLength(5);
       expect(requiredEnvVars).toContain('DASH_USER');
@@ -68,12 +68,15 @@ describe('Justice Dashboard', () => {
     test('should validate PDF file types', () => {
       const validFile = { name: 'test.pdf', type: 'application/pdf' };
       const invalidFile = { name: 'test.txt', type: 'text/plain' };
-      
+
       // Simple validation function
-      const isValidPDF = (file) => {
-        return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      const isValidPDF = file => {
+        return (
+          file.type === 'application/pdf' ||
+          file.name.toLowerCase().endsWith('.pdf')
+        );
       };
-      
+
       expect(isValidPDF(validFile)).toBe(true);
       expect(isValidPDF(invalidFile)).toBe(false);
     });
@@ -81,11 +84,11 @@ describe('Justice Dashboard', () => {
     test('should handle file size validation', () => {
       const smallFile = { size: 1024 * 1024 }; // 1MB
       const largeFile = { size: 100 * 1024 * 1024 }; // 100MB
-      
+
       const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-      
-      const isValidSize = (file) => file.size <= MAX_FILE_SIZE;
-      
+
+      const isValidSize = file => file.size <= MAX_FILE_SIZE;
+
       expect(isValidSize(smallFile)).toBe(true);
       expect(isValidSize(largeFile)).toBe(false);
     });
