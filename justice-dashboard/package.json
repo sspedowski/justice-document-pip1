@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest",
+    "test": "jest --config jest.config.js",
     "extract-env": "node extract-env.js",
     "cleanup": "bash cleanup-and-structure.sh",
     "cleanup:windows": "powershell -ExecutionPolicy Bypass -File cleanup-and-structure.ps1",
