@@ -49,7 +49,7 @@ justice-dashboard/
 │   ├── index-working.html     # Development version with CDN fallback
 │   ├── script.js              # Application logic
 │   └── styles.css             # Source Tailwind CSS
-├── justice-server/             # Optional server (for AI features)
+├── backend/                    # Backend server (for AI features)
 │   └── server.js              # Express server with AI summarization
 ├── package.json               # Dependencies and build scripts
 ├── postcss.config.js          # PostCSS configuration
@@ -126,7 +126,7 @@ If you want to use the optional server for AI-powered document summarization:
 2. **Start the server**:
 
    ```powershell
-   node justice-server/server.js
+   node backend/server.js
    ```
 
 3. **Open the application** at `http://localhost:3000`
