@@ -53,7 +53,7 @@ function findPDFFiles() {
           });
         }
       } catch (error) {
-        // Ignore permission errors
+        // Ignore permission errors and continue scanning
       }
     }
   }
