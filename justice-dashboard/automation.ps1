@@ -51,6 +51,7 @@ function Show-Menu {
     Write-Host ""
     Write-Host "TIP: Enter only the number, no extra text" -ForegroundColor Gray
 }
+}
 
 function Extract-Environment {
     Write-Host "Running environment variable extraction..." -ForegroundColor Green
