@@ -1,12 +1,17 @@
 import { defineConfig } from 'vite';
-
 export default defineConfig({
   root: 'frontend',
   server: {
     port: 5173,
     proxy: {
-      '/upload': 'http://localhost:3000',
-      '/api': 'http://localhost:3000',
+      '/upload': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
     },
   },
   build: {
