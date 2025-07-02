@@ -196,7 +196,7 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
     const response = await fetch(
       `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(query)}&appid=${WOLFRAM_ALPHA_API_KEY}&format=plaintext&output=JSON&podtitle=Result&podtitle=Solution&podtitle=Timeline&podtitle=Statistics`
     );
-    
+
     if (!response.ok) {
       if (response.status === 501) {
         // API couldn't interpret the input - this is normal for some queries
@@ -212,7 +212,7 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
         `Wolfram Alpha API error: ${response.status} ${response.statusText}`
       );
     }
-    
+
     // Try parsing as JSON first, fallback to text if that fails
     let data;
     const contentType = response.headers.get('content-type');
@@ -245,7 +245,7 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
         };
       }
     }
-    
+
     return {
       success: false,
       result: 'No analysis results returned from Wolfram Alpha',
