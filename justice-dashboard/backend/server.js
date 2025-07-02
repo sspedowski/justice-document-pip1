@@ -194,9 +194,9 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
   try {
     // Use the new LLM API endpoint with simplified parameters
     const response = await fetch(
-      `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(query)}&appid=${WOLFRAM_ALPHA_API_KEY}&maxchars=2000`
+      `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(query)}&appid=${WOLFRAM_ALPHA_API_KEY}&format=plaintext&output=JSON&podtitle=Result&podtitle=Solution&podtitle=Timeline&podtitle=Statistics`
     );
-
+    
     if (!response.ok) {
       if (response.status === 501) {
         // API couldn't interpret the input - this is normal for some queries
@@ -212,19 +212,40 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
         `Wolfram Alpha API error: ${response.status} ${response.statusText}`
       );
     }
-
-    const data = await response.text(); // LLM API returns plain text, not JSON
-
-    if (data && data.trim().length > 0) {
-      return {
-        success: true,
-        result: data.trim(),
-        analysisType,
-        query: query,
-        apiVersion: 'LLM-API-v1',
-      };
+    
+    // Try parsing as JSON first, fallback to text if that fails
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+      if (data.queryresult && data.queryresult.pods) {
+        const relevantData = data.queryresult.pods
+          .filter(pod => pod.title && pod.subpods && pod.subpods[0].plaintext)
+          .map(pod => ({
+            title: pod.title,
+            content: pod.subpods[0].plaintext,
+          }));
+        return {
+          success: true,
+          result: relevantData,
+          analysisType,
+          query,
+        };
+      }
+    } else {
+      // Handle plaintext response
+      data = await response.text();
+      if (data && data.trim().length > 0) {
+        return {
+          success: true,
+          result: data.trim(),
+          analysisType,
+          query,
+          apiVersion: 'plaintext',
+        };
+      }
     }
-
+    
     return {
       success: false,
       result: 'No analysis results returned from Wolfram Alpha',
@@ -232,7 +253,7 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
       query,
     };
   } catch (error) {
-    console.error('Wolfram Alpha LLM API error:', error.message);
+    console.error('Wolfram Alpha API error:', error.message);
     return {
       success: false,
       result: `Analysis failed: ${error.message}`,
