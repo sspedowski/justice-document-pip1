@@ -294,7 +294,7 @@ async function tryLogin(username, password) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-    
+
     if (r.ok) {
       console.log('Login successful');
       return true;
@@ -609,10 +609,10 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Login button clicked');
       const username = document.getElementById('userInput').value;
       const password = document.getElementById('passInput').value;
-      
+
       console.log('Username entered:', username);
       console.log('Password length:', password.length);
-      
+
       if (!username || !password) {
         if (errLabel) {
           errLabel.textContent = 'Please enter both username and password';
@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
       }
-      
+
       const ok = await tryLogin(username, password);
       if (ok) {
         console.log('Login successful, showing dashboard');
@@ -630,24 +630,25 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         console.log('Login failed, showing error');
         if (errLabel) {
-          errLabel.textContent = 'Invalid username or password. Try: admin / justice2025';
+          errLabel.textContent =
+            'Invalid username or password. Try: admin / justice2025';
           errLabel.classList.remove('hidden');
         }
       }
     });
   }
-  
+
   // Add Enter key support for login
   const userInput = document.getElementById('userInput');
   const passInput = document.getElementById('passInput');
-  
+
   if (userInput && passInput) {
-    const handleEnterKey = (event) => {
+    const handleEnterKey = event => {
       if (event.key === 'Enter') {
         btn.click();
       }
     };
-    
+
     userInput.addEventListener('keypress', handleEnterKey);
     passInput.addEventListener('keypress', handleEnterKey);
   }
