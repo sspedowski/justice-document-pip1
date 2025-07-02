@@ -485,56 +485,73 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
         }
       }
 
+      // Process Wolfram Batch Format
       async function processWolframBatch() {
-        const queriesText = document.getElementById('wolframBatchQueries').value;
+        const wolframText = document.getElementById('wolframBatchQueries').value;
         const resultsDiv = document.getElementById('batchResults');
 
-        if (!queriesText.trim()) {
-          resultsDiv.innerHTML =
-            '<div class="error">Please enter some queries in Wolfram format</div>';
+        if (!wolframText.trim()) {
+          resultsDiv.innerHTML = '<div class="error">Please enter Wolfram batch format queries</div>';
           return;
         }
 
-        const queries = queriesText
-          .trim()
-          .split('\n')
-          .filter(q => q.trim());
-        resultsDiv.innerHTML = `<div class="status-pending">Processing ${queries.length} Wolfram batch queries...</div>`;
-
         try {
+          // Parse JSONL format (one JSON object per line)
+          const lines = wolframText.trim().split('\n');
+          const queries = [];
+          
+          lines.forEach((line, index) => {
+            try {
+              const parsed = JSON.parse(line);
+              if (parsed.messages && parsed.messages[0] && parsed.messages[0].content) {
+                queries.push(parsed.messages[0].content);
+              }
+            } catch (e) {
+              console.warn(`Failed to parse line ${index + 1}:`, e);
+            }
+          });
+
+          if (queries.length === 0) {
+            resultsDiv.innerHTML = '<div class="error">No valid queries found in Wolfram format</div>';
+            return;
+          }
+
+          resultsDiv.innerHTML = `<div class="status-pending">Processing ${queries.length} Wolfram-style queries...</div>`;
+
           const response = await fetch('/api/batch-analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ queries, analysisType: 'wolfram-batch' }),
+            body: JSON.stringify({ 
+              queries, 
+              analysisType: 'wolfram-batch-format',
+              originalFormat: 'jsonl'
+            }),
           });
 
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
           const data = await response.json();
           let resultsHTML = `
-            <div class="success">Wolfram batch processing completed!</div>
+            <div class="success">Wolfram batch format processed!</div>
             <h3>Summary:</h3>
             <ul>
-              <li><strong>Total Queries:</strong> ${data.totalQueries}</li>
+              <li><strong>Extracted Queries:</strong> ${queries.length}</li>
               <li><strong>Successful:</strong> ${data.summary.successful}</li>
               <li><strong>Failed:</strong> ${data.summary.failed}</li>
               <li><strong>Execution Time:</strong> ${data.summary.executionTime}ms</li>
             </ul>
-            <h3>Detailed Results:</h3>
-          `;
-
-          data.results.forEach((result, index) => {
-            const statusClass =
-              result.status === 'success' ? 'success' : 'error';
-            resultsHTML += `
-              <div class="section">
-                <h4>Query ${result.queryIndex}: <span class="${statusClass}">${result.status}</span></h4>
-                <p><strong>Query:</strong> ${result.query}</p>
-                <div class="result">${JSON.stringify(result.wolfram, null, 2)}</div>
-                ${result.aiInterpretation ? `<p><strong>AI Context:</strong> ${result.aiInterpretation}</p>` : ''}
+            <h3>Comparison with Your Original Format:</h3>
+            <div class="grid">
+              <div>
+                <h4>Your Original Queries:</h4>
+                <div class="result">${queries.join('\n')}</div>
               </div>
-            `;
-          });
+              <div>
+                <h4>Processing Results:</h4>
+                <div class="result">${JSON.stringify(data.results.slice(0, 3), null, 2)}${data.results.length > 3 ? '\n... and more' : ''}</div>
+              </div>
+            </div>
+          `;
 
           resultsDiv.innerHTML = resultsHTML;
         } catch (error) {
