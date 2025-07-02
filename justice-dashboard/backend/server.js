@@ -719,6 +719,230 @@ app.post('/api/test-integrations', express.json(), async (req, res) => {
   }
 });
 
+// Batch Wolfram Alpha analysis endpoint (inspired by your batch file)
+app.post('/api/batch-analyze', express.json(), async (req, res) => {
+  try {
+    const { queries, analysisType = 'legal-batch' } = req.body;
+
+    if (!queries || !Array.isArray(queries)) {
+      return res.status(400).json({
+        error: 'Queries array required',
+        example: {
+          queries: [
+            'Calculate duration between January 15, 2023 and March 20, 2023',
+            'Statistical analysis of 5 violations over 6 months',
+            'Timeline analysis of court dates',
+          ],
+        },
+      });
+    }
+
+    const results = {
+      timestamp: new Date().toISOString(),
+      analysisType,
+      totalQueries: queries.length,
+      results: [],
+      summary: {
+        successful: 0,
+        failed: 0,
+        executionTime: 0,
+      },
+    };
+
+    const startTime = Date.now();
+
+    // Process each query with Wolfram Alpha
+    for (let i = 0; i < queries.length; i++) {
+      const query = queries[i];
+      console.log(`Processing batch query ${i + 1}/${queries.length}: ${query}`);
+
+      try {
+        const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
+
+        // Also get OpenAI interpretation if available
+        let aiInterpretation = null;
+        if (openai && process.env.OPENAI_API_KEY) {
+          try {
+            const aiResponse = await openai.chat.completions.create({
+              model: 'gpt-3.5-turbo',
+              messages: [
+                {
+                  role: 'user',
+                  content: `Interpret this computational query in legal context: "${query}". Provide a brief explanation of its relevance to legal document analysis.`,
+                },
+              ],
+              max_tokens: 100,
+              temperature: 0.3,
+            });
+            aiInterpretation = aiResponse.choices[0].message.content.trim();
+          } catch (aiError) {
+            console.log(`AI interpretation failed for query ${i + 1}:`, aiError.message);
+          }
+        }
+
+        results.results.push({
+          queryIndex: i + 1,
+          query,
+          wolfram: wolframResult,
+          aiInterpretation,
+          status: wolframResult.success ? 'success' : 'partial',
+        });
+
+        if (wolframResult.success) {
+          results.summary.successful++;
+        } else {
+          results.summary.failed++;
+        }
+      } catch (error) {
+        console.error(`Batch query ${i + 1} failed:`, error.message);
+        results.results.push({
+          queryIndex: i + 1,
+          query,
+          wolfram: { success: false, result: `Processing failed: ${error.message}`, analysisType: 'error' },
+          aiInterpretation: null,
+          status: 'failed',
+        });
+        results.summary.failed++;
+      }
+
+      // Add small delay to avoid overwhelming APIs
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    results.summary.executionTime = Date.now() - startTime;
+
+    console.log('Batch analysis complete:', {
+      total: results.totalQueries,
+      successful: results.summary.successful,
+      failed: results.summary.failed,
+      executionTime: `${results.summary.executionTime}ms`,
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error('Batch analysis error:', error);
+    res.status(500).json({
+      error: 'Batch analysis failed: ' + error.message,
+    });
+  }
+});
+
+// Load and process batch file endpoint
+app.post('/api/load-batch-file', upload.single('batchFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No batch file uploaded' });
+    }
+
+    const filePath = req.file.path;
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+
+    // Parse JSONL format (each line is a separate JSON object)
+    const lines = fileContent.trim().split('\n');
+    const queries = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      try {
+        const lineData = JSON.parse(lines[i]);
+
+        // Extract query from OpenAI format or direct string
+        let query;
+        if (lineData.messages && lineData.messages[0] && lineData.messages[0].content) {
+          query = lineData.messages[0].content;
+        } else if (typeof lineData === 'string') {
+          query = lineData;
+        } else if (lineData.query) {
+          query = lineData.query;
+        } else {
+          console.log(`Skipping line ${i + 1}: unable to extract query`);
+          continue;
+        }
+
+        queries.push(query);
+      } catch (parseError) {
+        console.log(`Error parsing line ${i + 1}:`, parseError.message);
+        continue;
+      }
+    }
+
+    if (queries.length === 0) {
+      return res.status(400).json({
+        error: 'No valid queries found in batch file',
+        supportedFormats: [
+          'JSONL with OpenAI message format',
+          'JSONL with direct query strings',
+          'JSONL with {query: "..."} objects',
+        ],
+      });
+    }
+
+    // Process the extracted queries
+    const batchResult = await processQueriesBatch(queries, 'file-upload');
+
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    res.json({
+      message: `Processed batch file with ${queries.length} queries`,
+      extractedQueries: queries,
+      results: batchResult,
+    });
+  } catch (error) {
+    console.error('Batch file processing error:', error);
+    res.status(500).json({
+      error: 'Batch file processing failed: ' + error.message,
+    });
+  }
+});
+
+// Helper function to process queries batch
+async function processQueriesBatch(queries, analysisType) {
+  // Use the same logic as the batch-analyze endpoint
+  const requestBody = { queries, analysisType };
+
+  // Simulate internal API call
+  return new Promise(async (resolve) => {
+    const results = {
+      timestamp: new Date().toISOString(),
+      analysisType,
+      totalQueries: queries.length,
+      results: [],
+      summary: { successful: 0, failed: 0, executionTime: 0 },
+    };
+
+    const startTime = Date.now();
+
+    for (let i = 0; i < queries.length; i++) {
+      const query = queries[i];
+      try {
+        const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
+        results.results.push({
+          queryIndex: i + 1,
+          query,
+          wolfram: wolframResult,
+          status: wolframResult.success ? 'success' : 'partial',
+        });
+
+        if (wolframResult.success) results.summary.successful++;
+        else results.summary.failed++;
+      } catch (error) {
+        results.results.push({
+          queryIndex: i + 1,
+          query,
+          wolfram: { success: false, result: error.message, analysisType: 'error' },
+          status: 'failed',
+        });
+        results.summary.failed++;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    results.summary.executionTime = Date.now() - startTime;
+    resolve(results);
+  });
+}
+
 // Error reporting endpoint
 app.post('/api/report-error', express.json(), async (req, res) => {
   try {
