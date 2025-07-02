@@ -205,9 +205,11 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           placeholder='{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Calculate duration between January 15, 2023 and March 20, 2023"}]}
 {"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Statistical analysis of 5 constitutional violations"}]}
 {"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates"}]}'
-        >{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Calculate duration between January 15, 2023 and March 20, 2023"}]}
+        >
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Calculate duration between January 15, 2023 and March 20, 2023"}]}
 {"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Statistical analysis of 5 constitutional violations over 6 months"}]}
-{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates: 1/15/2023, 2/20/2023, 3/15/2023"}]}</textarea>
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates: 1/15/2023, 2/20/2023, 3/15/2023"}]}</textarea
+        >
         <button onclick="processWolframBatch()">Process Wolfram Format</button>
 
         <div id="batchResults"></div>
@@ -487,11 +489,14 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
 
       // Process Wolfram Batch Format
       async function processWolframBatch() {
-        const wolframText = document.getElementById('wolframBatchQueries').value;
+        const wolframText = document.getElementById(
+          'wolframBatchQueries'
+        ).value;
         const resultsDiv = document.getElementById('batchResults');
 
         if (!wolframText.trim()) {
-          resultsDiv.innerHTML = '<div class="error">Please enter Wolfram batch format queries</div>';
+          resultsDiv.innerHTML =
+            '<div class="error">Please enter Wolfram batch format queries</div>';
           return;
         }
 
@@ -499,11 +504,15 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           // Parse JSONL format (one JSON object per line)
           const lines = wolframText.trim().split('\n');
           const queries = [];
-          
+
           lines.forEach((line, index) => {
             try {
               const parsed = JSON.parse(line);
-              if (parsed.messages && parsed.messages[0] && parsed.messages[0].content) {
+              if (
+                parsed.messages &&
+                parsed.messages[0] &&
+                parsed.messages[0].content
+              ) {
                 queries.push(parsed.messages[0].content);
               }
             } catch (e) {
@@ -512,7 +521,8 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           });
 
           if (queries.length === 0) {
-            resultsDiv.innerHTML = '<div class="error">No valid queries found in Wolfram format</div>';
+            resultsDiv.innerHTML =
+              '<div class="error">No valid queries found in Wolfram format</div>';
             return;
           }
 
@@ -521,10 +531,10 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           const response = await fetch('/api/batch-analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              queries, 
+            body: JSON.stringify({
+              queries,
               analysisType: 'wolfram-batch-format',
-              originalFormat: 'jsonl'
+              originalFormat: 'jsonl',
             }),
           });
 
