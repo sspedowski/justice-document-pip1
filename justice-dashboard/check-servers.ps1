@@ -18,7 +18,7 @@ try {
 } catch {
     Write-Host "❌ Backend Server: NOT RUNNING" -ForegroundColor Red
     Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Gray
-    Write-Host "   💡 To start: cd backend && npm start" -ForegroundColor Cyan
+    Write-Host "   💡 To start: cd backend; npm start" -ForegroundColor Cyan
 }
 
 Write-Host ""
@@ -37,7 +37,7 @@ try {
 } catch {
     Write-Host "❌ Frontend Server: NOT RUNNING" -ForegroundColor Red
     Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Gray
-    Write-Host "   💡 To start: cd frontend && npm run dev" -ForegroundColor Cyan
+    Write-Host "   💡 To start: cd frontend; npm run dev" -ForegroundColor Cyan
 }
 
 Write-Host ""
