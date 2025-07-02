@@ -7,6 +7,10 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
 
+// API Configurations
+const WOLFRAM_ALPHA_API_KEY = process.env.WOLFRAM_ALPHA_API_KEY;
+const WOLFRAM_ALPHA_BASE_URL = 'https://api.wolframalpha.com/v2/query';
+
 // Try to import OpenAI, fallback if not available
 let OpenAI;
 try {
@@ -175,6 +179,202 @@ async function performOCR(filePath) {
       }
     }
   }
+}
+
+// Wolfram Alpha analysis function
+async function analyzeWithWolfram(query, analysisType = 'general') {
+  if (!WOLFRAM_ALPHA_API_KEY) {
+    return {
+      success: false,
+      result: 'Wolfram Alpha analysis unavailable (no API key)',
+      analysisType,
+    };
+  }
+
+  try {
+    const response = await fetch(
+      `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(
+        query
+      )}&appid=${WOLFRAM_ALPHA_API_KEY}&format=plaintext&output=JSON&podtitle=Result&podtitle=Solution&podtitle=Timeline&podtitle=Statistics`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Wolfram Alpha API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.queryresult && data.queryresult.pods) {
+      const relevantData = data.queryresult.pods
+        .filter(
+          (pod) =>
+            pod.title && pod.subpods && pod.subpods[0].plaintext
+        )
+        .map((pod) => ({
+          title: pod.title,
+          content: pod.subpods[0].plaintext,
+        }));
+
+      return {
+        success: true,
+        result: relevantData,
+        analysisType,
+        query: query,
+      };
+    }
+
+    return {
+      success: false,
+      result: 'No relevant analysis found',
+      analysisType,
+    };
+  } catch (error) {
+    console.error('Wolfram Alpha API error:', error.message);
+    return {
+      success: false,
+      result: `Analysis failed: ${error.message}`,
+      analysisType,
+    };
+  }
+}
+
+// Enhanced document analysis combining OpenAI and Wolfram Alpha
+async function generateEnhancedAnalysis(text, fileName) {
+  const results = {
+    timestamp: new Date().toISOString(),
+    fileName,
+    analysis: {
+      aiSummary: '',
+      legalAnalysis: '',
+      timelineAnalysis: '',
+      statisticalAnalysis: '',
+      keyEntities: [],
+    },
+    wolfram: {
+      dateAnalysis: null,
+      numericalAnalysis: null,
+      patternAnalysis: null,
+    },
+    confidence: {
+      overall: 0,
+      aiSummary: 0,
+      wolframAnalysis: 0,
+    },
+  };
+
+  // OpenAI Legal Analysis
+  if (openai) {
+    try {
+      // Main legal summary
+      const summaryResponse = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'user',
+            content: `Analyze this legal document and provide:
+1. A brief summary (2-3 sentences)
+2. Key legal issues identified
+3. Important dates and timeline
+4. Parties involved
+5. Potential constitutional or statutory violations
+
+Document: ${text.substring(0, 3000)}`,
+          },
+        ],
+        max_tokens: 300,
+        temperature: 0.3,
+      });
+
+      results.analysis.aiSummary = summaryResponse.choices[0].message.content.trim();
+      results.confidence.aiSummary = 0.85;
+
+      // Extract key entities
+      const entityResponse = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'user',
+            content: `Extract key entities from this legal document. Return as JSON array with fields: name, type (person/organization/date/statute), relevance. Document: ${text.substring(
+              0,
+              2000
+            )}`,
+          },
+        ],
+        max_tokens: 200,
+        temperature: 0.1,
+      });
+
+      try {
+        results.analysis.keyEntities = JSON.parse(
+          entityResponse.choices[0].message.content.trim()
+        );
+      } catch (parseError) {
+        results.analysis.keyEntities = [
+          { name: 'Entity extraction failed', type: 'error', relevance: 'low' },
+        ];
+      }
+    } catch (error) {
+      console.error('OpenAI API error:', error.message);
+      results.analysis.aiSummary = `AI analysis failed: ${error.message}`;
+      results.confidence.aiSummary = 0;
+    }
+  }
+
+  // Wolfram Alpha Analyses
+  try {
+    // Date and timeline analysis
+    const dateMatches = text.match(
+      /\b\d{1,2}\/\d{1,2}\/\d{4}\b|\b\d{4}-\d{2}-\d{2}\b|\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/gi
+    );
+    if (dateMatches && dateMatches.length > 0) {
+      const dateQuery = `timeline analysis of dates: ${dateMatches
+        .slice(0, 5)
+        .join(', ')}`;
+      results.wolfram.dateAnalysis = await analyzeWithWolfram(
+        dateQuery,
+        'timeline'
+      );
+    }
+
+    // Numerical data analysis
+    const numbers = text.match(
+      /\$[\d,]+\.?\d*|\b\d+\.?\d*\s*(days|months|years|percent|%)\b/gi
+    );
+    if (numbers && numbers.length > 0) {
+      const numberQuery = `statistical analysis of: ${numbers
+        .slice(0, 5)
+        .join(', ')}`;
+      results.wolfram.numericalAnalysis = await analyzeWithWolfram(
+        numberQuery,
+        'statistical'
+      );
+    }
+
+    // Pattern analysis for legal terms
+    const legalTerms = text.match(
+      /\b(due process|constitutional|violation|statute|amendment|rights?|hearing|evidence|testimony)\b/gi
+    );
+    if (legalTerms && legalTerms.length > 0) {
+      const patternQuery = `frequency analysis of legal terms: ${Array.from(
+        new Set(legalTerms.map((t) => t.toLowerCase()))
+      ).join(', ')}`;
+      results.wolfram.patternAnalysis = await analyzeWithWolfram(
+        patternQuery,
+        'pattern'
+      );
+    }
+
+    results.confidence.wolframAnalysis = 0.75;
+  } catch (error) {
+    console.error('Wolfram Alpha analysis error:', error.message);
+    results.confidence.wolframAnalysis = 0;
+  }
+
+  // Calculate overall confidence
+  results.confidence.overall =
+    (results.confidence.aiSummary + results.confidence.wolframAnalysis) / 2;
+
+  return results;
 }
 
 // OpenAI summarization function
@@ -370,6 +570,149 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Enhanced analysis endpoint with OpenAI + Wolfram Alpha integration
+app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    console.log('Enhanced analysis for file:', req.file.originalname);
+    const filePath = req.file.path;
+    const fileName = req.file.originalname;
+    
+    // Generate file URL for frontend access
+    const fileURL = `http://localhost:${PORT}/uploads/${req.file.filename}`;
+
+    let textContent = '';
+    
+    try {
+      // Attempt PDF text extraction
+      const dataBuffer = fs.readFileSync(filePath);
+      const pdfData = await pdfParse(dataBuffer);
+      textContent = pdfData.text;
+      console.log('PDF text extracted, length:', textContent.length);
+
+      // If extracted text is too short, try OCR
+      if (textContent.length < 100) {
+        console.log('Text too short, attempting OCR fallback...');
+        const ocrText = await performOCR(filePath);
+        if (ocrText.length > textContent.length) {
+          textContent = ocrText;
+          console.log('OCR provided better results');
+        }
+      }
+    } catch (pdfError) {
+      console.log('PDF extraction failed, using OCR fallback:', pdfError.message);
+      textContent = await performOCR(filePath);
+    }
+
+    // Basic categorization (existing logic)
+    const category = categorizeDocument(fileName, textContent);
+    const child = detectChild(fileName, textContent);
+    const misconduct = detectMisconduct(fileName, textContent);
+
+    // Enhanced AI + Wolfram analysis
+    const enhancedAnalysis = await generateEnhancedAnalysis(textContent, fileName);
+
+    // Comprehensive response
+    const result = {
+      fileName,
+      fileURL,
+      basicClassification: {
+        category,
+        child,
+        misconduct
+      },
+      enhancedAnalysis,
+      metadata: {
+        textLength: textContent.length,
+        processed: new Date().toISOString(),
+        analysisVersion: '2.0',
+        apiKeys: {
+          openai: !!process.env.OPENAI_API_KEY,
+          wolfram: !!process.env.WOLFRAM_ALPHA_API_KEY
+        }
+      }
+    };
+
+    console.log('Enhanced analysis complete:', {
+      fileName,
+      category,
+      textLength: textContent.length,
+      aiConfidence: enhancedAnalysis.confidence.aiSummary,
+      wolframConfidence: enhancedAnalysis.confidence.wolframAnalysis,
+      overallConfidence: enhancedAnalysis.confidence.overall
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('Enhanced analysis error:', error);
+    res.status(500).json({ 
+      error: 'Enhanced analysis failed: ' + error.message,
+      fallback: 'Try the basic /api/summarize endpoint'
+    });
+  }
+});
+
+// Quick analysis endpoint for testing API integrations
+app.post('/api/test-integrations', express.json(), async (req, res) => {
+  try {
+    const { testQuery } = req.body;
+    const query = testQuery || "analyze legal document with 5 constitutional violations and 3 key dates";
+
+    const results = {
+      timestamp: new Date().toISOString(),
+      query,
+      integrations: {}
+    };
+
+    // Test OpenAI
+    if (openai && process.env.OPENAI_API_KEY) {
+      try {
+        const openaiResponse = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: `Test query: ${query}` }],
+          max_tokens: 100,
+          temperature: 0.5,
+        });
+        results.integrations.openai = {
+          status: 'success',
+          response: openaiResponse.choices[0].message.content.trim()
+        };
+      } catch (error) {
+        results.integrations.openai = {
+          status: 'error',
+          error: error.message
+        };
+      }
+    } else {
+      results.integrations.openai = {
+        status: 'not_configured',
+        message: 'OpenAI API key not found'
+      };
+    }
+
+    // Test Wolfram Alpha
+    if (process.env.WOLFRAM_ALPHA_API_KEY) {
+      const wolframResult = await analyzeWithWolfram(query, 'test');
+      results.integrations.wolfram = wolframResult;
+    } else {
+      results.integrations.wolfram = {
+        status: 'not_configured',
+        message: 'Wolfram Alpha API key not found'
+      };
+    }
+
+    res.json(results);
+  } catch (error) {
+    console.error('Integration test error:', error);
+    res.status(500).json({ 
+      error: 'Integration test failed: ' + error.message 
+    });
+  }
+});
+
 // Error reporting endpoint
 app.post('/api/report-error', express.json(), async (req, res) => {
   try {
@@ -401,7 +744,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Global error handlers to prevent server crashes
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   // Don't exit the process - keep server running
 });
