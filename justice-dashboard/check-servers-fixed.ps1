@@ -12,10 +12,12 @@ try {
         Write-Host "✅ Backend Server: RUNNING" -ForegroundColor Green
         Write-Host "   Status: $($backendResponse.status)" -ForegroundColor Gray
         Write-Host "   OpenAI: $($backendResponse.openaiConfigured)" -ForegroundColor Gray
-    } else {
+    }
+    else {
         Write-Host "⚠️  Backend Server: UNHEALTHY" -ForegroundColor Yellow
     }
-} catch {
+}
+catch {
     Write-Host "❌ Backend Server: NOT RUNNING" -ForegroundColor Red
     Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Gray
     Write-Host "   💡 To start: cd backend; npm start" -ForegroundColor Cyan
@@ -30,11 +32,13 @@ try {
     if ($frontendResponse.StatusCode -eq 200) {
         Write-Host "✅ Frontend Server: RUNNING" -ForegroundColor Green
         Write-Host "   Status Code: $($frontendResponse.StatusCode)" -ForegroundColor Gray
-    } else {
+    }
+    else {
         Write-Host "⚠️  Frontend Server: UNEXPECTED RESPONSE" -ForegroundColor Yellow
         Write-Host "   Status Code: $($frontendResponse.StatusCode)" -ForegroundColor Gray
     }
-} catch {
+}
+catch {
     Write-Host "❌ Frontend Server: NOT RUNNING" -ForegroundColor Red
     Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Gray
     Write-Host "   💡 To start: cd frontend; npm run dev" -ForegroundColor Cyan
@@ -49,7 +53,8 @@ if ($nodeProcesses) {
     $nodeProcesses | ForEach-Object {
         Write-Host "   PID $($_.Id): $($_.ProcessName) (CPU: $($_.CPU.ToString('F2'))s)" -ForegroundColor Gray
     }
-} else {
+}
+else {
     Write-Host "   No Node.js processes found" -ForegroundColor Gray
 }
 
