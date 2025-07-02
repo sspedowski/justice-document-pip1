@@ -287,12 +287,29 @@ function generateDocumentCard(doc) {
 }
 
 async function tryLogin(username, password) {
-  const r = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  });
-  return r.ok;
+  try {
+    console.log('Attempting login with username:', username);
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    
+    if (r.ok) {
+      console.log('Login successful');
+      return true;
+    } else {
+      const errorData = await r.json();
+      console.error('Login failed:', errorData);
+      return false;
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    if (window.showError) {
+      window.showError('Login request failed: ' + error.message, 'login-error');
+    }
+    return false;
+  }
 }
 
 function saveTracker(data) {
@@ -589,16 +606,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btn) {
     btn.addEventListener('click', async () => {
-      const ok = await tryLogin(
-        document.getElementById('userInput').value,
-        document.getElementById('passInput').value
-      );
+      console.log('Login button clicked');
+      const username = document.getElementById('userInput').value;
+      const password = document.getElementById('passInput').value;
+      
+      console.log('Username entered:', username);
+      console.log('Password length:', password.length);
+      
+      if (!username || !password) {
+        if (errLabel) {
+          errLabel.textContent = 'Please enter both username and password';
+          errLabel.classList.remove('hidden');
+        }
+        return;
+      }
+      
+      const ok = await tryLogin(username, password);
       if (ok) {
+        console.log('Login successful, showing dashboard');
         if (box) box.classList.add('hidden');
         if (dash) dash.classList.remove('hidden'); // show dashboard
         if (errLabel) errLabel.classList.add('hidden');
       } else {
-        if (errLabel) errLabel.classList.remove('hidden');
+        console.log('Login failed, showing error');
+        if (errLabel) {
+          errLabel.textContent = 'Invalid username or password. Try: admin / justice2025';
+          errLabel.classList.remove('hidden');
+        }
       }
     });
   }
