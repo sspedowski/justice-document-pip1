@@ -181,7 +181,7 @@ async function performOCR(filePath) {
   }
 }
 
-// Wolfram Alpha analysis function
+// Wolfram Alpha LLM API analysis function
 async function analyzeWithWolfram(query, analysisType = 'general') {
   if (!WOLFRAM_ALPHA_API_KEY) {
     return {
@@ -192,45 +192,50 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
   }
 
   try {
+    // Use the new LLM API endpoint with simplified parameters
     const response = await fetch(
-      `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(
-        query
-      )}&appid=${WOLFRAM_ALPHA_API_KEY}&format=plaintext&output=JSON&podtitle=Result&podtitle=Solution&podtitle=Timeline&podtitle=Statistics`
+      `${WOLFRAM_ALPHA_BASE_URL}?input=${encodeURIComponent(query)}&appid=${WOLFRAM_ALPHA_API_KEY}&maxchars=2000`
     );
 
     if (!response.ok) {
-      throw new Error(`Wolfram Alpha API error: ${response.status}`);
+      if (response.status === 501) {
+        // API couldn't interpret the input - this is normal for some queries
+        const errorBody = await response.text();
+        return {
+          success: false,
+          result: `Query not interpretable by Wolfram Alpha: "${query}". ${errorBody}`,
+          analysisType,
+          query,
+        };
+      }
+      throw new Error(`Wolfram Alpha API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = await response.text(); // LLM API returns plain text, not JSON
 
-    if (data.queryresult && data.queryresult.pods) {
-      const relevantData = data.queryresult.pods
-        .filter(pod => pod.title && pod.subpods && pod.subpods[0].plaintext)
-        .map(pod => ({
-          title: pod.title,
-          content: pod.subpods[0].plaintext,
-        }));
-
+    if (data && data.trim().length > 0) {
       return {
         success: true,
-        result: relevantData,
+        result: data.trim(),
         analysisType,
         query: query,
+        apiVersion: 'LLM-API-v1',
       };
     }
 
     return {
       success: false,
-      result: 'No relevant analysis found',
+      result: 'No analysis results returned from Wolfram Alpha',
       analysisType,
+      query,
     };
   } catch (error) {
-    console.error('Wolfram Alpha API error:', error.message);
+    console.error('Wolfram Alpha LLM API error:', error.message);
     return {
       success: false,
       result: `Analysis failed: ${error.message}`,
       analysisType,
+      query,
     };
   }
 }
