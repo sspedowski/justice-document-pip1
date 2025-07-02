@@ -305,18 +305,22 @@ async function tryLogin(username, password) {
     }
   } catch (error) {
     console.error('Login error:', error);
-    
+
     // Show specific error message based on error type
     const errLabel = document.getElementById('loginErr');
     if (errLabel) {
-      if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-        errLabel.textContent = 'Unable to connect to server. Please ensure the backend is running on port 3000.';
+      if (
+        error.message.includes('fetch') ||
+        error.message.includes('Failed to fetch')
+      ) {
+        errLabel.textContent =
+          'Unable to connect to server. Please ensure the backend is running on port 3000.';
       } else {
         errLabel.textContent = 'Login request failed: ' + error.message;
       }
       errLabel.classList.remove('hidden');
     }
-    
+
     if (window.showError) {
       window.showError('Login request failed: ' + error.message, 'login-error');
     }
