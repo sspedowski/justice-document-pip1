@@ -160,7 +160,7 @@ Your `wolfram_batch.json` can be uploaded via:
 **Just tested your exact implementation:**
 
 1. **✅ Configuration:** `WOLFRAM_ALPHA_API_KEY` and `WOLFRAM_ALPHA_BASE_URL` correctly set
-2. **✅ API Function:** `analyzeWithWolfram()` using correct `appid=${WOLFRAM_ALPHA_API_KEY}` 
+2. **✅ API Function:** `analyzeWithWolfram()` using correct `appid=${WOLFRAM_ALPHA_API_KEY}`
 3. **✅ Batch Endpoint:** `/api/batch-analyze` processing arrays correctly
 4. **✅ Your Format:** Handles `wolfram_batch.json` queries perfectly
 5. **✅ Error Handling:** Graceful degradation when API key missing
@@ -171,8 +171,8 @@ Your `wolfram_batch.json` can be uploaded via:
 # Health check: ✅ PASS
 GET /api/health → Server healthy, OpenAI configured
 
-# Batch processing: ✅ PASS 
-POST /api/batch-analyze 
+# Batch processing: ✅ PASS
+POST /api/batch-analyze
 Queries: ["integrate x^2","calories in a big mac","plot sin(x) from 0 to 2π"]
 Status: Processing correctly, returning "partial" (needs API key)
 ```

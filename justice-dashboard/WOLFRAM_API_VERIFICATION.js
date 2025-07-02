@@ -5,7 +5,7 @@
 async function analyzeWithWolfram(query, analysisType = 'general') {
   const WOLFRAM_ALPHA_API_KEY = process.env.WOLFRAM_ALPHA_API_KEY;
   const WOLFRAM_ALPHA_BASE_URL = 'https://api.wolframalpha.com/v2/query';
-  
+
   if (!WOLFRAM_ALPHA_API_KEY) {
     return {
       success: false,
@@ -70,7 +70,7 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
 // For "plot sin(x) from 0 to 2π":
 // GET https://api.wolframalpha.com/v2/query?input=plot%20sin(x)%20from%200%20to%202%CF%80&appid=YOUR_APPID&format=plaintext&output=JSON&podtitle=Result&podtitle=Solution&podtitle=Timeline&podtitle=Statistics
 
-// ✅ VERIFICATION: 
+// ✅ VERIFICATION:
 // 1. Using correct parameter name: appid (not api_key)
 // 2. Properly encoding queries with encodeURIComponent()
 // 3. Requesting JSON output for easy parsing
