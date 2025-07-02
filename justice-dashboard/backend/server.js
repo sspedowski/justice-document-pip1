@@ -747,11 +747,9 @@ app.post('/api/test-integrations', express.json(), async (req, res) => {
   }
 });
 
-// Batch Wolfram Alpha analysis endpoint (inspired by your batch file)
 app.post('/api/batch-analyze', express.json(), async (req, res) => {
   try {
     const { queries, analysisType = 'legal-batch' } = req.body;
-
     if (!queries || !Array.isArray(queries)) {
       return res.status(400).json({
         error: 'Queries array required',
@@ -764,7 +762,6 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
         },
       });
     }
-
     const results = {
       timestamp: new Date().toISOString(),
       analysisType,
@@ -773,22 +770,22 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
       summary: {
         successful: 0,
         failed: 0,
+        quotaExceeded: false,
         executionTime: 0,
+        retryAfter: null,
       },
     };
-
     const startTime = Date.now();
-
-    // Process each query with Wolfram Alpha
+    let retryDelay = 0;
     for (let i = 0; i < queries.length; i++) {
       const query = queries[i];
-      console.log(
-        `Processing batch query ${i + 1}/${queries.length}: ${query}`
-      );
-
+      console.log(`Processing batch query ${i + 1}/${queries.length}: ${query}`);
       try {
+        // Add delay if we hit rate limits
+        if (retryDelay > 0) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
         const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
-
         // Also get OpenAI interpretation if available
         let aiInterpretation = null;
         if (openai && process.env.OPENAI_API_KEY) {
@@ -806,13 +803,28 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
             });
             aiInterpretation = aiResponse.choices[0].message.content.trim();
           } catch (aiError) {
-            console.log(
-              `AI interpretation failed for query ${i + 1}:`,
-              aiError.message
-            );
+            // Handle OpenAI API quota and rate limit errors
+            if (aiError.status === 429) {
+              const resetTime = aiError.response?.headers?.['x-ratelimit-reset'];
+              const retryAfter = aiError.response?.headers?.['retry-after'];
+              
+              results.summary.quotaExceeded = true;
+              results.summary.retryAfter = retryAfter || resetTime;
+              retryDelay = (retryAfter || 60) * 1000; // Convert to milliseconds
+              console.log(
+                `OpenAI rate limit hit. Retry after: ${retryAfter}s. Adding delay: ${retryDelay}ms`
+              );
+              
+              aiInterpretation = 'AI analysis temporarily unavailable (rate limit reached)';
+            } else {
+              console.error(
+                `AI interpretation failed for query ${i + 1}:`,
+                aiError.message
+              );
+              aiInterpretation = `AI analysis failed: ${aiError.message}`;
+            }
           }
         }
-
         results.results.push({
           queryIndex: i + 1,
           query,
@@ -820,12 +832,8 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
           aiInterpretation,
           status: wolframResult.success ? 'success' : 'partial',
         });
-
-        if (wolframResult.success) {
-          results.summary.successful++;
-        } else {
-          results.summary.failed++;
-        }
+        if (wolframResult.success) results.summary.successful++;
+        else results.summary.failed++;
       } catch (error) {
         console.error(`Batch query ${i + 1} failed:`, error.message);
         results.results.push({
@@ -841,25 +849,23 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
         });
         results.summary.failed++;
       }
-
-      // Add small delay to avoid overwhelming APIs
+      // Add small delay between queries to avoid overwhelming APIs
       await new Promise(resolve => setTimeout(resolve, 200));
     }
-
     results.summary.executionTime = Date.now() - startTime;
-
     console.log('Batch analysis complete:', {
       total: results.totalQueries,
       successful: results.summary.successful,
       failed: results.summary.failed,
+      quotaExceeded: results.summary.quotaExceeded,
       executionTime: `${results.summary.executionTime}ms`,
     });
-
     res.json(results);
   } catch (error) {
     console.error('Batch analysis error:', error);
     res.status(500).json({
       error: 'Batch analysis failed: ' + error.message,
+      retryAfter: error.response?.headers?.['retry-after'],
     });
   }
 });
