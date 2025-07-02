@@ -148,24 +148,48 @@
       <!-- Batch Processing Section -->
       <div class="section">
         <h2>📊 Batch Analysis (Inspired by Your Wolfram Batch File)</h2>
-        <p>Process multiple queries at once, similar to your <code>wolfram_batch.json</code> file format.</p>
-        
+        <p>
+          Process multiple queries at once, similar to your
+          <code>wolfram_batch.json</code> file format.
+        </p>
+
         <h3>Option 1: Manual Batch Queries</h3>
-        <textarea id="batchQueries" rows="6" style="width: 100%; margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Enter one query per line:
+        <textarea
+          id="batchQueries"
+          rows="6"
+          style="
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          "
+          placeholder="Enter one query per line:
 Calculate duration between January 15, 2023 and March 20, 2023
 Statistical analysis of 5 constitutional violations over 6 months
 Timeline analysis of court hearing dates
-Frequency analysis of legal terms: due process, violation, hearing">Calculate duration between January 15, 2023 and March 20, 2023
+Frequency analysis of legal terms: due process, violation, hearing"
+        >
+Calculate duration between January 15, 2023 and March 20, 2023
 Statistical analysis of 5 constitutional violations over 6 months
 Timeline analysis of court hearing dates: 1/15/2023, 2/20/2023, 3/15/2023
-Pattern analysis of legal terms: due process, constitutional, violation</textarea>
+Pattern analysis of legal terms: due process, constitutional, violation</textarea
+        >
         <button onclick="processBatchQueries()">Process Batch Queries</button>
-        
+
         <h3>Option 2: Upload Batch File</h3>
         <input type="file" id="batchFileInput" accept=".json,.jsonl,.txt" />
         <button onclick="uploadBatchFile()">Upload & Process Batch File</button>
-        <p><small>Supports your existing format: <code>{"model": "gpt-4", "messages": [{"role": "user", "content": "query"}]}</code></small></p>
-        
+        <p>
+          <small
+            >Supports your existing format:
+            <code
+              >{"model": "gpt-4", "messages": [{"role": "user", "content":
+              "query"}]}</code
+            ></small
+          >
+        </p>
+
         <div id="batchResults"></div>
       </div>
 
@@ -349,24 +373,28 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
       async function processBatchQueries() {
         const queriesText = document.getElementById('batchQueries').value;
         const resultsDiv = document.getElementById('batchResults');
-        
+
         if (!queriesText.trim()) {
-          resultsDiv.innerHTML = '<div class="error">Please enter some queries</div>';
+          resultsDiv.innerHTML =
+            '<div class="error">Please enter some queries</div>';
           return;
         }
-        
-        const queries = queriesText.trim().split('\n').filter(q => q.trim());
+
+        const queries = queriesText
+          .trim()
+          .split('\n')
+          .filter(q => q.trim());
         resultsDiv.innerHTML = `<div class="status-pending">Processing ${queries.length} batch queries...</div>`;
-        
+
         try {
           const response = await fetch('/api/batch-analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ queries, analysisType: 'manual-batch' })
+            body: JSON.stringify({ queries, analysisType: 'manual-batch' }),
           });
-          
+
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          
+
           const data = await response.json();
           let resultsHTML = `
             <div class="success">Batch processing completed!</div>
@@ -379,9 +407,10 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
             </ul>
             <h3>Detailed Results:</h3>
           `;
-          
+
           data.results.forEach((result, index) => {
-            const statusClass = result.status === 'success' ? 'success' : 'error';
+            const statusClass =
+              result.status === 'success' ? 'success' : 'error';
             resultsHTML += `
               <div class="section">
                 <h4>Query ${result.queryIndex}: <span class="${statusClass}">${result.status}</span></h4>
@@ -391,7 +420,7 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
               </div>
             `;
           });
-          
+
           resultsDiv.innerHTML = resultsHTML;
         } catch (error) {
           resultsDiv.innerHTML = `<div class="error">Batch processing failed: ${error.message}</div>`;
@@ -401,25 +430,27 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
       async function uploadBatchFile() {
         const fileInput = document.getElementById('batchFileInput');
         const resultsDiv = document.getElementById('batchResults');
-        
+
         if (!fileInput.files[0]) {
-          resultsDiv.innerHTML = '<div class="error">Please select a batch file</div>';
+          resultsDiv.innerHTML =
+            '<div class="error">Please select a batch file</div>';
           return;
         }
-        
-        resultsDiv.innerHTML = '<div class="status-pending">Processing batch file...</div>';
-        
+
+        resultsDiv.innerHTML =
+          '<div class="status-pending">Processing batch file...</div>';
+
         const formData = new FormData();
         formData.append('batchFile', fileInput.files[0]);
-        
+
         try {
           const response = await fetch('/api/load-batch-file', {
             method: 'POST',
-            body: formData
+            body: formData,
           });
-          
+
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          
+
           const data = await response.json();
           resultsDiv.innerHTML = `
             <div class="success">Batch file processed successfully!</div>
