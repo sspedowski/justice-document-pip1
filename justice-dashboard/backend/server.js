@@ -208,7 +208,9 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
           query,
         };
       }
-      throw new Error(`Wolfram Alpha API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Wolfram Alpha API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.text(); // LLM API returns plain text, not JSON
