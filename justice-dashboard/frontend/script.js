@@ -431,8 +431,29 @@ async function handleFiles(e) {
   const files = [...e.target.files];
   if (!files.length) return;
 
+  // Initialize progress tracking
+  const progressDiv = document.getElementById('uploadProgress');
+  const progressBar = document.getElementById('uploadProgressBar');
+  const uploadStatus = document.getElementById('uploadStatus');
+  const uploadCount = document.getElementById('uploadCount');
+  const uploadDetails = document.getElementById('uploadDetails');
+
+  // Show progress bar
+  if (progressDiv) {
+    progressDiv.classList.remove('hidden');
+    uploadCount.textContent = `0/${files.length} files`;
+    uploadStatus.textContent = 'Processing files...';
+    uploadDetails.textContent = 'Preparing files...';
+  }
+
+  let completed = 0;
+
   for (const file of files) {
     const fname = file.name; // ⇢ cache synchronously before any async operations
+
+    // Update progress status
+    if (uploadStatus) uploadStatus.textContent = `Processing ${fname}...`;
+    if (uploadDetails) uploadDetails.textContent = `Analyzing document content...`;
 
     // 6.1 Duplicate detection (hash)
     const hash = await sha256(file);
@@ -449,6 +470,16 @@ async function handleFiles(e) {
         hash,
       };
       addRowToTable(duplicateRow);
+      
+      // Update progress for skipped files
+      completed++;
+      if (progressBar) {
+        const progress = (completed / files.length) * 100;
+        progressBar.style.width = `${progress}%`;
+      }
+      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadDetails) uploadDetails.textContent = `Skipped duplicate: ${fname}`;
+      
       continue;
     }
 
@@ -513,6 +544,16 @@ async function handleFiles(e) {
       // Clean up duplicates before saving
       const cleanTracker = removeDuplicates(tracker);
       saveTracker(cleanTracker);
+
+      // Update progress
+      completed++;
+      if (progressBar) {
+        const progress = (completed / files.length) * 100;
+        progressBar.style.width = `${progress}%`;
+      }
+      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadDetails) uploadDetails.textContent = `Completed: ${fname}`;
+
     } catch (err) {
       console.error('Upload failed', err);
 
@@ -534,7 +575,25 @@ async function handleFiles(e) {
       placeholder.category = 'Error';
       placeholder.misconduct = 'Error';
       updateRowInTable(rowIndex, placeholder);
+
+      // Update progress even for failed files
+      completed++;
+      if (progressBar) {
+        const progress = (completed / files.length) * 100;
+        progressBar.style.width = `${progress}%`;
+      }
+      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadDetails) uploadDetails.textContent = `Error processing ${fname}: ${errorMessage}`;
     }
+  }
+
+  // Hide progress bar after completion
+  if (progressDiv && completed === files.length) {
+    if (uploadStatus) uploadStatus.textContent = 'All files processed successfully!';
+    setTimeout(() => {
+      progressDiv.classList.add('hidden');
+      if (progressBar) progressBar.style.width = '0%';
+    }, 2000);
   }
 
   // reset input so same file list can be selected again
