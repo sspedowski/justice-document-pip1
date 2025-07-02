@@ -67,10 +67,10 @@ Write-Host ""
 # Quick start commands if servers are down
 Write-Host "📋 Quick Start Commands:" -ForegroundColor Yellow
 Write-Host "# Start Backend:"
-Write-Host "cd backend && npm start" -ForegroundColor Cyan
+Write-Host "cd backend; npm start" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "# Start Frontend:"
-Write-Host "cd frontend && npm run dev" -ForegroundColor Cyan
+Write-Host "cd frontend; npm run dev" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "# Check this status again:"
 Write-Host ".\check-servers.ps1" -ForegroundColor Cyan
