@@ -206,11 +206,8 @@ async function analyzeWithWolfram(query, analysisType = 'general') {
 
     if (data.queryresult && data.queryresult.pods) {
       const relevantData = data.queryresult.pods
-        .filter(
-          (pod) =>
-            pod.title && pod.subpods && pod.subpods[0].plaintext
-        )
-        .map((pod) => ({
+        .filter(pod => pod.title && pod.subpods && pod.subpods[0].plaintext)
+        .map(pod => ({
           title: pod.title,
           content: pod.subpods[0].plaintext,
         }));
@@ -285,7 +282,8 @@ Document: ${text.substring(0, 3000)}`,
         temperature: 0.3,
       });
 
-      results.analysis.aiSummary = summaryResponse.choices[0].message.content.trim();
+      results.analysis.aiSummary =
+        summaryResponse.choices[0].message.content.trim();
       results.confidence.aiSummary = 0.85;
 
       // Extract key entities
@@ -356,7 +354,7 @@ Document: ${text.substring(0, 3000)}`,
     );
     if (legalTerms && legalTerms.length > 0) {
       const patternQuery = `frequency analysis of legal terms: ${Array.from(
-        new Set(legalTerms.map((t) => t.toLowerCase()))
+        new Set(legalTerms.map(t => t.toLowerCase()))
       ).join(', ')}`;
       results.wolfram.patternAnalysis = await analyzeWithWolfram(
         patternQuery,
@@ -580,12 +578,12 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
     console.log('Enhanced analysis for file:', req.file.originalname);
     const filePath = req.file.path;
     const fileName = req.file.originalname;
-    
+
     // Generate file URL for frontend access
     const fileURL = `http://localhost:${PORT}/uploads/${req.file.filename}`;
 
     let textContent = '';
-    
+
     try {
       // Attempt PDF text extraction
       const dataBuffer = fs.readFileSync(filePath);
@@ -603,7 +601,10 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
         }
       }
     } catch (pdfError) {
-      console.log('PDF extraction failed, using OCR fallback:', pdfError.message);
+      console.log(
+        'PDF extraction failed, using OCR fallback:',
+        pdfError.message
+      );
       textContent = await performOCR(filePath);
     }
 
@@ -613,7 +614,10 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
     const misconduct = detectMisconduct(fileName, textContent);
 
     // Enhanced AI + Wolfram analysis
-    const enhancedAnalysis = await generateEnhancedAnalysis(textContent, fileName);
+    const enhancedAnalysis = await generateEnhancedAnalysis(
+      textContent,
+      fileName
+    );
 
     // Comprehensive response
     const result = {
@@ -622,7 +626,7 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
       basicClassification: {
         category,
         child,
-        misconduct
+        misconduct,
       },
       enhancedAnalysis,
       metadata: {
@@ -631,9 +635,9 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
         analysisVersion: '2.0',
         apiKeys: {
           openai: !!process.env.OPENAI_API_KEY,
-          wolfram: !!process.env.WOLFRAM_ALPHA_API_KEY
-        }
-      }
+          wolfram: !!process.env.WOLFRAM_ALPHA_API_KEY,
+        },
+      },
     };
 
     console.log('Enhanced analysis complete:', {
@@ -642,15 +646,15 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
       textLength: textContent.length,
       aiConfidence: enhancedAnalysis.confidence.aiSummary,
       wolframConfidence: enhancedAnalysis.confidence.wolframAnalysis,
-      overallConfidence: enhancedAnalysis.confidence.overall
+      overallConfidence: enhancedAnalysis.confidence.overall,
     });
 
     res.json(result);
   } catch (error) {
     console.error('Enhanced analysis error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Enhanced analysis failed: ' + error.message,
-      fallback: 'Try the basic /api/summarize endpoint'
+      fallback: 'Try the basic /api/summarize endpoint',
     });
   }
 });
@@ -659,12 +663,14 @@ app.post('/api/analyze-enhanced', upload.single('file'), async (req, res) => {
 app.post('/api/test-integrations', express.json(), async (req, res) => {
   try {
     const { testQuery } = req.body;
-    const query = testQuery || "analyze legal document with 5 constitutional violations and 3 key dates";
+    const query =
+      testQuery ||
+      'analyze legal document with 5 constitutional violations and 3 key dates';
 
     const results = {
       timestamp: new Date().toISOString(),
       query,
-      integrations: {}
+      integrations: {},
     };
 
     // Test OpenAI
@@ -678,18 +684,18 @@ app.post('/api/test-integrations', express.json(), async (req, res) => {
         });
         results.integrations.openai = {
           status: 'success',
-          response: openaiResponse.choices[0].message.content.trim()
+          response: openaiResponse.choices[0].message.content.trim(),
         };
       } catch (error) {
         results.integrations.openai = {
           status: 'error',
-          error: error.message
+          error: error.message,
         };
       }
     } else {
       results.integrations.openai = {
         status: 'not_configured',
-        message: 'OpenAI API key not found'
+        message: 'OpenAI API key not found',
       };
     }
 
@@ -700,15 +706,15 @@ app.post('/api/test-integrations', express.json(), async (req, res) => {
     } else {
       results.integrations.wolfram = {
         status: 'not_configured',
-        message: 'Wolfram Alpha API key not found'
+        message: 'Wolfram Alpha API key not found',
       };
     }
 
     res.json(results);
   } catch (error) {
     console.error('Integration test error:', error);
-    res.status(500).json({ 
-      error: 'Integration test failed: ' + error.message 
+    res.status(500).json({
+      error: 'Integration test failed: ' + error.message,
     });
   }
 });
@@ -744,7 +750,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Global error handlers to prevent server crashes
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('Uncaught Exception:', err);
   // Don't exit the process - keep server running
 });
