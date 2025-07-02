@@ -779,7 +779,9 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
     let retryDelay = 0;
     for (let i = 0; i < queries.length; i++) {
       const query = queries[i];
-      console.log(`Processing batch query ${i + 1}/${queries.length}: ${query}`);
+      console.log(
+        `Processing batch query ${i + 1}/${queries.length}: ${query}`
+      );
       try {
         // Add delay if we hit rate limits
         if (retryDelay > 0) {
@@ -805,17 +807,19 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
           } catch (aiError) {
             // Handle OpenAI API quota and rate limit errors
             if (aiError.status === 429) {
-              const resetTime = aiError.response?.headers?.['x-ratelimit-reset'];
+              const resetTime =
+                aiError.response?.headers?.['x-ratelimit-reset'];
               const retryAfter = aiError.response?.headers?.['retry-after'];
-              
+
               results.summary.quotaExceeded = true;
               results.summary.retryAfter = retryAfter || resetTime;
               retryDelay = (retryAfter || 60) * 1000; // Convert to milliseconds
               console.log(
                 `OpenAI rate limit hit. Retry after: ${retryAfter}s. Adding delay: ${retryDelay}ms`
               );
-              
-              aiInterpretation = 'AI analysis temporarily unavailable (rate limit reached)';
+
+              aiInterpretation =
+                'AI analysis temporarily unavailable (rate limit reached)';
             } else {
               console.error(
                 `AI interpretation failed for query ${i + 1}:`,
