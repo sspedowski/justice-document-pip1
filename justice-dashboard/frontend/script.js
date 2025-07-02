@@ -636,6 +636,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
+  // Add Enter key support for login
+  const userInput = document.getElementById('userInput');
+  const passInput = document.getElementById('passInput');
+  
+  if (userInput && passInput) {
+    const handleEnterKey = (event) => {
+      if (event.key === 'Enter') {
+        btn.click();
+      }
+    };
+    
+    userInput.addEventListener('keypress', handleEnterKey);
+    passInput.addEventListener('keypress', handleEnterKey);
+  }
 });
 
 // ===== 8. Hot‑reload support (Vite) =====
