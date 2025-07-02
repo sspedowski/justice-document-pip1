@@ -995,7 +995,7 @@ For each document, provide:
 
 Focus on building a comprehensive case for constitutional violations and child welfare advocacy.`,
       tools: [{ type: 'code_interpreter' }],
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4o-mini',
     });
 
     LEGAL_ASSISTANT_ID = assistant.id;
