@@ -345,67 +345,90 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
         }
       }
 
-      // Batch Processing
+      // Batch Processing Functions
       async function processBatchQueries() {
         const queriesText = document.getElementById('batchQueries').value;
-        const queries = queriesText.split('\n').map((q) => q.trim()).filter(Boolean);
         const resultsDiv = document.getElementById('batchResults');
-        resultsDiv.innerHTML = '<div class="status-pending">Processing batch queries...</div>';
-
+        
+        if (!queriesText.trim()) {
+          resultsDiv.innerHTML = '<div class="error">Please enter some queries</div>';
+          return;
+        }
+        
+        const queries = queriesText.trim().split('\n').filter(q => q.trim());
+        resultsDiv.innerHTML = `<div class="status-pending">Processing ${queries.length} batch queries...</div>`;
+        
         try {
-          const responses = await Promise.all(
-            queries.map((query) =>
-              fetch('/api/test-integrations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ testQuery: query }),
-              })
-            )
-          );
-
-          const data = await Promise.all(responses.map((res) => res.json()));
-          resultsDiv.innerHTML = `
-                    <div class="success">Batch processing completed!</div>
-                    ${data
-                      .map(
-                        (item, index) => `<div class="result"><strong>Query ${index + 1}:</strong> ${JSON.stringify(item, null, 2)}</div>`
-                      )
-                      .join('')}
-                `;
+          const response = await fetch('/api/batch-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ queries, analysisType: 'manual-batch' })
+          });
+          
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          
+          const data = await response.json();
+          let resultsHTML = `
+            <div class="success">Batch processing completed!</div>
+            <h3>Summary:</h3>
+            <ul>
+              <li><strong>Total Queries:</strong> ${data.totalQueries}</li>
+              <li><strong>Successful:</strong> ${data.summary.successful}</li>
+              <li><strong>Failed:</strong> ${data.summary.failed}</li>
+              <li><strong>Execution Time:</strong> ${data.summary.executionTime}ms</li>
+            </ul>
+            <h3>Detailed Results:</h3>
+          `;
+          
+          data.results.forEach((result, index) => {
+            const statusClass = result.status === 'success' ? 'success' : 'error';
+            resultsHTML += `
+              <div class="section">
+                <h4>Query ${result.queryIndex}: <span class="${statusClass}">${result.status}</span></h4>
+                <p><strong>Query:</strong> ${result.query}</p>
+                <div class="result">${JSON.stringify(result.wolfram, null, 2)}</div>
+                ${result.aiInterpretation ? `<p><strong>AI Context:</strong> ${result.aiInterpretation}</p>` : ''}
+              </div>
+            `;
+          });
+          
+          resultsDiv.innerHTML = resultsHTML;
         } catch (error) {
           resultsDiv.innerHTML = `<div class="error">Batch processing failed: ${error.message}</div>`;
         }
       }
 
-      // Upload Batch File
       async function uploadBatchFile() {
         const fileInput = document.getElementById('batchFileInput');
         const resultsDiv = document.getElementById('batchResults');
-
+        
         if (!fileInput.files[0]) {
           resultsDiv.innerHTML = '<div class="error">Please select a batch file</div>';
           return;
         }
-
-        resultsDiv.innerHTML = '<div class="status-pending">Uploading and processing batch file...</div>';
-
+        
+        resultsDiv.innerHTML = '<div class="status-pending">Processing batch file...</div>';
+        
         const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-
+        formData.append('batchFile', fileInput.files[0]);
+        
         try {
-          const response = await fetch('/api/analyze-enhanced', {
+          const response = await fetch('/api/load-batch-file', {
             method: 'POST',
-            body: formData,
+            body: formData
           });
-
+          
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+          
           const data = await response.json();
           resultsDiv.innerHTML = `
-                    <div class="success">Batch file processed successfully!</div>
-                    <h3>Analysis Results:</h3>
-                    <div class="result">${JSON.stringify(data, null, 2)}</div>
-                `;
+            <div class="success">Batch file processed successfully!</div>
+            <h3>File Analysis:</h3>
+            <p><strong>Extracted Queries:</strong> ${data.extractedQueries.length}</p>
+            <div class="result">Queries: ${data.extractedQueries.join(', ')}</div>
+            <h3>Processing Results:</h3>
+            <div class="result">${JSON.stringify(data.results, null, 2)}</div>
+          `;
         } catch (error) {
           resultsDiv.innerHTML = `<div class="error">Batch file processing failed: ${error.message}</div>`;
         }
