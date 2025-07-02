@@ -786,8 +786,10 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
       try {
         // Add delay if we hit rate limits
         if (retryDelay > 0) {
+          console.log(`Rate limit hit, waiting ${retryDelay}ms before next query...`);
           await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
+        // Get Wolfram analysis
         const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
         // Also get OpenAI interpretation if available
         let aiInterpretation = null;
@@ -814,10 +816,8 @@ app.post('/api/batch-analyze', express.json(), async (req, res) => {
 
               results.summary.quotaExceeded = true;
               results.summary.retryAfter = retryAfter || resetTime;
-              retryDelay = (retryAfter || 60) * 1000; // Convert to milliseconds
-              console.log(
-                `OpenAI rate limit hit. Retry after: ${retryAfter}s. Adding delay: ${retryDelay}ms`
-              );
+              retryDelay = (parseInt(retryAfter) || 60) * 1000; // Convert to milliseconds
+              console.log(`OpenAI rate limit hit. Retry after: ${retryAfter}s. Adding delay: ${retryDelay}ms`);
 
               aiInterpretation =
                 'AI analysis temporarily unavailable (rate limit reached)';
