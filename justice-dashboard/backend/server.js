@@ -964,6 +964,158 @@ async function processQueriesBatch(queries, analysisType) {
   });
 }
 
+// Enhanced OpenAI Messages API integration for persistent case threads
+// This extends your current Chat Completions implementation
+
+// Legal Assistant Configuration
+let LEGAL_ASSISTANT_ID = null;
+
+// Initialize legal assistant (call this on server startup)
+async function initializeLegalAssistant() {
+  if (!openai) return null;
+
+  try {
+    const assistant = await openai.beta.assistants.create({
+      name: 'Justice Dashboard Legal Analyzer',
+      instructions: `You are a specialized legal document analyst for child welfare and constitutional violation cases. 
+
+Your expertise includes:
+- 14th Amendment Due Process violations
+- 1st Amendment Free Speech suppression  
+- CPS investigation analysis
+- Court order interpretation
+- Timeline and evidence analysis
+
+For each document, provide:
+1. Brief summary of key legal issues
+2. Constitutional/statutory violations identified
+3. Important dates and parties involved
+4. Legal significance and case strategy recommendations
+5. Connection to other documents in this case thread
+
+Focus on building a comprehensive case for constitutional violations and child welfare advocacy.`,
+      tools: [{ type: 'code_interpreter' }],
+      model: 'gpt-4-1106-preview',
+    });
+
+    LEGAL_ASSISTANT_ID = assistant.id;
+    console.log('✅ Legal Assistant created:', LEGAL_ASSISTANT_ID);
+    return assistant.id;
+  } catch (error) {
+    console.error('❌ Failed to create legal assistant:', error.message);
+    return null;
+  }
+}
+
+// Create case thread for a specific child/case type
+async function createCaseThread(
+  childName,
+  caseType = 'Constitutional Violations'
+) {
+  if (!openai) return null;
+
+  try {
+    const thread = await openai.beta.threads.create({
+      metadata: {
+        child: childName,
+        caseType: caseType,
+        created: new Date().toISOString(),
+        dashboardVersion: '2.0',
+      },
+    });
+
+    // Add initial context message
+    await openai.beta.threads.messages.create(thread.id, {
+      role: 'user',
+      content: `Starting case analysis for ${childName}. Case type: ${caseType}. 
+      
+Please analyze all subsequent documents in the context of building a comprehensive legal case focused on constitutional violations, due process issues, and child welfare concerns.`,
+    });
+
+    return thread.id;
+  } catch (error) {
+    console.error('❌ Failed to create case thread:', error.message);
+    return null;
+  }
+}
+
+// Enhanced document analysis using Messages API with thread context
+async function analyzeDocumentWithThread(threadId, documentContent, fileName) {
+  if (!openai || !LEGAL_ASSISTANT_ID) {
+    return {
+      success: false,
+      error: 'Messages API not available - using fallback analysis',
+    };
+  }
+
+  try {
+    // Add document to thread
+    await openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: `New document: ${fileName}
+
+Document content:
+${documentContent.substring(0, 10000)}${
+        documentContent.length > 10000 ? '... [truncated]' : ''
+      }
+
+Please analyze this document in the context of our ongoing case. Focus on legal violations, timeline implications, and how this evidence strengthens the overall case.`,
+    });
+
+    // Run analysis
+    const run = await openai.beta.threads.runs.create(threadId, {
+      assistant_id: LEGAL_ASSISTANT_ID,
+      instructions:
+        'Provide detailed legal analysis with emphasis on constitutional violations and case building strategy.',
+    });
+
+    // Wait for completion
+    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+    let attempts = 0;
+
+    while (runStatus.status !== 'completed' && attempts < 30) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      attempts++;
+    }
+
+    if (runStatus.status !== 'completed') {
+      throw new Error(`Analysis timeout - status: ${runStatus.status}`);
+    }
+
+    // Get the assistant's response
+    const messages = await openai.beta.threads.messages.list(threadId, {
+      limit: 1,
+    });
+    const latestMessage = messages.data[0];
+
+    return {
+      success: true,
+      threadId: threadId,
+      messageId: latestMessage.id,
+      analysis: latestMessage.content[0].text.value,
+      timestamp: latestMessage.created_at,
+      contextual: true,
+    };
+  } catch (error) {
+    console.error('❌ Thread analysis failed:', error.message);
+    return {
+      success: false,
+      error: error.message,
+      fallback: 'Use regular chat completions instead',
+    };
+  }
+}
+
+// Initialize assistant on server startup
+if (openai) {
+  initializeLegalAssistant().then(assistantId => {
+    if (assistantId) {
+      console.log('🤖 Legal Assistant ready for case analysis');
+    }
+  });
+}
+
 // Error reporting endpoint
 app.post('/api/report-error', express.json(), async (req, res) => {
   try {
@@ -1017,3 +1169,264 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+// OpenAI Messages API Endpoints for Enhanced Legal Analysis
+
+// Create case thread for persistent conversation
+app.post('/api/case/create-thread', express.json(), async (req, res) => {
+  try {
+    const { childName, caseType = 'Constitutional Violations' } = req.body;
+
+    if (!childName) {
+      return res.status(400).json({
+        error: 'Child name required',
+        example: { childName: 'Jace', caseType: 'Constitutional Violations' },
+      });
+    }
+
+    const threadId = await createCaseThread(childName, caseType);
+
+    if (!threadId) {
+      return res.status(503).json({
+        error:
+          'Unable to create case thread - OpenAI Messages API not available',
+        fallback: 'Use regular document analysis endpoints',
+      });
+    }
+
+    res.json({
+      success: true,
+      threadId,
+      child: childName,
+      caseType,
+      created: new Date().toISOString(),
+      message:
+        'Case thread created - all subsequent documents will build contextual analysis',
+    });
+  } catch (error) {
+    console.error('Create thread error:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to create case thread: ' + error.message });
+  }
+});
+
+// Enhanced document analysis with thread context
+app.post(
+  '/api/analyze-with-thread',
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      const { threadId } = req.body;
+
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      if (!threadId) {
+        return res.status(400).json({
+          error: 'Thread ID required',
+          hint: 'Create a case thread first with /api/case/create-thread',
+        });
+      }
+
+      console.log('Enhanced thread analysis for:', req.file.originalname);
+      const filePath = req.file.path;
+      const fileName = req.file.originalname;
+
+      // Extract document text (same logic as existing endpoints)
+      let textContent = '';
+      try {
+        const dataBuffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse(dataBuffer);
+        textContent = pdfData.text;
+
+        if (textContent.length < 100) {
+          const ocrText = await performOCR(filePath);
+          if (ocrText.length > textContent.length) {
+            textContent = ocrText;
+          }
+        }
+      } catch (pdfError) {
+        textContent = await performOCR(filePath);
+      }
+
+      // Basic classification (existing logic)
+      const category = categorizeDocument(fileName, textContent);
+      const child = detectChild(fileName, textContent);
+      const misconduct = detectMisconduct(fileName, textContent);
+
+      // Enhanced analysis with thread context
+      const threadAnalysis = await analyzeDocumentWithThread(
+        threadId,
+        textContent,
+        fileName
+      );
+
+      // Fallback to regular analysis if thread analysis fails
+      let fallbackAnalysis = null;
+      if (!threadAnalysis.success && openai) {
+        try {
+          const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'user',
+                content: `Analyze this legal document: ${fileName}\n\nContent: ${textContent.substring(0, 3000)}`,
+              },
+            ],
+            max_tokens: 300,
+          });
+          fallbackAnalysis = response.choices[0].message.content.trim();
+        } catch (fallbackError) {
+          console.error('Fallback analysis failed:', fallbackError.message);
+        }
+      }
+
+      const result = {
+        fileName,
+        fileURL: `http://localhost:${PORT}/uploads/${req.file.filename}`,
+        basicClassification: { category, child, misconduct },
+        threadAnalysis: threadAnalysis.success
+          ? {
+              analysis: threadAnalysis.analysis,
+              threadId: threadAnalysis.threadId,
+              messageId: threadAnalysis.messageId,
+              contextual: true,
+              timestamp: threadAnalysis.timestamp,
+            }
+          : null,
+        fallbackAnalysis,
+        metadata: {
+          textLength: textContent.length,
+          processed: new Date().toISOString(),
+          analysisMethod: threadAnalysis.success
+            ? 'Messages API (contextual)'
+            : 'Chat Completions (fallback)',
+          threadContextAvailable: threadAnalysis.success,
+        },
+      };
+
+      res.json(result);
+    } catch (error) {
+      console.error('Thread analysis error:', error);
+      res
+        .status(500)
+        .json({ error: 'Thread analysis failed: ' + error.message });
+    }
+  }
+);
+
+// List thread messages (case history)
+app.get('/api/case/:threadId/messages', async (req, res) => {
+  try {
+    const { threadId } = req.params;
+
+    if (!openai) {
+      return res.status(503).json({
+        error: 'OpenAI not available',
+        threadId,
+      });
+    }
+
+    const messages = await openai.beta.threads.messages.list(threadId, {
+      order: 'desc',
+      limit: 50,
+    });
+
+    const formattedMessages = messages.data.map(msg => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content[0]?.text?.value || 'No content',
+      created: new Date(msg.created_at * 1000).toISOString(),
+      metadata: msg.metadata,
+    }));
+
+    res.json({
+      threadId,
+      messageCount: messages.data.length,
+      messages: formattedMessages,
+      hasMore: messages.has_more,
+    });
+  } catch (error) {
+    console.error('List messages error:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to retrieve thread messages: ' + error.message });
+  }
+});
+
+// Generate comprehensive case summary from thread
+app.post('/api/case/:threadId/summary', async (req, res) => {
+  try {
+    const { threadId } = req.params;
+
+    if (!openai || !LEGAL_ASSISTANT_ID) {
+      return res.status(503).json({
+        error: 'OpenAI Messages API not available',
+        threadId,
+      });
+    }
+
+    // Request comprehensive case summary
+    await openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: `Please generate a comprehensive case summary including:
+
+1. **Constitutional Violations Identified**: List all 14th Amendment, 1st Amendment, and other constitutional issues
+2. **Timeline of Key Events**: Chronological order of important dates and proceedings  
+3. **Evidence Summary**: Key documents and their legal significance
+4. **Parties Involved**: All individuals, agencies, and their roles
+5. **Legal Strategy Recommendations**: Next steps and strongest arguments
+6. **Case Strengths**: Most compelling evidence and legal arguments
+7. **Areas for Further Investigation**: Missing evidence or additional documentation needed
+
+Format this as a comprehensive legal brief suitable for court filing or attorney review.`,
+    });
+
+    // Run analysis
+    const run = await openai.beta.threads.runs.create(threadId, {
+      assistant_id: LEGAL_ASSISTANT_ID,
+      instructions:
+        'Generate a comprehensive, professional legal case summary suitable for court filing. Be thorough and specific.',
+    });
+
+    // Wait for completion
+    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+    let attempts = 0;
+
+    while (runStatus.status !== 'completed' && attempts < 60) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      attempts++;
+    }
+
+    if (runStatus.status !== 'completed') {
+      return res.status(408).json({
+        error: 'Summary generation timeout',
+        status: runStatus.status,
+        threadId,
+      });
+    }
+
+    // Get the summary
+    const messages = await openai.beta.threads.messages.list(threadId, {
+      limit: 1,
+    });
+    const summary = messages.data[0].content[0].text.value;
+
+    res.json({
+      threadId,
+      summary,
+      generated: new Date().toISOString(),
+      messageId: messages.data[0].id,
+      length: summary.length,
+      type: 'Comprehensive Legal Case Summary',
+    });
+  } catch (error) {
+    console.error('Generate summary error:', error);
+    res
+      .status(500)
+      .json({ error: 'Failed to generate case summary: ' + error.message });
+  }
+});
