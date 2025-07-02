@@ -3,6 +3,7 @@
 ## 📋 **Current vs. Messages API Comparison**
 
 ### **Your Current Implementation (Chat Completions):**
+
 ```javascript
 // Current approach in backend/server.js
 const response = await openai.chat.completions.create({
@@ -14,15 +15,16 @@ const response = await openai.chat.completions.create({
 ```
 
 ### **Messages API (Assistants with Threads):**
+
 ```javascript
 // Enhanced approach with persistent conversations
 const thread = await openai.beta.threads.create();
 const message = await openai.beta.threads.messages.create(thread.id, {
-  role: "user",
-  content: "Analyze this legal document for constitutional violations..."
+  role: 'user',
+  content: 'Analyze this legal document for constitutional violations...',
 });
 const run = await openai.beta.threads.runs.create(thread.id, {
-  assistant_id: "asst_your_assistant_id"
+  assistant_id: 'asst_your_assistant_id',
 });
 ```
 
@@ -62,7 +64,7 @@ const run = await openai.beta.threads.runs.create(thread.id, {
 // Create specialized assistant for legal analysis
 async function createLegalAssistant() {
   const assistant = await openai.beta.assistants.create({
-    name: "Justice Dashboard Legal Analyzer",
+    name: 'Justice Dashboard Legal Analyzer',
     instructions: `You are a legal document analyst specializing in:
     - Constitutional violations (Due Process, Free Speech)
     - Child welfare cases and CPS documentation
@@ -75,10 +77,10 @@ async function createLegalAssistant() {
     3. Important dates and timeline
     4. Parties involved and their roles
     5. Recommendations for legal strategy`,
-    tools: [{"type": "code_interpreter"}, {"type": "retrieval"}],
-    model: "gpt-4-1106-preview"
+    tools: [{ type: 'code_interpreter' }, { type: 'retrieval' }],
+    model: 'gpt-4-1106-preview',
   });
-  
+
   return assistant.id;
 }
 ```
@@ -92,21 +94,21 @@ async function createCaseThread(childName, caseType) {
     metadata: {
       child: childName,
       caseType: caseType,
-      created: new Date().toISOString()
-    }
+      created: new Date().toISOString(),
+    },
   });
-  
+
   return thread.id;
 }
 
 // Add document to existing thread
 async function addDocumentToThread(threadId, documentContent, fileName) {
   const message = await openai.beta.threads.messages.create(threadId, {
-    role: "user",
+    role: 'user',
     content: `New document uploaded: ${fileName}\n\nContent:\n${documentContent}`,
-    file_ids: [] // Can attach PDF files directly
+    file_ids: [], // Can attach PDF files directly
   });
-  
+
   return message;
 }
 ```
@@ -118,24 +120,25 @@ async function addDocumentToThread(threadId, documentContent, fileName) {
 async function analyzeDocumentWithMessages(threadId, assistantId, query) {
   // Add user query to thread
   await openai.beta.threads.messages.create(threadId, {
-    role: "user",
-    content: query
+    role: 'user',
+    content: query,
   });
-  
+
   // Run analysis
   const run = await openai.beta.threads.runs.create(threadId, {
     assistant_id: assistantId,
-    instructions: "Focus on legal violations, timeline, and case strategy implications."
+    instructions:
+      'Focus on legal violations, timeline, and case strategy implications.',
   });
-  
+
   // Wait for completion and get response
   let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
-  
+
   while (runStatus.status !== 'completed') {
     await new Promise(resolve => setTimeout(resolve, 1000));
     runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
   }
-  
+
   // Get the assistant's response
   const messages = await openai.beta.threads.messages.list(threadId);
   return messages.data[0]; // Latest message from assistant
@@ -157,16 +160,20 @@ app.post('/api/case/create-thread', async (req, res) => {
 });
 
 // 2. Enhanced document analysis with thread context
-app.post('/api/analyze-with-thread', upload.single('file'), async (req, res) => {
-  const { threadId } = req.body;
-  // ... extract document text ...
-  const analysis = await analyzeDocumentWithMessages(
-    threadId, 
-    LEGAL_ASSISTANT_ID, 
-    `Analyze this document for legal issues: ${textContent}`
-  );
-  res.json({ analysis, threadId });
-});
+app.post(
+  '/api/analyze-with-thread',
+  upload.single('file'),
+  async (req, res) => {
+    const { threadId } = req.body;
+    // ... extract document text ...
+    const analysis = await analyzeDocumentWithMessages(
+      threadId,
+      LEGAL_ASSISTANT_ID,
+      `Analyze this document for legal issues: ${textContent}`
+    );
+    res.json({ analysis, threadId });
+  }
+);
 
 // 3. List thread messages (case history)
 app.get('/api/case/:threadId/messages', async (req, res) => {
@@ -179,7 +186,7 @@ app.post('/api/case/:threadId/summary', async (req, res) => {
   const summary = await analyzeDocumentWithMessages(
     req.params.threadId,
     LEGAL_ASSISTANT_ID,
-    "Generate a comprehensive case summary including all constitutional violations, timeline, and recommended legal strategy based on our entire conversation."
+    'Generate a comprehensive case summary including all constitutional violations, timeline, and recommended legal strategy based on our entire conversation.'
   );
   res.json({ summary });
 });
@@ -208,8 +215,8 @@ app.post('/api/case/:threadId/summary', async (req, res) => {
       "1st Amendment speech suppression"
     ],
     "timeline": [
-      {"date": "2023-01-15", "event": "Initial CPS contact"},
-      {"date": "2023-03-20", "event": "Court hearing scheduled"}
+      { "date": "2023-01-15", "event": "Initial CPS contact" },
+      { "date": "2023-03-20", "event": "Court hearing scheduled" }
     ],
     "caseStrategy": "Focus on due process violations...",
     "contextFromPreviousDocuments": true
