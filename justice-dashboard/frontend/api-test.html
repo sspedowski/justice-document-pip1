@@ -190,6 +190,26 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           >
         </p>
 
+        <h3>Option 3: Your Wolfram Batch Format</h3>
+        <p>Upload your exact <code>wolfram_batch.json</code> format:</p>
+        <textarea
+          id="wolframBatchQueries"
+          rows="4"
+          style="
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          "
+          placeholder='{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Calculate duration between January 15, 2023 and March 20, 2023"}]}
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Statistical analysis of 5 constitutional violations"}]}
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates"}]}'
+        >{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Calculate duration between January 15, 2023 and March 20, 2023"}]}
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Statistical analysis of 5 constitutional violations over 6 months"}]}
+{"model": "gpt-4-0613", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates: 1/15/2023, 2/20/2023, 3/15/2023"}]}</textarea>
+        <button onclick="processWolframBatch()">Process Wolfram Format</button>
+
         <div id="batchResults"></div>
       </div>
 
@@ -462,6 +482,63 @@ Pattern analysis of legal terms: due process, constitutional, violation</textare
           `;
         } catch (error) {
           resultsDiv.innerHTML = `<div class="error">Batch file processing failed: ${error.message}</div>`;
+        }
+      }
+
+      async function processWolframBatch() {
+        const queriesText = document.getElementById('wolframBatchQueries').value;
+        const resultsDiv = document.getElementById('batchResults');
+
+        if (!queriesText.trim()) {
+          resultsDiv.innerHTML =
+            '<div class="error">Please enter some queries in Wolfram format</div>';
+          return;
+        }
+
+        const queries = queriesText
+          .trim()
+          .split('\n')
+          .filter(q => q.trim());
+        resultsDiv.innerHTML = `<div class="status-pending">Processing ${queries.length} Wolfram batch queries...</div>`;
+
+        try {
+          const response = await fetch('/api/batch-analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ queries, analysisType: 'wolfram-batch' }),
+          });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const data = await response.json();
+          let resultsHTML = `
+            <div class="success">Wolfram batch processing completed!</div>
+            <h3>Summary:</h3>
+            <ul>
+              <li><strong>Total Queries:</strong> ${data.totalQueries}</li>
+              <li><strong>Successful:</strong> ${data.summary.successful}</li>
+              <li><strong>Failed:</strong> ${data.summary.failed}</li>
+              <li><strong>Execution Time:</strong> ${data.summary.executionTime}ms</li>
+            </ul>
+            <h3>Detailed Results:</h3>
+          `;
+
+          data.results.forEach((result, index) => {
+            const statusClass =
+              result.status === 'success' ? 'success' : 'error';
+            resultsHTML += `
+              <div class="section">
+                <h4>Query ${result.queryIndex}: <span class="${statusClass}">${result.status}</span></h4>
+                <p><strong>Query:</strong> ${result.query}</p>
+                <div class="result">${JSON.stringify(result.wolfram, null, 2)}</div>
+                ${result.aiInterpretation ? `<p><strong>AI Context:</strong> ${result.aiInterpretation}</p>` : ''}
+              </div>
+            `;
+          });
+
+          resultsDiv.innerHTML = resultsHTML;
+        } catch (error) {
+          resultsDiv.innerHTML = `<div class="error">Wolfram batch processing failed: ${error.message}</div>`;
         }
       }
 
