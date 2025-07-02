@@ -49,11 +49,9 @@ if (!fs.existsSync(publicUploadsDir)) {
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 
-// Serve frontend build files
-// Serve frontend build files
+// Serve frontend files
+app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
-// Serve uploaded files statically
-app.use('/uploads', express.static(uploadsDir));
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
