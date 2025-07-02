@@ -1,0 +1,6 @@
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Calculate duration between legal dates: January 15, 2023 and March 20, 2023"}]}
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Statistical analysis of 5 constitutional violations over 6 months"}]}
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Timeline analysis of court hearing dates: 1/15/2023, 2/20/2023, 3/15/2023"}]}
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Frequency analysis of legal terms: due process, constitutional violation, hearing"}]}
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Calculate average time between CPS complaints filed monthly"}]}
+{"model": "gpt-4", "messages": [{"role": "user", "content": "Analyze pattern in child support payment amounts: $450, $500, $475, $525"}]}
