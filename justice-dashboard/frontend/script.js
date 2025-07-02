@@ -453,7 +453,8 @@ async function handleFiles(e) {
 
     // Update progress status
     if (uploadStatus) uploadStatus.textContent = `Processing ${fname}...`;
-    if (uploadDetails) uploadDetails.textContent = `Analyzing document content...`;
+    if (uploadDetails)
+      uploadDetails.textContent = `Analyzing document content...`;
 
     // 6.1 Duplicate detection (hash)
     const hash = await sha256(file);
@@ -470,16 +471,18 @@ async function handleFiles(e) {
         hash,
       };
       addRowToTable(duplicateRow);
-      
+
       // Update progress for skipped files
       completed++;
       if (progressBar) {
         const progress = (completed / files.length) * 100;
         progressBar.style.width = `${progress}%`;
       }
-      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
-      if (uploadDetails) uploadDetails.textContent = `Skipped duplicate: ${fname}`;
-      
+      if (uploadCount)
+        uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadDetails)
+        uploadDetails.textContent = `Skipped duplicate: ${fname}`;
+
       continue;
     }
 
@@ -551,9 +554,9 @@ async function handleFiles(e) {
         const progress = (completed / files.length) * 100;
         progressBar.style.width = `${progress}%`;
       }
-      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadCount)
+        uploadCount.textContent = `${completed}/${files.length} files`;
       if (uploadDetails) uploadDetails.textContent = `Completed: ${fname}`;
-
     } catch (err) {
       console.error('Upload failed', err);
 
@@ -582,14 +585,17 @@ async function handleFiles(e) {
         const progress = (completed / files.length) * 100;
         progressBar.style.width = `${progress}%`;
       }
-      if (uploadCount) uploadCount.textContent = `${completed}/${files.length} files`;
-      if (uploadDetails) uploadDetails.textContent = `Error processing ${fname}: ${errorMessage}`;
+      if (uploadCount)
+        uploadCount.textContent = `${completed}/${files.length} files`;
+      if (uploadDetails)
+        uploadDetails.textContent = `Error processing ${fname}: ${errorMessage}`;
     }
   }
 
   // Hide progress bar after completion
   if (progressDiv && completed === files.length) {
-    if (uploadStatus) uploadStatus.textContent = 'All files processed successfully!';
+    if (uploadStatus)
+      uploadStatus.textContent = 'All files processed successfully!';
     setTimeout(() => {
       progressDiv.classList.add('hidden');
       if (progressBar) progressBar.style.width = '0%';
