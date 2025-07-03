@@ -9,6 +9,7 @@
     "watch": "npx tailwindcss -i ./client/style.css -o ./client/output.css --watch"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
