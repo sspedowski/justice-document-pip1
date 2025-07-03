@@ -181,7 +181,6 @@ const DashboardAuth = {
       }
     }, 100);
   },
-  },
 
   loadDashboard() {
     // Instead of replacing the entire body, just replace the app div content
