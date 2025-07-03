@@ -956,3 +956,89 @@ window.manualInit = function() {
   console.log('Manual initialization...');
   initializeJusticeDashboard();
 };
+
+// API Helper Functions for Authenticated Requests
+const ApiHelper = {
+  // Make authenticated API requests
+  async makeRequest(url, options = {}) {
+    const defaultOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+      },
+      ...options
+    };
+    
+    // Merge headers if provided
+    if (options.headers) {
+      defaultOptions.headers = {
+        ...defaultOptions.headers,
+        ...options.headers
+      };
+    }
+    
+    try {
+      const response = await fetch(url, defaultOptions);
+      
+      // Handle unauthorized responses
+      if (response.status === 401) {
+        DashboardAuth.logout();
+        throw new Error('Session expired. Please log in again.');
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  },
+  
+  // Upload file with authentication
+  async uploadFile(file, additionalData = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Add any additional data
+    Object.keys(additionalData).forEach(key => {
+      formData.append(key, additionalData[key]);
+    });
+    
+    return this.makeRequest('/api/summarize', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type for FormData, let browser set it
+        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+      }
+    });
+  },
+  
+  // Get user profile
+  async getProfile() {
+    const response = await this.makeRequest('/api/profile');
+    return response.json();
+  },
+  
+  // Admin: Get all users
+  async getUsers() {
+    const response = await this.makeRequest('/api/admin/users');
+    return response.json();
+  },
+  
+  // Admin: Add user
+  async addUser(userData) {
+    const response = await this.makeRequest('/api/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+    return response.json();
+  },
+  
+  // Admin: Delete user
+  async deleteUser(userId) {
+    const response = await this.makeRequest(`/api/admin/users/${userId}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  }
+};
