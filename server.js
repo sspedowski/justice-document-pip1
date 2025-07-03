@@ -50,7 +50,9 @@ app.use(session({
 }));
 
 // Static files
+app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "client")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // File-based user storage for security
 const usersPath = path.join(__dirname, 'users.json');
