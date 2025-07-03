@@ -43,7 +43,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
@@ -57,7 +57,7 @@ const users = [
   {
     id: 1,
     username: "admin",
-    password: bcrypt.hashSync("admin123", 10), // Hash the password
+    password: bcrypt.hashSync("admin123", 10),
     role: "admin"
   },
   {
@@ -86,6 +86,8 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// ============= API ROUTES =============
+
 // Login endpoint
 app.post("/api/login", loginLimiter, async (req, res) => {
   try {
@@ -95,26 +97,22 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       return res.status(400).json({ error: "Username and password required" });
     }
 
-    // Find user
     const user = users.find(u => u.username === username);
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
       JWT_SECRET,
       { expiresIn: "24h" }
     );
 
-    // Set session
     req.session.user = {
       id: user.id,
       username: user.username,
@@ -146,7 +144,7 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-// Protected route example
+// Profile endpoint
 app.get("/api/profile", authenticateToken, (req, res) => {
   res.json({
     user: req.user
@@ -179,7 +177,7 @@ function ocrPdf(pdfPath) {
   });
 }
 
-// Protected PDF summarize endpoint
+// PDF summarize endpoint
 app.post("/api/summarize", authenticateToken, upload.single("file"), async (req, res) => {
   const pdfPath = req.file.path;
   try {
@@ -204,11 +202,32 @@ app.post("/api/summarize", authenticateToken, upload.single("file"), async (req,
   }
 });
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Error handling endpoint
+app.post("/api/report-error", (req, res) => {
+  console.error("Client error:", req.body);
+  res.json({ success: true, message: "Error reported" });
+});
+
+// ============= FRONTEND ROUTES =============
+
 // Serve frontend
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "index.html"));
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`✅ Secure Justice Dashboard running on http://localhost:${PORT}`);
+  console.log(`✅ Justice Dashboard API running on http://localhost:${PORT}`);
+  console.log(`📋 API endpoints available:`);
+  console.log(`   POST /api/login`);
+  console.log(`   POST /api/logout`);
+  console.log(`   GET  /api/profile`);
+  console.log(`   POST /api/summarize`);
+  console.log(`   GET  /api/health`);
+  console.log(`   POST /api/report-error`);
 });
