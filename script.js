@@ -227,7 +227,7 @@ const DashboardAuth = {
               <!-- Progress bar for bulk processing -->
               <div id="bulkProgress" class="hidden">
                 <div class="bg-gray-200 rounded-full h-2.5 mb-2">
-                  <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                  <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 progress-0"></div>
                 </div>
                 <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
               </div>
@@ -726,9 +726,15 @@ function initializeJusticeDashboard() {
       const file = files[i];
       bulkProgress = i + 1;
       
-      // Update progress
+      // Update progress using CSS classes (CSP-compliant)
       const percentage = (bulkProgress / bulkTotal) * 100;
-      progressBar.style.width = `${percentage}%`;
+      const progressClass = `progress-${Math.round(percentage / 5) * 5}`;
+      
+      // Remove existing progress classes
+      progressBar.className = progressBar.className.replace(/progress-\d+/g, '');
+      // Add new progress class
+      progressBar.classList.add(progressClass);
+      
       progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
       
       try {
