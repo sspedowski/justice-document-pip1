@@ -1,49 +1,73 @@
-/* Justice Dashboard – front-end logic v1.2.0 ✨ WITH DASHBOARD ACCESS */
+/* Justice Dashboard – front-end logic v2.0.0 ✨ WITH SECURE API AUTH */
 
 // Global variables for dashboard access
 let currentUser = null;
 let isAuthenticated = false;
+let authToken = null;
 let isProcessingBulk = false;
 let bulkProgress = 0;
 let bulkTotal = 0;
 
-/********** Dashboard Access System **********/
+/********** Secure Dashboard Access System **********/
 const DashboardAuth = {
-  users: [
-    { 
-      username: 'admin', 
-      password: 'justice2024', 
-      role: 'admin',
-      fullName: 'System Administrator'
-    },
-    { 
-      username: 'stephanie', 
-      password: 'spedowski2024', 
-      role: 'user',
-      fullName: 'Stephanie Spedowski'
-    },
-    { 
-      username: 'legal', 
-      password: 'legal123', 
-      role: 'user',
-      fullName: 'Legal Team'
-    }
-  ],
+  // Secure API-based authentication
+  async authenticate(username, password) {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-  authenticate(username, password) {
-    const user = this.users.find(u => u.username === username && u.password === password);
-    if (user) {
-      currentUser = { ...user };
-      delete currentUser.password; // Remove password from memory
-      isAuthenticated = true;
-      localStorage.setItem('justiceAuth', JSON.stringify(currentUser));
-      return true;
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      if (data.success) {
+        currentUser = data.user;
+        authToken = data.token;
+        isAuthenticated = true;
+        
+        // Store auth info securely
+        localStorage.setItem('justiceAuth', JSON.stringify({
+          user: currentUser,
+          token: authToken,
+          timestamp: Date.now()
+        }));
+        
+        return { success: true, user: currentUser };
+      }
+      
+      return { success: false, error: data.error || 'Login failed' };
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return { success: false, error: error.message };
     }
-    return false;
   },
 
-  logout() {
+  async logout() {
+    try {
+      // Call server logout endpoint
+      if (authToken) {
+        await fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
+    // Clear local state
     currentUser = null;
+    authToken = null;
     isAuthenticated = false;
     localStorage.removeItem('justiceAuth');
     this.showLoginForm();
@@ -52,11 +76,25 @@ const DashboardAuth = {
   checkAuth() {
     const saved = localStorage.getItem('justiceAuth');
     if (saved) {
-      currentUser = JSON.parse(saved);
-      isAuthenticated = true;
-      return true;
+      try {
+        const authData = JSON.parse(saved);
+        
+        // Check if token is less than 24 hours old
+        const isValid = authData.timestamp && (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000;
+        
+        if (isValid && authData.user && authData.token) {
+          currentUser = authData.user;
+          authToken = authData.token;
+          isAuthenticated = true;
+          return true;
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
     }
     
+    // Clear invalid auth data
+    localStorage.removeItem('justiceAuth');
     return false;
   },
 
@@ -82,7 +120,7 @@ const DashboardAuth = {
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             
-            <button type="submit" 
+            <button type="submit" id="loginBtn"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
               Access Dashboard
             </button>
@@ -91,10 +129,8 @@ const DashboardAuth = {
           <div id="loginError" class="mt-4 text-red-600 text-sm hidden"></div>
           
           <div class="mt-6 text-xs text-gray-500 text-center">
-            <p><strong>Demo Accounts:</strong></p>
-            <p>admin / justice2024 (Full Access)</p>
-            <p>stephanie / spedowski2024 (User Access)</p>
-            <p>legal / legal123 (User Access)</p>
+            <p><strong>Secure Authentication</strong></p>
+            <p>Contact administrator for access credentials</p>
           </div>
         </div>
       </div>
