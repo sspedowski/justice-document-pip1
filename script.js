@@ -170,143 +170,144 @@ const DashboardAuth = {
   },
 
   loadDashboard() {
-    // Load the main dashboard HTML
-    document.body.innerHTML = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Justice Dashboard</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-      </head>
-      <body class="bg-gray-100">
-        <!-- Header with user info and logout -->
-        <header class="bg-white shadow-sm border-b">
-          <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-900">Justice Dashboard</h1>
-            <div class="flex items-center space-x-4">
-              <span class="text-sm text-gray-600">Welcome, ${currentUser.fullName}</span>
-              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${currentUser.role}</span>
-              <button onclick="DashboardAuth.logout()" 
-                class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
-                Logout
+    // Instead of replacing the entire body, just replace the app div content
+    const appDiv = document.getElementById('app');
+    if (!appDiv) {
+      console.error('App div not found');
+      return;
+    }
+
+    // CSP-compliant dashboard content (no inline scripts or external CDNs)
+    appDiv.innerHTML = `
+      <!-- Header with user info and logout -->
+      <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <h1 class="text-xl font-bold text-gray-900">Justice Dashboard</h1>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-600">Welcome, ${currentUser.fullName || currentUser.username}</span>
+            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${currentUser.role}</span>
+            <button id="logoutBtn" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="max-w-4xl mx-auto p-6">
+        <!-- Daily Scripture Section -->
+        <div class="bg-white rounded shadow p-6 mb-6">
+          <h2 class="text-lg font-semibold mb-4">📖 Daily Scripture & Prayer</h2>
+          <blockquote class="bg-blue-100 p-4 italic mb-6">
+            Proverbs 21:15 - Justice brings joy to the righteous.
+          </blockquote>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">⚡ Your Prayer for Today</label>
+            <textarea id="docInput" placeholder="Write your prayer here..." 
+              class="w-full border p-2 mb-6 rounded shadow"></textarea>
+          </div>
+        </div>
+
+        <!-- Justice Dashboard Section -->
+        <div class="bg-white rounded shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Justice Dashboard</h2>
+          
+          <!-- File Upload and Controls -->
+          <div class="mb-6 space-y-4">
+            <div>
+              <input type="file" id="fileInput" accept=".pdf" multiple
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+              <small class="text-gray-600">Select multiple PDF files for bulk processing</small>
+            </div>
+            
+            <!-- Progress bar for bulk processing -->
+            <div id="bulkProgress" class="hidden">
+              <div class="bg-gray-200 rounded-full h-2.5 mb-2">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 progress-0"></div>
+              </div>
+              <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
+            </div>
+            
+            <div class="flex space-x-4">
+              <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Process Selected Files
+              </button>
+              <button id="bulkProcessBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                Bulk Process (Skip Duplicates)
+              </button>
+              <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Export CSV
+              </button>
+              <button id="askLawGpt" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                Ask Law GPT
               </button>
             </div>
           </div>
-        </header>
 
-        <div class="max-w-4xl mx-auto p-6">
-          <!-- Daily Scripture Section -->
-          <div class="bg-white rounded shadow p-6 mb-6">
-            <h2 class="text-lg font-semibold mb-4">📖 Daily Scripture & Prayer</h2>
-            <blockquote class="bg-blue-100 p-4 italic mb-6">
-              Proverbs 21:15 - Justice brings joy to the righteous.
-            </blockquote>
-            
-            <div class="mb-4">
-              <label class="block text-sm font-medium mb-2">⚡ Your Prayer for Today</label>
-              <textarea id="docInput" placeholder="Write your prayer here..." 
-                class="w-full border p-2 mb-6 rounded shadow"></textarea>
+          <!-- Summary Display -->
+          <div id="summaryBox" class="bg-gray-50 border p-4 rounded mb-6 min-h-[100px]">
+            Summary will appear here...
+          </div>
+
+          <!-- Dashboard Stats -->
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-blue-50 p-4 rounded">
+              <h3 class="font-semibold text-blue-800">Total Cases</h3>
+              <p id="totalCases" class="text-2xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded">
+              <h3 class="font-semibold text-green-800">Active Cases</h3>
+              <p id="activeCases" class="text-2xl font-bold text-green-600">0</p>
             </div>
           </div>
 
-          <!-- Justice Dashboard Section -->
-          <div class="bg-white rounded shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Justice Dashboard</h2>
-            
-            <!-- File Upload and Controls -->
-            <div class="mb-6 space-y-4">
-              <div>
-                <input type="file" id="fileInput" accept=".pdf" multiple
-                  class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                <small class="text-gray-600">Select multiple PDF files for bulk processing</small>
-              </div>
-              
-              <!-- Progress bar for bulk processing -->
-              <div id="bulkProgress" class="hidden">
-                <div class="bg-gray-200 rounded-full h-2.5 mb-2">
-                  <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 progress-0"></div>
-                </div>
-                <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
-              </div>
-              
-              <div class="flex space-x-4">
-                <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Process Selected Files
-                </button>
-                <button id="bulkProcessBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
-                  Bulk Process (Skip Duplicates)
-                </button>
-                </button>
-                <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                  Export CSV
-                </button>
-                <button id="askLawGpt" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-                  Ask Law GPT
-                </button>
-              </div>
-            </div>
+          <!-- Filters -->
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <select id="categoryFilter" class="border p-2 rounded">
+              <option value="">All Categories</option>
+            </select>
+            <select id="misconductFilter" class="border p-2 rounded">
+              <option value="">All Types</option>
+            </select>
+          </div>
 
-            <!-- Summary Display -->
-            <div id="summaryBox" class="bg-gray-50 border p-4 rounded mb-6 min-h-[100px]">
-              Summary will appear here...
-            </div>
-
-            <!-- Dashboard Stats -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-              <div class="bg-blue-50 p-4 rounded">
-                <h3 class="font-semibold text-blue-800">Total Cases</h3>
-                <p id="totalCases" class="text-2xl font-bold text-blue-600">0</p>
-              </div>
-              <div class="bg-green-50 p-4 rounded">
-                <h3 class="font-semibold text-green-800">Active Cases</h3>
-                <p id="activeCases" class="text-2xl font-bold text-green-600">0</p>
-              </div>
-            </div>
-
-            <!-- Filters -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <select id="categoryFilter" class="border p-2 rounded">
-                <option value="">All Categories</option>
-              </select>
-              <select id="misconductFilter" class="border p-2 rounded">
-                <option value="">All Types</option>
-              </select>
-            </div>
-
-            <!-- Cases Table -->
-            <div class="overflow-x-auto">
-              <table id="trackerTable" class="w-full border-collapse border border-gray-300">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="border border-gray-300 p-2">Category</th>
-                    <th class="border border-gray-300 p-2">Child</th>
-                    <th class="border border-gray-300 p-2">Misconduct</th>
-                    <th class="border border-gray-300 p-2">Summary</th>
-                    <th class="border border-gray-300 p-2">Tags</th>
-                    <th class="border border-gray-300 p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="results">
-                  <!-- Dynamic rows will be added here -->
-                </tbody>
-              </table>
-            </div>
+          <!-- Cases Table -->
+          <div class="overflow-x-auto">
+            <table id="trackerTable" class="w-full border-collapse border border-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="border border-gray-300 p-2">Category</th>
+                  <th class="border border-gray-300 p-2">Child</th>
+                  <th class="border border-gray-300 p-2">Misconduct</th>
+                  <th class="border border-gray-300 p-2">Summary</th>
+                  <th class="border border-gray-300 p-2">Tags</th>
+                  <th class="border border-gray-300 p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="results">
+                <!-- Dynamic rows will be added here -->
+              </tbody>
+            </table>
           </div>
         </div>
-      </body>
-      </html>
+      </div>
     `;
 
-    // Initialize the dashboard functionality
+    // Initialize the dashboard functionality without inline scripts
     this.initializeDashboard();
   },
 
   initializeDashboard() {
     // Wait a moment for DOM to be ready, then initialize
     setTimeout(() => {
+      // Add logout event listener
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          this.logout();
+        });
+      }
+      
       // Re-run the main dashboard code
       initializeJusticeDashboard();
     }, 100);
