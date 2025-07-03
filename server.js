@@ -52,21 +52,85 @@ app.use(session({
 // Static files
 app.use(express.static(path.join(__dirname, "client")));
 
-// In-memory user storage (replace with database in production)
-const users = [
-  {
-    id: 1,
-    username: "admin",
-    password: bcrypt.hashSync("admin123", 10),
-    role: "admin"
-  },
-  {
-    id: 2,
-    username: "user",
-    password: bcrypt.hashSync("user123", 10),
-    role: "user"
+// File-based user storage for security
+const usersPath = path.join(__dirname, 'users.json');
+
+// Load users from file
+function getUsers() {
+  if (!fs.existsSync(usersPath)) {
+    // Create initial users file if it doesn't exist
+    const initialUsers = [
+      {
+        id: 1,
+        username: "admin",
+        password: bcrypt.hashSync("justice2025", 10),
+        role: "admin",
+        fullName: "System Administrator",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        username: "stephanie",
+        password: bcrypt.hashSync("spedowski2024", 10),
+        role: "user",
+        fullName: "Stephanie Spedowski",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 3,
+        username: "legal",
+        password: bcrypt.hashSync("legal123", 10),
+        role: "user",
+        fullName: "Legal Team",
+        createdAt: new Date().toISOString()
+      }
+    ];
+    saveUsers(initialUsers);
+    return initialUsers;
   }
-];
+  try {
+    return JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+  } catch (error) {
+    console.error('Error reading users file:', error);
+    return [];
+  }
+}
+
+// Save users to file
+function saveUsers(users) {
+  try {
+    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
+  } catch (error) {
+    console.error('Error saving users file:', error);
+  }
+}
+
+// Add user function (for admin use)
+async function addUser(username, password, role = 'user', fullName = '') {
+  const users = getUsers();
+  const existingUser = users.find(u => u.username === username);
+  
+  if (existingUser) {
+    throw new Error('Username already exists');
+  }
+  
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = {
+    id: Math.max(...users.map(u => u.id), 0) + 1,
+    username,
+    password: hashedPassword,
+    role,
+    fullName,
+    createdAt: new Date().toISOString()
+  };
+  
+  users.push(newUser);
+  saveUsers(users);
+  return newUser;
+}
+
+// Initialize users (load from file)
+const users = getUsers();
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
@@ -97,6 +161,7 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       return res.status(400).json({ error: "Username and password required" });
     }
 
+    const users = getUsers(); // Get fresh users from file
     const user = users.find(u => u.username === username);
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -116,7 +181,8 @@ app.post("/api/login", loginLimiter, async (req, res) => {
     req.session.user = {
       id: user.id,
       username: user.username,
-      role: user.role
+      role: user.role,
+      fullName: user.fullName
     };
 
     res.json({
@@ -125,7 +191,8 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        role: user.role
+        role: user.role,
+        fullName: user.fullName
       }
     });
   } catch (error) {
@@ -149,6 +216,90 @@ app.get("/api/profile", authenticateToken, (req, res) => {
   res.json({
     user: req.user
   });
+});
+
+// Admin-only middleware
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
+};
+
+// Admin: Add new user
+app.post("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { username, password, role = 'user', fullName = '' } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+    
+    const newUser = await addUser(username, password, role, fullName);
+    const userResponse = { ...newUser };
+    delete userResponse.password; // Never send password back
+    
+    res.json({
+      success: true,
+      message: "User created successfully",
+      user: userResponse
+    });
+  } catch (error) {
+    console.error("Add user error:", error);
+    if (error.message === 'Username already exists') {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Admin: List all users
+app.get("/api/admin/users", authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const users = getUsers();
+    const usersResponse = users.map(user => {
+      const userCopy = { ...user };
+      delete userCopy.password; // Never send passwords
+      return userCopy;
+    });
+    
+    res.json({
+      success: true,
+      users: usersResponse
+    });
+  } catch (error) {
+    console.error("List users error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Admin: Delete user
+app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const users = getUsers();
+    
+    // Prevent deleting yourself
+    if (userId === req.user.id) {
+      return res.status(400).json({ error: "Cannot delete your own account" });
+    }
+    
+    const updatedUsers = users.filter(user => user.id !== userId);
+    
+    if (updatedUsers.length === users.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    saveUsers(updatedUsers);
+    
+    res.json({
+      success: true,
+      message: "User deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // File upload configuration
