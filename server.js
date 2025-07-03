@@ -133,6 +133,13 @@ function saveUsers(users) {
 
 // Add user function (for admin use)
 async function addUser(username, password, role = 'user', fullName = '') {
+  // Input validation
+  if (!username || !password) {
+    throw new Error('Username and password are required');
+  }
+  if (password.length < 8) {
+    throw new Error('Password must be at least 8 characters long');
+  }
   const users = getUsers();
   const existingUser = users.find(u => u.username === username);
   

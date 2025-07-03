@@ -99,10 +99,15 @@ const DashboardAuth = {
   },
 
   showLoginForm() {
+    console.log('showLoginForm() called');
     // Use the existing app div instead of replacing the entire body
     const appDiv = document.getElementById('app');
+    console.log('App div found in showLoginForm?', !!appDiv);
+    
     if (!appDiv) {
       console.error('App div not found for login form');
+      console.log('Available elements with IDs:', 
+        Array.from(document.querySelectorAll('[id]')).map(el => el.id));
       return;
     }
 
