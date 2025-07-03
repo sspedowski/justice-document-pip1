@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Justice Dashboard - Secure Access</title>
+  <meta name="cache-control" content="no-cache">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
+  <link rel="stylesheet" href="output.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Authentication and Dashboard will be loaded here by JavaScript -->
+  <div id="app">
+    <div class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading Justice Dashboard...</p>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="script.js?v=2025070201"></script>
+  <script>
+    // Initialize the dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication status
+      if (DashboardAuth.checkAuth()) {
+        // User is logged in, load dashboard
+        DashboardAuth.loadDashboard();
+      } else {
+        // User needs to log in
+        DashboardAuth.showLoginForm();
+      }
+    });
+  </script>
+</body>
+</html>
