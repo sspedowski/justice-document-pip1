@@ -1,15 +1,36 @@
-// Dashboard Initialization - External File for CSP Compliance
-document.addEventListener('DOMContentLoaded', function() {
-  // Check authentication status
-  if (typeof DashboardAuth !== 'undefined') {
-    if (DashboardAuth.checkAuth()) {
-      // User is logged in, load dashboard
-      DashboardAuth.loadDashboard();
+// Dashboard Initialization - Safe and CSP Compliant
+window.addEventListener('DOMContentLoaded', function() {
+  console.log('Dashboard initializing...');
+  
+  // Wait a moment for all scripts to load
+  setTimeout(function() {
+    if (typeof DashboardAuth !== 'undefined' && DashboardAuth.checkAuth) {
+      console.log('DashboardAuth loaded, checking authentication...');
+      
+      try {
+        if (DashboardAuth.checkAuth()) {
+          console.log('User authenticated, loading dashboard...');
+          DashboardAuth.loadDashboard();
+        } else {
+          console.log('User not authenticated, showing login form...');
+          DashboardAuth.showLoginForm();
+        }
+      } catch (error) {
+        console.error('Error during authentication check:', error);
+        // Fallback: show login form
+        DashboardAuth.showLoginForm();
+      }
     } else {
-      // User needs to log in
-      DashboardAuth.showLoginForm();
+      console.error('DashboardAuth not loaded or missing checkAuth method');
+      // Show a basic error message
+      document.getElementById('app').innerHTML = `
+        <div class="min-h-screen flex items-center justify-center">
+          <div class="text-center">
+            <h1 class="text-2xl font-bold text-red-600 mb-4">Loading Error</h1>
+            <p class="text-gray-600">Please refresh the page</p>
+          </div>
+        </div>
+      `;
     }
-  } else {
-    console.error('DashboardAuth not loaded');
-  }
+  }, 100);
 });

@@ -17,22 +17,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key-change-this";
 
-// Security middleware
+// Security middleware - Strict CSP for local assets only
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for dynamic content
-      imgSrc: ["'self'", "data:", "blob:"], // Allow data URLs and blob URLs for images
-      fontSrc: ["'self'", "data:"],
+      styleSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      fontSrc: ["'self'"],
       connectSrc: ["'self'"],
       mediaSrc: ["'self'"],
       objectSrc: ["'none'"],
-      childSrc: ["'self'"],
-      frameSrc: ["'self'"],
-      workerSrc: ["'self'", "blob:"], // Allow worker scripts
-      manifestSrc: ["'self'"]
+      childSrc: ["'none'"],
+      frameSrc: ["'none'"],
+      workerSrc: ["'self'", "blob:"],
+      manifestSrc: ["'self'"],
+      baseUri: ["'self'"]
     }
   }
 }));
