@@ -99,7 +99,14 @@ const DashboardAuth = {
   },
 
   showLoginForm() {
-    document.body.innerHTML = `
+    // Use the existing app div instead of replacing the entire body
+    const appDiv = document.getElementById('app');
+    if (!appDiv) {
+      console.error('App div not found for login form');
+      return;
+    }
+
+    appDiv.innerHTML = `
       <div class="min-h-screen bg-gray-100 flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-6">
           <div class="text-center mb-6">
@@ -136,37 +143,44 @@ const DashboardAuth = {
       </div>
     `;
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('loginError');
-      const loginBtn = document.getElementById('loginBtn');
+    // Wait for DOM to be updated, then add event listener
+    setTimeout(() => {
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          const errorDiv = document.getElementById('loginError');
+          const loginBtn = document.getElementById('loginBtn');
 
-      // Show loading state
-      loginBtn.textContent = 'Authenticating...';
-      loginBtn.disabled = true;
-      errorDiv.classList.add('hidden');
+          // Show loading state
+          loginBtn.textContent = 'Authenticating...';
+          loginBtn.disabled = true;
+          errorDiv.classList.add('hidden');
 
-      try {
-        const result = await this.authenticate(username, password);
-        
-        if (result.success) {
-          this.loadDashboard();
-        } else {
-          errorDiv.textContent = result.error || 'Invalid username or password';
-          errorDiv.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        errorDiv.textContent = 'Connection error. Please try again.';
-        errorDiv.classList.remove('hidden');
-      } finally {
-        // Reset button state
-        loginBtn.textContent = 'Access Dashboard';
-        loginBtn.disabled = false;
+          try {
+            const result = await this.authenticate(username, password);
+            
+            if (result.success) {
+              this.loadDashboard();
+            } else {
+              errorDiv.textContent = result.error || 'Invalid username or password';
+              errorDiv.classList.remove('hidden');
+            }
+          } catch (error) {
+            console.error('Login error:', error);
+            errorDiv.textContent = 'Connection error. Please try again.';
+            errorDiv.classList.remove('hidden');
+          } finally {
+            // Reset button state
+            loginBtn.textContent = 'Access Dashboard';
+            loginBtn.disabled = false;
+          }
+        });
       }
-    });
+    }, 100);
+  },
   },
 
   loadDashboard() {
