@@ -213,6 +213,42 @@ app.post("/api/report-error", (req, res) => {
   res.json({ success: true, message: "Error reported" });
 });
 
+// Wolfram API endpoint
+app.post("/api/wolfram", authenticateToken, async (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: "Query parameter required" });
+    }
+
+    const WOLFRAM_APP_ID = process.env.WOLFRAM_APP_ID;
+    if (!WOLFRAM_APP_ID) {
+      return res.status(500).json({ error: "Wolfram API not configured" });
+    }
+
+    const wolframUrl = `http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
+    
+    const response = await fetch(wolframUrl);
+    const data = await response.json();
+    
+    if (data.queryresult && data.queryresult.success) {
+      res.json({
+        success: true,
+        result: data.queryresult
+      });
+    } else {
+      res.status(400).json({ 
+        error: "No results found",
+        details: data.queryresult?.error || "Unknown error"
+      });
+    }
+  } catch (error) {
+    console.error("Wolfram API error:", error);
+    res.status(500).json({ error: "Wolfram API request failed" });
+  }
+});
+
 // ============= FRONTEND ROUTES =============
 
 // Serve frontend
@@ -230,4 +266,5 @@ app.listen(PORT, () => {
   console.log(`   POST /api/summarize`);
   console.log(`   GET  /api/health`);
   console.log(`   POST /api/report-error`);
+  console.log(`   POST /api/wolfram`);
 });
