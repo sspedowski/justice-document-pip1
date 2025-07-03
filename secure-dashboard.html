@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Justice Dashboard - Secure Access</title>
   <meta name="cache-control" content="no-cache">
-  <!-- Use local Tailwind CSS instead of CDN -->
+  
+  <!-- LOCAL CSS ONLY - No CDN -->
   <link rel="stylesheet" href="output.css">
-  <!-- Use local PDF.js instead of CDN -->
-  <script src="pdf.min.js"></script>
+  
+  <!-- Favicon -->
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -22,9 +23,10 @@
     </div>
   </div>
 
-  <!-- Load all JavaScript externally -->
-  <script defer src="pdf-config.js"></script>
-  <script defer src="script.js?v=2025070201"></script>
-  <script defer src="dashboard-init.js"></script>
+  <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
+  <script src="pdf.min.js"></script>
+  <script src="pdf-config.js"></script>
+  <script src="script.js"></script>
+  <script src="dashboard-init.js"></script>
 </body>
 </html>
