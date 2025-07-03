@@ -136,17 +136,35 @@ const DashboardAuth = {
       </div>
     `;
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const errorDiv = document.getElementById('loginError');
+      const loginBtn = document.getElementById('loginBtn');
 
-      if (this.authenticate(username, password)) {
-        this.loadDashboard();
-      } else {
-        errorDiv.textContent = 'Invalid username or password';
+      // Show loading state
+      loginBtn.textContent = 'Authenticating...';
+      loginBtn.disabled = true;
+      errorDiv.classList.add('hidden');
+
+      try {
+        const result = await this.authenticate(username, password);
+        
+        if (result.success) {
+          this.loadDashboard();
+        } else {
+          errorDiv.textContent = result.error || 'Invalid username or password';
+          errorDiv.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = 'Connection error. Please try again.';
         errorDiv.classList.remove('hidden');
+      } finally {
+        // Reset button state
+        loginBtn.textContent = 'Access Dashboard';
+        loginBtn.disabled = false;
       }
     });
   },
