@@ -12,15 +12,15 @@
   <!-- Favicon -->
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-8">
+<body class="bg-gray-100 min-h-screen">
   <div id="app"></div>
-  <div class="bg-white shadow rounded-lg p-6 w-full max-w-xl space-y-4">
-    <!-- Textarea -->
-    <label for="docInput" class="block text-sm font-medium mb-1">Paste Document Text (optional)</label>
-    <textarea id="docInput" name="docInput" rows="6" class="w-full border rounded p-2 text-sm"></textarea>
 
-    <!-- Action buttons -->
-    <div class="flex flex-wrap gap-3 mt-3">
+  <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
+  <script src="pdf.min.js"></script>
+  <script src="pdf-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
       <button id="summarizeBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Generate Summary</button>
       <button id="exportBtn"   class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Export CSV</button>
       <button id="askLawGpt"   class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Ask Law GPT</button>
