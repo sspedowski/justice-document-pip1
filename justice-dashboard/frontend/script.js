@@ -699,24 +699,26 @@ function filterRows() {
   });
 }
 
-// ===== 7. Login form handling =====
+// Authentication handling
 document.addEventListener('DOMContentLoaded', () => {
-  const box = document.getElementById('loginBox');
-  const dash = document.getElementById('dashboard'); // wrap the main UI in a #dashboard div
-  const btn = document.getElementById('loginBtn');
+  const loginSection = document.getElementById('loginBox');
+  const dashboardSection = document.getElementById('dashboard');
+  const loginBtn = document.getElementById('loginBtn');
   const errLabel = document.getElementById('loginErr');
-
-  if (dash) dash.classList.add('hidden'); // hide dashboard until logged in
-
-  if (btn) {
-    btn.addEventListener('click', async () => {
-      console.log('Login button clicked');
+  const userDisplay = document.getElementById('userDisplay');
+  // Hide dashboard initially
+  if (dashboardSection) dashboardSection.style.display = 'none';
+  // Check for existing auth token
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    validateToken(token).then(valid => {
+      if (valid) showDashboard();
+    });
+  }
+  if (loginBtn) {
+    loginBtn.addEventListener('click', async () => {
       const username = document.getElementById('userInput').value;
       const password = document.getElementById('passInput').value;
-
-      console.log('Username entered:', username);
-      console.log('Password length:', password.length);
-
       if (!username || !password) {
         if (errLabel) {
           errLabel.textContent = 'Please enter both username and password';
@@ -724,24 +726,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
       }
-
-      const ok = await tryLogin(username, password);
-      if (ok) {
-        console.log('Login successful, showing dashboard');
-        if (box) box.classList.add('hidden');
-        if (dash) dash.classList.remove('hidden'); // show dashboard
+      const result = await tryLogin(username, password);
+      if (result.success) {
+        if (loginSection) loginSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.remove('hidden');
         if (errLabel) errLabel.classList.add('hidden');
       } else {
-        console.log('Login failed, showing error');
         if (errLabel) {
-          errLabel.textContent =
-            'Invalid username or password. Try: admin / justice2025';
+          errLabel.textContent = result.error || 'Invalid credentials';
           errLabel.classList.remove('hidden');
         }
       }
     });
   }
-
+});
   // Add Enter key support for login
   const userInput = document.getElementById('userInput');
   const passInput = document.getElementById('passInput');

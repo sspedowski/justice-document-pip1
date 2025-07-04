@@ -268,25 +268,9 @@ The main application logic is in `justice-dashboard/script.js`. Key functions:
 
 ### Static Hosting
 
-The application can be deployed to any static hosting service:
+## Firebase Deployment
 
-1. **Build CSS**:
-
-   ```powershell
-   npm run build:css
-   ```
-
-2. **Deploy files**:
-   - `justice-dashboard/index.html`
-   - `justice-dashboard/script.js`
-   - `justice-dashboard/dist/styles.css`
-
-3. **Supported platforms**:
-   - GitHub Pages
-   - Netlify
-   - Vercel
-   - AWS S3
-   - Any web server
+1. **Install Firebase CLI**:
 
 ### Server Deployment
 
