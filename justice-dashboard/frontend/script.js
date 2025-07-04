@@ -20,6 +20,9 @@
    • Toggle view for summary cards with legal significance indicators
    ---------------------------------------------------------------------- */
 
+// Import Firebase (will test connection automatically in dev mode)
+import { testFirebaseConnection } from './firebase-test.js';
+
 // ===== Configuration =====
 const CONFIG = {
   aiSummarization: false, // Set to true when OpenAI API key is configured
