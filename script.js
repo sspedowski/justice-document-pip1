@@ -1,24 +1,5 @@
-/* Justice Dashboard – front-end logic v2.0.0 ✨ WITH SECURE API AUTH */
-
-// Global variables for dashboard access
-let currentUser = null;
-let isAuthenticated = false;
-let authToken = null;
-let isProcessingBulk = false;
-let bulkProgress = 0;
-let bulkTotal = 0;
-
-/********** Secure Dashboard Access System **********/
-const DashboardAuth = {
-  // Secure API-based authentication
-  async authenticate(username, password) {
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuthAndRender();
       });
 
       const data = await response.json();
