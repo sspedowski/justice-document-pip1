@@ -1,11 +1,40 @@
-document.addEventListener('DOMContentLoaded', () => {
-  checkAuthAndRender();
-      });
+// Authentication Manager
+const DashboardAuth = {
+  // State
+  isAuthenticated: false,
+  currentUser: null,
+  authToken: null,
+  // Check authentication status
+  checkAuth() {
+    const saved = localStorage.getItem('justiceAuth');
+    if (saved) {
+      try {
+        const authData = JSON.parse(saved);
+        const isValid = authData.timestamp && 
+          (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000;
 
-      const data = await response.json();
-      
+        if (isValid && authData.user && authData.token) {
+          this.currentUser = authData.user;
+          this.authToken = authData.token;
+          this.isAuthenticated = true;
+          return true;
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    }
+    return false;
+  },
+  // Authenticate user
+  async authenticate(username, password) {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error('Login failed');
       }
 
       if (data.success) {
