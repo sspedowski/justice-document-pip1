@@ -1,13 +1,14 @@
-/* Justice Dashboard — clientfunction downloadCSV(rows) {
-  const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate'];
-  const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
-  const csv = [header.join(','), ...body].join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'tracker.csv'; a.click();
-  URL.revokeObjectURL(url);
-} (v2)
+/* Justice Dashboard — client-side (v2)
+   Function: downloadCSV(rows) {
+     const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate'];
+     const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
+     const csv = [header.join(','), ...body].join('\n');
+     const blob = new Blob([csv], {type:'text/csv'});
+     const url = URL.createObjectURL(blob);
+     const a = document.createElement('a');
+     a.href = url; a.download = 'tracker.csv'; a.click();
+     URL.revokeObjectURL(url);
+   }
    ----------------------------------------------------------------------
    Features added:
    • Multi‑file upload (drag‑and‑drop or file input)
@@ -132,6 +133,12 @@ function tagStatutes(doc) {
   if (text.includes('holiday lawyer') || text.includes('legal strategy'))
     statutes.push('Legal Strategy Evidence');
   if (text.includes('notice of hearing') || text.includes('hearing notice'))
+    statutes.push('Hearing Notice Evidence');
+
+  return statutes;
+}
+
+// ===== Authentication Management =====
 function showDashboard() {
   if (loginSection) loginSection.style.display = 'none';
   if (dashboardSection) {
