@@ -31,6 +31,13 @@ const CONFIG = {
   summaryCardsEnabled: true, // Enable per-document summary cards
 };
 
+// ===== Authentication State =====
+const auth = {
+  user: null,
+  token: null,
+  isAuthenticated: false
+};
+
 // ===== 1. Utility helpers =====
 const $ = sel => document.querySelector(sel);
 const $$ = sel => [...document.querySelectorAll(sel)];
