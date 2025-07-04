@@ -129,14 +129,40 @@ function tagStatutes(doc) {
   if (text.includes('holiday lawyer') || text.includes('legal strategy'))
     statutes.push('Legal Strategy Evidence');
   if (text.includes('notice of hearing') || text.includes('hearing notice'))
-    statutes.push('Due Process Notice Violation');
+function showDashboard() {
+  if (loginSection) loginSection.style.display = 'none';
+  if (dashboardSection) {
+    dashboardSection.style.display = 'block';
+    // Initialize dashboard components
+    initializeTracker();
+    updateDashboardStats();
+  }
 
-  // Enhanced Document-Specific Detection (as mentioned in requirements)
-  if (CONFIG.enhancedLegalTagging) {
-    if (text.includes('independent review of marsh cps')) {
-      statutes.push(
-        'MCL 722.628 – CPS Duty to Investigate',
-        'CAPTA – Federal Child Protection Standards',
+  if (userDisplay && auth.user) {
+    userDisplay.textContent = `Welcome, ${auth.user.username}`;
+  }
+  
+  // Ensure all dashboard elements are properly initialized
+  setTimeout(() => {
+    const trackerTable = document.getElementById('trackerTable');
+    if (trackerTable && !trackerTable.hasChildNodes()) {
+      initializeTracker(); // Retry initialization if table is empty
+    }
+  }, 100);
+}
+
+  if (userDisplay && auth.user) {
+    userDisplay.textContent = `Welcome, ${auth.user.username}`;
+  }
+  
+  // Ensure all dashboard elements are properly initialized
+  setTimeout(() => {
+    const trackerTable = document.getElementById('trackerTable');
+    if (trackerTable && !trackerTable.hasChildNodes()) {
+      initializeTracker(); // Retry initialization if table is empty
+    }
+  }, 100);
+}
         '42 U.S.C. § 1983 – Civil Rights Violation'
       );
     }
@@ -273,19 +299,6 @@ function generateDocumentCard(doc) {
     card.linked_argument =
       'Demonstrates pattern of court bias and constitutional rights violations.';
   } else if (text.includes('brady') || text.includes('evidence')) {
-    card.legal_significance =
-      'Potential Brady v. Maryland evidence suppression';
-    card.linked_argument =
-      'Shows state withholding of exculpatory evidence in violation of federal law.';
-  } else {
-    card.legal_significance = 'Supporting documentation for justice case';
-    card.linked_argument =
-      'Provides context and evidence supporting overall case for justice and accountability.';
-  }
-
-  return card;
-}
-
 async function tryLogin(username, password) {
   try {
     console.log('Attempting login with username:', username);
@@ -293,24 +306,34 @@ async function tryLogin(username, password) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
+      credentials: 'include' // Add credentials for session handling
     });
-
-    if (r.ok) {
+    const data = await r.json();
+    if (r.ok && data.success) {
       console.log('Login successful');
-      return true;
+      // Store auth data
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return { success: true, user: data.user };
     } else {
-      const errorData = await r.json();
-      console.error('Login failed:', errorData);
-      return false;
+      console.error('Login failed:', data);
+      return { success: false, error: data.error || 'Invalid credentials' };
     }
   } catch (error) {
     console.error('Login error:', error);
-
     // Show specific error message based on error type
     const errLabel = document.getElementById('loginErr');
     if (errLabel) {
-      if (
-        error.message.includes('fetch') ||
+      if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+        errLabel.textContent = 'Unable to connect to server. Please check your connection and ensure the backend is running.';
+      } else {
+        errLabel.textContent = 'Login request failed: ' + error.message;
+      }
+      errLabel.classList.remove('hidden');
+    }
+    return { success: false, error: 'Network error' };
+  }
+}
         error.message.includes('Failed to fetch')
       ) {
         errLabel.textContent =
