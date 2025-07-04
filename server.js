@@ -39,7 +39,7 @@ app.use(helmet({
   }
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3001",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true
 }));
 
@@ -70,7 +70,7 @@ app.use(session({
 
 // Static files
 app.use(express.static(path.join(__dirname, ".")));
-app.use(express.static(path.join(__dirname, "client")));
+app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Default route - serve secure dashboard
