@@ -9,7 +9,7 @@
     "build:css": "postcss frontend/styles.css -o frontend/dist/styles.css",
     "watch:css": "postcss frontend/styles.css -o frontend/dist/styles.css --watch",
     "build": "npm run build:css && vite build",
-    "build:prod": "NODE_ENV=production npm run build",
+    "build:prod": "set NODE_ENV=production && npm run build",
     "start": "node backend/server.js",
     "start:prod": "NODE_ENV=production node backend/server.js",
     "deploy:firebase": "npm run build:prod && firebase deploy",
