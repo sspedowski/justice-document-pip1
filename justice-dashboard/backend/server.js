@@ -3,13 +3,50 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { createWorker } = require('tesseract.js');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
 
+// Security: Environment variable validation
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable not set');
+  process.exit(1);
+}
+
+if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS) {
+  console.error('WARNING: ADMIN_USER and ADMIN_PASS environment variables should be set for secure authentication');
+}
+
 // API Configurations
 const WOLFRAM_ALPHA_API_KEY = process.env.WOLFRAM_ALPHA_API_KEY;
 const WOLFRAM_ALPHA_BASE_URL = 'https://api.wolframalpha.com/v2/query';
+
+// Create secure admin user object
+let adminUser = null;
+
+async function createAdminUser() {
+  try {
+    if (process.env.ADMIN_USER && process.env.ADMIN_PASS) {
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 12);
+      adminUser = {
+        username: process.env.ADMIN_USER,
+        password: hashedPassword,
+        role: 'admin',
+        createdAt: new Date().toISOString()
+      };
+      console.log('✅ Secure admin user created successfully');
+    } else {
+      console.log('⚠️  Using legacy authentication (less secure)');
+    }
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    process.exit(1);
+  }
+}
+
+// Initialize admin user on startup
+createAdminUser();
 
 // Try to import OpenAI, fallback if not available
 let OpenAI;
@@ -427,16 +464,46 @@ async function generateSummary(text, fileName) {
   }
 }
 
-// Authentication endpoint
-app.post('/api/login', express.json(), (req, res) => {
-  const { username, password } = req.body;
-  if (
-    username === process.env.DASH_USER &&
-    password === process.env.DASH_PASS
-  ) {
-    return res.json({ ok: true });
+// Authentication endpoint with secure password comparison
+app.post('/api/login', express.json(), async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, error: 'Username and password required' });
+    }
+    
+    // Use secure admin user if available
+    if (adminUser && username === adminUser.username) {
+      const isValidPassword = await bcrypt.compare(password, adminUser.password);
+      if (isValidPassword) {
+        console.log(`✅ Secure admin login successful for: ${username}`);
+        return res.json({ 
+          ok: true, 
+          user: { 
+            username: adminUser.username, 
+            role: adminUser.role 
+          } 
+        });
+      }
+    }
+    
+    // Fallback to legacy authentication (backward compatibility)
+    if (
+      username === process.env.DASH_USER &&
+      password === process.env.DASH_PASS
+    ) {
+      console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
+      return res.json({ ok: true, user: { username, role: 'admin' } });
+    }
+    
+    console.log(`❌ Login failed for username: ${username}`);
+    return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({ ok: false, error: 'Internal server error' });
   }
-  return res.status(401).json({ ok: false, error: 'bad credentials' });
 });
 
 // Main upload and processing endpoint
