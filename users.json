@@ -2,25 +2,9 @@
   {
     "id": 1,
     "username": "admin",
-    "password": "$2b$10$9ty/srIxuLXVY/AmaMZbKuoFlkgqt2aw1vffqqofGzjwSL5XwsUBu",
+    "password": "HASHED_PASSWORD_PLACEHOLDER",
     "role": "admin",
     "fullName": "System Administrator",
     "createdAt": "2025-07-03T01:48:59.259Z"
-  },
-  {
-    "id": 2,
-    "username": "stephanie",
-    "password": "$2b$10$Nk9Xa7VHmjcpKVYcJdTBpOlHOGSOdmIWj7bRq/en/9MsDiqPzsEHu",
-    "role": "user",
-    "fullName": "Stephanie Spedowski",
-    "createdAt": "2025-07-03T01:48:59.354Z"
-  },
-  {
-    "id": 3,
-    "username": "legal",
-    "password": "$2b$10$Gd.YCRH8V7q7PNzJl/14t.QQbmpUoKR5N0H7C6NpFvl7odZB7la.6",
-    "role": "user",
-    "fullName": "Legal Team",
-    "createdAt": "2025-07-03T01:48:59.447Z"
   }
 ]
