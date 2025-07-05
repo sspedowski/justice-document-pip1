@@ -14,14 +14,14 @@ const requiredEnvVars = [
 
 // Check for missing environment variables
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+
+let app = null;
+let db = null;
+
 if (missingVars.length > 0) {
   console.warn(`⚠️ Firebase not configured: Missing variables: ${missingVars.join(', ')}`);
   console.warn('📝 Please update your .env file with real Firebase configuration values');
   console.warn('🔗 Get config from: https://console.firebase.google.com -> Project Settings -> Your Apps');
-  
-  // Export dummy objects to prevent crashes
-  export const db = null;
-  export const app = null;
 } else {
   const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,9 +33,6 @@ if (missingVars.length > 0) {
   };
 
   // Initialize Firebase with error handling
-  let app;
-  let db;
-
   try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
@@ -50,8 +47,7 @@ if (missingVars.length > 0) {
       messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || 'MISSING',
       appId: import.meta.env.VITE_FIREBASE_APP_ID || 'MISSING',
     });
-    throw error;
   }
-
-  export { db, app };
 }
+
+export { db, app };
