@@ -11,9 +11,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# Uploads and temporary files
+# User data and uploads
 uploads/
-public/
+public/uploads/
+users.json
 
 # OS generated files
 .DS_Store
@@ -37,5 +38,39 @@ output.css
 styles/output.css
 *.min.js
 
-# Logs
+# Binary artifacts and shortcuts
+*.lnk
+*.traineddata
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Logs and debug files
 *.log
+pglite-debug.log
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.cache/
+
+# Security sensitive files
+secrets.json
+private_keys/
+certificates/

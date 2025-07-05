@@ -13,54 +13,14 @@
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <div id="app"></div>
-
-  <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
-  <script src="pdf.min.js"></script>
-  <script src="pdf-config.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
-      <button id="summarizeBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Generate Summary</button>
-      <button id="exportBtn"   class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Export CSV</button>
-      <button id="askLawGpt"   class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Ask Law GPT</button>
-    </div>
-
-    <!-- File upload -->
-    <div class="mt-6">
-      <label for="fileUpload" class="block text-sm font-medium">Upload PDF File</label>
-      <input type="file" id="fileUpload" name="fileUpload" accept=".pdf" class="mt-1 p-2 border rounded w-full" />
-    </div>
-
-    <!-- Summary output -->
-    <div class="mt-6">
-      <h2 class="font-semibold text-gray-700">Summary Output:</h2>
-      <pre id="summaryBox" class="mt-2 p-3 bg-gray-50 border rounded text-sm whitespace-pre-wrap"></pre>
-    </div>
-
-    <!-- Tracker table -->
-    <h3 class="text-xl font-semibold mt-8 mb-2">Justice Tracker</h3>
-    <table id="trackerTable" class="w-full text-sm border-collapse border border-gray-300">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="border px-2 py-1">Category</th>
-          <th class="border px-2 py-1">Child</th>
-          <th class="border px-2 py-1">Misconduct</th>
-          <th class="border px-2 py-1">Summary</th>
-          <th class="border px-2 py-1">Legal Tags</th>
-          <th class="border px-2 py-1">View</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- PDF viewer modal -->
-  <div id="pdfViewerModal" class="fixed inset-0 hidden justify-center items-center bg-black bg-opacity-50 z-50">
-    <div class="bg-white rounded-lg p-4 w-11/12 max-w-4xl shadow-xl relative">
-      <h2 id="pdfTitle" class="text-lg font-semibold mb-4 text-gray-800">Document Viewer</h2>
-      <iframe id="pdfFrame" class="w-full h-96 border rounded" frameborder="0" title="PDF Viewer"></iframe>
-      <button onclick="closeViewer()" class="absolute top-4 right-4 text-gray-600 hover:text-red-600 text-xl" aria-label="Close">✖</button>
+  <div id="app">
+    <!-- Main dashboard content container -->
+    <div class="container mx-auto p-6">
+      <!-- Auth check will render appropriate content here -->
+      <div class="text-center py-20">
+        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" role="status"></div>
+        <p class="mt-4 text-gray-600">Loading Justice Dashboard...</p>
+      </div>
     </div>
   </div>
 

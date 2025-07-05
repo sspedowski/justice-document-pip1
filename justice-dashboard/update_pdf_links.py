@@ -2,19 +2,29 @@
 """
 PDF Link Updater and Bookmark Creator
 Applies hyperlink corrections and adds bookmarks to PDF files
+
+Requirements:
+    pip install PyPDF2
+
+Usage:
+    python update_pdf_links.py input.pdf [output.pdf]
 """
 
 import sys
 import os
 from pathlib import Path
 
+# Safe import with proper error handling
 try:
     import PyPDF2
 except ImportError:
-    print("PyPDF2 not found. Installing...")
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "PyPDF2"])
-    import PyPDF2
+    print("\n❌ ERROR: PyPDF2 is not installed.")
+    print("\nTo install the required dependency, run:")
+    print("    pip install PyPDF2")
+    print("\nOr if using conda:")
+    print("    conda install -c conda-forge pypdf2")
+    print("\nThen try running this script again.")
+    sys.exit(1)
 
 def update_pdf_links(input_file, output_file=None):
     """

@@ -1,14 +1,35 @@
-// Simple sanity checker – run:  npm run check
+// Simple sanity checker – run: npm run check
 const fs = require("fs");
+const path = require("path");
+
 const required = [
-  "server/server.js",
-  "client/index.html",
-  "client/script.js",
-  ".env"
+  "server.js",                    // Root level server
+  "index.html",                   // Root level index 
+  "script.js",                    // Root level script
+  "backend/server.js",            // Backend server
+  "frontend/index.html",          // Frontend index
+  "frontend/script.js",           // Frontend script
+  "package.json",                 // Package config
+  ".env"                          // Environment variables
 ];
+
+console.log("🔍 Checking Justice Dashboard file structure...\n");
+
 let ok = true;
 for (const r of required) {
-  if (fs.existsSync(r)) console.log("✅", r);
-  else { console.error("❌ MISSING:", r); ok = false; }
+  const fullPath = path.join(__dirname, r);
+  if (fs.existsSync(fullPath)) {
+    console.log("✅", r);
+  } else { 
+    console.error("❌ MISSING:", r); 
+    ok = false; 
+  }
 }
-if (!ok) process.exitCode = 1;
+
+console.log("\n" + "=".repeat(50));
+if (ok) {
+  console.log("🎉 All critical files found!");
+} else {
+  console.log("⚠️  Some files are missing - check the structure above.");
+  process.exitCode = 1;
+}

@@ -1,31 +1,49 @@
-// Authentication Manager
+// Justice Dashboard - Authentication & Main App
+// Secure authentication with proper session management
+
+document.addEventListener('DOMContentLoaded', () => {
+  initializeApp();
+});
+
+// ===== AUTHENTICATION SYSTEM =====
 const DashboardAuth = {
   // State
   isAuthenticated: false,
   currentUser: null,
   authToken: null,
-  // Check authentication status
+
+  // Initialize authentication check
+  init() {
+    return this.checkAuth();
+  },
+
+  // Check existing authentication
   checkAuth() {
     const saved = localStorage.getItem('justiceAuth');
     if (saved) {
       try {
         const authData = JSON.parse(saved);
         const isValid = authData.timestamp && 
-          (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000;
+          (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000; // 24 hour expiry
 
         if (isValid && authData.user && authData.token) {
           this.currentUser = authData.user;
           this.authToken = authData.token;
           this.isAuthenticated = true;
           return true;
+        } else {
+          // Clear expired auth
+          this.clearAuth();
         }
       } catch (error) {
         console.error('Auth check error:', error);
+        this.clearAuth();
       }
     }
     return false;
   },
-  // Authenticate user
+
+  // Authenticate user with server
   async authenticate(username, password) {
     try {
       const response = await fetch('/api/login', {
@@ -33,23 +51,27 @@ const DashboardAuth = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
+
       if (!response.ok) {
-        throw new Error('Login failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Login failed');
       }
 
-      if (data.success) {
-        currentUser = data.user;
-        authToken = data.token;
-        isAuthenticated = true;
+      const data = await response.json();
+
+      if (data.success && data.user && data.token) {
+        this.currentUser = data.user;
+        this.authToken = data.token;
+        this.isAuthenticated = true;
         
-        // Store auth info securely
+        // Store auth info securely with timestamp
         localStorage.setItem('justiceAuth', JSON.stringify({
-          user: currentUser,
-          token: authToken,
+          user: this.currentUser,
+          token: this.authToken,
           timestamp: Date.now()
         }));
         
-        return { success: true, user: currentUser };
+        return { success: true, user: this.currentUser };
       }
       
       return { success: false, error: data.error || 'Login failed' };
@@ -59,14 +81,15 @@ const DashboardAuth = {
     }
   },
 
+  // Logout user
   async logout() {
     try {
-      // Call server logout endpoint
-      if (authToken) {
+      // Call server logout endpoint if token exists
+      if (this.authToken) {
         await fetch('/api/logout', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${authToken}`,
+            'Authorization': `Bearer ${this.authToken}`,
             'Content-Type': 'application/json',
           },
         });
@@ -75,29 +98,179 @@ const DashboardAuth = {
       console.error('Logout error:', error);
     }
     
-    // Clear local state
-    currentUser = null;
-    authToken = null;
-    isAuthenticated = false;
-    localStorage.removeItem('justiceAuth');
-    this.showLoginForm();
+    this.clearAuth();
+    this.renderLoginForm();
   },
 
-  checkAuth() {
-    const saved = localStorage.getItem('justiceAuth');
-    if (saved) {
-      try {
-        const authData = JSON.parse(saved);
-        
-        // Check if token is less than 24 hours old
-        const isValid = authData.timestamp && (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000;
-        
-        if (isValid && authData.user && authData.token) {
-          currentUser = authData.user;
-          authToken = authData.token;
-          isAuthenticated = true;
-          return true;
+  // Clear authentication state
+  clearAuth() {
+    this.currentUser = null;
+    this.authToken = null;
+    this.isAuthenticated = false;
+    localStorage.removeItem('justiceAuth');
+  },
+
+  // Render login form
+  renderLoginForm() {
+    const app = document.getElementById('app');
+    if (!app) {
+      console.error('App container not found');
+      return;
+    }
+
+    app.innerHTML = `
+      <div class="flex min-h-screen items-center justify-center bg-gray-100">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md space-y-6">
+          <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Justice Dashboard</h1>
+            <p class="text-gray-600">Secure Legal Document Management</p>
+          </div>
+          
+          <div id="loginError" class="text-red-600 text-sm mb-2 hidden bg-red-50 p-3 rounded border border-red-200"></div>
+          
+          <form id="loginForm" class="space-y-4">
+            <div>
+              <label for="loginUsername" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input 
+                id="loginUsername" 
+                type="text" 
+                placeholder="Enter username" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                required
+                autofocus
+              >
+            </div>
+            
+            <div>
+              <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input 
+                id="loginPassword" 
+                type="password" 
+                placeholder="Enter password" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                required
+              >
+            </div>
+            
+            <button 
+              id="loginBtn" 
+              type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <span id="loginBtnText">Access Dashboard</span>
+              <span id="loginBtnSpinner" class="hidden">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+            </button>
+          </form>
+          
+          <div class="text-xs text-center text-gray-500 border-t pt-4">
+            <div class="font-semibold text-gray-700 mb-1">🔒 Secure Authentication</div>
+            <div>Contact system administrator for access credentials</div>
+            <div class="mt-2 text-gray-400">Session expires after 24 hours for security</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add event listeners
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', this.handleLogin.bind(this));
+    }
+
+    // Add Enter key support for password field
+    const passwordField = document.getElementById('loginPassword');
+    if (passwordField) {
+      passwordField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.handleLogin(e);
         }
+      });
+    }
+  },
+
+  // Handle login form submission
+  async handleLogin(event) {
+    event.preventDefault();
+    
+    const usernameEl = document.getElementById('loginUsername');
+    const passwordEl = document.getElementById('loginPassword');
+    const errorEl = document.getElementById('loginError');
+    const btnEl = document.getElementById('loginBtn');
+    const btnTextEl = document.getElementById('loginBtnText');
+    const btnSpinnerEl = document.getElementById('loginBtnSpinner');
+
+    if (!usernameEl || !passwordEl) {
+      this.showLoginError('Login form not properly initialized');
+      return;
+    }
+
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value;
+
+    // Basic validation
+    if (!username || !password) {
+      this.showLoginError('Please enter both username and password');
+      return;
+    }
+
+    // Show loading state
+    btnEl.disabled = true;
+    btnTextEl.classList.add('hidden');
+    btnSpinnerEl.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+
+    try {
+      const result = await this.authenticate(username, password);
+      
+      if (result.success) {
+        // Success - redirect to dashboard
+        this.renderDashboard();
+      } else {
+        this.showLoginError(result.error || 'Invalid credentials. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      this.showLoginError('Connection error. Please check your network and try again.');
+    } finally {
+      // Reset button state
+      btnEl.disabled = false;
+      btnTextEl.classList.remove('hidden');
+      btnSpinnerEl.classList.add('hidden');
+    }
+  },
+
+  // Show login error message
+  showLoginError(message) {
+    const errorEl = document.getElementById('loginError');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      
+      // Auto-hide error after 5 seconds
+      setTimeout(() => {
+        errorEl.classList.add('hidden');
+      }, 5000);
+    }
+  },
+
+  // Render main dashboard
+  renderDashboard() {
+    const app = document.getElementById('app');
+    if (!app) {
+      console.error('App container not found');
+      return;
+    }
+
+    // Initialize the main dashboard content
+    initializeJusticeDashboard();
+  }
+};
       } catch (error) {
         console.error('Auth check error:', error);
       }
@@ -991,6 +1164,61 @@ window.manualInit = function() {
   console.log('Manual initialization...');
   initializeJusticeDashboard();
 };
+
+// ===== MAIN APP INITIALIZATION =====
+function initializeApp() {
+  console.log('Justice Dashboard starting...');
+  
+  // Check if app container exists
+  const appContainer = document.getElementById('app');
+  if (!appContainer) {
+    console.error('App container (#app) not found in DOM');
+    return;
+  }
+
+  // Initialize authentication and render appropriate view
+  if (DashboardAuth.init()) {
+    // User is authenticated - show dashboard
+    console.log('User authenticated, loading dashboard...');
+    DashboardAuth.renderDashboard();
+  } else {
+    // User not authenticated - show login form
+    console.log('User not authenticated, showing login form...');
+    DashboardAuth.renderLoginForm();
+  }
+}
+
+// Helper function to check if user is authenticated (for use in other parts of app)
+function isUserAuthenticated() {
+  return DashboardAuth.isAuthenticated;
+}
+
+// Helper function to get current user info (for use in other parts of app)
+function getCurrentUser() {
+  return DashboardAuth.currentUser;
+}
+
+// Helper function to get auth token for API calls
+function getAuthToken() {
+  return DashboardAuth.authToken;
+}
+
+// Helper function to logout (for use in UI)
+function logoutUser() {
+  DashboardAuth.logout();
+}
+
+// Export auth functions for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    DashboardAuth,
+    initializeApp,
+    isUserAuthenticated,
+    getCurrentUser,
+    getAuthToken,
+    logoutUser
+  };
+}
 
 // API Helper Functions for Authenticated Requests
 const ApiHelper = {
