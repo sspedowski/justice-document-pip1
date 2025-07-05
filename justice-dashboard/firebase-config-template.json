@@ -1,7 +1,5 @@
-# Firebase Deployment Configuration Template
-# Use this as a starting point for your firebase.json
-
 {
+  "_comment": "Firebase Deployment Configuration Template - Use this as a starting point for your firebase.json",
   "functions": [
     {
       "source": "functions",
