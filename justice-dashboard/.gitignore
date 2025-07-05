@@ -16,6 +16,12 @@ uploads/
 public/uploads/
 users.json
 
+# Binary artifacts and generated files
+*.lnk
+*.traineddata
+eng.traineddata
+pglite-debug.log
+
 # OS generated files
 .DS_Store
 .DS_Store?
