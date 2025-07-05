@@ -8,7 +8,6 @@
      const a = document.createElement('a');
      a.href = url; a.download = 'tracker.csv'; a.click();
      URL.revokeObjectURL(url);
-   }
    ----------------------------------------------------------------------
    Features added:
    • Multi‑file upload (drag‑and‑drop or file input)
@@ -168,19 +167,6 @@ function showDashboard() {
   }, 100);
 }
 
-  if (userDisplay && auth.user) {
-    userDisplay.textContent = `Welcome, ${auth.user.username}`;
-  }
-  
-  // Ensure all dashboard elements are properly initialized
-  setTimeout(() => {
-    const trackerTable = document.getElementById('trackerTable');
-    if (trackerTable && !trackerTable.hasChildNodes()) {
-      initializeTracker(); // Retry initialization if table is empty
-    }
-  }, 100);
-}
-
 // Enhanced summarization with legal focus
 function generateSummary(text, filename) {
   if (!text || text.length < 50) {
@@ -288,8 +274,17 @@ function generateDocumentCard(doc) {
     card.linked_argument =
       'Demonstrates pattern of court bias and constitutional rights violations.';
   } else if (text.includes('brady') || text.includes('evidence')) {
+  } else if (text.includes('brady') || text.includes('evidence')) {
+    card.legal_significance =
+      'Potential Brady violation or evidence suppression';
+    card.linked_argument =
+      'Indicates possible suppression of exculpatory evidence or Brady violation.';
+  }
+
+  return card;
+}
+
 async function tryLogin(username, password) {
-  try {
     console.log('Attempting login with username:', username);
     const r = await fetch('/api/login', {
       method: 'POST',
