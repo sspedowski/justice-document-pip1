@@ -180,34 +180,6 @@ function showDashboard() {
     }
   }, 100);
 }
-        '42 U.S.C. § 1983 – Civil Rights Violation'
-      );
-    }
-    if (
-      text.includes('battle creek counseling psychological eval') ||
-      text.includes('8.31.20')
-    ) {
-      statutes.push(
-        '14th Amendment – Due Process',
-        'MCL 712A.19b – Parental Rights Termination'
-      );
-    }
-    if (text.includes('1.5.23 holiday lawyer discuss')) {
-      statutes.push(
-        'Brady v. Maryland – Suppression of Evidence',
-        'MCL 552.14 – Custody Modification'
-      );
-    }
-    if (text.includes('1.26.21 notice of hearing')) {
-      statutes.push(
-        '14th Amendment – Due Process',
-        'MCL 600.1701 – Court Contempt Authority'
-      );
-    }
-  }
-
-  return statutes;
-}
 
 // Enhanced summarization with legal focus
 function generateSummary(text, filename) {
