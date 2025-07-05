@@ -506,6 +506,46 @@ app.post('/api/login', express.json(), async (req, res) => {
   }
 });
 
+// Secure user registration endpoint (admin-only)
+app.post('/api/register', express.json(), async (req, res) => {
+  try {
+    const { username, password, role = 'user' } = req.body;
+    
+    // TODO: Add admin authentication check here
+    // For now, this endpoint is disabled for security
+    return res.status(403).json({ 
+      ok: false, 
+      error: 'User registration disabled. Contact administrator.' 
+    });
+    
+    /* Future implementation:
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, error: 'Username and password required' });
+    }
+    
+    if (password.length < 8) {
+      return res.status(400).json({ ok: false, error: 'Password must be at least 8 characters' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const newUser = {
+      username,
+      password: hashedPassword,
+      role,
+      createdAt: new Date().toISOString()
+    };
+    
+    // TODO: Save to database instead of memory
+    // For now, just return success
+    return res.json({ ok: true, user: { username, role } });
+    */
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    return res.status(500).json({ ok: false, error: 'Internal server error' });
+  }
+});
+
 // Main upload and processing endpoint
 app.post('/api/summarize', upload.single('file'), async (req, res) => {
   try {
