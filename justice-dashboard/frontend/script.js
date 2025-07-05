@@ -323,22 +323,6 @@ async function tryLogin(username, password) {
     return { success: false, error: 'Network error' };
   }
 }
-        error.message.includes('Failed to fetch')
-      ) {
-        errLabel.textContent =
-          'Unable to connect to server. Please ensure the backend is running on port 3000.';
-      } else {
-        errLabel.textContent = 'Login request failed: ' + error.message;
-      }
-      errLabel.classList.remove('hidden');
-    }
-
-    if (window.showError) {
-      window.showError('Login request failed: ' + error.message, 'login-error');
-    }
-    return false;
-  }
-}
 
 function saveTracker(data) {
   localStorage.setItem('tracker', JSON.stringify(data));
