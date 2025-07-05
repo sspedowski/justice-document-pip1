@@ -15,7 +15,13 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key-change-this";
+
+// Security: JWT Secret must be provided via environment variable
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable not set');
+  process.exit(1);
+}
 
 // Security middleware - Strictest CSP for maximum security
 app.use(helmet({
