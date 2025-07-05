@@ -1,14 +1,18 @@
-/* Justice Dashboard — client-side (v2)
-   Function: downloadCSV(rows) {
-     const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate'];
-     const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
-     const csv = [header.join(','), ...body].join('\n');
-     const blob = new Blob([csv], {type:'text/csv'});
-     const url = URL.createObjectURL(blob);
-     const a = document.createElement('a');
-     a.href = url; a.download = 'tracker.csv'; a.click();
-     URL.revokeObjectURL(url);
-   ----------------------------------------------------------------------
+/* Justice Dashboard — client-side (v2) */
+
+// CSV download helper function
+function downloadCSV(rows) {
+  const header = ['Filename','Summary','Category','Child','Misconduct','Duplicate'];
+  const body = rows.map(r => header.map(h => JSON.stringify(r[h.toLowerCase()] ?? '')).join(','));
+  const csv = [header.join(','), ...body].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'tracker.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/*
    Features added:
    • Multi‑file upload (drag‑and‑drop or file input)
    • SHA‑256 duplicate detection client‑side
@@ -18,7 +22,7 @@
    • Enhanced legal statute tagging with document-specific detection
    • Summary cards for detailed document analysis
    • Toggle view for summary cards with legal significance indicators
-   ---------------------------------------------------------------------- */
+*/
 
 // ===== Authentication State =====
 const auth = {
@@ -343,40 +347,6 @@ function loadTracker() {
   } catch {
     return [];
   }
-}
-
-function downloadCSV(rows) {
-  const header = [
-    'Filename',
-    'Summary',
-    'Category',
-    'Child',
-    'Misconduct',
-    'Duplicate',
-    'Legal_Statutes',
-  ];
-  const body = rows.map(r => {
-    const row = {
-      filename: r.filename || '',
-      summary: r.summary || '',
-      category: r.category || '',
-      child: r.child || '',
-      misconduct: r.misconduct || '',
-      duplicate: r.duplicate ? 'Yes' : 'No',
-      legal_statutes: (r.statutes || []).join('; '),
-    };
-    return header
-      .map(h => JSON.stringify(row[h.toLowerCase()] ?? ''))
-      .join(',');
-  });
-  const csv = [header.join(','), ...body].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'justice_tracker_enhanced.csv';
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 // ===== 2. State =====
