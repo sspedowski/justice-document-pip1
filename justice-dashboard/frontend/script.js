@@ -20,16 +20,6 @@
    • Toggle view for summary cards with legal significance indicators
    ---------------------------------------------------------------------- */
 
-// Import Firebase (will test connection automatically in dev mode)
-import { testFirebaseConnection } from './firebase-test.js';
-
-// ===== Configuration =====
-const CONFIG = {
-  aiSummarization: false, // Set to true when OpenAI API key is configured
-  enhancedLegalTagging: true, // Enhanced document-specific legal statute detection
-  summaryCardsEnabled: true, // Enable per-document summary cards
-};
-
 // ===== Authentication State =====
 const auth = {
   user: null,
@@ -146,12 +136,18 @@ function tagStatutes(doc) {
 
 // ===== Authentication Management =====
 function showDashboard() {
+  const loginSection = document.getElementById('loginBox');
+  const dashboardSection = document.getElementById('dashboard');
+  const userDisplay = document.getElementById('userDisplay');
+  
   if (loginSection) loginSection.style.display = 'none';
   if (dashboardSection) {
     dashboardSection.style.display = 'block';
     // Initialize dashboard components
     initializeTracker();
-    updateDashboardStats();
+    if (typeof updateDashboardStats === 'function') {
+      updateDashboardStats();
+    }
   }
 
   if (userDisplay && auth.user) {
@@ -165,6 +161,12 @@ function showDashboard() {
       initializeTracker(); // Retry initialization if table is empty
     }
   }, 100);
+}
+
+// Simple dashboard stats update function
+function updateDashboardStats() {
+  // This function can be expanded later to show document counts, etc.
+  console.log('Dashboard stats updated');
 }
 
 // Enhanced summarization with legal focus
@@ -685,7 +687,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const dashboardSection = document.getElementById('dashboard');
   const loginBtn = document.getElementById('loginBtn');
   const errLabel = document.getElementById('loginErr');
-  const userDisplay = document.getElementById('userDisplay');
   // Hide dashboard initially
   if (dashboardSection) dashboardSection.style.display = 'none';
   // Check for existing auth token
