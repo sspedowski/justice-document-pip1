@@ -11,6 +11,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Firebase credentials (KEEP SECURE!)
+firebase-admin-key.json
+*-service-account-key.json
+
 # User data and uploads
 uploads/
 public/uploads/
