@@ -269,8 +269,7 @@ const DashboardAuth = {
 
     // Initialize the main dashboard content
     initializeJusticeDashboard();
-  }
-};
+  },
 
   showLoginForm() {
     console.log('showLoginForm() called');
