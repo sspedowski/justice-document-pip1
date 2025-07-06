@@ -76,7 +76,3 @@ This project is licensed under the [MIT License](LICENSE).
 ## 📧 Support
 
 For questions or support, please open an issue on GitHub.
-
----
-
-**Firebase integration completed successfully**
