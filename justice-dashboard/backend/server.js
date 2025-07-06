@@ -8,6 +8,25 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
 
+// Firebase Admin SDK
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin
+try {
+  const serviceAccountPath = process.env.FIREBASE_ADMIN_KEY_PATH || './firebase-admin-key.json';
+  const serviceAccount = require(path.resolve(__dirname, '..', serviceAccountPath.replace('./', '')));
+  
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app'
+  });
+  
+  console.log('🔥 Firebase Admin SDK initialized successfully');
+} catch (error) {
+  console.warn('⚠️ Firebase Admin SDK not initialized:', error.message);
+  console.warn('📝 Some features may be limited without Firebase Admin');
+}
+
 // Security: Environment variable validation
 if (!process.env.JWT_SECRET) {
   console.error('FATAL ERROR: JWT_SECRET environment variable not set');
@@ -482,25 +501,6 @@ app.post('/api/login', express.json(), async (req, res) => {
           ok: true, 
           user: { 
             username: adminUser.username, 
-            role: adminUser.role 
-          } 
-        });
-      }
-    }
-    
-    // Fallback to legacy authentication (backward compatibility)
-    if (
-      username === process.env.DASH_USER &&
-      password === process.env.DASH_PASS
-    ) {
-      console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
-      return res.json({ ok: true, user: { username, role: 'admin' } });
-    }
-    
-    console.log(`❌ Login failed for username: ${username}`);
-    return res.status(401).json({ ok: false, error: 'Invalid credentials' });
-    
-  } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ ok: false, error: 'Internal server error' });
   }
