@@ -271,15 +271,6 @@ const DashboardAuth = {
     initializeJusticeDashboard();
   }
 };
-      } catch (error) {
-        console.error('Auth check error:', error);
-      }
-    }
-    
-    // Clear invalid auth data
-    localStorage.removeItem('justiceAuth');
-    return false;
-  },
 
   showLoginForm() {
     console.log('showLoginForm() called');
