@@ -501,6 +501,25 @@ app.post('/api/login', express.json(), async (req, res) => {
           ok: true, 
           user: { 
             username: adminUser.username, 
+            role: adminUser.role 
+          } 
+        });
+      }
+    }
+    
+    // Fallback to legacy authentication (backward compatibility)
+    if (
+      username === process.env.DASH_USER &&
+      password === process.env.DASH_PASS
+    ) {
+      console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
+      return res.json({ ok: true, user: { username, role: 'admin' } });
+    }
+    
+    console.log(`❌ Login failed for username: ${username}`);
+    return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+    
+  } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ ok: false, error: 'Internal server error' });
   }
