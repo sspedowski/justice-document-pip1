@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   root: 'frontend',
   envPrefix: 'VITE_',
+  envDir: '../', // Look for .env files in the parent directory (project root)
   server: {
     port: 5173,
     host: true,
