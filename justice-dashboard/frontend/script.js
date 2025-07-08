@@ -146,7 +146,6 @@ function showDashboard() {
   
   if (loginSection) loginSection.style.display = 'none';
   if (dashboardSection) {
-// Authentication request helper
 async function makeAuthenticatedRequest(url, options = {}) {
   if (!DashboardAuth.isAuthenticated) {
     console.error('User not authenticated');
@@ -174,8 +173,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
     console.error('API request error:', error);
     return null;
   }
-  
-  // Ensure all dashboard elements are properly initialized
+}
   setTimeout(() => {
     const trackerTable = document.getElementById('trackerTable');
     if (trackerTable && !trackerTable.hasChildNodes()) {
@@ -282,10 +280,10 @@ function generateDocumentCard(doc) {
   const text = (doc.summary || doc.filename || '').toLowerCase();
 
   if (text.includes('cps') && text.includes('investigation')) {
-    card.legal_significance =
-      'Demonstrates CPS failure to investigate per MCL 722.628';
-    card.linked_argument =
-      'This document corroborates systemic CPS misconduct and failure to protect children.';
+async function detectMisconductWithAI(summary, category, child) {
+  const misconduct = await callAIService(summary + ' ' + category + ' ' + child);
+  return misconduct || "Review Needed";
+}
   } else if (text.includes('psychological') || text.includes('trauma')) {
     card.legal_significance =
       'Documents psychological harm and trauma to children';
