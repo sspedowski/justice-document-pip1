@@ -146,36 +146,34 @@ const DashboardAuth = {
               <input 
                 id="loginPassword" 
                 type="password" 
-                placeholder="Enter password" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                required
-              >
-            </div>
-            
-            <button 
-              id="loginBtn" 
-              type="submit"
-              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <span id="loginBtnText">Access Dashboard</span>
-              <span id="loginBtnSpinner" class="hidden">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Signing in...
-              </span>
-            </button>
-          </form>
-          
-          <div class="text-xs text-center text-gray-500 border-t pt-4">
-            <div class="font-semibold text-gray-700 mb-1">🔒 Secure Authentication</div>
-            <div>Contact system administrator for access credentials</div>
-            <div class="mt-2 text-gray-400">Session expires after 24 hours for security</div>
-          </div>
-        </div>
-      </div>
-    `;
+async function makeAuthenticatedRequest(url, options = {}) {
+  if (!DashboardAuth.isAuthenticated) {
+    console.error('User not authenticated');
+    DashboardAuth.showLoginForm();
+    return null;
+  }
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${DashboardAuth.authToken}`,
+    'Content-Type': 'application/json'
+  };
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+    if (response.status === 401) {
+      // Token expired or invalid
+      DashboardAuth.clearAuth();
+      DashboardAuth.showLoginForm();
+      return null;
+    }
+    return response;
+  } catch (error) {
+    console.error('API request error:', error);
+    return null;
+  }
+}
 
     // Add event listeners
     const loginForm = document.getElementById('loginForm');
@@ -288,56 +286,48 @@ const DashboardAuth = {
       <div class="min-h-screen bg-gray-100 flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-6">
           <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Justice Dashboard</h1>
-            <p class="text-gray-600 mt-2">Secure Access Portal</p>
-          </div>
+async function uploadPDF() {
+  const fileInput = document.getElementById('pdfFile');
+  const file = fileInput.files[0];
           
-          <form id="loginForm" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Username</label>
-              <input type="text" id="username" required 
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Password</label>
-              <input type="password" id="password" required 
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            
-            <button type="submit" id="loginBtn"
-              class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              Access Dashboard
-            </button>
-          </form>
-          
-          <div id="loginError" class="mt-4 text-red-600 text-sm hidden"></div>
-          
-          <div class="mt-6 text-xs text-gray-500 text-center">
-            <p><strong>Secure Authentication</strong></p>
-            <p>Contact administrator for access credentials</p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Wait for DOM to be updated, then add event listener
-    setTimeout(() => {
-      const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const username = document.getElementById('username').value;
-          const password = document.getElementById('password').value;
-          const errorDiv = document.getElementById('loginError');
-          const loginBtn = document.getElementById('loginBtn');
-
-          // Show loading state
-          loginBtn.textContent = 'Authenticating...';
-          loginBtn.disabled = true;
-          errorDiv.classList.add('hidden');
-
+  if (!file) {
+    showError('Please select a PDF file');
+    return;
+  }
+  if (file.type !== 'application/pdf') {
+    showError('Please select a valid PDF file');
+    return;
+  }
+  if (!DashboardAuth.isAuthenticated) {
+    DashboardAuth.showLoginForm();
+    return;
+  }
+  const formData = new FormData();
+  formData.append('pdf', file);
+  showLoading();
           try {
+    const response = await makeAuthenticatedRequest('/api/upload-pdf', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${DashboardAuth.authToken}`
+      }
+    });
+    const result = await response.json();
+    if (response.ok) {
+      showError('PDF uploaded successfully');
+      loadDashboardData(); // Refresh dashboard
+      fileInput.value = ''; // Clear file input
+    } else {
+      showError(result.message || 'PDF upload failed');
+    }
+  } catch (error) {
+    console.error('PDF upload error:', error);
+    showError('PDF upload failed');
+  } finally {
+    hideLoading();
+  }
+}
             const result = await this.authenticate(username, password);
             
             if (result.success) {
@@ -375,8 +365,8 @@ const DashboardAuth = {
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 class="text-xl font-bold text-gray-900">Justice Dashboard</h1>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">Welcome, ${currentUser.fullName || currentUser.username}</span>
-            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${currentUser.role}</span>
+            <span class="text-sm text-gray-600">Welcome, ${this.currentUser.fullName || this.currentUser.username}</span>
+            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${this.currentUser.role}</span>
             <button id="logoutBtn" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
               Logout
             </button>
@@ -1135,24 +1125,20 @@ window.clearOldData = function() {
 // Global debugging functions
 window.debugDashboard = function() {
   console.log('=== Dashboard Debug Info ===');
-  console.log('Authentication status:', isAuthenticated);
-  console.log('Current user:', currentUser);
-  console.log('DOM elements:');
-  console.log('- fileInput:', document.getElementById("fileInput"));
-  console.log('- generateBtn:', document.getElementById("generateBtn"));
-  console.log('- results tbody:', document.querySelector("#results"));
-  console.log('- trackerTable:', document.getElementById("trackerTable"));
-  console.log('All elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
-};
-
-window.forceLoadDashboard = function() {
-  console.log('Force loading dashboard...');
-  DashboardAuth.loadDashboard();
-};
-
-window.manualInit = function() {
-  console.log('Manual initialization...');
-  initializeJusticeDashboard();
+  console.log('Authentication:', {
+    isAuthenticated: DashboardAuth.isAuthenticated,
+    user: DashboardAuth.currentUser,
+    token: DashboardAuth.authToken ? 'Present' : 'Missing'
+  });
+  console.log('DOM elements:', {
+    fileInput: document.getElementById("fileInput"),
+    generateBtn: document.getElementById("generateBtn"),
+    results: document.querySelector("#results"),
+    trackerTable: document.getElementById("trackerTable")
+  });
+  console.log('All elements with IDs:', 
+    Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+  );
 };
 
 // ===== MAIN APP INITIALIZATION =====
@@ -1214,6 +1200,7 @@ if (typeof module !== 'undefined' && module.exports) {
 const ApiHelper = {
   // Make authenticated API requests
   async makeRequest(url, options = {}) {
+    const authToken = getAuthToken();
     const defaultOptions = {
       headers: {
         'Content-Type': 'application/json',
@@ -1255,7 +1242,8 @@ const ApiHelper = {
     Object.keys(additionalData).forEach(key => {
       formData.append(key, additionalData[key]);
     });
-    
+
+    const authToken = getAuthToken();
     return this.makeRequest('/api/summarize', {
       method: 'POST',
       body: formData,
