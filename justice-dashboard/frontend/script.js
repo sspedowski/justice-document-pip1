@@ -146,6 +146,7 @@ function showDashboard() {
   
   if (loginSection) loginSection.style.display = 'none';
   if (dashboardSection) {
+// Authentication request helper
 async function makeAuthenticatedRequest(url, options = {}) {
   if (!DashboardAuth.isAuthenticated) {
     console.error('User not authenticated');
