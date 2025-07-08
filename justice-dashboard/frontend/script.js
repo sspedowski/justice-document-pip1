@@ -62,4 +62,8 @@ function tagStatutes(doc) {
   // Constitutional Violations
   if (text.includes('due process') || text.includes('14th amendment'))
     statutes.push('14th Amendment – Due Process');
-  if (text.includes('1st amendment'
+  if (text.includes('1st amendment') || text.includes('free speech'))
+    statutes.push('1st Amendment – Free Speech');
+
+  return statutes;
+}
