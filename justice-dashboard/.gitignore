@@ -6,6 +6,7 @@ yarn-error.log*
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
@@ -14,6 +15,14 @@ yarn-error.log*
 # Firebase credentials (KEEP SECURE!)
 firebase-admin-key.json
 *-service-account-key.json
+*-firebase-adminsdk-*.json
+
+# API Keys and secrets
+*.pem
+*.key
+*.crt
+secrets/
+config/secrets/
 
 # User data and uploads
 uploads/
