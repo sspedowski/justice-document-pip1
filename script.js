@@ -162,34 +162,39 @@ const DashboardAuth = {
       </div>
     `;
   },
-  if (!DashboardAuth.isAuthenticated) {
-    console.error('User not authenticated');
-    DashboardAuth.showLoginForm();
-    return null;
-  }
-  const headers = {
-    ...options.headers,
-    'Authorization': `Bearer ${DashboardAuth.authToken}`,
-    'Content-Type': 'application/json'
-  };
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers
-    });
-    if (response.status === 401) {
-      // Token expired or invalid
-      DashboardAuth.clearAuth();
+
+  // Helper function to make authenticated requests
+  async makeAuthenticatedRequest(url, options = {}) {
+    if (!DashboardAuth.isAuthenticated) {
+      console.error('User not authenticated');
       DashboardAuth.showLoginForm();
       return null;
     }
-    return response;
-  } catch (error) {
-    console.error('API request error:', error);
-    return null;
-  }
-}
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${DashboardAuth.authToken}`,
+      'Content-Type': 'application/json'
+    };
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers
+      });
+      if (response.status === 401) {
+        // Token expired or invalid
+        DashboardAuth.clearAuth();
+        DashboardAuth.showLoginForm();
+        return null;
+      }
+      return response;
+    } catch (error) {
+      console.error('API request error:', error);
+      return null;
+    }
+  },
 
+  // Initialize login form event listeners
+  initializeLoginForm() {
     // Add event listeners
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
