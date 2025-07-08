@@ -146,16 +146,32 @@ function showDashboard() {
   
   if (loginSection) loginSection.style.display = 'none';
   if (dashboardSection) {
-    dashboardSection.style.display = 'block';
-    // Initialize dashboard components
-    initializeTracker();
-    if (typeof updateDashboardStats === 'function') {
-      updateDashboardStats();
+async function makeAuthenticatedRequest(url, options = {}) {
+  if (!DashboardAuth.isAuthenticated) {
+    console.error('User not authenticated');
+    DashboardAuth.showLoginForm();
+    return null;
     }
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${DashboardAuth.authToken}`,
+    'Content-Type': 'application/json'
+  };
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+    if (response.status === 401) {
+      // Token expired or invalid
+      DashboardAuth.clearAuth();
+      DashboardAuth.showLoginForm();
+      return null;
   }
-
-  if (userDisplay && auth.user) {
-    userDisplay.textContent = `Welcome, ${auth.user.username}`;
+    return response;
+  } catch (error) {
+    console.error('API request error:', error);
+    return null;
   }
   
   // Ensure all dashboard elements are properly initialized
