@@ -137,8 +137,7 @@ const DashboardAuth = {
                 placeholder="Enter username" 
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                 required
-                autofocus
-              >
+                autofocus />
             </div>
             
             <div>
@@ -146,7 +145,23 @@ const DashboardAuth = {
               <input 
                 id="loginPassword" 
                 type="password" 
-async function makeAuthenticatedRequest(url, options = {}) {
+                placeholder="Enter password"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                required />
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              Sign In
+            </button>
+          </form>
+          
+          <div class="text-center text-sm text-gray-500">
+            <p>Secure access to legal case management</p>
+          </div>
+        </div>
+      </div>
+    `;
+  },
   if (!DashboardAuth.isAuthenticated) {
     console.error('User not authenticated');
     DashboardAuth.showLoginForm();
