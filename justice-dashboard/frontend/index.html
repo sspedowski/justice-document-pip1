@@ -153,6 +153,9 @@
           grid-template-columns: repeat(3, minmax(0, 1fr));
         }
       }
+      .upload-progress-bar {
+        width: 0%;
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -378,11 +381,10 @@
         <div id="uploadProgress" class="hidden mb-4">
           <div class="mb-2 flex justify-between text-sm">
             <span id="uploadStatus">Processing files...</span>
-            <span id="uploadCount">0/0 files</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2.5">
             <div
               id="uploadProgressBar"
+              class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 upload-progress-bar"
+            ></div>
               class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
               style="width: 0%"
             ></div>
