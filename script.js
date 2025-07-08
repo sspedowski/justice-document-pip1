@@ -286,48 +286,65 @@ async function makeAuthenticatedRequest(url, options = {}) {
       <div class="min-h-screen bg-gray-100 flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-6">
           <div class="text-center mb-6">
-async function uploadPDF() {
-  const fileInput = document.getElementById('pdfFile');
-  const file = fileInput.files[0];
+            <h1 class="text-2xl font-bold text-gray-900">Justice Dashboard</h1>
+            <p class="text-gray-600 mt-2">Secure Access Portal</p>
+          </div>
           
-  if (!file) {
-    showError('Please select a PDF file');
-    return;
-  }
-  if (file.type !== 'application/pdf') {
-    showError('Please select a valid PDF file');
-    return;
-  }
-  if (!DashboardAuth.isAuthenticated) {
-    DashboardAuth.showLoginForm();
-    return;
-  }
-  const formData = new FormData();
-  formData.append('pdf', file);
-  showLoading();
+          <form id="loginForm" class="space-y-4">
+            <div>
+              <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input type="text" id="username" name="username" required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input type="password" id="password" name="password" required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            
+            <div id="loginError" class="hidden text-red-600 text-sm bg-red-50 p-2 rounded"></div>
+            
+            <button type="submit" id="loginBtn" 
+              class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Access Dashboard
+            </button>
+          </form>
+          
+          <div class="mt-6 text-center text-sm text-gray-500">
+            <p>Secure Justice Management System</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Initialize login form functionality
+    setTimeout(() => {
+      const loginForm = document.getElementById('loginForm');
+      const loginBtn = document.getElementById('loginBtn');
+      const errorDiv = document.getElementById('loginError');
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value;
+          
+          if (!username || !password) {
+            errorDiv.textContent = 'Please enter both username and password';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          
+          // Clear previous errors
+          errorDiv.classList.add('hidden');
+          
+          // Update button state
+          loginBtn.textContent = 'Authenticating...';
+          loginBtn.disabled = true;
+          
           try {
-    const response = await makeAuthenticatedRequest('/api/upload-pdf', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Authorization': `Bearer ${DashboardAuth.authToken}`
-      }
-    });
-    const result = await response.json();
-    if (response.ok) {
-      showError('PDF uploaded successfully');
-      loadDashboardData(); // Refresh dashboard
-      fileInput.value = ''; // Clear file input
-    } else {
-      showError(result.message || 'PDF upload failed');
-    }
-  } catch (error) {
-    console.error('PDF upload error:', error);
-    showError('PDF upload failed');
-  } finally {
-    hideLoading();
-  }
-}
             const result = await this.authenticate(username, password);
             
             if (result.success) {
@@ -397,7 +414,7 @@ async function uploadPDF() {
           <div class="mb-6 space-y-4">
             <div>
               <input type="file" id="fileInput" accept=".pdf" multiple
-                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
               <small class="text-gray-600">Select multiple PDF files for bulk processing</small>
             </div>
             
