@@ -1,3 +1,12 @@
+// Add crash detection handlers at the very top to prevent silent crashes
+process.on('uncaughtException', (err) => {
+  console.error('🚨 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
