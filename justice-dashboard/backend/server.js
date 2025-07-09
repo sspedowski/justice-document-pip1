@@ -8,6 +8,21 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
 
+// 🔥 CRASH DETECTION - Add this to catch silent crashes
+process.on('uncaughtException', (err) => {
+  console.error('🚨 UNCAUGHT EXCEPTION - Server will crash:', err);
+  console.error('Stack:', err.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  console.error('This is what killed your server silently!');
+  // Don't exit immediately, just log it
+});
+
+console.log('🔍 Crash detection handlers installed');
+
 // Firebase Admin SDK
 const admin = require('firebase-admin');
 
@@ -1084,53 +1099,49 @@ app.post(
 // Helper function to process queries batch
 async function processQueriesBatch(queries, analysisType) {
   // Use the same logic as the batch-analyze endpoint
-  const requestBody = { queries, analysisType };
+  
+  const results = {
+    timestamp: new Date().toISOString(),
+    analysisType,
+    totalQueries: queries.length,
+    results: [],
+    summary: { successful: 0, failed: 0, executionTime: 0 },
+  };
 
-  // Simulate internal API call
-  return new Promise(async resolve => {
-    const results = {
-      timestamp: new Date().toISOString(),
-      analysisType,
-      totalQueries: queries.length,
-      results: [],
-      summary: { successful: 0, failed: 0, executionTime: 0 },
-    };
+  const startTime = Date.now();
 
-    const startTime = Date.now();
+  for (let i = 0; i < queries.length; i++) {
+    const query = queries[i];
+    try {
+      const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
+      results.results.push({
+        queryIndex: i + 1,
+        query,
+        wolfram: wolframResult,
+        status: wolframResult.success ? 'success' : 'partial',
+      });
 
-    for (let i = 0; i < queries.length; i++) {
-      const query = queries[i];
-      try {
-        const wolframResult = await analyzeWithWolfram(query, `batch-${i + 1}`);
-        results.results.push({
-          queryIndex: i + 1,
-          query,
-          wolfram: wolframResult,
-          status: wolframResult.success ? 'success' : 'partial',
-        });
-
-        if (wolframResult.success) results.summary.successful++;
-        else results.summary.failed++;
-      } catch (error) {
-        results.results.push({
-          queryIndex: i + 1,
-          query,
-          wolfram: {
-            success: false,
-            result: error.message,
-            analysisType: 'error',
-          },
-          status: 'failed',
-        });
-        results.summary.failed++;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 200));
+      if (wolframResult.success) results.summary.successful++;
+      else results.summary.failed++;
+    } catch (error) {
+      results.results.push({
+        queryIndex: i + 1,
+        query,
+        wolfram: {
+          success: false,
+          result: error.message,
+          analysisType: 'error',
+        },
+        status: 'failed',
+      });
+      results.summary.failed++;
     }
 
-    results.summary.executionTime = Date.now() - startTime;
-    resolve(results);
-  });
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  results.summary.executionTime = Date.now() - startTime;
+  return results;
 }
 
 // Enhanced OpenAI Messages API integration for persistent case threads
