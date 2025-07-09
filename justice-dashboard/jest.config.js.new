@@ -12,14 +12,3 @@ module.exports = {
   coverageDirectory: "coverage",
   verbose: true
 };
-  ],
-  collectCoverageFrom: [
-    'frontend/**/*.{js,jsx}',
-    'backend/**/*.{js,jsx}',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/coverage/**'
-  ],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html']
-};
