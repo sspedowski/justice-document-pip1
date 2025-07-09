@@ -8,14 +8,12 @@ module.exports = {
   },
   extends: [
     'eslint:recommended'
-    // Removed potentially missing plugins to avoid errors
   ],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
   rules: {
-    // Basic rules for clean code
     "no-unused-vars": "warn",
     "no-console": "off", // Allow console.log for debugging
     "semi": ["error", "always"],
@@ -27,17 +25,4 @@ module.exports = {
     "uploads/",
     "coverage/"
   ]
-};
-  plugins: ['react'],
-  rules: {
-    'no-unused-vars': 'warn',
-    'no-console': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'warn',
-  },
-  settings: {
-    react: {
-      version: 'detect',
-    },
-  },
 };
