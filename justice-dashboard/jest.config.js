@@ -1,5 +1,5 @@
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: "jsdom", // Changed to jsdom for frontend tests
   roots: ["<rootDir>/frontend", "<rootDir>/backend", "<rootDir>/__tests__"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   moduleFileExtensions: ["js", "json", "node"],
