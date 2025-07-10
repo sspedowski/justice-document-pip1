@@ -598,11 +598,15 @@ app.get('/api/profile', (req, res) => {
     }
     
     const token = authHeader.substring(7);
-    // Simple token validation - in production use proper JWT
-    if (token.startsWith('temp_token_')) {
+    const decoded = verifyJWT(token);
+    
+    if (decoded) {
       return res.json({ 
         success: true, 
-        user: { username: 'admin', role: 'admin' } 
+        user: { 
+          username: decoded.username, 
+          role: decoded.role 
+        } 
       });
     }
     
