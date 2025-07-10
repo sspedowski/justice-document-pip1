@@ -7,6 +7,11 @@ const API_BASE_URL = "https://justice-dashboard.onrender.com";
 
 // Environment detection helper
 function getApiBaseUrl() {
+  // If API_BASE_URL is defined globally (from index.html), use it
+  if (typeof window.API_BASE_URL !== 'undefined') {
+    return window.API_BASE_URL;
+  }
+  
   // Check if running locally
   const isLocal = window.location.hostname === 'localhost' || 
                   window.location.hostname === '127.0.0.1' ||
@@ -1278,7 +1283,7 @@ const ApiHelper = {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}${url}`, defaultOptions);
+      const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, defaultOptions);
       
       // Handle unauthorized responses
       if (response.status === 401) {
