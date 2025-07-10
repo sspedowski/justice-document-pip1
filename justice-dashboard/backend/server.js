@@ -522,7 +522,8 @@ app.post('/api/login', express.json(), async (req, res) => {
       if (isValidPassword) {
         console.log(`✅ Secure admin login successful for: ${username}`);
         return res.json({ 
-          ok: true, 
+          success: true, 
+          token: 'temp_token_' + Date.now(), // Simple token for now
           user: { 
             username: adminUser.username, 
             role: adminUser.role 
@@ -537,15 +538,43 @@ app.post('/api/login', express.json(), async (req, res) => {
       password === process.env.DASH_PASS
     ) {
       console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
-      return res.json({ ok: true, user: { username, role: 'admin' } });
+      return res.json({ 
+        success: true, 
+        token: 'temp_token_' + Date.now(), // Simple token for now
+        user: { username, role: 'admin' } 
+      });
     }
     
     console.log(`❌ Login failed for username: ${username}`);
-    return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+    return res.status(401).json({ success: false, error: 'Invalid credentials' });
     
   } catch (error) {
     console.error('Login error:', error);
-    return res.status(500).json({ ok: false, error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Profile endpoint for token validation
+app.get('/api/profile', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'No token provided' });
+    }
+    
+    const token = authHeader.substring(7);
+    // Simple token validation - in production use proper JWT
+    if (token.startsWith('temp_token_')) {
+      return res.json({ 
+        success: true, 
+        user: { username: 'admin', role: 'admin' } 
+      });
+    }
+    
+    return res.status(401).json({ success: false, error: 'Invalid token' });
+  } catch (error) {
+    console.error('Profile validation error:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 

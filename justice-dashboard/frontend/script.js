@@ -31,7 +31,7 @@
 
 // ===== Login Functionality =====
 document.addEventListener('DOMContentLoaded', () => {
-  const loginSection = document.getElementById('loginBox');
+  const loginSection = document.getElementById('login-form');
   const dashboardSection = document.getElementById('dashboard');
   const loginBtn = document.getElementById('loginBtn');
   const userInput = document.getElementById('userInput');
