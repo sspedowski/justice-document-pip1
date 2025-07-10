@@ -1,0 +1,47 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "client/dist/",
+    "uploads/",
+    "server/uploads/",
+    "server/public/uploads/"
+  ],
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "off"
+  },
+  "overrides": [
+    {
+      "files": ["server/**/*.js", "*.config.js", "check-files.js"],
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "env": {
+        "node": true,
+        "browser": false
+      }
+    },
+    {
+      "files": ["client/**/*.js", "vite.config.js"],
+      "parserOptions": {
+        "sourceType": "module"
+      },
+      "env": {
+        "browser": true,
+        "node": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase credentials (KEEP SECURE!)
+firebase-admin-key.json
+*-service-account-key.json
+*-firebase-adminsdk-*.json
+
+# API Keys and secrets
+*.pem
+*.key
+*.crt
+secrets/
+config/secrets/
+
+# User data and uploads
+uploads/
+public/uploads/
+users.json
+
+# Binary artifacts and generated files
+*.lnk
+*.traineddata
+eng.traineddata
+pglite-debug.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+output.css
+styles/output.css
+*.min.js
+
+# Binary artifacts and shortcuts
+*.lnk
+*.traineddata
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Logs and debug files
+*.log
+pglite-debug.log
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.cache/
+
+# Security sensitive files
+secrets.json
+private_keys/
+certificates/
