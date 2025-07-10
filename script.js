@@ -8,7 +8,7 @@ function getApiBaseUrl() {
     return window.API_BASE_URL;
   }
   
-  // Check if running locally
+  // Fallback: Check if running locally
   const isLocal = window.location.hostname === 'localhost' || 
                   window.location.hostname === '127.0.0.1' ||
                   window.location.hostname === '';
@@ -17,7 +17,7 @@ function getApiBaseUrl() {
   return isLocal ? "http://localhost:3000" : "https://justice-dashboard.onrender.com";
 }
 
-// Use dynamic API base URL
+// Use dynamic API base URL (will use window.API_BASE_URL when available)
 const DYNAMIC_API_BASE_URL = getApiBaseUrl();
 
 // Global variables for bulk processing
