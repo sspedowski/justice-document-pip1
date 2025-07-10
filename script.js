@@ -184,7 +184,7 @@ const DashboardAuth = {
       'Content-Type': 'application/json'
     };
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${API_BASE_URL}${url}`, {
         ...options,
         headers
       });
@@ -1263,7 +1263,7 @@ const ApiHelper = {
     }
     
     try {
-      const response = await fetch(url, defaultOptions);
+      const response = await fetch(`${API_BASE_URL}${url}`, defaultOptions);
       
       // Handle unauthorized responses
       if (response.status === 401) {
