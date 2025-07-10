@@ -13,17 +13,21 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Security: JWT Secret must be provided via environment variable
-// Security: JWT Secret must be provided via environment variable
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-  console.error('FATAL ERROR: JWT_SECRET environment variable not set or too weak');
-  console.error('Please set JWT_SECRET in your .env file with at least 32 characters');
-  process.exit(1);
+// Add debugging statements
+const DEBUG = process.env.NODE_ENV !== 'production';
+if (DEBUG) {
+  console.log('Environment Variables:');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Set' : 'Not Set');
+  console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not Set');
 }
+// Validate required environment variables
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+requiredEnvVars.forEach(varName => {
+  if (!process.env[varName]) {
+    throw new Error(`Environment variable ${varName} is required`);
+  }
+});
 // Security middleware - Strictest CSP for maximum security
 app.use(helmet({
   contentSecurityPolicy: {

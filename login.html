@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Justice Dashboard - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .login-container {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            min-height: 100vh;
+        }
+        .auth-form {
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .status-indicator {
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="login-container">
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                    Justice Dashboard
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-300">
+                    Secure Authentication System
+                </p>
+                <div id="connectionStatus" class="mt-4 hidden">
+                    <div class="status-indicator"></div>
+                    <p class="text-xs text-green-300 mt-1">Connected to server</p>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form mt-8 space-y-6 p-8 rounded-lg shadow-xl">
+                <div id="alertContainer" class="hidden rounded-md p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg id="alertIcon" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p id="alertMessage" class="text-sm font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <div class="mt-1 relative">
+                            <input 
+                                id="username" 
+                                name="username" 
+                                type="text" 
+                                required 
+                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="Enter your username"
+                                autocomplete="username"
+                            >
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <div class="mt-1 relative">
+                            <input 
+                                id="password" 
+                                name="password" 
+                                type="password" 
+                                required 
+                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                            >
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <button type="button" id="togglePassword" class="text-gray-400 hover:text-gray-600" title="Toggle password visibility" aria-label="Toggle password visibility">
+                                    <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input 
+                            id="rememberMe" 
+                            name="rememberMe" 
+                            type="checkbox" 
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-blue-600 hover:text-blue-500" onclick="showForgotPassword()">
+                            Forgot password?
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button 
+                        type="submit" 
+                        id="loginButton"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <svg id="loginIcon" class="h-5 w-5 text-blue-500 group-hover:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg id="loadingIcon" class="hidden h-5 w-5 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        <span id="loginText">Sign in</span>
+                    </button>
+                </div>
+
+                <!-- System Status -->
+                <div class="mt-6 text-center">
+                    <div id="systemStatus" class="text-xs text-gray-500">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div id="serverIndicator" class="w-2 h-2 rounded-full bg-gray-400"></div>
+                            <span id="serverStatus">Checking server status...</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="text-center text-sm text-gray-400">
+                <p>&copy; 2025 Justice Dashboard. All rights reserved.</p>
+                <p class="mt-1">Enhanced Security • Session Management • Auto-refresh</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include our enhanced auth manager -->
+    <script src="auth-manager.js"></script>
+    
+    <script>
+        // Check if already logged in
+        if (window.authManager.isAuthenticated()) {
+            window.location.href = '/secure-dashboard.html';
+        }
+
+        // DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const loginIcon = document.getElementById('loginIcon');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const loginText = document.getElementById('loginText');
+        const alertContainer = document.getElementById('alertContainer');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertIcon = document.getElementById('alertIcon');
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const serverIndicator = document.getElementById('serverIndicator');
+        const serverStatus = document.getElementById('serverStatus');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Password visibility toggle
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                `;
+            } else {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                `;
+            }
+        });
+
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'online') {
+                    serverIndicator.className = 'w-2 h-2 rounded-full bg-green-400';
+                    serverStatus.textContent = `Server online (v${data.version})`;
+                    connectionStatus.classList.remove('hidden');
+                } else {
+                    throw new Error('Server offline');
+                }
+            } catch (error) {
+                serverIndicator.className = 'w-2 h-2 rounded-full bg-red-400';
+                serverStatus.textContent = 'Server offline';
+                connectionStatus.classList.add('hidden');
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            alertMessage.textContent = message;
+            alertContainer.className = `rounded-md p-4 mb-4 ${
+                type === 'error' ? 'bg-red-50 text-red-800' : 
+                type === 'success' ? 'bg-green-50 text-green-800' : 
+                'bg-yellow-50 text-yellow-800'
+            }`;
+            
+            alertIcon.className = `h-5 w-5 ${
+                type === 'error' ? 'text-red-400' : 
+                type === 'success' ? 'text-green-400' : 
+                'text-yellow-400'
+            }`;
+            
+            alertContainer.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Hide alert
+        function hideAlert() {
+            alertContainer.classList.add('hidden');
+        }
+
+        // Set loading state
+        function setLoading(loading) {
+            loginButton.disabled = loading;
+            
+            if (loading) {
+                loginIcon.classList.add('hidden');
+                loadingIcon.classList.remove('hidden');
+                loginText.textContent = 'Signing in...';
+                usernameInput.disabled = true;
+                passwordInput.disabled = true;
+            } else {
+                loginIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
+                loginText.textContent = 'Sign in';
+                usernameInput.disabled = false;
+                passwordInput.disabled = false;
+            }
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!username || !password) {
+                showAlert('Please enter both username and password');
+                return;
+            }
+            
+            hideAlert();
+            setLoading(true);
+            
+            try {
+                const result = await window.authManager.login(username, password);
+                
+                if (result.success) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/secure-dashboard.html';
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Login failed');
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Network error. Please try again.');
+                setLoading(false);
+            }
+        });
+
+        // Forgot password placeholder
+        function showForgotPassword() {
+            showAlert('Password reset functionality will be available soon.', 'info');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            checkServerStatus();
+            
+            // Auto-focus username field
+            usernameInput.focus();
+            
+            // Re-check server status every 30 seconds
+            setInterval(checkServerStatus, 30000);
+        });
+        
+        console.log('🔐 Enhanced login page loaded');
+    </script>
+</body>
+</html>
