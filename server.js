@@ -186,11 +186,16 @@ const authenticateToken = (req, res, next) => {
 app.post("/api/login", loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
-    // Input validation
+    
+    // Input validation with detailed logging
     if (!username || !password) {
       console.log('Login attempt failed: Missing credentials');
+      console.log('Username provided:', !!username);
+      console.log('Password provided:', !!password);
       return res.status(400).json({ error: "Username and password required" });
     }
+    // Debug log
+    console.log('Login attempt for username:', username);
 
     const users = getUsers(); // Get fresh users from file
     const user = users.find(u => u.username === username);
