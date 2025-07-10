@@ -13,6 +13,24 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
+// ============= DEBUGGING SECTION =============
+// Add this temporarily for debugging admin login issues
+const usersPath = path.join(__dirname, 'users.json');
+console.log('🔍 DEBUGGING - Users file exists:', fs.existsSync(usersPath));
+if (fs.existsSync(usersPath)) {
+  try {
+    const usersContent = fs.readFileSync(usersPath, 'utf8');
+    console.log('🔍 DEBUGGING - Users file content:', usersContent);
+  } catch (error) {
+    console.log('🔍 DEBUGGING - Error reading users file:', error);
+  }
+}
+
+// Verify JWT_SECRET is properly set
+console.log('🔍 DEBUGGING - JWT_SECRET is set:', !!process.env.JWT_SECRET);
+console.log('🔍 DEBUGGING - JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 'undefined');
+// ============= END DEBUGGING SECTION =============
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -90,18 +108,23 @@ const usersPath = path.join(__dirname, 'users.json');
 // Load users from file
 function getUsers() {
   if (!fs.existsSync(usersPath)) {
-    console.log('Creating initial users file...');
+    console.log('🔍 DEBUGGING - Creating initial users file...');
     // Create initial users file if it doesn't exist
+    const hashedPassword = bcrypt.hashSync("justice2025", 10);
+    console.log('🔍 DEBUGGING - Created hash for justice2025:', hashedPassword);
+    console.log('🔍 DEBUGGING - Hash verification test:', bcrypt.compareSync("justice2025", hashedPassword));
+    
     const initialUsers = [
       {
         id: 1,
         username: "admin",
-        password: bcrypt.hashSync("justice2025", 10),
+        password: hashedPassword,
         role: "admin",
         fullName: "System Administrator",
         createdAt: new Date().toISOString()
       }
     ];
+    console.log('🔍 DEBUGGING - Initial users to save:', JSON.stringify(initialUsers, null, 2));
     saveUsers(initialUsers);
     return initialUsers;
   }
@@ -195,16 +218,39 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       return res.status(400).json({ error: "Username and password required" });
     }
     // Debug log
-    console.log('Login attempt for username:', username);
+    console.log('🔍 DEBUGGING - Login attempt for username:', username);
+    console.log('🔍 DEBUGGING - Password provided:', password);
+
+    // Test bcrypt functionality
+    const testHash = await bcrypt.hash('justice2025', 10);
+    console.log('🔍 DEBUGGING - Test hash created:', testHash);
+    console.log('🔍 DEBUGGING - Test hash matches justice2025:', await bcrypt.compare('justice2025', testHash));
 
     const users = getUsers(); // Get fresh users from file
+    console.log('🔍 DEBUGGING - Number of users loaded:', users.length);
+    console.log('🔍 DEBUGGING - Users data:', JSON.stringify(users, null, 2));
+    
     const user = users.find(u => u.username === username);
+    console.log('🔍 DEBUGGING - User found:', !!user);
+    if (user) {
+      console.log('🔍 DEBUGGING - User details:', JSON.stringify(user, null, 2));
+      console.log('🔍 DEBUGGING - Stored password hash:', user.password);
+    }
+    
     if (!user) {
+      console.log('🔍 DEBUGGING - No user found with username:', username);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    console.log('🔍 DEBUGGING - Comparing password...');
+    console.log('🔍 DEBUGGING - Input password:', password);
+    console.log('🔍 DEBUGGING - Stored hash:', user.password);
+    
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log('🔍 DEBUGGING - Password comparison result:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('🔍 DEBUGGING - Password validation failed');
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
