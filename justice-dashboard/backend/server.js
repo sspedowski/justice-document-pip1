@@ -13,6 +13,7 @@ const pdfParse = require('pdf-parse');
 const { createWorker } = require('tesseract.js');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
@@ -509,6 +510,30 @@ async function generateSummary(text, fileName) {
   } catch (error) {
     console.error('OpenAI API error:', error.message);
     return `Document: ${fileName}. Content extracted but AI summary failed.`;
+  }
+}
+
+// JWT Helper Functions
+function generateJWT(user) {
+  const payload = {
+    id: user.username,
+    username: user.username,
+    role: user.role,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+  };
+  
+  return jwt.sign(payload, process.env.JWT_SECRET, { 
+    algorithm: 'HS256',
+    expiresIn: '24h'
+  });
+}
+
+function verifyJWT(token) {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    return null;
   }
 }
 
