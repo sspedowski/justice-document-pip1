@@ -517,6 +517,7 @@ app.post('/api/login', express.json(), async (req, res) => {
   try {
     const { username, password } = req.body;
     
+    // Input validation
     if (!username || !password) {
       return res.status(400).json({ ok: false, error: 'Username and password required' });
     }
