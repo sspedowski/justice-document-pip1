@@ -90,12 +90,6 @@ async function createAdminUser() {
 // Initialize admin user on startup
 createAdminUser();
 
-// Static files
-app.use(express.static(path.join(__dirname, "..")));
-app.use(express.static(path.join(__dirname, "../frontend")));
-app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
-app.use(express.static(path.join(__dirname, "public")));
-
 // Try to import OpenAI, fallback if not available
 let OpenAI;
 try {
@@ -118,6 +112,12 @@ if (OpenAI && process.env.OPENAI_API_KEY) {
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Static files
+app.use(express.static(path.join(__dirname, "..")));
+app.use(express.static(path.join(__dirname, "../frontend")));
+app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
