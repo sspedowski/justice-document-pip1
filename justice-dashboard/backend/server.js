@@ -53,8 +53,8 @@ try {
 }
 
 // Security: Environment variable validation
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL ERROR: JWT_SECRET environment variable not set');
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable not set or too weak (min 32 characters required)');
   process.exit(1);
 }
 

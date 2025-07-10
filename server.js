@@ -32,12 +32,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Security: JWT Secret must be provided via environment variable
+// Security: JWT Secret must be provided via environment variable
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.error('FATAL ERROR: JWT_SECRET environment variable not set');
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable not set or too weak');
+  console.error('Please set JWT_SECRET in your .env file with at least 32 characters');
   process.exit(1);
 }
-
 // Security middleware - Strictest CSP for maximum security
 app.use(helmet({
   contentSecurityPolicy: {
