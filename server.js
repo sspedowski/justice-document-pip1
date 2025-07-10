@@ -90,6 +90,7 @@ const usersPath = path.join(__dirname, 'users.json');
 // Load users from file
 function getUsers() {
   if (!fs.existsSync(usersPath)) {
+    console.log('Creating initial users file...');
     // Create initial users file if it doesn't exist
     const initialUsers = [
       {
@@ -99,31 +100,22 @@ function getUsers() {
         role: "admin",
         fullName: "System Administrator",
         createdAt: new Date().toISOString()
-      },
-      {
-        id: 2,
-        username: "stephanie",
-        password: bcrypt.hashSync("spedowski2024", 10),
-        role: "user",
-        fullName: "Stephanie Spedowski",
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 3,
-        username: "legal",
-        password: bcrypt.hashSync("legal123", 10),
-        role: "user",
-        fullName: "Legal Team",
-        createdAt: new Date().toISOString()
       }
     ];
     saveUsers(initialUsers);
     return initialUsers;
   }
   try {
-    return JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    const users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    console.log(`Loaded ${users.length} users from file`);
+    return users;
   } catch (error) {
     console.error('Error reading users file:', error);
+    // Create backup of corrupted file
+    if (fs.existsSync(usersPath)) {
+      fs.copyFileSync(usersPath, `${usersPath}.backup.${Date.now()}`);
+    }
+    // Return empty array to prevent crashes
     return [];
   }
 }
@@ -191,12 +183,12 @@ const authenticateToken = (req, res, next) => {
 
 // ============= API ROUTES =============
 
-// Login endpoint
 app.post("/api/login", loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
-
+    // Input validation
     if (!username || !password) {
+      console.log('Login attempt failed: Missing credentials');
       return res.status(400).json({ error: "Username and password required" });
     }
 
