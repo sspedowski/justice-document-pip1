@@ -15,11 +15,10 @@ require("dotenv").config();
 
 // ============= DEBUGGING SECTION =============
 // Add this temporarily for debugging admin login issues
-const usersPath = path.join(__dirname, 'users.json');
-console.log('🔍 DEBUGGING - Users file exists:', fs.existsSync(usersPath));
-if (fs.existsSync(usersPath)) {
+console.log('🔍 DEBUGGING - Users file exists:', fs.existsSync(path.join(__dirname, 'users.json')));
+if (fs.existsSync(path.join(__dirname, 'users.json'))) {
   try {
-    const usersContent = fs.readFileSync(usersPath, 'utf8');
+    const usersContent = fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8');
     console.log('🔍 DEBUGGING - Users file content:', usersContent);
   } catch (error) {
     console.log('🔍 DEBUGGING - Error reading users file:', error);
