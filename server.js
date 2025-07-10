@@ -333,6 +333,10 @@ app.post("/api/login", loginLimiter, async (req, res) => {
       fullName: user.fullName
     };
 
+    // Update last login time
+    user.lastLogin = new Date().toISOString();
+    saveUsers(users);
+
     console.log(`✅ Login successful for user: ${username} (${user.role})`);
 
     res.json({
@@ -361,11 +365,62 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-// Profile endpoint
+// User session monitoring endpoint
+app.get("/api/user-sessions", authenticateToken, (req, res) => {
+  try {
+    // Only allow admin users to view sessions
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const users = getUsers();
+    const sessionInfo = users.map(user => ({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      lastLogin: user.lastLogin || null,
+      passwordChangedAt: user.passwordChangedAt || null,
+      createdAt: user.createdAt || null
+    }));
+
+    res.json({
+      success: true,
+      sessions: sessionInfo
+    });
+  } catch (error) {
+    console.error("Session monitoring error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// User profile endpoint
 app.get("/api/profile", authenticateToken, (req, res) => {
-  res.json({
-    user: req.user
-  });
+  try {
+    const users = getUsers();
+    const user = users.find(u => u.id === req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return user profile without sensitive data
+    const profile = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+      passwordChangedAt: user.passwordChangedAt
+    };
+
+    res.json({
+      success: true,
+      profile: profile
+    });
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // Admin-only middleware
@@ -505,7 +560,30 @@ app.post("/api/summarize", authenticateToken, upload.single("file"), async (req,
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  
+  let authStatus = "unauthenticated";
+  
+  if (token) {
+    try {
+      jwt.verify(token, JWT_SECRET);
+      authStatus = "authenticated";
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        authStatus = "token_expired";
+      } else {
+        authStatus = "invalid_token";
+      }
+    }
+  }
+
+  res.json({
+    status: "online",
+    timestamp: new Date().toISOString(),
+    authentication: authStatus,
+    version: "1.0.0"
+  });
 });
 
 // Error handling endpoint
