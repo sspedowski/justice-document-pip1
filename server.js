@@ -91,11 +91,9 @@ const usersPath = path.join(__dirname, 'users.json');
 // Load users from file
 function getUsers() {
   if (!fs.existsSync(usersPath)) {
-    console.log('🔍 DEBUGGING - Creating initial users file...');
+    console.log('Creating initial users file...');
     // Create initial users file if it doesn't exist
     const hashedPassword = bcrypt.hashSync("justice2025", 10);
-    console.log('🔍 DEBUGGING - Created hash for justice2025:', hashedPassword);
-    console.log('🔍 DEBUGGING - Hash verification test:', bcrypt.compareSync("justice2025", hashedPassword));
     
     const initialUsers = [
       {
@@ -107,7 +105,7 @@ function getUsers() {
         createdAt: new Date().toISOString()
       }
     ];
-    console.log('🔍 DEBUGGING - Initial users to save:', JSON.stringify(initialUsers, null, 2));
+    console.log('✅ Initial admin user created with username: admin');
     saveUsers(initialUsers);
     return initialUsers;
   }
@@ -193,62 +191,47 @@ app.post("/api/login", loginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    // Input validation with detailed logging
+    // Input validation
     if (!username || !password) {
       console.log('Login attempt failed: Missing credentials');
-      console.log('Username provided:', !!username);
-      console.log('Password provided:', !!password);
       return res.status(400).json({ error: "Username and password required" });
     }
-    // Debug log
-    console.log('🔍 DEBUGGING - Login attempt for username:', username);
-    console.log('🔍 DEBUGGING - Password provided:', password);
 
-    // Test bcrypt functionality
-    const testHash = await bcrypt.hash('justice2025', 10);
-    console.log('🔍 DEBUGGING - Test hash created:', testHash);
-    console.log('🔍 DEBUGGING - Test hash matches justice2025:', await bcrypt.compare('justice2025', testHash));
+    // Log login attempt (without password for security)
+    console.log(`Login attempt for username: ${username}`);
 
-    const users = getUsers(); // Get fresh users from file
-    console.log('🔍 DEBUGGING - Number of users loaded:', users.length);
-    console.log('🔍 DEBUGGING - Users data:', JSON.stringify(users, null, 2));
-    
+    const users = getUsers();
     const user = users.find(u => u.username === username);
-    console.log('🔍 DEBUGGING - User found:', !!user);
-    if (user) {
-      console.log('🔍 DEBUGGING - User details:', JSON.stringify(user, null, 2));
-      console.log('🔍 DEBUGGING - Stored password hash:', user.password);
-    }
     
     if (!user) {
-      console.log('🔍 DEBUGGING - No user found with username:', username);
+      console.log(`Login failed - User not found: ${username}`);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    console.log('🔍 DEBUGGING - Comparing password...');
-    console.log('🔍 DEBUGGING - Input password:', password);
-    console.log('🔍 DEBUGGING - Stored hash:', user.password);
-    
+    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
-    console.log('🔍 DEBUGGING - Password comparison result:', isValidPassword);
     
     if (!isValidPassword) {
-      console.log('🔍 DEBUGGING - Password validation failed');
+      console.log(`Login failed - Invalid password for user: ${username}`);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
       JWT_SECRET,
       { expiresIn: "24h" }
     );
 
+    // Set session data
     req.session.user = {
       id: user.id,
       username: user.username,
       role: user.role,
       fullName: user.fullName
     };
+
+    console.log(`✅ Login successful for user: ${username} (${user.role})`);
 
     res.json({
       success: true,
