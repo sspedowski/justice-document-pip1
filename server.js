@@ -13,23 +13,8 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-// ============= DEBUGGING SECTION =============
-// Add this temporarily for debugging admin login issues
-console.log('🔍 DEBUGGING - Users file exists:', fs.existsSync(path.join(__dirname, 'users.json')));
-if (fs.existsSync(path.join(__dirname, 'users.json'))) {
-  try {
-    const usersContent = fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8');
-    console.log('🔍 DEBUGGING - Users file content:', usersContent);
-  } catch (error) {
-    console.log('🔍 DEBUGGING - Error reading users file:', error);
-  }
-}
-// Verify JWT_SECRET is properly set
-console.log('🔍 DEBUGGING - JWT_SECRET is set:', !!process.env.JWT_SECRET);
-console.log('🔍 DEBUGGING - JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 'undefined');
-// ============= END DEBUGGING SECTION =============
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Security: JWT Secret must be provided via environment variable
 // Security: JWT Secret must be provided via environment variable
