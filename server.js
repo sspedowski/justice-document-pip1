@@ -31,7 +31,7 @@ console.log('🔍 DEBUGGING - JWT_SECRET length:', process.env.JWT_SECRET ? proc
 // ============= END DEBUGGING SECTION =============
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Security: JWT Secret must be provided via environment variable
 const JWT_SECRET = process.env.JWT_SECRET;
