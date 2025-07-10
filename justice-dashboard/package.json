@@ -12,8 +12,7 @@
     "build:prod": "set NODE_ENV=production && npm run build",
     "start": "node backend/server.js",
     "start:prod": "NODE_ENV=production node backend/server.js",
-    "deploy:firebase": "npm run build:prod && firebase deploy"
-  },
+    "deploy:firebase": "npm run build:prod && firebase deploy",
     "deploy:vercel": "npm run build:prod && vercel --prod",
     "check": "node check-files.js",
     "deploy:check": "cross-env NODE_ENV=production node deployment-check.js",
