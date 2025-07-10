@@ -74,11 +74,11 @@ async function createAdminUser() {
       const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 12);
       adminUser = {
         username: process.env.ADMIN_USER,
-        password: hashedPassword,
-        role: 'admin',
-        createdAt: new Date().toISOString()
-      };
-      console.log('✅ Secure admin user created successfully');
+// Static files
+app.use(express.static(path.join(__dirname, "..")));
+app.use(express.static(path.join(__dirname, "../frontend")));
+app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
+app.use(express.static(path.join(__dirname, "public")));
     } else {
       console.log('⚠️  Using legacy authentication (less secure)');
     }
