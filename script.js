@@ -1,6 +1,9 @@
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
+// API Configuration
+const API_BASE_URL = "https://justice-dashboard.onrender.com";
+
 // Global variables for bulk processing
 let isProcessingBulk = false;
 let bulkTotal = 0;
@@ -51,7 +54,7 @@ const DashboardAuth = {
   // Authenticate user with server
   async authenticate(username, password) {
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -91,7 +94,7 @@ const DashboardAuth = {
     try {
       // Call server logout endpoint if token exists
       if (this.authToken) {
-        await fetch('/api/logout', {
+        await fetch(`${API_BASE_URL}/api/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.authToken}`,
