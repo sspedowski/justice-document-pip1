@@ -620,7 +620,7 @@ app.get('/api/profile', (req, res) => {
 // Secure user registration endpoint (admin-only)
 app.post('/api/register', express.json(), async (req, res) => {
   try {
-    const { username, password, role = 'user' } = req.body;
+    // const { username, password, role = 'user' } = req.body;
     
     // TODO: Add admin authentication check here
     // For now, this endpoint is disabled for security
