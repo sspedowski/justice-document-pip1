@@ -22,7 +22,7 @@ if (DEBUG) {
   console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not Set');
 }
 // Validate required environment variables
-const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const requiredEnvVars = ['JWT_SECRET'];
 requiredEnvVars.forEach(varName => {
   if (!process.env[varName]) {
     throw new Error(`Environment variable ${varName} is required`);
