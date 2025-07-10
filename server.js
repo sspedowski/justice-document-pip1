@@ -167,23 +167,125 @@ async function addUser(username, password, role = 'user', fullName = '') {
 // Initialize users (load from file)
 const users = getUsers();
 
-// Authentication middleware
+// Enhanced authentication middleware with better error handling
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ error: "Access token required" });
+    return res.status(401).json({ 
+      error: "Access token required",
+      code: "TOKEN_MISSING"
+    });
   }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
+      console.log(`Token verification failed: ${err.message}`);
+      
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          error: "Token has expired",
+          code: "TOKEN_EXPIRED"
+        });
+      } else if (err.name === 'JsonWebTokenError') {
+        return res.status(403).json({ 
+          error: "Invalid token",
+          code: "TOKEN_INVALID"
+        });
+      } else {
+        return res.status(403).json({ 
+          error: "Token verification failed",
+          code: "TOKEN_ERROR"
+        });
+      }
     }
-    req.user = user;
+    
+    // Add timestamp of token verification
+    req.user = { ...user, tokenVerifiedAt: new Date().toISOString() };
     next();
   });
 };
+
+// Token refresh endpoint
+app.post("/api/refresh-token", authenticateToken, (req, res) => {
+  try {
+    // Generate a new token with extended expiry
+    const newToken = jwt.sign(
+      { 
+        id: req.user.id, 
+        username: req.user.username, 
+        role: req.user.role 
+      },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    console.log(`✅ Token refreshed for user: ${req.user.username}`);
+
+    res.json({
+      success: true,
+      token: newToken,
+      expiresIn: "24h"
+    });
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    res.status(500).json({ error: "Failed to refresh token" });
+  }
+});
+
+// Password change endpoint
+app.post("/api/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        error: "Current password and new password required" 
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ 
+        error: "New password must be at least 8 characters long" 
+      });
+    }
+
+    const users = getUsers();
+    const user = users.find(u => u.id === req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isCurrentPasswordValid) {
+      console.log(`Password change failed - Invalid current password for user: ${user.username}`);
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update user password
+    user.password = hashedNewPassword;
+    user.passwordChangedAt = new Date().toISOString();
+    
+    saveUsers(users);
+    
+    console.log(`✅ Password changed successfully for user: ${user.username}`);
+
+    res.json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // ============= API ROUTES =============
 
