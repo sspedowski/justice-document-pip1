@@ -94,7 +94,26 @@ function logout() {
 
 // Show login form
 function showLogin() {
-    const loginForm = document.getElementById('loginForm'); // Changed from 'login-form' to 'loginForm'
+    // Create login form if it doesn't exist
+    let loginForm = document.getElementById('login-form');
+    if (!loginForm) {
+        const appDiv = document.getElementById('app');
+        appDiv.innerHTML = `
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" id="loginBtn">Login</button>
+            </form>
+        `;
+        loginForm = document.getElementById('login-form');
+    }
+    
     const dashboard = document.getElementById('dashboard');
     if (loginForm) loginForm.style.display = 'block';
     if (dashboard) dashboard.style.display = 'none';
