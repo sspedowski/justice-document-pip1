@@ -3,6 +3,7 @@
 
 // API Configuration
 const API_BASE_URL = "https://justice-dashboard.onrender.com";
+// For local development, use: const API_BASE_URL = "http://localhost:3000";
 
 // Global variables for bulk processing
 let isProcessingBulk = false;
