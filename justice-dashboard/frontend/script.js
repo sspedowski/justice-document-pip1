@@ -131,13 +131,6 @@ async function validateToken(token) {
 }
 
 // Show/hide login and dashboard functions
-function showLogin() {
-  const loginForm = document.getElementById('login-form');
-  const dashboard = document.getElementById('dashboard');
-  
-  if (loginForm) loginForm.style.display = 'block';
-  if (dashboard) dashboard.style.display = 'none';
-}
 
 function showDashboard() {
   const loginForm = document.getElementById('login-form');
