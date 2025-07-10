@@ -28,6 +28,12 @@ requiredEnvVars.forEach(varName => {
     throw new Error(`Environment variable ${varName} is required`);
   }
 });
+
+// Initialize Express app
+const app = express();
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
 // Security middleware - Strictest CSP for maximum security
 app.use(helmet({
   contentSecurityPolicy: {
