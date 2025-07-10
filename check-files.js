@@ -6,9 +6,6 @@ const required = [
   "server.js",                    // Root level server
   "index.html",                   // Root level index 
   "script.js",                    // Root level script
-  "backend/server.js",            // Backend server
-  "frontend/index.html",          // Frontend index
-  "frontend/script.js",           // Frontend script
   "package.json",                 // Package config
   ".env"                          // Environment variables
 ];
