@@ -1,10 +1,6 @@
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
-// API Configuration
-const API_BASE_URL = "https://justice-dashboard.onrender.com";
-// For local development, use: const API_BASE_URL = "http://localhost:3000";
-
 // Environment detection helper
 function getApiBaseUrl() {
   // If API_BASE_URL is defined globally (from index.html), use it
