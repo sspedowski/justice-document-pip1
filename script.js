@@ -1,6 +1,11 @@
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
+// Global variables for bulk processing
+let isProcessingBulk = false;
+let bulkTotal = 0;
+let bulkProgress = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
 });
