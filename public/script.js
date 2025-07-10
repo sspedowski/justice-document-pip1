@@ -113,6 +113,7 @@ function showLogin() {
         // Focus username field
     const usernameField = document.getElementById('username');
     if (usernameField) usernameField.focus();
+    }
 }
 
 // Show dashboard
