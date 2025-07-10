@@ -24,12 +24,10 @@ if (fs.existsSync(path.join(__dirname, 'users.json'))) {
     console.log('🔍 DEBUGGING - Error reading users file:', error);
   }
 }
-
 // Verify JWT_SECRET is properly set
 console.log('🔍 DEBUGGING - JWT_SECRET is set:', !!process.env.JWT_SECRET);
 console.log('🔍 DEBUGGING - JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 'undefined');
 // ============= END DEBUGGING SECTION =============
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
