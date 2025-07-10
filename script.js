@@ -5,6 +5,20 @@
 const API_BASE_URL = "https://justice-dashboard.onrender.com";
 // For local development, use: const API_BASE_URL = "http://localhost:3000";
 
+// Environment detection helper
+function getApiBaseUrl() {
+  // Check if running locally
+  const isLocal = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' ||
+                  window.location.hostname === '';
+  
+  // Return appropriate base URL
+  return isLocal ? "http://localhost:3000" : "https://justice-dashboard.onrender.com";
+}
+
+// Use dynamic API base URL
+const DYNAMIC_API_BASE_URL = getApiBaseUrl();
+
 // Global variables for bulk processing
 let isProcessingBulk = false;
 let bulkTotal = 0;
@@ -55,7 +69,7 @@ const DashboardAuth = {
   // Authenticate user with server
   async authenticate(username, password) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -95,7 +109,7 @@ const DashboardAuth = {
     try {
       // Call server logout endpoint if token exists
       if (this.authToken) {
-        await fetch(`${API_BASE_URL}/api/logout`, {
+        await fetch(`${DYNAMIC_API_BASE_URL}/api/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.authToken}`,
@@ -185,7 +199,7 @@ const DashboardAuth = {
       'Content-Type': 'application/json'
     };
     try {
-      const response = await fetch(`${API_BASE_URL}${url}`, {
+      const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, {
         ...options,
         headers
       });
