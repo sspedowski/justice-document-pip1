@@ -3,7 +3,8 @@ const fs = require('fs');
 const requiredFiles = [
   'backend/server.js',
   'frontend/index.html',
-  'frontend/script.js'
+  'frontend/script.js',
+  'frontend/dist/output.css'  // Add CSS file check
 ];
 
 let allPresent = true;

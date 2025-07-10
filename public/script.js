@@ -94,11 +94,11 @@ function logout() {
 
 // Show login form
 function showLogin() {
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById('loginForm'); // Changed from 'login-form' to 'loginForm'
     const dashboard = document.getElementById('dashboard');
     if (loginForm) loginForm.style.display = 'block';
     if (dashboard) dashboard.style.display = 'none';
-    
+}
     // Focus username field if it exists
     const usernameField = document.getElementById('username');
     if (usernameField) usernameField.focus();
