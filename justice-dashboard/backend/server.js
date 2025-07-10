@@ -74,11 +74,10 @@ async function createAdminUser() {
       const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 12);
       adminUser = {
         username: process.env.ADMIN_USER,
-// Static files
-app.use(express.static(path.join(__dirname, "..")));
-app.use(express.static(path.join(__dirname, "../frontend")));
-app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
-app.use(express.static(path.join(__dirname, "public")));
+        password: hashedPassword,
+        role: 'admin'
+      };
+      console.log('✅ Secure admin user created');
     } else {
       console.log('⚠️  Using legacy authentication (less secure)');
     }
@@ -90,6 +89,12 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Initialize admin user on startup
 createAdminUser();
+
+// Static files
+app.use(express.static(path.join(__dirname, "..")));
+app.use(express.static(path.join(__dirname, "../frontend")));
+app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Try to import OpenAI, fallback if not available
 let OpenAI;
