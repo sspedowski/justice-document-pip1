@@ -130,13 +130,21 @@ async function validateToken(token) {
   }
 }
 
-// Show dashboard function
-function showDashboard() {
-  const loginSection = document.getElementById('loginBox');
-  const dashboardSection = document.getElementById('dashboard');
+// Show/hide login and dashboard functions
+function showLogin() {
+  const loginForm = document.getElementById('login-form');
+  const dashboard = document.getElementById('dashboard');
   
-  if (loginSection) loginSection.style.display = 'none';
-  if (dashboardSection) dashboardSection.style.display = 'block';
+  if (loginForm) loginForm.style.display = 'block';
+  if (dashboard) dashboard.style.display = 'none';
+}
+
+function showDashboard() {
+  const loginForm = document.getElementById('login-form');
+  const dashboard = document.getElementById('dashboard');
+  
+  if (loginForm) loginForm.style.display = 'none';
+  if (dashboard) dashboard.style.display = 'block';
 }
 
 // Legal statute tagging logic
