@@ -4,6 +4,14 @@ export default defineConfig({
   root: 'frontend',
   envPrefix: 'VITE_',
   envDir: '../', // Look for .env files in the parent directory (project root)
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
   server: {
     port: 5173,
     host: true,

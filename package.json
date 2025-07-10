@@ -10,6 +10,7 @@
     "test": "echo \"No tests specified in root - run 'cd justice-dashboard && npm test' for main tests\" && exit 0"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.21",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
