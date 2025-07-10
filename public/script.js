@@ -94,31 +94,23 @@ function logout() {
 
 // Show login form
 function showLogin() {
-    // Create login form if it doesn't exist
-    let loginForm = document.getElementById('login-form');
-    if (!loginForm) {
+    // Get the app container
         const appDiv = document.getElementById('app');
-        appDiv.innerHTML = `
-            <form id="login-form" class="login-form">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" id="loginBtn">Login</button>
-            </form>
-        `;
-        loginForm = document.getElementById('login-form');
+    if (!appDiv) {
+        console.error('App container not found');
+        return;
     }
-    
+    // Hide any existing dashboard content
     const dashboard = document.getElementById('dashboard');
-    if (loginForm) loginForm.style.display = 'block';
-    if (dashboard) dashboard.style.display = 'none';
+    if (dashboard) {
+        dashboard.style.display = 'none';
 }
-    // Focus username field if it exists
+    // Show the login form
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.style.display = 'block';
+        
+        // Focus username field
     const usernameField = document.getElementById('username');
     if (usernameField) usernameField.focus();
 }
