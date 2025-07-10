@@ -94,9 +94,14 @@ function logout() {
 
 // Show login form
 function showLogin() {
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('username').focus();
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('dashboard');
+    if (loginForm) loginForm.style.display = 'block';
+    if (dashboard) dashboard.style.display = 'none';
+    
+    // Focus username field if it exists
+    const usernameField = document.getElementById('username');
+    if (usernameField) usernameField.focus();
 }
 
 // Show dashboard
