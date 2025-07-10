@@ -552,13 +552,15 @@ app.post('/api/login', express.json(), async (req, res) => {
       const isValidPassword = await bcrypt.compare(password, adminUser.password);
       if (isValidPassword) {
         console.log(`✅ Secure admin login successful for: ${username}`);
+        const user = { 
+          username: adminUser.username, 
+          role: adminUser.role 
+        };
+        const token = generateJWT(user);
         return res.json({ 
           success: true, 
-          token: 'temp_token_' + Date.now(), // Simple token for now
-          user: { 
-            username: adminUser.username, 
-            role: adminUser.role 
-          } 
+          token: token,
+          user: user
         });
       }
     }
@@ -569,10 +571,12 @@ app.post('/api/login', express.json(), async (req, res) => {
       password === process.env.DASH_PASS
     ) {
       console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
+      const user = { username, role: 'admin' };
+      const token = generateJWT(user);
       return res.json({ 
         success: true, 
-        token: 'temp_token_' + Date.now(), // Simple token for now
-        user: { username, role: 'admin' } 
+        token: token,
+        user: user
       });
     }
     
