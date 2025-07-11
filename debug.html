@@ -2,75 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>Justice Dashboard Debug Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Justice Dashboard - Debug</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .login-form { background: #f5f5f5; padding: 20px; border-radius: 8px; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; }
-    input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-    button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #005a87; }
-    .error { color: red; margin-top: 10px; }
+    body { font-family: system-ui,sans-serif; background: #f7fafc; margin: 0; padding: 2rem; }
+    .box { max-width: 360px; margin: 3rem auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px #0001; padding: 2rem; }
+    h1 { font-size: 1.5rem; text-align: center; }
+    label { display: block; margin: 1rem 0 0.2rem; }
+    input { width: 100%; padding: 0.5rem; font-size: 1rem; }
+    button { width: 100%; padding: 0.7rem; background: #3157c3; color: #fff; border: none; border-radius: 7px; font-size: 1rem; margin-top: 1.5rem; }
+    .msg { color: #d32f2f; font-size: 1rem; text-align: center; margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Justice Dashboard - Simple Version</h1>
-    <div id="app">
-      <div class="login-form">
-        <h2>Login</h2>
-        <form id="loginForm">
-          <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" value="admin">
-          </div>
-          <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" value="justice2025">
-          </div>
-          <button type="submit">Login</button>
-          <div id="error" class="error"></div>
-        </form>
-      </div>
-    </div>
+  <div class="box">
+    <h1>Justice Dashboard Login (Debug)</h1>
+    <form id="loginForm">
+      <label for="user">Username</label>
+      <input id="user" autocomplete="username" required autofocus>
+      <label for="pass">Password</label>
+      <input id="pass" type="password" autocomplete="current-password" required>
+      <button type="submit">Login</button>
+      <div class="msg" id="msg"></div>
+    </form>
   </div>
-
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('loginForm');
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('error');
-      
+      document.getElementById('msg').textContent = '';
+      const username = document.getElementById('user').value.trim();
+      const password = document.getElementById('pass').value;
       try {
-        console.log('Attempting login...');
-        const response = await fetch('/api/login', {
+        const res = await fetch('/api/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
-        
-        console.log('Response status:', response.status);
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (response.ok) {
-          errorDiv.textContent = '';
-          document.getElementById('app').innerHTML = '<h2>Login Successful!</h2><p>Welcome to Justice Dashboard</p><p>Token: ' + data.token + '</p>';
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('msg').textContent = '✅ Login successful!';
+          setTimeout(() => window.location.href = '/', 1000);
         } else {
-          errorDiv.textContent = data.error || 'Login failed';
+          document.getElementById('msg').textContent = data.error || 'Login failed.';
         }
-      } catch (error) {
-        console.error('Login error:', error);
-        errorDiv.textContent = 'Network error: ' + error.message;
+      } catch (err) {
+        document.getElementById('msg').textContent = 'Server error.';
       }
-    });
+    };
   </script>
 </body>
 </html>
