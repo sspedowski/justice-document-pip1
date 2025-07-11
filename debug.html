@@ -27,29 +27,56 @@
     </form>
   </div>
   <script>
+    console.log('Debug script loaded');
     const form = document.getElementById('loginForm');
+    console.log('Form element:', form);
+    
     form.onsubmit = async (e) => {
+      console.log('Form submitted');
       e.preventDefault();
-      document.getElementById('msg').textContent = '';
+      
+      const msgDiv = document.getElementById('msg');
+      msgDiv.textContent = 'Attempting login...';
+      msgDiv.style.color = 'blue';
+      
       const username = document.getElementById('user').value.trim();
       const password = document.getElementById('pass').value;
+      
+      console.log('Credentials:', { username, password: password ? '***' : 'empty' });
+      
       try {
+        console.log('Making fetch request to /api/login');
         const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
+        
+        console.log('Response status:', res.status);
         const data = await res.json();
+        console.log('Response data:', data);
+        
         if (data.success) {
-          document.getElementById('msg').textContent = '✅ Login successful!';
+          msgDiv.textContent = '✅ Login successful!';
+          msgDiv.style.color = 'green';
           setTimeout(() => window.location.href = '/', 1000);
         } else {
-          document.getElementById('msg').textContent = data.error || 'Login failed.';
+          msgDiv.textContent = data.error || 'Login failed.';
+          msgDiv.style.color = 'red';
         }
       } catch (err) {
-        document.getElementById('msg').textContent = 'Server error.';
+        console.error('Login error:', err);
+        msgDiv.textContent = 'Server error: ' + err.message;
+        msgDiv.style.color = 'red';
       }
     };
+    
+    // Test button click
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, setting up form');
+      const button = document.querySelector('button');
+      console.log('Button element:', button);
+    });
   </script>
 </body>
 </html>
