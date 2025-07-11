@@ -58,7 +58,11 @@ app.use(helmet({
   }
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000", 
+    "https://sspedowski.github.io"
+  ],
   credentials: true
 }));
 
@@ -76,6 +80,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
+// Note: Using MemoryStore for sessions - acceptable for demo/testing
+// For production scale, consider: connect-mongo, connect-redis, or express-session-file-store
 app.use(session({
   secret: process.env.SESSION_SECRET || "your-session-secret",
   resave: false,
