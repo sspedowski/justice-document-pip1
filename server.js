@@ -98,9 +98,9 @@ app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Default route - serve secure dashboard
+// Default route - serve main dashboard
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'secure-dashboard.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // File-based user storage for security
