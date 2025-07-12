@@ -1222,29 +1222,6 @@ window.debugDashboard = function() {
   );
 };
 
-// ===== MAIN APP INITIALIZATION =====
-function initializeApp() {
-  console.log('Justice Dashboard starting...');
-  
-  // Check if app container exists
-  const appContainer = document.getElementById('app');
-  if (!appContainer) {
-    console.error('App container (#app) not found in DOM');
-    return;
-  }
-
-  // Initialize authentication and render appropriate view
-  if (DashboardAuth.init()) {
-    // User is authenticated - show dashboard
-    console.log('User authenticated, loading dashboard...');
-    DashboardAuth.renderDashboard();
-  } else {
-    // User not authenticated - show login form
-    console.log('User not authenticated, showing login form...');
-    DashboardAuth.renderLoginForm();
-  }
-}
-
 // Helper function to check if user is authenticated (for use in other parts of app)
 function isUserAuthenticated() {
   return DashboardAuth.isAuthenticated;
