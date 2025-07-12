@@ -21,23 +21,45 @@
   <!-- Dashboard content with beautiful modern design -->
   <div id="dashboardContent" class="hidden">
     <div class="max-w-5xl mx-auto p-6 sm:p-10 mt-8 mb-12 bg-white rounded-2xl shadow-2xl ring-1 ring-blue-100">
-      <!-- Dashboard Header -->
-      <header class="mb-6 text-center">
-        <h1 class="text-4xl font-extrabold text-blue-700 mb-2 tracking-tight">Justice Dashboard</h1>
-        <p class="text-lg text-gray-500">Case Tracking & Management System</p>
-        <div class="flex justify-center space-x-6 text-sm text-gray-500 mt-4">
-          <span class="flex items-center">
-            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-            System Secure
-          </span>
-          <span class="flex items-center">
-            <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-            CSP Compliant
-          </span>
-          <span class="flex items-center">
-            <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-            AI Ready
-          </span>
+      <!-- Enhanced Professional Header with Scripture -->
+      <header class="mb-8 text-center justice-animate-in">
+        <!-- Inspirational Scripture Banner -->
+        <div class="bg-gradient-to-r from-slate-600 to-slate-700 text-white py-3 px-6 rounded-xl mb-6 shadow-lg">
+          <p class="text-sm font-medium italic">
+            "But let justice roll down like waters, and righteousness like a mighty stream." - Amos 5:24
+          </p>
+        </div>
+        
+        <!-- Main Header -->
+        <div class="justice-card text-center">
+          <div class="flex items-center justify-center mb-4">
+            <!-- Justice Scales Icon -->
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7L13.5 7.5C13.1 7.7 12.6 7.8 12 7.8S10.9 7.7 10.5 7.5L9 7L3 7V9L9 9L10.08 9.28L8 11V22H10V12.5L11 11.5L12 12.5V22H14V11L11.92 9.28L13 9L21 9Z"/>
+              </svg>
+            </div>
+            <div class="text-left">
+              <h1 class="text-4xl font-extrabold justice-heading mb-2 tracking-tight">Justice Dashboard</h1>
+              <p class="text-lg justice-subheading">Legal Case Management & AI-Powered Analysis</p>
+            </div>
+          </div>
+          
+          <!-- Status Indicators -->
+          <div class="flex justify-center space-x-4 text-sm">
+            <span class="justice-status-indicator justice-status-secure">
+              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              System Secure
+            </span>
+            <span class="justice-status-indicator justice-status-ready">
+              <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              CSP Compliant
+            </span>
+            <span class="justice-status-indicator">
+              <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+              AI Ready
+            </span>
+          </div>
         </div>
       </header>
       
@@ -60,23 +82,91 @@
         <textarea id="docText" class="w-full h-32 border rounded-lg px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Paste document text here..."></textarea>
       </div>
       
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gradient-to-tr from-blue-400 to-blue-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
-          <div class="text-2xl font-bold" id="totalCases">0</div>
-          <div class="text-sm opacity-80">Total Cases</div>
+      <!-- Enhanced Professional Statistics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Cases Card -->
+        <div class="justice-card bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 hover:border-blue-600 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-1">Total Cases</p>
+              <p id="totalCases" class="text-3xl font-bold text-blue-900 mb-1">0</p>
+              <p class="text-xs text-blue-600 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Tracking active
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 3a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="bg-gradient-to-tr from-green-400 to-green-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
-          <div class="text-2xl font-bold" id="activeCases">0</div>
-          <div class="text-sm opacity-80">Active Cases</div>
+
+        <!-- Active Cases Card -->
+        <div class="justice-card bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500 hover:border-green-600 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold text-green-600 uppercase tracking-wide mb-1">Active Cases</p>
+              <p id="activeCases" class="text-3xl font-bold text-green-900 mb-1">0</p>
+              <p class="text-xs text-green-600 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Currently processing
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="bg-gradient-to-tr from-purple-400 to-purple-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
-          <div class="text-2xl font-bold" id="processingStatus">Ready</div>
-          <div class="text-sm opacity-80">Processing Status</div>
+
+        <!-- Processing Status Card -->
+        <div class="justice-card bg-gradient-to-br from-purple-50 to-purple-100 border-l-4 border-purple-500 hover:border-purple-600 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold text-purple-600 uppercase tracking-wide mb-1">Processing</p>
+              <p id="processingStatus" class="text-3xl font-bold text-purple-900 mb-1">Ready</p>
+              <p class="text-xs text-purple-600 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                </svg>
+                System operational
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="bg-gradient-to-tr from-orange-400 to-orange-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
-          <div class="text-2xl font-bold" id="analysisResults">0</div>
-          <div class="text-sm opacity-80">Analysis Results</div>
+
+        <!-- Analysis Results Card -->
+        <div class="justice-card bg-gradient-to-br from-amber-50 to-amber-100 border-l-4 border-amber-500 hover:border-amber-600 transition-all duration-300">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-1">Analysis</p>
+              <p id="analysisResults" class="text-3xl font-bold text-amber-900 mb-1">0</p>
+              <p class="text-xs text-amber-600 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Reports completed
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
       
