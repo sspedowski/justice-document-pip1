@@ -1,4 +1,5 @@
-/* Justice Dashboard Login Styles */
+/* login.css -- All login page CSS, CSP-safe */
+
 .login-container {
     background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     min-height: 100vh;
@@ -15,3 +16,5 @@
     background: linear-gradient(90deg, #10b981, #3b82f6);
     border-radius: 2px;
 }
+
+/* Add any additional login-page-specific custom styles here */
