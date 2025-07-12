@@ -83,7 +83,10 @@ app.use(express.urlencoded({ extended: true }));
 // Note: Using MemoryStore for sessions - acceptable for demo/testing
 // For production scale, consider: connect-mongo, connect-redis, or express-session-file-store
 app.use(session({
-  secret: process.env.SESSION_SECRET || "your-session-secret",
+  secret: process.env.SESSION_SECRET || (() => {
+    console.warn('⚠️  WARNING: Using default session secret. Set SESSION_SECRET environment variable for production!');
+    return "justice-dashboard-default-secret-" + Date.now();
+  })(),
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -624,7 +627,7 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
       return res.status(500).json({ error: "Wolfram API not configured" });
     }
 
-    const wolframUrl = `http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
+    const wolframUrl = `https://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
     
     const response = await fetch(wolframUrl);
     const data = await response.json();
