@@ -1,5 +1,5 @@
 /* Justice Dashboard - Professional Law Firm Theme */
-/* Enhanced with Dark Mode Support */
+/* Enhanced with Dark Mode Support & System Fonts */
 
 :root {
   --justice-navy: #1e3a8a;
@@ -17,10 +17,15 @@
   --border-color: #e2e8f0;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --card-bg: #ffffff;
+  
+  /* System Font Stack - No External Fonts Needed */
+  --font-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 /* Dark Mode Variables */
-body.dark-mode {
+body.dark-mode, [data-theme="dark"] {
   --bg-primary: #1a202c;
   --bg-secondary: #2d3748;
   --text-primary: #f7fafc;
@@ -35,7 +40,34 @@ body.dark-mode {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  font-family: var(--font-system);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* System Font Classes */
+.font-system { font-family: var(--font-system); }
+.font-serif { font-family: var(--font-serif); }
+.font-mono { font-family: var(--font-mono); }
+
+/* Unicode Icon Replacements for Font Awesome */
+.icon-shield::before { content: "🛡️"; }
+.icon-moon::before { content: "🌙"; }
+.icon-sun::before { content: "☀️"; }
+.icon-folder::before { content: "📁"; }
+.icon-gavel::before { content: "⚖️"; }
+.icon-cogs::before { content: "⚙️"; }
+.icon-chart::before { content: "📊"; }
+.icon-plus::before { content: "➕"; }
+.icon-search::before { content: "🔍"; }
+.icon-download::before { content: "⬇️"; }
+.icon-logout::before { content: "🔚"; }
+.icon-file::before { content: "📄"; }
+.icon-check::before { content: "✅"; }
+.icon-warning::before { content: "⚠️"; }
+
+/* Enhanced professional shadows */
+.justice-shadow-elegant {
+  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px var(--shadow-color);
 }
 
 /* Enhanced professional shadows */
@@ -163,8 +195,6 @@ body {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-5px); }
   60% { transform: translateY(-3px); }
-}
-  cursor: pointer;
 }
 
 .justice-btn-primary:hover {
