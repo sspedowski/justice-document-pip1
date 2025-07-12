@@ -20,14 +20,30 @@ if (DEBUG) {
   console.log('NODE_ENV:', process.env.NODE_ENV);
   console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Set' : 'Not Set');
   console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not Set');
+  console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? 'Set' : 'Not Set');
+  console.log('WOLFRAM_APP_ID:', process.env.WOLFRAM_APP_ID ? 'Set' : 'Not Set');
 }
+
 // Validate required environment variables
 const requiredEnvVars = ['JWT_SECRET'];
+const recommendedEnvVars = ['SESSION_SECRET', 'WOLFRAM_APP_ID'];
+
 requiredEnvVars.forEach(varName => {
   if (!process.env[varName]) {
-    throw new Error(`Environment variable ${varName} is required`);
+    throw new Error(`❌ CRITICAL: Environment variable ${varName} is required`);
   }
 });
+
+recommendedEnvVars.forEach(varName => {
+  if (!process.env[varName]) {
+    console.warn(`⚠️  WARNING: Environment variable ${varName} is not set. Some features may not work.`);
+  }
+});
+
+// Additional security validation
+if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+  console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.');
+}
 
 // Initialize Express app
 const app = express();
