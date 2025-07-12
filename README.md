@@ -2,8 +2,6 @@
 
 > Open-source legal document analysis tool with AI-driven tagging and summaries.
 
-# Justice Dashboard
-
 A legal-tech tool for organizing and summarizing case documents, powered by OpenAI GPT-4 and scripture-aligned legal responses.
 
 ## Features
@@ -17,11 +15,13 @@ A legal-tech tool for organizing and summarizing case documents, powered by Open
 ## Setup
 
 **For Linux/macOS/WSL:**
+
 ```bash
 npm install
 ```
 
 **For Windows PowerShell:**
+
 ```powershell
 npm install
 ```
@@ -29,22 +29,26 @@ npm install
 Create a `.env` file in the root:
 
 **For Linux/macOS/WSL:**
+
 ```bash
 cp .env.example .env
 ```
 
 **For Windows PowerShell:**
+
 ```powershell
 Copy-Item .env.example .env
 ```
 
 **For Windows Command Prompt:**
+
 ```cmd
 copy .env.example .env
 ```
 
 Then edit `.env` with your values:
-```
+
+```bash
 OPENAI_API_KEY=your-key-here
 JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
 PORT=3000
@@ -53,21 +57,23 @@ PORT=3000
 Run the server:
 
 **For Linux/macOS/WSL:**
+
 ```bash
 npm start
 ```
 
 **For Windows PowerShell:**
+
 ```powershell
 npm start
 ```
 
-Then visit [http://localhost:3000](http://localhost:3000)
+Then visit <http://localhost:3000>
 
 ## Legal Notes
 
-This project is released under the [MIT License](./LICENSE).  
-All AI-assisted code was reviewed and assembled by the project author.  
+This project is released under the [MIT License](./LICENSE).
+All AI-assisted code was reviewed and assembled by the project author.
 Some parts of the logic (e.g., file upload, CSV export) may resemble standard implementations from public tutorials or GitHub repositories.
 
 If any portions appear similar to external sources, they are functionally generic and used under fair and standard development practices.
@@ -79,7 +85,8 @@ If any portions appear similar to external sources, they are functionally generi
 - Scripture/legal alignment via LawGPT endpoint
 
 ## Version History
-- **v1.0.0**: Initial release with core document processing features        
+
+- **v1.0.0**: Initial release with core document processing features
 - Bulk PDF upload and processing
 - Auto-categorization and child detection
 - Misconduct type classification
