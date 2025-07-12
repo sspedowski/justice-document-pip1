@@ -151,21 +151,76 @@
           </div>
         </div>
 
-        <!-- Main tracker table -->
-        <div class="bg-white rounded-lg shadow">
-          <table id="trackerTable" class="w-full table-auto">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Child</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Misconduct</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Summary</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <!-- Case Tracker Table - Premium Design -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+          <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+              <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z" clip-rule="evenodd"></path>
+              </svg>
+              Case Tracker & Analysis
+            </h2>
+            <p class="text-blue-100 mt-2">Comprehensive legal case management and tracking system</p>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table id="trackerTable" class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>📁</span>
+                      <span>Category</span>
+                    </div>
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>👤</span>
+                      <span>Individual</span>
+                    </div>
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>⚠️</span>
+                      <span>Issue Type</span>
+                    </div>
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>📝</span>
+                      <span>Summary</span>
+                    </div>
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>🏷️</span>
+                      <span>Tags</span>
+                    </div>
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <div class="flex items-center space-x-2">
+                      <span>⚡</span>
+                      <span>Actions</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-100">
+                <!-- JavaScript will populate rows here -->
+                <tr class="text-center">
+                  <td colspan="6" class="px-6 py-12 text-gray-500">
+                    <div class="flex flex-col items-center">
+                      <svg class="w-16 h-16 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z" clip-rule="evenodd"></path>
+                      </svg>
+                      <p class="text-lg font-medium text-gray-600 mb-2">No cases found</p>
+                      <p class="text-sm text-gray-500">Upload a document or paste text to begin case analysis</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         
         <!-- Additional dashboard sections can be added here -->
