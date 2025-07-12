@@ -165,30 +165,46 @@
         </div>
       </div>
       
-      <!-- Beautiful Statistics Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- Enhanced Animated Statistics Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Cases Card -->
-        <div class="bg-gradient-to-br from-blue-400 to-blue-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200">
-          <div class="text-3xl font-bold" id="totalCases">0</div>
-          <div class="text-sm mt-2 opacity-90">Total Cases</div>
+        <div class="stats-card bg-gradient-to-br from-blue-400 to-blue-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+          <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full mb-3">
+            <span class="text-2xl">📁</span>
+          </div>
+          <div class="text-4xl font-bold mb-1" id="totalCases" data-target="247">0</div>
+          <div class="text-sm opacity-90 font-medium">Total Cases</div>
+          <div class="text-xs mt-1 opacity-75">+12% this month</div>
         </div>
         
         <!-- Active Cases Card -->
-        <div class="bg-gradient-to-br from-green-400 to-green-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200">
-          <div class="text-3xl font-bold" id="activeCases">0</div>
-          <div class="text-sm mt-2 opacity-90">Active Cases</div>
+        <div class="stats-card bg-gradient-to-br from-green-400 to-green-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+          <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full mb-3">
+            <span class="text-2xl">⚖️</span>
+          </div>
+          <div class="text-4xl font-bold mb-1" id="activeCases" data-target="23">0</div>
+          <div class="text-sm opacity-90 font-medium">Active Cases</div>
+          <div class="text-xs mt-1 opacity-75">In progress</div>
         </div>
         
         <!-- Processing Status Card -->
-        <div class="bg-gradient-to-br from-purple-400 to-purple-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200">
-          <div class="text-3xl font-bold" id="processingStatus">Ready</div>
-          <div class="text-sm mt-2 opacity-90">Status</div>
+        <div class="stats-card bg-gradient-to-br from-purple-400 to-purple-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+          <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full mb-3">
+            <span class="text-2xl">⚙️</span>
+          </div>
+          <div class="text-2xl font-bold mb-1" id="processingStatus">Ready</div>
+          <div class="text-sm opacity-90 font-medium">System Status</div>
+          <div class="text-xs mt-1 opacity-75">All systems operational</div>
         </div>
         
         <!-- Analysis Results Card -->
-        <div class="bg-gradient-to-br from-orange-400 to-orange-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200">
-          <div class="text-3xl font-bold" id="analysisResults">0</div>
-          <div class="text-sm mt-2 opacity-90">Processing</div>
+        <div class="stats-card bg-gradient-to-br from-orange-400 to-orange-700 text-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+          <div class="flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full mb-3">
+            <span class="text-2xl">📊</span>
+          </div>
+          <div class="text-4xl font-bold mb-1" id="analysisResults" data-target="184">0</div>
+          <div class="text-sm opacity-90 font-medium">Analyses Complete</div>
+          <div class="text-xs mt-1 opacity-75">Documents processed</div>
         </div>
       </div>
       
