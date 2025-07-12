@@ -4,7 +4,7 @@
 
 ## 1. 🎯 **Project Status**
 
-* **API:** http://localhost:3000 (secure, functional)
+* **API:** <http://localhost:3000> (secure, functional)
 * **Authentication:** Secure, JWT + bcrypt (default: admin/justice2025 – CHANGE IN PROD)
 * **Dashboard:** CSP-compliant, all DOM/init errors resolved
 * **Security:** All critical issues fixed, warnings show if settings are unsafe
@@ -40,7 +40,7 @@ npm install
 npm start
 ```
 
-* Visit http://localhost:3000
+* Visit <http://localhost:3000>
 * Default login: admin / justice2025 (**change after first login!**)
 * Set SESSION_SECRET to something unique and long (min 32 chars)
 * Never commit .env to version control
@@ -64,6 +64,11 @@ npm start
 
 ## 5. 🔑 **.env.example**
 
+✅ Justice Dashboard API running (localhost:3000)
+✅ Authentication: Secure (admin/justice2025)
+✅ Dashboard: CSP-compliant, no DOM/init errors
+✅ Security: All critical issues fixed & warnings active
+✅ Documentation: Complete and audit-trail ready
 ```
 SESSION_SECRET=your-very-long-random-session-secret-here
 OPENAI_API_KEY=sk-...

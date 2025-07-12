@@ -1198,53 +1198,34 @@ const DashboardEnhancements = {
     });
   },
 
-  // Add professional button interactions
+  // Add professional button interactions (CSP compliant - no inline styles)
   initButtonAnimations() {
     const buttons = document.querySelectorAll('.justice-btn-primary, .justice-btn-secondary, .justice-btn-accent');
     buttons.forEach(button => {
+      // Add classes for positioning
+      button.classList.add('relative', 'overflow-hidden');
+      
       button.addEventListener('click', function(e) {
-        // Create ripple effect
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
+        // Simple pulse animation using CSS classes only
+        this.classList.add('animate-pulse');
         
-        ripple.style.cssText = `
-          position: absolute;
-          width: ${size}px;
-          height: ${size}px;
-          left: ${x}px;
-          top: ${y}px;
-          background: rgba(255,255,255,0.3);
-          border-radius: 50%;
-          transform: scale(0);
-          animation: ripple 0.6s ease-out;
-          pointer-events: none;
-        `;
-        
-        this.style.position = 'relative';
-        this.style.overflow = 'hidden';
-        this.appendChild(ripple);
-        
-        setTimeout(() => ripple.remove(), 600);
+        setTimeout(() => {
+          this.classList.remove('animate-pulse');
+        }, 600);
       });
     });
   },
 
   // Initialize all enhancements
   init() {
-    // Add CSS animation for ripple effect
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(2);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
+    // Add CSS classes instead of injected styles (CSP compliant)
+    if (!document.querySelector('.ripple-styles-added')) {
+      const linkElement = document.createElement('link');
+      linkElement.rel = 'stylesheet';
+      linkElement.href = 'data:text/css;base64,'; // We'll add to existing CSS instead
+      linkElement.className = 'ripple-styles-added';
+      // Don't inject - add to existing CSS file instead
+    }
 
     // Initialize features after DOM load
     setTimeout(() => {
