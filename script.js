@@ -25,10 +25,6 @@ let isProcessingBulk = false;
 let bulkTotal = 0;
 let bulkProgress = 0;
 
-document.addEventListener('DOMContentLoaded', () => {
-  initializeApp();
-});
-
 // ===== AUTHENTICATION SYSTEM =====
 const DashboardAuth = {
   // State
@@ -309,8 +305,23 @@ const DashboardAuth = {
       return;
     }
 
-    // Initialize the main dashboard content
-    initializeJusticeDashboard();
+    // Show the dashboard content that's already in the HTML
+    const loadingState = document.getElementById('loadingState');
+    const dashboardContent = document.getElementById('dashboardContent');
+    
+    if (loadingState) {
+      loadingState.classList.add('hidden');
+    }
+    
+    if (dashboardContent) {
+      dashboardContent.classList.remove('hidden');
+      // Initialize dashboard functionality only after content is visible
+      setTimeout(() => {
+        initializeJusticeDashboard();
+      }, 50);
+    } else {
+      console.error('Dashboard content container not found');
+    }
   },
 
   showLoginForm() {
