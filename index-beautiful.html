@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Justice Dashboard - Beautiful Modern Interface</title>
+  <link rel="stylesheet" href="output.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="animate-spin inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mb-6" role="status"></div>
+      <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading Justice Dashboard</h2>
+      <p class="text-gray-600">Initializing secure case management system...</p>
+    </div>
+  </div>
+  
+  <!-- Dashboard content with beautiful modern design -->
+  <div id="dashboardContent" class="hidden">
+    <div class="max-w-5xl mx-auto p-6 sm:p-10 mt-8 mb-12 bg-white rounded-2xl shadow-2xl ring-1 ring-blue-100">
+      <!-- Dashboard Header -->
+      <header class="mb-6 text-center">
+        <h1 class="text-4xl font-extrabold text-blue-700 mb-2 tracking-tight">Justice Dashboard</h1>
+        <p class="text-lg text-gray-500">Case Tracking & Management System</p>
+        <div class="flex justify-center space-x-6 text-sm text-gray-500 mt-4">
+          <span class="flex items-center">
+            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            System Secure
+          </span>
+          <span class="flex items-center">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+            CSP Compliant
+          </span>
+          <span class="flex items-center">
+            <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+            AI Ready
+          </span>
+        </div>
+      </header>
+      
+      <!-- Upload & Actions Row -->
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+        <div>
+          <label class="font-semibold text-gray-700">Upload PDF</label>
+          <input type="file" id="fileInput" class="block mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" accept=".pdf,.doc,.docx,.txt" />
+        </div>
+        <div class="flex flex-row gap-2 mt-2 sm:mt-0">
+          <button id="generateBtn" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">Generate Summary</button>
+          <button id="exportBtn" class="bg-green-500 text-white px-5 py-2 rounded-lg shadow hover:bg-green-600 transition">Export CSV</button>
+          <button id="logoutBtn" class="bg-red-500 text-white px-5 py-2 rounded-lg shadow hover:bg-red-600 transition">Logout</button>
+        </div>
+      </div>
+      
+      <!-- Document Text Area -->
+      <div class="mb-6">
+        <label class="block font-semibold text-gray-700 mb-2">Document Text</label>
+        <textarea id="docText" class="w-full h-32 border rounded-lg px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Paste document text here..."></textarea>
+      </div>
+      
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gradient-to-tr from-blue-400 to-blue-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
+          <div class="text-2xl font-bold" id="totalCases">0</div>
+          <div class="text-sm opacity-80">Total Cases</div>
+        </div>
+        <div class="bg-gradient-to-tr from-green-400 to-green-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
+          <div class="text-2xl font-bold" id="activeCases">0</div>
+          <div class="text-sm opacity-80">Active Cases</div>
+        </div>
+        <div class="bg-gradient-to-tr from-purple-400 to-purple-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
+          <div class="text-2xl font-bold" id="processingStatus">Ready</div>
+          <div class="text-sm opacity-80">Processing Status</div>
+        </div>
+        <div class="bg-gradient-to-tr from-orange-400 to-orange-600 text-white rounded-xl p-5 shadow flex flex-col items-center transform hover:scale-105 transition-transform">
+          <div class="text-2xl font-bold" id="analysisResults">0</div>
+          <div class="text-sm opacity-80">Analysis Results</div>
+        </div>
+      </div>
+      
+      <!-- Filter Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4 bg-gray-50 p-4 rounded-lg">
+        <div>
+          <label class="mr-2 text-gray-700 font-medium">Filter by Category</label>
+          <select id="categoryFilter" class="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">All Categories</option>
+            <option value="CPS">CPS Cases</option>
+            <option value="Court">Court Proceedings</option>
+            <option value="Legal">Legal Documents</option>
+          </select>
+        </div>
+        <div>
+          <label class="mr-2 text-gray-700 font-medium">Filter by Issue Type</label>
+          <select id="misconductFilter" class="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">All Types</option>
+            <option value="Due Process">Due Process Violations</option>
+            <option value="Constitutional">Constitutional Issues</option>
+            <option value="Procedural">Procedural Violations</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Case Tracker Table -->
+      <div class="overflow-x-auto rounded-xl shadow-lg ring-1 ring-gray-200 mb-6">
+        <table id="trackerTable" class="min-w-full divide-y divide-gray-200 bg-white">
+          <thead class="bg-gradient-to-r from-blue-50 to-purple-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>📁</span>
+                  <span>Category</span>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>👤</span>
+                  <span>Individual</span>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>⚠️</span>
+                  <span>Issue Type</span>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>📝</span>
+                  <span>Summary</span>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>🏷️</span>
+                  <span>Tags</span>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <span>⚡</span>
+                  <span>Actions</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            <!-- Populated dynamically by JS -->
+            <tr class="text-center">
+              <td colspan="6" class="px-6 py-12 text-gray-500">
+                <div class="flex flex-col items-center">
+                  <svg class="w-16 h-16 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z" clip-rule="evenodd"></path>
+                  </svg>
+                  <p class="text-lg font-medium text-gray-600 mb-2">No cases found</p>
+                  <p class="text-sm text-gray-500">Upload a document or paste text to begin case analysis</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Footer / Status -->
+      <div class="mt-8 text-sm text-center text-gray-400 border-t pt-6">
+        <div class="flex justify-center items-center space-x-4">
+          <span>Justice Dashboard &copy; 2025</span>
+          <span class="flex items-center">
+            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            Secure & Compliant
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
