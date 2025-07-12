@@ -15,19 +15,43 @@
 ## 🚀 Quick Setup (5 Steps)
 
 ### 1. **Clone & Install**
+
+**For Linux/macOS/WSL:**
 ```bash
 git clone https://github.com/sspedowski/justice-dashboard.git
 cd justice-dashboard
 npm install
 ```
 
+**For Windows PowerShell:**
+```powershell
+git clone https://github.com/sspedowski/justice-dashboard.git
+cd justice-dashboard
+npm install
+```
+
 ### 2. **Environment Setup**
+
+**For Linux/macOS/WSL:**
 ```bash
 # Copy the example environment file
 cp .env.example .env
+```
 
-# Edit .env with your values (minimum required):
-# JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
+**For Windows PowerShell:**
+```powershell
+# Copy the example environment file
+Copy-Item .env.example .env
+```
+
+**For Windows Command Prompt:**
+```cmd
+copy .env.example .env
+```
+
+Then edit `.env` with your values (minimum required):
+```
+JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
 ```
 
 ### 3. **Start the Server**
