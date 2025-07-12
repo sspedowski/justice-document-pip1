@@ -1,0 +1,144 @@
+/* Justice Dashboard - Professional Law Firm Theme */
+/* Add this to your custom.css for instant professional polish */
+
+:root {
+  --justice-navy: #1e3a8a;
+  --justice-gold: #f59e0b;
+  --justice-silver: #6b7280;
+  --justice-cream: #fefbf3;
+  --justice-success: #059669;
+  --justice-warning: #d97706;
+}
+
+/* Enhanced professional shadows */
+.justice-shadow-elegant {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Professional gradient backgrounds */
+.justice-bg-professional {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.justice-header-gradient {
+  background: linear-gradient(135deg, var(--justice-navy) 0%, #3730a3 100%);
+}
+
+/* Elegant card styling */
+.justice-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.justice-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+/* Professional button styling */
+.justice-btn-primary {
+  background: linear-gradient(135deg, var(--justice-navy) 0%, #3730a3 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.justice-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+}
+
+/* Elegant typography */
+.justice-heading {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  color: var(--justice-navy);
+  letter-spacing: -0.025em;
+}
+
+.justice-subheading {
+  color: var(--justice-silver);
+  font-weight: 500;
+}
+
+/* Professional table styling */
+.justice-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.justice-table th {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  color: var(--justice-navy);
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.justice-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.justice-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Status indicators */
+.justice-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.justice-status-secure {
+  background-color: #d1fae5;
+  color: var(--justice-success);
+}
+
+.justice-status-ready {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+/* Elegant animations */
+@keyframes justice-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.justice-animate-in {
+  animation: justice-fadeIn 0.5s ease-out;
+}
+
+/* Professional loading spinner */
+.justice-spinner {
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid var(--justice-navy);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
