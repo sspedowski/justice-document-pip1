@@ -1265,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Initialize dashboard enhancements
+  // Initialize dashboard enhancements first
   DashboardEnhancements.init();
 
   // Initialize authentication and render appropriate view
@@ -1277,6 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize counters after dashboard is rendered
     setTimeout(() => {
       DashboardEnhancements.initCounters();
+      console.log('Dashboard enhancements initialized');
     }, 1000);
   } else {
     // User not authenticated - show login form
