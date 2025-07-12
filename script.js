@@ -1246,7 +1246,6 @@ function logoutUser() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     DashboardAuth,
-    initializeApp,
     isUserAuthenticated,
     getCurrentUser,
     getAuthToken,
