@@ -4,7 +4,7 @@
 
 ## 1. 🎯 **Project Status**
 
-* **API:** <http://localhost:3000> (secure, functional)
+* **API:** [http://localhost:3000](http://localhost:3000) (secure, functional)
 * **Authentication:** Secure, JWT + bcrypt (default: admin/justice2025 – CHANGE IN PROD)
 * **Dashboard:** CSP-compliant, all DOM/init errors resolved
 * **Security:** All critical issues fixed, warnings show if settings are unsafe
@@ -42,7 +42,7 @@ npm install
 npm start
 ```
 
-* Visit <http://localhost:3000>
+* Visit [http://localhost:3000](http://localhost:3000)
 * Default login: admin / justice2025 (**change after first login!**)
 * Set SESSION_SECRET to something unique and long (min 32 chars)
 * Never commit .env to version control
@@ -66,12 +66,7 @@ npm start
 
 ## 5. 🔑 **.env.example**
 
-✅ Justice Dashboard API running (localhost:3000)
-✅ Authentication: Secure (admin/justice2025)
-✅ Dashboard: CSP-compliant, no DOM/init errors
-✅ Security: All critical issues fixed & warnings active
-✅ Documentation: Complete and audit-trail ready
-```
+```env
 SESSION_SECRET=your-very-long-random-session-secret-here
 OPENAI_API_KEY=sk-...
 WOLFRAM_APP_ID=xxxxx
@@ -102,8 +97,12 @@ WOLFRAM_APP_ID=xxxxx
 
 ---
 
-### **Your Justice Dashboard is now fully audited, secured, production-ready, and supported by a best-practice documentation suite. Copy this summary to your Canvas as your "single source of truth"!**
+**Your Justice Dashboard is now fully audited, secured, production-ready, and supported by a best-practice documentation suite. Copy this summary to your Canvas as your "single source of truth"!**
 
 ---
 
 *Need this as a downloadable .md, PDF, or for a team wiki? Just ask!*
+
+---
+
+**Ready for your next project step, or want this formatted for PDF/team handoff? Just let me know!**
