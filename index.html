@@ -13,11 +13,6 @@
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <!-- Global API Configuration -->
-  <script>
-    window.API_BASE_URL = "http://localhost:3000";
-  </script>
-  
   <div id="app">
     <!-- Main dashboard content container -->
     <div class="container mx-auto p-6">
@@ -29,9 +24,8 @@
     </div>
   </div>
 
-  <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
-  <script src="pdf.min.js"></script>
-  <script src="pdf-config.js"></script>
+  <!-- CSP-compliant external scripts only -->
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
