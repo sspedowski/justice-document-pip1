@@ -1163,15 +1163,24 @@ Note: This is a demo. The full version would connect to a legal AI service.`;
 
 /********** Initialize Application **********/
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, checking authentication...');
+  console.log('Justice Dashboard starting...');
   
-  // Check if user is already authenticated
-  if (DashboardAuth.checkAuth()) {
+  // Check if app container exists
+  const appContainer = document.getElementById('app');
+  if (!appContainer) {
+    console.error('App container (#app) not found in DOM');
+    return;
+  }
+
+  // Initialize authentication and render appropriate view
+  if (DashboardAuth.init()) {
+    // User is authenticated - show dashboard
     console.log('User authenticated, loading dashboard...');
-    DashboardAuth.loadDashboard();
+    DashboardAuth.renderDashboard();
   } else {
+    // User not authenticated - show login form
     console.log('User not authenticated, showing login form...');
-    DashboardAuth.showLoginForm();
+    DashboardAuth.renderLoginForm();
   }
 });
 
