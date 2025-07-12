@@ -8,6 +8,8 @@
 
 ## 🎯 **Canvas-Ready Summary** ⭐ **PRIMARY REFERENCE**
 
+> **For Canvas Copy-Paste:** Use `CANVAS_MASTER_REFERENCE.md` - the perfect one-page summary!
+
 ### Project Status
 * **API:** http://localhost:3000 (secure, functional)
 * **Authentication:** Secure, JWT + bcrypt (default: admin/justice2025 – **CHANGE IN PROD**)
