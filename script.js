@@ -1265,11 +1265,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // Initialize dashboard enhancements
+  DashboardEnhancements.init();
+
   // Initialize authentication and render appropriate view
   if (DashboardAuth.init()) {
     // User is authenticated - show dashboard
     console.log('User authenticated, loading dashboard...');
     DashboardAuth.renderDashboard();
+    
+    // Initialize counters after dashboard is rendered
+    setTimeout(() => {
+      DashboardEnhancements.initCounters();
+    }, 1000);
   } else {
     // User not authenticated - show login form
     console.log('User not authenticated, showing login form...');
