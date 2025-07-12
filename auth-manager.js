@@ -288,15 +288,15 @@ function updateAuthDisplay() {
       } else if (el.dataset.authUser === 'role') {
         el.textContent = user.role;
       }
-      el.style.display = '';
+      el.classList.remove('hidden');
     });
     
-    loginElements.forEach(el => el.style.display = 'none');
-    logoutElements.forEach(el => el.style.display = '');
+    loginElements.forEach(el => el.classList.add('hidden'));
+    logoutElements.forEach(el => el.classList.remove('hidden'));
   } else {
-    authElements.forEach(el => el.style.display = 'none');
-    loginElements.forEach(el => el.style.display = '');
-    logoutElements.forEach(el => el.style.display = 'none');
+    authElements.forEach(el => el.classList.add('hidden'));
+    loginElements.forEach(el => el.classList.remove('hidden'));
+    logoutElements.forEach(el => el.classList.add('hidden'));
   }
 }
 

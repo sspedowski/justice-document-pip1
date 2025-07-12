@@ -56,8 +56,10 @@ document.addEventListener('DOMContentLoaded', function () {
     loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       loginButton.disabled = true;
-      loginIcon.style.display = 'none';
-      loadingIcon.style.display = 'inline-block';
+      
+      // Use CSS classes instead of inline styles
+      loginIcon.classList.add('hidden');
+      loadingIcon.classList.remove('hidden');
       loginText.textContent = 'Logging in...';
 
       const username = usernameInput.value.trim();
@@ -86,18 +88,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // Helper functions
   function resetButton() {
     loginButton.disabled = false;
-    loginIcon.style.display = 'inline-block';
-    loadingIcon.style.display = 'none';
+    loginIcon.classList.remove('hidden');
+    loadingIcon.classList.add('hidden');
     loginText.textContent = 'Login';
   }
 
   function showAlert(message, type) {
     if (!alertContainer || !alertMessage || !alertIcon) return;
-    alertContainer.style.display = 'block';
+    alertContainer.classList.remove('hidden');
     alertMessage.textContent = message;
     if (type === 'error') {
       alertContainer.className = 'rounded bg-red-100 border border-red-300 text-red-800 px-4 py-2 mb-2 flex items-center';
-      alertIcon.innerHTML = `<svg class="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path></svg>`;
+      alertIcon.innerHTML = `<svg class="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03 9-9 9-9 9z"></path></svg>`;
     } else {
       alertContainer.className = 'rounded bg-blue-100 border border-blue-300 text-blue-800 px-4 py-2 mb-2 flex items-center';
       alertIcon.innerHTML = `<svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path></svg>`;
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
   [usernameInput, passwordInput].forEach(function (input) {
     if (!input) return;
     input.addEventListener('input', function () {
-      if (alertContainer) alertContainer.style.display = 'none';
+      if (alertContainer) alertContainer.classList.add('hidden');
     });
   });
 

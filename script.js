@@ -1218,14 +1218,8 @@ const DashboardEnhancements = {
 
   // Initialize all enhancements
   init() {
-    // Add CSS classes instead of injected styles (CSP compliant)
-    if (!document.querySelector('.ripple-styles-added')) {
-      const linkElement = document.createElement('link');
-      linkElement.rel = 'stylesheet';
-      linkElement.href = 'data:text/css;base64,'; // We'll add to existing CSS instead
-      linkElement.className = 'ripple-styles-added';
-      // Don't inject - add to existing CSS file instead
-    }
+    // All styles are now in CSS files - no dynamic injection needed
+    console.log('Dashboard enhancements initializing...');
 
     // Initialize features after DOM load
     setTimeout(() => {
