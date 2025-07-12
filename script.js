@@ -1161,6 +1161,99 @@ Note: This is a demo. The full version would connect to a legal AI service.`;
   populateFilters();
 }
 
+/********** ANIMATED COUNTERS & DASHBOARD ENHANCEMENTS **********/
+const DashboardEnhancements = {
+  // Animate number counters
+  animateCounter(element, target, duration = 2000) {
+    const start = parseInt(element.textContent) || 0;
+    const increment = (target - start) / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+        current = target;
+        clearInterval(timer);
+      }
+      element.textContent = Math.floor(current);
+    }, 16);
+  },
+
+  // Initialize all counters with sample data
+  initCounters() {
+    const counters = [
+      { id: 'totalCases', target: 247 },
+      { id: 'activeCases', target: 23 },
+      { id: 'analysisResults', target: 184 }
+    ];
+
+    counters.forEach(counter => {
+      const element = document.getElementById(counter.id);
+      if (element) {
+        // Add stagger delay for visual appeal
+        setTimeout(() => {
+          this.animateCounter(element, counter.target);
+        }, Math.random() * 500);
+      }
+    });
+  },
+
+  // Add professional button interactions
+  initButtonAnimations() {
+    const buttons = document.querySelectorAll('.justice-btn-primary, .justice-btn-secondary, .justice-btn-accent');
+    buttons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        // Create ripple effect
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+          background: rgba(255,255,255,0.3);
+          border-radius: 50%;
+          transform: scale(0);
+          animation: ripple 0.6s ease-out;
+          pointer-events: none;
+        `;
+        
+        this.style.position = 'relative';
+        this.style.overflow = 'hidden';
+        this.appendChild(ripple);
+        
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+  },
+
+  // Initialize all enhancements
+  init() {
+    // Add CSS animation for ripple effect
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes ripple {
+        to {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize features after DOM load
+    setTimeout(() => {
+      this.initCounters();
+      this.initButtonAnimations();
+    }, 500);
+  }
+};
+
 /********** Initialize Application **********/
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Justice Dashboard starting...');
@@ -1340,3 +1433,6 @@ const ApiHelper = {
     return response.json();
   }
 };
+
+// Initialize enhancements
+DashboardEnhancements.init();

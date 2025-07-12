@@ -7,9 +7,14 @@
   <link rel="stylesheet" href="output.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="justice-theme.css">
+  <link rel="stylesheet" href="print.css" media="print">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
-  <!-- Loading Screen -->
+  <!-- Main App Container - Required by script.js -->
+  <div id="app">
+    <!-- Loading Screen -->
   <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center z-50">
     <div class="text-center">
       <div class="animate-spin inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mb-6" role="status"></div>
@@ -229,10 +234,11 @@
         </div>
       </footer>
     </div>
-  </div>
+  </div> <!-- End #app container -->
 
   <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
   <script src="config.js"></script>
+  <script src="dark-mode.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
