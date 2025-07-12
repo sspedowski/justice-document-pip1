@@ -16,20 +16,49 @@ A legal-tech tool for organizing and summarizing case documents, powered by Open
 
 ## Setup
 
+**For Linux/macOS/WSL:**
 ```bash
+npm install
+```
+
+**For Windows PowerShell:**
+```powershell
 npm install
 ```
 
 Create a `.env` file in the root:
 
+**For Linux/macOS/WSL:**
+```bash
+cp .env.example .env
+```
+
+**For Windows PowerShell:**
+```powershell
+Copy-Item .env.example .env
+```
+
+**For Windows Command Prompt:**
+```cmd
+copy .env.example .env
+```
+
+Then edit `.env` with your values:
 ```
 OPENAI_API_KEY=your-key-here
+JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
 PORT=3000
 ```
 
 Run the server:
 
+**For Linux/macOS/WSL:**
 ```bash
+npm start
+```
+
+**For Windows PowerShell:**
+```powershell
 npm start
 ```
 

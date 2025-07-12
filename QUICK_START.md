@@ -160,6 +160,33 @@ PORT=3000
 
 ---
 
+## 💻 Windows PowerShell Quick Start
+
+**For Windows users - copy-paste this complete setup:**
+
+```powershell
+git clone https://github.com/sspedowski/justice-dashboard.git
+cd justice-dashboard
+Copy-Item .env.example .env
+npm install
+npm start
+```
+
+**Then:**
+1. Open your browser to http://localhost:3000
+2. Login with:
+   - **Username:** `admin`
+   - **Password:** `justice2025`
+3. ⚠️ **Change this password immediately in production!**
+
+**Important Notes for Windows Users:**
+- Replace `<repo>` placeholders with your actual GitHub repository URL
+- PowerShell doesn't support `&&` or UNIX-style `cp` commands
+- Use `Copy-Item` instead of `cp` for copying files
+- If you see errors, paste the message for troubleshooting help
+
+---
+
 ## 🆘 Troubleshooting
 
 ### **Server won't start:**
