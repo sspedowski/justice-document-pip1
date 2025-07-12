@@ -2,17 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Justice Dashboard Debug Login</title>
+  <title>Justice Dashboard Login (Debug)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: system-ui,sans-serif; background: #f7fafc; margin: 0; padding: 2rem; }
-    .box { max-width: 360px; margin: 3rem auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px #0001; padding: 2rem; }
-    h1 { font-size: 1.5rem; text-align: center; }
-    label { display: block; margin: 1rem 0 0.2rem; }
-    input { width: 100%; padding: 0.5rem; font-size: 1rem; }
-    button { width: 100%; padding: 0.7rem; background: #3157c3; color: #fff; border: none; border-radius: 7px; font-size: 1rem; margin-top: 1.5rem; }
-    .msg { color: #d32f2f; font-size: 1rem; text-align: center; margin-top: 1rem; }
-  </style>
+  <link rel="stylesheet" href="debug.css">
 </head>
 <body>
   <div class="box">
@@ -26,30 +18,6 @@
       <div class="msg" id="msg"></div>
     </form>
   </div>
-  <script>
-    const form = document.getElementById('loginForm');
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      document.getElementById('msg').textContent = '';
-      const username = document.getElementById('user').value.trim();
-      const password = document.getElementById('pass').value;
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('msg').textContent = '✅ Login successful!';
-          setTimeout(() => window.location.href = '/', 1000);
-        } else {
-          document.getElementById('msg').textContent = data.error || 'Login failed.';
-        }
-      } catch (err) {
-        document.getElementById('msg').textContent = 'Server error.';
-      }
-    };
-  </script>
+  <script src="debug.js"></script>
 </body>
 </html>
