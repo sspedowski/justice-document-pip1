@@ -1,0 +1,123 @@
+/* Print-Friendly Styles for Justice Dashboard */
+@media print {
+    /* Hide non-essential elements */
+    .toggle-button,
+    .fa-moon,
+    .fa-sun,
+    .bg-gradient-to-br,
+    .shadow-lg,
+    button[type="submit"],
+    .action-buttons,
+    .print-hidden {
+        display: none !important;
+    }
+    
+    /* Reset backgrounds and colors for better printing */
+    * {
+        background: white !important;
+        color: black !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Ensure good contrast */
+    .text-gray-600 {
+        color: #333 !important;
+    }
+    
+    /* Optimize layout for print */
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+        margin: 0.5in;
+    }
+    
+    /* Headers */
+    h1 {
+        font-size: 18pt;
+        margin-bottom: 0.5in;
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 0.1in;
+    }
+    
+    h2 {
+        font-size: 14pt;
+        margin: 0.3in 0 0.1in 0;
+        page-break-after: avoid;
+    }
+    
+    /* Scripture banner */
+    .scripture-banner {
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+        padding: 0.2in !important;
+        margin: 0.2in 0 !important;
+        text-align: center;
+        font-style: italic;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.2in 0;
+    }
+    
+    th, td {
+        border: 1px solid #000;
+        padding: 0.1in;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    th {
+        background: #f0f0f0 !important;
+        font-weight: bold;
+    }
+    
+    /* Statistics cards */
+    .stats-card {
+        border: 1px solid #ddd !important;
+        margin: 0.1in 0 !important;
+        padding: 0.1in !important;
+        break-inside: avoid;
+    }
+    
+    /* Forms */
+    input, select, textarea {
+        border: 1px solid #000 !important;
+        background: white !important;
+        padding: 0.05in !important;
+    }
+    
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .no-break {
+        page-break-inside: avoid;
+    }
+    
+    /* Footer for printed pages */
+    @page {
+        margin: 0.5in;
+        @bottom-center {
+            content: "Justice Dashboard - " counter(page);
+        }
+    }
+    
+    /* Ensure readability */
+    .text-sm {
+        font-size: 10pt !important;
+    }
+    
+    .text-lg {
+        font-size: 14pt !important;
+    }
+    
+    .text-xl {
+        font-size: 16pt !important;
+    }
+}

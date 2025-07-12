@@ -1,5 +1,5 @@
 /* Justice Dashboard - Professional Law Firm Theme */
-/* Add this to your custom.css for instant professional polish */
+/* Enhanced with Dark Mode Support */
 
 :root {
   --justice-navy: #1e3a8a;
@@ -8,6 +8,34 @@
   --justice-cream: #fefbf3;
   --justice-success: #059669;
   --justice-warning: #d97706;
+  
+  /* Light Mode Variables */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --card-bg: #ffffff;
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+  --bg-primary: #1a202c;
+  --bg-secondary: #2d3748;
+  --text-primary: #f7fafc;
+  --text-secondary: #e2e8f0;
+  --border-color: #4a5568;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --card-bg: #2d3748;
+  --justice-cream: #2d3748;
+}
+
+/* Apply theme variables */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Enhanced professional shadows */
@@ -24,30 +52,118 @@
   background: linear-gradient(135deg, var(--justice-navy) 0%, #3730a3 100%);
 }
 
-/* Elegant card styling */
+/* Elegant card styling with dark mode support */
 .justice-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px var(--shadow-color);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
+  color: var(--text-primary);
 }
 
 .justice-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px -5px var(--shadow-color);
 }
 
-/* Professional button styling */
+/* Professional button styling with animations */
 .justice-btn-primary {
   background: linear-gradient(135deg, var(--justice-navy) 0%, #3730a3 100%);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(30, 58, 138, 0.2);
+}
+
+.justice-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+  background: linear-gradient(135deg, #1e40af 0%, #4338ca 100%);
+}
+
+.justice-btn-secondary {
+  background: linear-gradient(135deg, var(--justice-silver) 0%, #6b7280 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.2);
+}
+
+.justice-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.justice-btn-accent {
+  background: linear-gradient(135deg, var(--justice-gold) 0%, #d97706 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+.justice-btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+/* Animation classes */
+.group:hover .fa-plus {
+  animation: rotate 0.3s ease;
+}
+
+.group:hover .fa-search {
+  animation: scale 0.3s ease;
+}
+
+.group:hover .fa-chart-bar {
+  animation: bounce 0.3s ease;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+@keyframes scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-3px); }
+}
   cursor: pointer;
 }
 
