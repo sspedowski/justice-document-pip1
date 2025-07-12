@@ -49,55 +49,104 @@
           </div>
         </div>
         
-        <!-- Dashboard Controls -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <!-- File Upload -->
-            <div>
-              <label for="fileInput" class="block text-sm font-medium text-gray-700 mb-2">Upload PDF</label>
-              <input type="file" id="fileInput" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        <!-- Dashboard Controls - Modern Card Design -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"></path>
+                <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            Document Processing Center
+          </h2>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+            <!-- File Upload Section -->
+            <div class="space-y-3">
+              <label for="fileInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                📄 Upload Legal Document
+              </label>
+              <div class="relative">
+                <input type="file" id="fileInput" accept=".pdf" 
+                       class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-200 rounded-lg cursor-pointer">
+              </div>
             </div>
             
-            <!-- Document Input -->
-            <div>
-              <label for="docInput" class="block text-sm font-medium text-gray-700 mb-2">Document Text</label>
-              <textarea id="docInput" placeholder="Paste document text here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            <!-- Document Input Section -->
+            <div class="space-y-3">
+              <label for="docInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                📝 Document Text
+              </label>
+              <textarea id="docInput" placeholder="Paste legal document text here..." 
+                        class="w-full h-24 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"></textarea>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="flex flex-col space-y-2">
-              <button id="generateBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Generate Summary</button>
-              <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Export CSV</button>
-              <button id="askLawGpt" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">Ask LawGPT</button>
+            <!-- Action Buttons Section -->
+            <div class="space-y-3">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                ⚡ Quick Actions
+              </label>
+              <div class="space-y-2">
+                <button id="generateBtn" 
+                        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm">
+                  🤖 Generate AI Summary
+                </button>
+                <button id="exportBtn" 
+                        class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm">
+                  📊 Export to CSV
+                </button>
+                <button id="askLawGpt" 
+                        class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm">
+                  ⚖️ Ask LawGPT
+                </button>
+              </div>
             </div>
             
-            <!-- Summary Display -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">AI Summary</label>
-              <div id="summaryBox" class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600 overflow-y-auto">Summary will appear here...</div>
+            <!-- AI Summary Display -->
+            <div class="space-y-3">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                🧠 AI Analysis
+              </label>
+              <div id="summaryBox" 
+                   class="w-full h-24 px-4 py-3 border border-gray-200 rounded-lg bg-gradient-to-br from-gray-50 to-blue-50 text-sm text-gray-700 overflow-y-auto">
+                <span class="text-gray-500 italic">AI summary will appear here after document processing...</span>
+              </div>
             </div>
           </div>
           
-          <!-- Filters -->
-          <div class="flex space-x-4">
-            <div>
-              <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Category</label>
-              <select id="categoryFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Categories</option>
-                <option value="CPS">CPS</option>
-                <option value="Court">Court</option>
-                <option value="Legal">Legal</option>
-              </select>
-            </div>
-            
-            <div>
-              <label for="misconductFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Misconduct</label>
-              <select id="misconductFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Types</option>
-                <option value="Due Process">Due Process</option>
-                <option value="Constitutional">Constitutional</option>
-                <option value="Procedural">Procedural</option>
-              </select>
+          <!-- Advanced Filters -->
+          <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <div class="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center mr-2">
+                <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              Smart Filters
+            </h3>
+            <div class="flex flex-wrap gap-4">
+              <div class="min-w-0 flex-1">
+                <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+                <select id="categoryFilter" 
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                  <option value="">All Categories</option>
+                  <option value="CPS">CPS Cases</option>
+                  <option value="Court">Court Proceedings</option>
+                  <option value="Legal">Legal Documents</option>
+                </select>
+              </div>
+              
+              <div class="min-w-0 flex-1">
+                <label for="misconductFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Issue Type</label>
+                <select id="misconductFilter" 
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                  <option value="">All Types</option>
+                  <option value="Due Process">Due Process Violations</option>
+                  <option value="Constitutional">Constitutional Issues</option>
+                  <option value="Procedural">Procedural Violations</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
