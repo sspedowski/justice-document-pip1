@@ -625,6 +625,9 @@ function initializeJusticeDashboard() {
       trackerBody.innerHTML = saved;
       updateDashboardStats();
       populateFilters();
+    } else {
+      // Show no cases message initially
+      updateNoCasesDisplay();
     }
   })();
 
@@ -778,6 +781,23 @@ function initializeJusticeDashboard() {
     localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
     updateDashboardStats();
     populateFilters();
+    updateNoCasesDisplay();
+  }
+
+  // Update the no cases display
+  function updateNoCasesDisplay() {
+    const rows = Array.from(trackerBody.querySelectorAll('tr'));
+    const noCasesMsg = document.getElementById('noCasesMsg');
+    
+    if (rows.length === 0) {
+      if (noCasesMsg) {
+        noCasesMsg.classList.remove('hidden');
+      }
+    } else {
+      if (noCasesMsg) {
+        noCasesMsg.classList.add('hidden');
+      }
+    }
   }
 
   // Create misconduct dropdown
@@ -809,27 +829,51 @@ function initializeJusticeDashboard() {
   // Add row to tracker
   function addRow({ category, child, misconduct, summary, tags, fileURL, fileName }) {
     const row = trackerBody.insertRow();
+    row.className = "hover:bg-gray-50 transition-colors";
     
-    row.insertCell().innerText = category;
-    row.insertCell().innerText = child;
-    row.insertCell().appendChild(buildMisconductSelect(misconduct));
+    // Category cell
+    const categoryCell = row.insertCell();
+    categoryCell.className = "py-3 px-4 text-sm font-medium text-gray-900";
+    categoryCell.textContent = category;
     
+    // Child cell
+    const childCell = row.insertCell();
+    childCell.className = "py-3 px-4 text-sm text-gray-700";
+    childCell.textContent = child;
+    
+    // Misconduct cell with select
+    const misconductCell = row.insertCell();
+    misconductCell.className = "py-3 px-4";
+    misconductCell.appendChild(buildMisconductSelect(misconduct));
+    
+    // Summary cell
     const summaryCell = row.insertCell();
+    summaryCell.className = "py-3 px-4 text-sm text-gray-700 max-w-xs";
     summaryCell.textContent = summary;
     summaryCell.title = summary;
-    summaryCell.className = "max-w-xs truncate";
     
-    row.insertCell().innerText = tags.join(", ");
+    // Tags cell
+    const tagsCell = row.insertCell();
+    tagsCell.className = "py-3 px-4 text-sm text-gray-600";
+    if (tags && tags.length > 0) {
+      tagsCell.innerHTML = tags.map(tag => 
+        `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1">${tag}</span>`
+      ).join('');
+    } else {
+      tagsCell.textContent = 'None';
+    }
     
+    // Actions cell
     const actionCell = row.insertCell();
+    actionCell.className = "py-3 px-4";
     if (fileURL) {
       const viewBtn = document.createElement("button");
-      viewBtn.className = "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
-      viewBtn.innerText = "View PDF";
+      viewBtn.className = "px-3 py-1 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700 transition-colors";
+      viewBtn.textContent = "View PDF";
       viewBtn.onclick = () => window.open(fileURL, '_blank');
       actionCell.appendChild(viewBtn);
     } else {
-      actionCell.innerText = "N/A";
+      actionCell.innerHTML = '<span class="text-gray-400 text-xs">No file</span>';
     }
     
     saveTable();
@@ -1096,11 +1140,43 @@ function initializeJusticeDashboard() {
       return select && select.value !== 'Review Needed';
     }).length;
     
+    // Update all stat elements
     const totalEl = document.getElementById('totalCases');
     const activeEl = document.getElementById('activeCases');
+    const documentsEl = document.getElementById('documentsProcessed');
+    const statusEl = document.getElementById('systemStatus');
     
-    if (totalEl) totalEl.textContent = totalCases;
-    if (activeEl) activeEl.textContent = activeCases;
+    if (totalEl) {
+      animateCounter(totalEl, totalCases);
+    }
+    if (activeEl) {
+      animateCounter(activeEl, activeCases);
+    }
+    if (documentsEl) {
+      animateCounter(documentsEl, totalCases);
+    }
+    if (statusEl) {
+      statusEl.textContent = totalCases > 0 ? 'Active' : 'Ready';
+    }
+  }
+
+  // Animate counter with smooth transition
+  function animateCounter(element, target) {
+    const current = parseInt(element.textContent) || 0;
+    const increment = target > current ? 1 : -1;
+    const duration = Math.abs(target - current) * 50; // 50ms per step
+    
+    if (current === target) return;
+    
+    let step = current;
+    const timer = setInterval(() => {
+      step += increment;
+      element.textContent = step;
+      
+      if (step === target) {
+        clearInterval(timer);
+      }
+    }, 50);
   }
 
   // Populate filter dropdowns
@@ -1136,6 +1212,45 @@ function initializeJusticeDashboard() {
     });
   }
 
+  // Add filter event listeners
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', applyFilters);
+  }
+  if (misconductFilter) {
+    misconductFilter.addEventListener('change', applyFilters);
+  }
+
+  // Apply filters to table
+  function applyFilters() {
+    const categoryValue = categoryFilter?.value || '';
+    const misconductValue = misconductFilter?.value || '';
+    
+    Array.from(trackerBody.querySelectorAll('tr')).forEach(row => {
+      const categoryMatch = !categoryValue || row.cells[0]?.textContent === categoryValue;
+      const misconductMatch = !misconductValue || row.querySelector('select')?.value === misconductValue;
+      
+      if (categoryMatch && misconductMatch) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+    
+    // Update stats based on visible rows
+    const visibleRows = Array.from(trackerBody.querySelectorAll('tr:not([style*="display: none"])'));
+    const totalEl = document.getElementById('totalCases');
+    const activeEl = document.getElementById('activeCases');
+    
+    if (totalEl) totalEl.textContent = visibleRows.length;
+    if (activeEl) {
+      const activeCount = visibleRows.filter(row => {
+        const select = row.querySelector('select');
+        return select && select.value !== 'Review Needed';
+      }).length;
+      activeEl.textContent = activeCount;
+    }
+  }
+
   // Ask Law GPT (Demo Mode)
   if (askBtn) {
     askBtn.onclick = async () => {
@@ -1159,6 +1274,9 @@ Note: This is a demo. The full version would connect to a legal AI service.`;
   // Initialize dashboard
   updateDashboardStats();
   populateFilters();
+  updateNoCasesDisplay();
+  
+  console.log('✅ Justice Dashboard initialized successfully');
 }
 
 /********** ANIMATED COUNTERS & DASHBOARD ENHANCEMENTS **********/
