@@ -68,3 +68,22 @@
 - ✅ Both development servers running smoothly
 
 The application is now fully functional for development and testing!
+
+---
+
+### ⚠️ **Outstanding Issues / Known Problems**
+
+- [ ] "justice2025" must be changed for deployment
+- [ ] .env.example needs to match final `.env` structure
+- [ ] Any build/node_modules accidentally in git? Remove!
+- [ ] Firestore rules: Set to locked before prod launch
+- [ ] (Add others as needed, or see issues.md)
+
+---
+
+### 🔑 **Security Reminder**
+
+- Do **not** commit real API keys, JWT secrets, or prod credentials to git.
+- Change all default/test passwords and secrets before going live.
+
+---
