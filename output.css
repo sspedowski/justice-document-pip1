@@ -727,7 +727,7 @@ video {
 .z-40 { z-index: 40; }
 .z-50 { z-index: 50; }
 .max-w-4xl { max-width: 56rem; }
-.max-h-[90vh] { max-height: 90vh; }
+.max-h-90vh { max-height: 90vh; }
 .overflow-auto { overflow: auto; }
 .border-b { border-bottom-width: 1px; }
 .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
