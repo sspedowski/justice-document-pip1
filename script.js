@@ -1657,7 +1657,10 @@ function initializeJusticeDashboard() {
       e.stopPropagation();
       summaryFull.classList.add('hidden');
     });
-    
+    // File Name cell (new column)
+    const fileNameCell = row.insertCell();
+    fileNameCell.className = "py-4 px-6 text-sm text-gray-700";
+    fileNameCell.textContent = fileName || '';
     // Tags cell with colored badges
     const tagsCell = row.insertCell();
     tagsCell.className = "py-4 px-6 text-sm";
