@@ -1,2 +1,10 @@
 {
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": ".*",
+        "cmd": "workbench.action.tasks.runTask Start Server"
+      }
+    ]
+  }
 }
