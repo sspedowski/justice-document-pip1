@@ -918,9 +918,9 @@ function initializeJusticeDashboard() {
     return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
   };
 
-  // Ensure summary logic only uses #textInput (never Personal Notes)
+  // Ensure summary logic only uses main document textarea (never Personal Notes)
   function getDocumentInputText() {
-    const mainInput = document.getElementById('textInput');
+    const mainInput = document.getElementById('textInput') || document.getElementById('docInput') || document.getElementById('docText');
     return mainInput ? mainInput.value : '';
   }
 
