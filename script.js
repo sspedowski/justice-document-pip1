@@ -306,11 +306,11 @@ const DashboardAuth = {
     }
 
     // Show the dashboard content that's already in the HTML
-    const loadingState = document.getElementById('loadingState');
+    const loadingScreen = document.getElementById('loadingScreen');
     const dashboardContent = document.getElementById('dashboardContent');
     
-    if (loadingState) {
-      loadingState.classList.add('hidden');
+    if (loadingScreen) {
+      loadingScreen.classList.add('hidden');
     }
     
     if (dashboardContent) {
