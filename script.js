@@ -966,7 +966,6 @@ function initializeJusticeDashboard() {
   }
 
   // Optimize saving for bulk operations
-  let saveTimeout;
   function saveTableDelayed() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -1139,9 +1138,9 @@ function initializeJusticeDashboard() {
   }
 
   // Bulk process button handler
-  const bulkProcessBtn = document.getElementById("bulkProcessBtn");
-  if (bulkProcessBtn) {
-    bulkProcessBtn.onclick = async () => {
+  const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
+  if (bulkProcessBtnHandler) {
+    bulkProcessBtnHandler.onclick = async () => {
       const files = fileInput?.files;
       
       if (!files?.length) {
