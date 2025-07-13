@@ -35,6 +35,15 @@ let isProcessingBulk = false;
 let bulkTotal = 0;
 let bulkProgress = 0;
 
+// Global debug flag
+const JUSTICE_DEBUG = true; // Set to false to disable debug logs
+
+function justiceDebugLog(...args) {
+  if (JUSTICE_DEBUG) {
+    console.log('[JusticeDashboard]', ...args);
+  }
+}
+
 // ===== AUTHENTICATION SYSTEM =====
 const DashboardAuth = {
   // State
@@ -1279,6 +1288,7 @@ function initializeJusticeDashboard() {
 
   // Main summarize button handler
   summarizeBtn.onclick = async () => {
+  justiceDebugLog('summarizeBtn clicked');
     const files = fileInput?.files;
     const hasText = docInput?.value?.trim();
     
@@ -1363,6 +1373,7 @@ function initializeJusticeDashboard() {
 
   // Bulk processing function
   async function processBulkFiles(files, skipDuplicates = false) {
+  justiceDebugLog('processBulkFiles called', { fileCount: files.length, skipDuplicates });
     isProcessingBulk = true;
     bulkTotal = files.length;
     bulkProgress = 0;
@@ -1378,6 +1389,7 @@ function initializeJusticeDashboard() {
     let errorCount = 0;
     
     for (let i = 0; i < files.length; i++) {
+    justiceDebugLog(`Processing file [${i+1}/${files.length}]`, files[i]?.name);
       const file = files[i];
       bulkProgress = i + 1;
       
@@ -1397,54 +1409,52 @@ function initializeJusticeDashboard() {
         await new Promise(resolve => setTimeout(resolve, 50));
         
         const text = await pdfToText(file);
-        const summary = quickSummary(text);
-        const fileURL = URL.createObjectURL(file);
-        
-        // Check for duplicates if requested
-        if (skipDuplicates) {
-          const dupeCheck = isDuplicate(file.name, summary);
-          if (dupeCheck.isDupe) {
-            duplicateCount++;
-            continue;
-          }
         }
-        
-        // Add row without alerts
-        addRowSilent({
-          category: detectCategory(text, file.name),
-          child: detectChild(text),
-          misconduct: "Review Needed",
-          summary,
-          tags: keywordTags(text),
-          fileURL,
-          fileName: file.name
-        });
-        
-        processedCount++;
-        
-      } catch (error) {
-        console.error(`Error processing ${file.name}:`, error);
-        errorCount++;
       }
+      
+      // Add row without alerts
+      addRowSilent({
+        category: detectCategory(text, file.name),
+        child: detectChild(text),
+        misconduct: "Review Needed",
+        summary,
+        tags: keywordTags(text),
+        fileURL,
+        fileName: file.name
+      });
+      justiceDebugLog(`File processed and added: ${file.name}`);
+      processedCount++;
+      
+    } catch (error) {
+      justiceDebugLog(`Error processing file: ${file.name}`, error);
+      errorCount++;
     }
-    
-    // Hide progress and show results
-    progressDiv.classList.add('hidden');
-    isProcessingBulk = false;
-    
-    alert(
-      `Bulk processing complete!\n\n` +
-      `✅ Processed: ${processedCount} files\n` +
-      `⚠️ Duplicates skipped: ${duplicateCount}\n` +
-      `❌ Errors: ${errorCount}\n` +
-      `📊 Total: ${bulkTotal} files`
-    );
   }
+  
+  // Hide progress and show results
+  progressDiv.classList.add('hidden');
+  isProcessingBulk = false;
+  justiceDebugLog('Bulk processing complete', {
+    processedCount,
+    duplicateCount,
+    errorCount,
+    total: bulkTotal
+  });
+  alert(
+    `Bulk processing complete!\n\n` +
+    `✅ Processed: ${processedCount} files\n` +
+    `⚠️ Duplicates skipped: ${duplicateCount}\n` +
+    `❌ Errors: ${errorCount}\n` +
+    `📊 Total: ${bulkTotal} files`
+  );
+};
 
-  // Bulk process button handler
-  const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
-  if (bulkProcessBtnHandler) {
+// Bulk process button handler
+const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
+if (bulkProcessBtnHandler) {
+  bulkProcessBtnHandler.onclick = async () => {
     bulkProcessBtnHandler.onclick = async () => {
+  justiceDebugLog('bulkProcessBtn clicked');
       const files = fileInput?.files;
       
       if (!files?.length) {
