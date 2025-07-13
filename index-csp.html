@@ -94,13 +94,23 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gold">Case Tracker</h2>
                     <div class="flex items-center gap-4">
-                        <label for="statusFilter" class="sr-only">Filter by case status</label>
-                        <select id="statusFilter" class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400" aria-label="Filter by case status">
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
-                        </select>
+                        <!-- Filter Dropdown with Accessible Label -->
+                        <div class="flex flex-col">
+                            <label for="statusFilter" class="block text-sm font-medium text-gold mb-1">
+                                Filter by case status
+                            </label>
+                            <select
+                                id="statusFilter"
+                                name="statusFilter"
+                                class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400"
+                                aria-label="Filter by case status"
+                            >
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
                         <button id="clearFiltersBtn" class="bg-gold text-white px-5 py-2 rounded-full font-bold card-shadow hover:bg-faith-gold-600 transition">
                             Clear Filters
                         </button>
