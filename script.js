@@ -326,12 +326,6 @@ const DashboardAuth = {
     if (dashboardContent) {
       dashboardContent.classList.remove('hidden');
       
-      // Show header
-      const dashboardHeader = document.getElementById('dashboardHeader');
-      if (dashboardHeader) {
-        dashboardHeader.classList.remove('hidden');
-      }
-      
       // Initialize dashboard functionality only after content is visible
       setTimeout(() => {
         initializeJusticeDashboard();
