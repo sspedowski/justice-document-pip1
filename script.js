@@ -1409,7 +1409,30 @@ function initializeJusticeDashboard() {
         await new Promise(resolve => setTimeout(resolve, 50));
         
         const text = await pdfToText(file);
+        const summary = quickSummary(text);
+        const fileURL = URL.createObjectURL(file);
+        // Check for duplicates if requested
+        if (skipDuplicates) {
+          const dupeCheck = isDuplicate(file.name, summary);
+          if (dupeCheck.isDupe) {
+            justiceDebugLog(`Duplicate skipped: ${file.name}`);
+            duplicateCount++;
+            continue;
+          }
         }
+        // Add row without alerts
+        addRowSilent({
+          category: detectCategory(text, file.name),
+          child: detectChild(text),
+          misconduct: "Review Needed",
+          summary,
+          tags: keywordTags(text),
+          fileURL,
+          fileName: file.name
+        });
+        justiceDebugLog(`File processed and added: ${file.name}`);
+        processedCount++;
+      }
       }
       
       // Add row without alerts
