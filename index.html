@@ -26,14 +26,39 @@
 <body class="bg-gradient-to-br from-blue-950 via-blue-800 to-indigo-900 min-h-screen font-sans">
   <!-- Main App Container - Required by script.js -->
   <div id="app">
-    <!-- Loading Screen -->
-  <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center z-50">
-    <div class="text-center">
-      <div class="animate-spin inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mb-6" role="status"></div>
-      <h2 class="text-2xl font-semibold text-gray-800 mb-2">Loading Justice Dashboard</h2>
-      <p class="text-gray-600">Initializing secure case management system...</p>
+    <!-- Loading Screen with Faith Theme -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-950 via-blue-800 to-indigo-900 flex items-center justify-center z-50">
+      <div class="text-center">
+        <div class="flex items-center justify-center mb-6">
+          <span class="text-6xl text-gold-400 drop-shadow-lg animate-pulse mr-4">✝️</span>
+          <div class="animate-spin inline-block w-12 h-12 border-4 border-gold-400 border-t-transparent rounded-full" role="status"></div>
+        </div>
+        <h2 class="text-3xl font-bold text-white mb-2 drop-shadow-xl">Loading Justice Dashboard</h2>
+        <p class="text-gold-400 font-semibold">God goes before you in all things...</p>
+        <p class="text-blue-200 text-sm mt-2">Initializing secure case management system</p>
+      </div>
     </div>
-  </div>
+  
+    <!-- HEADER BAR with Faith Theme -->
+    <header id="dashboardHeader" class="hidden flex flex-col md:flex-row items-center justify-between px-8 pt-8 pb-4 bg-gradient-to-r from-blue-900 to-blue-700 shadow-xl rounded-b-3xl relative">
+      <div class="flex items-center gap-4">
+        <span class="text-4xl text-gold-400 drop-shadow-lg">✝️</span>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-wide drop-shadow-xl">Justice Dashboard</h1>
+          <p class="text-blue-200 text-sm font-medium">Faith-Based Legal Case Management</p>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row items-center gap-3 mt-3 md:mt-0">
+        <div class="flex items-center gap-2 text-base md:text-lg">
+          <span class="px-2 py-1 rounded-xl bg-green-500 text-white font-semibold">🛡️ CSP</span>
+          <span class="px-2 py-1 rounded-xl bg-yellow-400 text-blue-900 font-semibold">🔒 SSL</span>
+          <span class="px-2 py-1 rounded-xl bg-indigo-400 text-white font-semibold">🤖 AI Ready</span>
+        </div>
+        <div class="ml-4 font-semibold text-blue-900 bg-gold-400 px-3 py-1 rounded-xl animate-pulse shadow-lg">
+          <span id="scripture-ticker">God goes before you. — Deut. 31:8</span>
+        </div>
+      </div>
+    </header>
   
   <!-- Dashboard content with perfectly centered modern design -->
   <div id="dashboardContent" class="hidden min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
