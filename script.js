@@ -622,6 +622,123 @@ function updateNoCasesDisplay() {
   if (systemStatusEl) systemStatusEl.textContent = 'Ready';
 }
 
+/********** Filter Functions **********/
+function populateFilters() {
+  // Get all tracker rows to read existing data
+  const trackerBody = document.querySelector("#results");
+  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
+  
+  // Get filter elements
+  const categoryFilter = document.getElementById('categoryFilter');
+  const misconductFilter = document.getElementById('misconductFilter');
+  const clearFiltersBtn = document.getElementById('clearFilters');
+  
+  // Collect unique values from existing data
+  const categories = new Set();
+  const misconductTypes = new Set();
+  
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 3) {
+      // Category is in first column
+      const category = cells[0].textContent.trim();
+      if (category) categories.add(category);
+      
+      // Misconduct type is in third column (misconduct select)
+      const misconductSelect = cells[2].querySelector('select');
+      if (misconductSelect && misconductSelect.value) {
+        misconductTypes.add(misconductSelect.value);
+      }
+    }
+  });
+  
+  // Populate category filter (keep existing static options + dynamic ones)
+  if (categoryFilter) {
+    const staticOptions = categoryFilter.innerHTML;
+    const dynamicOptions = Array.from(categories)
+      .filter(cat => !staticOptions.includes(cat)) // Don't duplicate existing options
+      .map(cat => `<option value="${cat}">${cat}</option>`)
+      .join('');
+    
+    if (dynamicOptions) {
+      categoryFilter.innerHTML = staticOptions + dynamicOptions;
+    }
+  }
+  
+  // Populate misconduct filter (keep existing static options + dynamic ones)
+  if (misconductFilter) {
+    const staticOptions = misconductFilter.innerHTML;
+    const dynamicOptions = Array.from(misconductTypes)
+      .filter(type => !staticOptions.includes(type)) // Don't duplicate existing options
+      .map(type => `<option value="${type}">${type}</option>`)
+      .join('');
+    
+    if (dynamicOptions) {
+      misconductFilter.innerHTML = staticOptions + dynamicOptions;
+    }
+  }
+  
+  // Set up filter event handlers
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', applyFilters);
+  }
+  
+  if (misconductFilter) {
+    misconductFilter.addEventListener('change', applyFilters);
+  }
+  
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', clearAllFilters);
+  }
+}
+
+function applyFilters() {
+  const trackerBody = document.querySelector("#results");
+  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
+  
+  const categoryFilter = document.getElementById('categoryFilter');
+  const misconductFilter = document.getElementById('misconductFilter');
+  
+  const selectedCategory = categoryFilter ? categoryFilter.value : '';
+  const selectedMisconduct = misconductFilter ? misconductFilter.value : '';
+  
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 3) {
+      const category = cells[0].textContent.trim();
+      const misconductSelect = cells[2].querySelector('select');
+      const misconduct = misconductSelect ? misconductSelect.value : '';
+      
+      const categoryMatch = !selectedCategory || category === selectedCategory;
+      const misconductMatch = !selectedMisconduct || misconduct === selectedMisconduct;
+      
+      // Show/hide row based on filter matches
+      row.style.display = (categoryMatch && misconductMatch) ? '' : 'none';
+    }
+  });
+  
+  // Update stats after filtering
+  updateDashboardStats();
+}
+
+function clearAllFilters() {
+  const categoryFilter = document.getElementById('categoryFilter');
+  const misconductFilter = document.getElementById('misconductFilter');
+  
+  if (categoryFilter) categoryFilter.value = '';
+  if (misconductFilter) misconductFilter.value = '';
+  
+  // Show all rows
+  const trackerBody = document.querySelector("#results");
+  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
+  rows.forEach(row => {
+    row.style.display = '';
+  });
+  
+  // Update stats
+  updateDashboardStats();
+}
+
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
   // Timeout variable for optimized saving
