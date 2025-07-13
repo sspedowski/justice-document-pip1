@@ -586,9 +586,11 @@ function updateDashboardStats() {
   // Calculate total cases
   const totalCases = rows.length;
   
-  // Calculate active cases (assuming those without a "Closed" status)
+  // Calculate active cases and PDF statistics
   let activeCases = 0;
   let documentsProcessed = 0;
+  let pdfDocuments = 0;
+  let totalPdfCharacters = 0;
   
   rows.forEach(row => {
     const cells = row.querySelectorAll('td');
@@ -599,9 +601,21 @@ function updateDashboardStats() {
         activeCases++;
       }
       
-      // Count documents (check if there are file attachments)
+      // Count documents and analyze PDF content
       const fileLinks = row.querySelectorAll('a[href*="blob:"]');
       documentsProcessed += fileLinks.length;
+      
+      // Check for PDF documents and count characters
+      fileLinks.forEach(link => {
+        if (link.textContent.toLowerCase().includes('.pdf')) {
+          pdfDocuments++;
+          // Try to estimate content from visible text in the row
+          const rowText = row.textContent;
+          if (rowText.length > 200) { // Likely contains extracted PDF content
+            totalPdfCharacters += rowText.length;
+          }
+        }
+      });
     }
   });
   
@@ -616,7 +630,14 @@ function updateDashboardStats() {
   if (documentsProcessedEl) documentsProcessedEl.textContent = documentsProcessed;
   if (systemStatusEl) systemStatusEl.textContent = totalCases > 0 ? 'Active' : 'Ready';
   
-  console.log(`Dashboard stats updated: ${totalCases} total, ${activeCases} active, ${documentsProcessed} documents`);
+  // Update PDF-specific stats if elements exist
+  const pdfDocumentsEl = document.getElementById('pdfDocuments');
+  const pdfCharactersEl = document.getElementById('pdfCharacters');
+  
+  if (pdfDocumentsEl) pdfDocumentsEl.textContent = pdfDocuments;
+  if (pdfCharactersEl) pdfCharactersEl.textContent = `${(totalPdfCharacters / 1000).toFixed(1)}K`;
+  
+  console.log(`📊 Dashboard stats updated: ${totalCases} total, ${activeCases} active, ${documentsProcessed} documents, ${pdfDocuments} PDFs (${totalPdfCharacters} chars)`);
 }
 
 function updateNoCasesDisplay() {
@@ -2191,5 +2212,69 @@ const ApiHelper = {
   }
 };
 
-// Initialize enhancements
-DashboardEnhancements.init();
+// Show full PDF content in modal
+window.showFullContent = function(caseId) {
+  const cases = JSON.parse(localStorage.getItem('legalCases') || '[]');
+  const caseObj = cases.find(c => c.id === caseId);
+  
+  if (!caseObj || !caseObj.evidence) {
+    showNotification('No content available for this case', 'error');
+    return;
+  }
+  
+  // Create modal for full content display
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-gray-800">📄 ${caseObj.title} - Full Content</h3>
+        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto max-h-[70vh]">
+        <pre class="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed">${caseObj.evidence}</pre>
+      </div>
+      <div class="p-4 border-t border-gray-200 bg-gray-50 text-center">
+        <button onclick="this.closest('.fixed').remove()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Close on outside click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+};
+
+// Enhanced notification system for PDF operations
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  const colors = {
+    success: 'bg-green-500',
+    error: 'bg-red-500', 
+    warning: 'bg-yellow-500',
+    info: 'bg-blue-500'
+  };
+  
+  notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Slide in
+  setTimeout(() => {
+    notification.classList.remove('translate-x-full');
+  }, 100);
+  
+  // Auto remove after 4 seconds
+  setTimeout(() => {
+    notification.classList.add('translate-x-full');
+    setTimeout(() => notification.remove(), 300);
+  }, 4000);
+}
