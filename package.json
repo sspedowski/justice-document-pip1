@@ -5,8 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npx tailwindcss -i ./client/style.css -o ./client/output.css",
-    "watch": "npx tailwindcss -i ./client/style.css -o ./client/output.css --watch",
+    "build": "npx tailwindcss -i ./input.css -o ./output.css",
+    "watch": "npx tailwindcss -i ./input.css -o ./output.css --watch",
     "test": "echo \"No tests specified in root - run 'cd justice-dashboard && npm test' for main tests\" && exit 0"
   },
   "dependencies": {
