@@ -862,6 +862,10 @@ function initializeJusticeDashboard() {
       }
       
       console.log(`✅ Successfully extracted ${extractedText.length} characters from ${file.name}`);
+      
+      // Show success notification to user
+      showNotification(`📄 PDF processed: ${file.name} (${extractedText.length} characters extracted)`, 'success');
+      
       return extractedText;
       
     } catch (error) {
