@@ -502,8 +502,8 @@ const DashboardAuth = {
               <button id="exportBtn" class="justice-btn-accent bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
                 📊 Export CSV
               </button>
-              <button id="askLawGpt" class="justice-btn-primary bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
-                ⚖️ Ask Law GPT
+              <button id="askWolfram" class="justice-btn-primary bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
+                🧠 Ask Wolfram Alpha
               </button>
             </div>
           </div>
@@ -777,7 +777,7 @@ function initializeJusticeDashboard() {
   const docInput = document.getElementById("docInput");
   const summarizeBtn = document.getElementById("generateBtn");
   const exportBtn = document.getElementById("exportBtn");
-  const askBtn = document.getElementById("askLawGpt");
+  const askBtn = document.getElementById("askWolfram");
   const summaryBox = document.getElementById("summaryBox");
   let trackerBody = document.querySelector("#results");
   
@@ -792,12 +792,30 @@ function initializeJusticeDashboard() {
 
   // Dashboard elements
   const textInput = document.getElementById('textInput');
-  const askLawGptBtn = document.getElementById('askLawGpt');
+  const askWolframBtn = document.getElementById('askWolfram');
 
-  // Wire up Ask Law GPT button
-  if (askLawGptBtn) {
-    askLawGptBtn.addEventListener('click', () => {
-      showNotification('This feature is coming soon! AI legal assistant is not yet enabled.', 'info');
+  // Wire up Ask Wolfram Alpha button
+  if (askWolframBtn) {
+    askWolframBtn.addEventListener('click', async () => {
+      const query = prompt("What legal or factual question would you like to ask Wolfram Alpha?\n\nExample: 'What is the constitutional standard for removal of a child from parental custody in Michigan?'");
+      if (!query || !query.trim()) return;
+      
+      try {
+        askWolframBtn.disabled = true;
+        askWolframBtn.innerHTML = '🔄 Asking Wolfram...';
+        
+        const result = await askWolfram(query.trim());
+        
+        // Display result in a modal or alert
+        showWolframResult(query, result);
+        
+      } catch (error) {
+        console.error('Wolfram Alpha error:', error);
+        showNotification('Error: ' + error.message, 'error');
+      } finally {
+        askWolframBtn.disabled = false;
+        askWolframBtn.innerHTML = '🧠 Ask Wolfram Alpha';
+      }
     });
   }
   const categoryFilter = document.getElementById('categoryFilter');
@@ -1753,6 +1771,112 @@ const ApiHelper = {
     return response.json();
   }
 };
+
+// Wolfram Alpha Integration Functions
+async function askWolfram(query) {
+  const authToken = getAuthToken();
+  if (!authToken) {
+    throw new Error('Authentication required to use Wolfram Alpha');
+  }
+
+  const response = await fetch('/api/wolfram', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`
+    },
+    body: JSON.stringify({ query })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  if (data.success) {
+    return data.result;
+  } else {
+    throw new Error(data.error || 'Wolfram Alpha API error');
+  }
+}
+
+function showWolframResult(query, result) {
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+  
+  // Create modal content
+  const modal = document.createElement('div');
+  modal.className = 'bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden';
+  
+  modal.innerHTML = `
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">🧠 Wolfram Alpha Response</h3>
+      <button id="closeWolframModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+      <div class="mb-4">
+        <h4 class="font-medium text-gray-700 mb-2">Query:</h4>
+        <p class="bg-gray-50 p-3 rounded border text-sm">${query}</p>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Response:</h4>
+        <div class="bg-blue-50 p-4 rounded border">
+          <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono">${JSON.stringify(result, null, 2)}</pre>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+      <button id="copyWolframResult" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+        📋 Copy Result
+      </button>
+      <button id="closeWolframModalBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">
+        Close
+      </button>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  // Event handlers
+  const closeModal = () => {
+    document.body.removeChild(overlay);
+  };
+  
+  document.getElementById('closeWolframModal').onclick = closeModal;
+  document.getElementById('closeWolframModalBtn').onclick = closeModal;
+  
+  document.getElementById('copyWolframResult').onclick = () => {
+    navigator.clipboard.writeText(JSON.stringify(result, null, 2)).then(() => {
+      showNotification('Wolfram result copied to clipboard!', 'success');
+    }).catch(() => {
+      showNotification('Failed to copy to clipboard', 'error');
+    });
+  };
+  
+  // Close on overlay click
+  overlay.onclick = (e) => {
+    if (e.target === overlay) closeModal();
+  };
+  
+  // Close on Escape key
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
 
 // Show full PDF content in modal
 window.showFullContent = function(caseId) {
