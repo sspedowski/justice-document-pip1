@@ -5,6 +5,7 @@
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
+    /* 'text-size-adjust' is not supported by Firefox, Safari */
     text-size-adjust: 100%;
   select,
   input[type='file'] {
@@ -13,5 +14,6 @@
     -moz-appearance: none;
     -ms-appearance: none;
       appearance: none;
+      }
     }
   }
