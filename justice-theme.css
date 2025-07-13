@@ -350,7 +350,7 @@ body {
 
 /* Faith gradients */
 .bg-faith-gradient {
-  background: linear-gradient(135deg, var(--faith-indigo-900) 0%, var(--faith-indigo-500) 50%, var(--faith-gold-400) 100%);
+  background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
 }
 
 .bg-heaven-gradient {
@@ -415,4 +415,109 @@ body {
   font-family: var(--font-serif);
   font-style: italic;
   transition: opacity 0.3s ease;
+}
+
+/* CSP-Compliant Faith-Based Gold Design System */
+
+/* Gold color utilities */
+.bg-gold { 
+  background-color: var(--faith-gold-400); 
+}
+
+.text-gold { 
+  color: var(--faith-gold-400); 
+}
+
+.border-gold { 
+  border-color: var(--faith-gold-400); 
+}
+
+.card-shadow {
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+}
+
+.animate-sparkle {
+  animation: sparkle 2.5s infinite alternate;
+}
+
+@keyframes sparkle {
+  from { filter: brightness(1.1); }
+  to   { filter: brightness(1.6); }
+}
+
+/* Professional faith-based components */
+.faith-dashboard-header {
+  background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
+  border-radius: 1.5rem;
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.faith-stats-card {
+  background: white;
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  border-radius: 0.75rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border: 2px solid var(--faith-gold-400);
+  transition: all 0.3s ease;
+}
+
+.faith-stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(186, 153, 48, 0.15);
+}
+
+.faith-table {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  overflow: hidden;
+}
+
+.faith-table thead tr {
+  background-color: var(--faith-gold-400);
+  color: white;
+}
+
+.faith-table th {
+  padding: 0.75rem 0.5rem;
+  font-weight: 600;
+}
+
+.faith-table th:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+.faith-table th:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+.faith-footer {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Scripture and faith text styling */
+.scripture-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--faith-gold-700);
+}
+
+.faith-title {
+  color: var(--faith-gold-400);
+  font-weight: bold;
+  font-size: 2.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.victory-text {
+  color: var(--faith-gold-400);
+  font-weight: 600;
+  animation: sparkle 2.5s infinite alternate;
 }
