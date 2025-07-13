@@ -1476,14 +1476,13 @@ function initializeJusticeDashboard() {
       `📊 Total: ${bulkTotal} files`;
     
     showNotification(message, processedCount > 0 ? 'success' : 'warning');
-  };
+  }
 
-// Bulk process button handler
-const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
-if (bulkProcessBtnHandler) {
-  bulkProcessBtnHandler.onclick = async () => {
+  // Bulk process button handler
+  const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
+  if (bulkProcessBtnHandler) {
     bulkProcessBtnHandler.onclick = async () => {
-  justiceDebugLog('bulkProcessBtn clicked');
+      justiceDebugLog('bulkProcessBtn clicked');
       const files = fileInput?.files;
       
       if (!files?.length) {
