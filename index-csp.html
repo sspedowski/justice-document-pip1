@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self';">
+    <title>Justice Dashboard - Victory by Faith</title>
+    <link rel="stylesheet" href="output.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="justice-theme.css">
+    <link rel="stylesheet" href="custom.css">
+</head>
+<body class="p-4 min-h-screen bg-faith-gradient">
+    <div class="container mx-auto">
+        
+        <!-- Faith-Based Header -->
+        <header class="faith-dashboard-header text-center mb-8">
+            <div class="flex items-center justify-center mb-4">
+                <span class="text-4xl mr-3">⚖️</span>
+                <h1 class="faith-title">Justice Dashboard</h1>
+                <span class="text-4xl ml-3">✝️</span>
+            </div>
+            <p class="scripture-text text-lg mb-2">"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, to give you hope and a future." - Jeremiah 29:11</p>
+            <p class="victory-text text-xl">Victory by Faith in Legal Excellence</p>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="faith-stats-card">
+                <div class="text-3xl font-bold text-gold mb-2" id="totalCases">0</div>
+                <div class="text-sm text-gray-600">Total Cases</div>
+            </div>
+            <div class="faith-stats-card">
+                <div class="text-3xl font-bold text-gold mb-2" id="activeCases">0</div>
+                <div class="text-sm text-gray-600">Active Cases</div>
+            </div>
+            <div class="faith-stats-card">
+                <div class="text-3xl font-bold text-gold mb-2" id="completedCases">0</div>
+                <div class="text-sm text-gray-600">Completed</div>
+            </div>
+            <div class="faith-stats-card">
+                <div class="text-3xl font-bold text-gold mb-2" id="documentsProcessed">0</div>
+                <div class="text-sm text-gray-600">Documents</div>
+            </div>
+        </div>
+
+        <!-- Document Processing Section -->
+        <div class="faith-table mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gold mb-6 text-center">Document Processing Center</h2>
+                
+                <!-- File Upload -->
+                <div class="mb-6">
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" 
+                           class="w-full p-3 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button id="processBtn" class="bg-gold text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-faith-gold-600 transition-all">
+                        📄 Process Document
+                    </button>
+                    <button id="exportBtn" class="bg-faith-indigo text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-indigo-700 transition-all">
+                        📊 Export Report
+                    </button>
+                </div>
+                
+                <!-- Text Input Area -->
+                <div class="mb-6">
+                    <textarea id="textInput" placeholder="Paste legal document text here for immediate analysis..." 
+                              class="w-full h-32 p-4 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400"></textarea>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <button id="addCaseBtn" class="bg-green-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-green-600 transition">
+                        ➕ Add Case
+                    </button>
+                    <button id="smartFilterBtn" class="bg-purple-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-purple-600 transition">
+                        🔍 Smart Filter
+                    </button>
+                    <button id="clearBtn" class="bg-red-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-red-600 transition">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case Tracker Table -->
+        <div class="faith-table">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gold">Case Tracker</h2>
+                    <div class="flex items-center gap-4">
+                        <select id="statusFilter" class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <button id="clearFiltersBtn" class="bg-gold text-white px-5 py-2 rounded-full font-bold card-shadow hover:bg-faith-gold-600 transition">
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gold text-white">
+                                <th class="p-3 text-left">Case ID</th>
+                                <th class="p-3 text-left">Title</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Date</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="caseTableBody">
+                            <!-- Cases will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faith-Based Footer -->
+        <footer class="faith-footer text-center mt-8">
+            <p class="scripture-text mb-2">"Trust in the Lord with all your heart and lean not on your own understanding." - Proverbs 3:5</p>
+            <p>&copy; 2024 Justice Dashboard | Victory by Faith | All Rights Reserved</p>
+            <p class="text-xs mt-2">Built with faith, dedication, and excellence in mind</p>
+        </footer>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="fixed top-4 right-4 z-50"></div>
+
+    <!-- PDF Preview Modal -->
+    <div id="pdfModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-bold">Document Preview</h3>
+                    <button id="closePdfModal" class="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div id="pdfContent" class="p-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="dashboard-init.js"></script>
+    <script src="script.js"></script>
+    <script src="auth-manager.js"></script>
+    <script src="dark-mode.js"></script>
+    <script src="pdf-config.js"></script>
+    <script src="pdf.min.js"></script>
+</body>
+</html>
