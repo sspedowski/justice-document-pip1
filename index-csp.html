@@ -142,7 +142,11 @@
             <p>&copy; 2024 Justice Dashboard | Victory by Faith | All Rights Reserved</p>
             <p class="text-xs mt-2">Built with faith, dedication, and excellence in mind</p>
         </footer>
-    </div>
+    </div> <!-- End container -->
+</div> <!-- End app -->
+
+    <!-- Dark Mode Toggle Button (Required by dark-mode.js) -->
+    <button id="darkModeToggle" class="fixed top-4 left-4 bg-gold text-white p-2 rounded-full shadow-lg z-50 hover:bg-faith-gold-600 transition">🌙</button>
 
     <!-- Notification System -->
     <div id="notifications" class="fixed top-4 right-4 z-50"></div>
@@ -160,12 +164,13 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="dashboard-init.js"></script>
-    <script src="script.js"></script>
+    <!-- Scripts (must come after #app and modals for CSP) - DEBUG ENABLED -->
+    <script src="debug-tracer.js"></script>
     <script src="auth-manager.js"></script>
     <script src="dark-mode.js"></script>
     <script src="pdf-config.js"></script>
     <script src="pdf.min.js"></script>
+    <script src="script.js"></script>
+    <script src="dashboard-init.js"></script>
 </body>
 </html>
