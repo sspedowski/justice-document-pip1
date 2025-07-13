@@ -793,6 +793,18 @@ function initializeJusticeDashboard() {
   const categoryFilter = document.getElementById('categoryFilter');
   const misconductFilter = document.getElementById('misconductFilter');
 
+  // Daily Prayer Persistence
+  const dailyPrayer = document.getElementById('dailyPrayer');
+  if (dailyPrayer) {
+    // Restore saved prayer
+    const savedPrayer = localStorage.getItem('dailyPrayerText');
+    if (savedPrayer) dailyPrayer.value = savedPrayer;
+    // Save on input
+    dailyPrayer.addEventListener('input', () => {
+      localStorage.setItem('dailyPrayerText', dailyPrayer.value);
+    });
+  }
+
   // Essential elements check
   if (!summarizeBtn || !trackerBody) {
     console.error('Required DOM elements not found');
