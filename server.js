@@ -667,7 +667,7 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
 
 // ============= FRONTEND ROUTES =============
 
-// Serve frontend - FIXED: Serve index.html for all routes
+// Serve frontend - FIXED: Serve index-csp.html for all routes
 app.get("*", (req, res) => {
   // For API routes, let them handle their own responses
   if (req.path.startsWith('/api/')) {
@@ -675,7 +675,7 @@ app.get("*", (req, res) => {
   }
   
   // Serve the main dashboard for all other routes
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "index-csp.html"));
 });
 
 // Start server
