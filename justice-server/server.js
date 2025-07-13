@@ -6,8 +6,20 @@ const path = require("path");
 const pdfParse = require("pdf-parse");
 const { fromPath } = require("pdf2pic");
 const Tesseract = require("tesseract.js");
+const helmet = require("helmet");
 
 const app = express();
+
+// Unified Content Security Policy
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "http://localhost:3000"],
+    styleSrc: ["'self'", "http://localhost:3000"],
+    frameSrc: ["'none'"],
+    // Add other directives as needed
+  },
+}));
 const upload = multer({ dest: "uploads/" });
 
 app.use(cors());
