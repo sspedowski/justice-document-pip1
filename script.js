@@ -624,6 +624,9 @@ function updateNoCasesDisplay() {
 
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
+  // Timeout variable for optimized saving
+  let saveTimeout;
+  
   // DOM Elements
   const fileInput = document.getElementById("fileInput");
   const docInput = document.getElementById("docInput");
