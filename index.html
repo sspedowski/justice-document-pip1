@@ -54,7 +54,8 @@
 
           <!-- File Upload -->
           <div class="mb-6">
-            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" class="w-full p-3 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400">
+            <label for="fileInput" class="block mb-2 font-semibold text-gold">Upload Document</label>
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" title="Select a document to upload" placeholder="Choose a file..." class="w-full p-3 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400">
           </div>
 
           <!-- Action Buttons -->
@@ -83,7 +84,7 @@
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gold">Case Tracker</h2>
             <div class="flex items-center gap-4">
-              <select id="statusFilter" class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400">
+              <select id="statusFilter" title="Filter cases by status" class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400">
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
