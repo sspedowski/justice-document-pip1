@@ -418,30 +418,31 @@
         </div>
       </section>
 
-      <!-- Professional Footer -->
-      <footer class="text-center text-gray-500 text-sm border-t pt-6 mt-8">
-        <div class="flex justify-center items-center space-x-6 flex-wrap">
-          <span class="flex items-center">
-            <span class="mr-2">⚖️</span>
-            Justice Dashboard © 2025
-          </span>
-          <span class="flex items-center">
-            <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-            Secure & Compliant
-          </span>
-          <span class="flex items-center text-xs">
-            <span class="mr-1">🛡️</span>
-            CSP Protected
-          </span>
-          <span class="flex items-center text-xs">
-            <span class="mr-1">🔒</span>
-            SSL Encrypted
-          </span>
-        </div>
-      </footer>
-      
-    </div> <!-- End Main Content Container -->
-  </div>
+  </div> <!-- End Stats Cards -->
+  </div> <!-- End Dashboard Content -->
+
+  <!-- Faith-Based Footer -->
+  <footer class="mt-12 mb-2 flex flex-col items-center gap-2 text-center">
+    <span class="font-extrabold text-2xl text-gold-400 tracking-wider animate-pulse drop-shadow-lg">Victory by Faith</span>
+    <span class="font-semibold text-white">Justice Dashboard © 2025. All Glory to God Alone.</span>
+    <span class="italic text-blue-200">"No weapon formed against you shall prosper." — Isaiah 54:17</span>
+    <div class="flex items-center gap-4 mt-2">
+      <span class="flex items-center text-white">
+        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+        Secure & Protected by God
+      </span>
+      <span class="flex items-center text-blue-200 text-xs">
+        <span class="mr-1">🛡️</span>
+        CSP Active
+      </span>
+      <span class="flex items-center text-blue-200 text-xs">
+        <span class="mr-1">🔒</span>
+        SSL Encrypted
+      </span>
+    </div>
+  </footer>
+
+  </div> <!-- End App Container -->
 
   <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
   <!-- PDF.js Library for PDF text extraction -->
@@ -450,5 +451,37 @@
   <script src="config.js"></script>
   <script src="dark-mode.js"></script>
   <script src="script.js"></script>
+  
+  <!-- Scripture Rotation Script -->
+  <script>
+    // Faith-based scripture rotation
+    const scriptures = [
+      "God goes before you. — Deut. 31:8",
+      "Be strong and courageous! — Joshua 1:9",
+      "The Lord will fight for you. — Exodus 14:14",
+      "No weapon formed against you shall prosper. — Isaiah 54:17",
+      "Greater is He who is in you. — 1 John 4:4",
+      "All things work together for good. — Romans 8:28",
+      "God has not given you a spirit of fear. — 2 Tim. 1:7",
+      "I can do all things through Christ. — Phil. 4:13"
+    ];
+    
+    let scriptureIndex = 0;
+    
+    function rotateScripture() {
+      const ticker = document.getElementById('scripture-ticker');
+      if (ticker) {
+        ticker.style.opacity = '0';
+        setTimeout(() => {
+          scriptureIndex = (scriptureIndex + 1) % scriptures.length;
+          ticker.textContent = scriptures[scriptureIndex];
+          ticker.style.opacity = '1';
+        }, 300);
+      }
+    }
+    
+    // Rotate scripture every 5 seconds
+    setInterval(rotateScripture, 5000);
+  </script>
 </body>
 </html>
