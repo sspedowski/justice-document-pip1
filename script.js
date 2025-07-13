@@ -1373,7 +1373,10 @@ function initializeJusticeDashboard() {
 
   // Bulk processing function
   async function processBulkFiles(files, skipDuplicates = false) {
-  justiceDebugLog('processBulkFiles called', { fileCount: files.length, skipDuplicates });
+    if (!files || files.length === 0) return;
+
+    justiceDebugLog('processBulkFiles called', { fileCount: files.length, skipDuplicates });
+    
     isProcessingBulk = true;
     bulkTotal = files.length;
     bulkProgress = 0;
@@ -1382,35 +1385,45 @@ function initializeJusticeDashboard() {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     
-    progressDiv.classList.remove('hidden');
+    if (progressDiv) progressDiv.classList.remove('hidden');
     
     let processedCount = 0;
     let duplicateCount = 0;
     let errorCount = 0;
-    
+
     for (let i = 0; i < files.length; i++) {
-    justiceDebugLog(`Processing file [${i+1}/${files.length}]`, files[i]?.name);
       const file = files[i];
       bulkProgress = i + 1;
       
-      // Update progress using CSS classes (CSP-compliant)
-      const percentage = (bulkProgress / bulkTotal) * 100;
-      const progressClass = `progress-${Math.round(percentage / 5) * 5}`;
-      
-      // Remove existing progress classes
-      progressBar.className = progressBar.className.replace(/progress-\d+/g, '');
-      // Add new progress class
-      progressBar.classList.add(progressClass);
-      
-      progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
-      
+      justiceDebugLog(`Processing file [${i+1}/${files.length}]`, file?.name);
+
+      // Update progress display
+      if (progressBar && progressText) {
+        const percentage = (bulkProgress / bulkTotal) * 100;
+        const progressClass = `progress-${Math.round(percentage / 5) * 5}`;
+        
+        // Remove existing progress classes and add new one
+        progressBar.className = progressBar.className.replace(/progress-\d+/g, '');
+        progressBar.classList.add(progressClass);
+        progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
+      }
+
       try {
+        // Ensure file is a PDF
+        if (file.type !== 'application/pdf') {
+          showNotification('Only PDF files are supported: ' + file.name, 'error');
+          errorCount++;
+          continue;
+        }
+
         // Add delay to prevent browser freezing
         await new Promise(resolve => setTimeout(resolve, 50));
-        
+
+        // Process the PDF
         const text = await pdfToText(file);
         const summary = quickSummary(text);
         const fileURL = URL.createObjectURL(file);
+
         // Check for duplicates if requested
         if (skipDuplicates) {
           const dupeCheck = isDuplicate(file.name, summary);
@@ -1420,57 +1433,50 @@ function initializeJusticeDashboard() {
             continue;
           }
         }
-        // Add row without alerts
-        addRowSilent({
+
+        // Compose row data for tracker
+        const rowData = {
           category: detectCategory(text, file.name),
           child: detectChild(text),
           misconduct: "Review Needed",
-          summary,
+          summary: summary || '',
           tags: keywordTags(text),
-          fileURL,
-          fileName: file.name
-        });
+          fileURL: fileURL,
+          fileName: file.name || ''
+        };
+
+        // Add row to tracker
+        addRowSilent(rowData);
         justiceDebugLog(`File processed and added: ${file.name}`);
         processedCount++;
+
+      } catch (error) {
+        justiceDebugLog(`Error processing file: ${file.name}`, error);
+        showNotification('Failed to process: ' + (file.name || 'Unknown file'), 'error');
+        errorCount++;
       }
-      }
-      
-      // Add row without alerts
-      addRowSilent({
-        category: detectCategory(text, file.name),
-        child: detectChild(text),
-        misconduct: "Review Needed",
-        summary,
-        tags: keywordTags(text),
-        fileURL,
-        fileName: file.name
-      });
-      justiceDebugLog(`File processed and added: ${file.name}`);
-      processedCount++;
-      
-    } catch (error) {
-      justiceDebugLog(`Error processing file: ${file.name}`, error);
-      errorCount++;
     }
-  }
-  
-  // Hide progress and show results
-  progressDiv.classList.add('hidden');
-  isProcessingBulk = false;
-  justiceDebugLog('Bulk processing complete', {
-    processedCount,
-    duplicateCount,
-    errorCount,
-    total: bulkTotal
-  });
-  alert(
-    `Bulk processing complete!\n\n` +
-    `✅ Processed: ${processedCount} files\n` +
-    `⚠️ Duplicates skipped: ${duplicateCount}\n` +
-    `❌ Errors: ${errorCount}\n` +
-    `📊 Total: ${bulkTotal} files`
-  );
-};
+
+    // Hide progress and show results
+    if (progressDiv) progressDiv.classList.add('hidden');
+    isProcessingBulk = false;
+
+    justiceDebugLog('Bulk processing complete', {
+      processedCount,
+      duplicateCount,
+      errorCount,
+      total: bulkTotal
+    });
+
+    // Show completion notification
+    const message = `Bulk processing complete!\n\n` +
+      `✅ Processed: ${processedCount} files\n` +
+      `⚠️ Duplicates skipped: ${duplicateCount}\n` +
+      `❌ Errors: ${errorCount}\n` +
+      `📊 Total: ${bulkTotal} files`;
+    
+    showNotification(message, processedCount > 0 ? 'success' : 'warning');
+  };
 
 // Bulk process button handler
 const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
