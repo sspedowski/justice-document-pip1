@@ -1,6 +1,16 @@
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
+// PDF.js Status Check
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof pdfjsLib !== 'undefined') {
+    console.log('✅ PDF.js library loaded successfully');
+    console.log('📚 PDF.js version:', pdfjsLib.version);
+  } else {
+    console.error('❌ PDF.js library not found - PDF content extraction will not work');
+  }
+});
+
 // Environment detection helper
 function getApiBaseUrl() {
   // If API_BASE_URL is defined globally (from index.html), use it
