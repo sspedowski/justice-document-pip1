@@ -886,25 +886,26 @@ function initializeJusticeDashboard() {
       
       console.log(`📖 Processing ${pdf.numPages} pages...`);
       
+      let summaryArr = [];
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
         const content = await page.getTextContent();
-        const pageText = content.items.map(item => item.str).join(' ');
-        text += `Page ${pageNum}:\n${pageText}\n\n`;
+        const pageText = content.items.map(item => item.str).join(' ').trim();
+        if (pageText && pageText.replace(/\s+/g, '').length > 10) {
+          summaryArr.push(pageText);
+        }
       }
-      
-      const extractedText = text.trim();
+      const extractedText = summaryArr.join('\n\n');
       if (extractedText.length === 0) {
         console.warn(`⚠️ No text content found in PDF: ${file.name}`);
-        return `PDF Document: ${file.name}\n\n[No extractable text content found]\n\nThis PDF may contain only images or be password-protected.`;
+        return `PDF Document: ${file.name}`;
       }
-      
+      // Optionally truncate to 1000 chars for summary display
+      const summaryText = extractedText.length > 1000 ? extractedText.substring(0, 1000) + '...' : extractedText;
       console.log(`✅ Successfully extracted ${extractedText.length} characters from ${file.name}`);
-      
       // Show success notification to user
       showNotification(`📄 PDF processed: ${file.name} (${extractedText.length} characters extracted)`, 'success');
-      
-      return extractedText;
+      return summaryText;
       
     } catch (error) {
       console.error('❌ PDF parsing error:', error);
