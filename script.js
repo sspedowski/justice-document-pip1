@@ -826,57 +826,111 @@ function initializeJusticeDashboard() {
     return select;
   }
 
-  // Add row to tracker
+  // Helper function to get category icon
+  function getCategoryIcon(category) {
+    const icons = {
+      'Medical': '🏥',
+      'Legal': '⚖️',
+      'School': '🏫',
+      'General': '📝'
+    };
+    return icons[category] || '📄';
+  }
+
+  // Add row to tracker with enhanced styling
   function addRow({ category, child, misconduct, summary, tags, fileURL, fileName }) {
     const row = trackerBody.insertRow();
-    row.className = "hover:bg-gray-50 transition-colors";
+    row.className = "hover:bg-indigo-50 transition-all duration-200 group";
     
-    // Category cell
+    // Category cell with icon
     const categoryCell = row.insertCell();
-    categoryCell.className = "py-3 px-4 text-sm font-medium text-gray-900";
-    categoryCell.textContent = category;
+    categoryCell.className = "py-4 px-6 text-sm font-medium text-gray-900";
+    const categoryIcon = getCategoryIcon(category);
+    categoryCell.innerHTML = `<span class="flex items-center"><span class="mr-2">${categoryIcon}</span>${category}</span>`;
     
     // Child cell
     const childCell = row.insertCell();
-    childCell.className = "py-3 px-4 text-sm text-gray-700";
+    childCell.className = "py-4 px-6 text-sm text-gray-700";
     childCell.textContent = child;
     
-    // Misconduct cell with select
+    // Misconduct cell with enhanced select
     const misconductCell = row.insertCell();
-    misconductCell.className = "py-3 px-4";
-    misconductCell.appendChild(buildMisconductSelect(misconduct));
+    misconductCell.className = "py-4 px-6";
+    const select = buildMisconductSelect(misconduct);
+    select.className = "w-full bg-transparent text-sm border border-gray-200 rounded-md px-2 py-1 hover:border-indigo-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 transition-all";
+    misconductCell.appendChild(select);
     
-    // Summary cell
+    // Summary cell with expand functionality
     const summaryCell = row.insertCell();
-    summaryCell.className = "py-3 px-4 text-sm text-gray-700 max-w-xs";
-    summaryCell.textContent = summary;
-    summaryCell.title = summary;
+    summaryCell.className = "py-4 px-6 text-sm text-gray-700 min-w-[300px]";
+    const truncatedSummary = summary.length > 100 ? summary.slice(0, 97) + "..." : summary;
+    summaryCell.innerHTML = `
+      <div class="relative">
+        <p class="summary-text cursor-pointer hover:text-indigo-600 transition-colors" title="Click to expand">
+          ${truncatedSummary}
+        </p>
+        <div class="summary-full hidden absolute z-10 bg-white border border-gray-300 rounded-lg p-3 shadow-lg max-w-md mt-1">
+          <p class="text-sm text-gray-700 leading-relaxed">${summary}</p>
+          <button class="mt-2 text-xs text-indigo-600 hover:text-indigo-800">Close</button>
+        </div>
+      </div>
+    `;
     
-    // Tags cell
+    // Add click handlers for summary expansion
+    const summaryText = summaryCell.querySelector('.summary-text');
+    const summaryFull = summaryCell.querySelector('.summary-full');
+    const closeBtn = summaryCell.querySelector('.summary-full button');
+    
+    summaryText.addEventListener('click', () => {
+      summaryFull.classList.toggle('hidden');
+    });
+    
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      summaryFull.classList.add('hidden');
+    });
+    
+    // Tags cell with colored badges
     const tagsCell = row.insertCell();
-    tagsCell.className = "py-3 px-4 text-sm text-gray-600";
+    tagsCell.className = "py-4 px-6 text-sm";
     if (tags && tags.length > 0) {
       tagsCell.innerHTML = tags.map(tag => 
-        `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1">${tag}</span>`
+        `<span class="inline-block bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1 border border-blue-200">${tag}</span>`
       ).join('');
     } else {
-      tagsCell.textContent = 'None';
+      tagsCell.innerHTML = '<span class="text-gray-400 italic">None</span>';
     }
     
-    // Actions cell
+    // Actions cell with enhanced buttons
     const actionCell = row.insertCell();
-    actionCell.className = "py-3 px-4";
+    actionCell.className = "py-4 px-6";
     if (fileURL) {
-      const viewBtn = document.createElement("button");
-      viewBtn.className = "px-3 py-1 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700 transition-colors";
-      viewBtn.textContent = "View PDF";
-      viewBtn.onclick = () => window.open(fileURL, '_blank');
-      actionCell.appendChild(viewBtn);
+      actionCell.innerHTML = `
+        <div class="flex space-x-2">
+          <button onclick="window.open('${fileURL}', '_blank')" 
+                  class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-md text-xs hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">👁️</span>View
+          </button>
+          <button onclick="this.closest('tr').remove(); saveTable();" 
+                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">🗑️</span>Delete
+          </button>
+        </div>
+      `;
     } else {
-      actionCell.innerHTML = '<span class="text-gray-400 text-xs">No file</span>';
+      actionCell.innerHTML = `
+        <div class="flex space-x-2">
+          <span class="text-gray-400 text-xs italic">No file</span>
+          <button onclick="this.closest('tr').remove(); saveTable();" 
+                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">🗑️</span>Delete
+          </button>
+        </div>
+      `;
     }
     
     saveTable();
+    updateLastUpdated();
   }
 
   // Silent version of addRow (no alerts)
@@ -1131,144 +1185,526 @@ function initializeJusticeDashboard() {
     };
   }
 
-  // Dashboard statistics
-  function updateDashboardStats() {
-    const rows = Array.from(trackerBody.querySelectorAll('tr'));
-    const totalCases = rows.length;
-    const activeCases = rows.filter(row => {
-      const select = row.querySelector('select');
-      return select && select.value !== 'Review Needed';
-    }).length;
-    
-    // Update all stat elements
-    const totalEl = document.getElementById('totalCases');
-    const activeEl = document.getElementById('activeCases');
-    const documentsEl = document.getElementById('documentsProcessed');
-    const statusEl = document.getElementById('systemStatus');
-    
-    if (totalEl) {
-      animateCounter(totalEl, totalCases);
-    }
-    if (activeEl) {
-      animateCounter(activeEl, activeCases);
-    }
-    if (documentsEl) {
-      animateCounter(documentsEl, totalCases);
-    }
-    if (statusEl) {
-      statusEl.textContent = totalCases > 0 ? 'Active' : 'Ready';
+  // Update last updated timestamp
+  function updateLastUpdated() {
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+    if (lastUpdatedEl) {
+      const now = new Date();
+      lastUpdatedEl.textContent = now.toLocaleString();
     }
   }
 
-  // Animate counter with smooth transition
-  function animateCounter(element, target) {
-    const current = parseInt(element.textContent) || 0;
-    const increment = target > current ? 1 : -1;
-    const duration = Math.abs(target - current) * 50; // 50ms per step
-    
-    if (current === target) return;
-    
-    let step = current;
-    const timer = setInterval(() => {
-      step += increment;
-      element.textContent = step;
-      
-      if (step === target) {
-        clearInterval(timer);
-      }
-    }, 50);
-  }
-
-  // Populate filter dropdowns
-  function populateFilters() {
-    if (!categoryFilter || !misconductFilter) return;
-    
-    categoryFilter.innerHTML = '<option value="">All Categories</option>';
-    misconductFilter.innerHTML = '<option value="">All Types</option>';
-    
-    const categories = new Set();
-    const misconductTypes = new Set();
-    
-    Array.from(trackerBody.querySelectorAll('tr')).forEach(row => {
-      if (row.cells[0]) {
-        categories.add(row.cells[0].textContent);
-      }
-      const select = row.querySelector('select');
-      if (select) {
-        misconductTypes.add(select.value);
-      }
-    });
-    
-    categories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = option.textContent = cat;
-      categoryFilter.appendChild(option);
-    });
-    
-    misconductTypes.forEach(type => {
-      const option = document.createElement('option');
-      option.value = option.textContent = type;
-      misconductFilter.appendChild(option);
-    });
-  }
-
-  // Add filter event listeners
-  if (categoryFilter) {
-    categoryFilter.addEventListener('change', applyFilters);
-  }
-  if (misconductFilter) {
-    misconductFilter.addEventListener('change', applyFilters);
-  }
-
-  // Apply filters to table
-  function applyFilters() {
-    const categoryValue = categoryFilter?.value || '';
-    const misconductValue = misconductFilter?.value || '';
-    
-    Array.from(trackerBody.querySelectorAll('tr')).forEach(row => {
-      const categoryMatch = !categoryValue || row.cells[0]?.textContent === categoryValue;
-      const misconductMatch = !misconductValue || row.querySelector('select')?.value === misconductValue;
-      
-      if (categoryMatch && misconductMatch) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    });
-    
-    // Update stats based on visible rows
+  // Update case count display
+  function updateCaseCount() {
     const visibleRows = Array.from(trackerBody.querySelectorAll('tr:not([style*="display: none"])'));
-    const totalEl = document.getElementById('totalCases');
-    const activeEl = document.getElementById('activeCases');
-    
-    if (totalEl) totalEl.textContent = visibleRows.length;
-    if (activeEl) {
-      const activeCount = visibleRows.filter(row => {
-        const select = row.querySelector('select');
-        return select && select.value !== 'Review Needed';
-      }).length;
-      activeEl.textContent = activeCount;
+    const caseCountEl = document.getElementById('caseCount');
+    if (caseCountEl) {
+      const count = visibleRows.length;
+      caseCountEl.textContent = `${count} case${count === 1 ? '' : 's'}`;
     }
   }
 
-  // Ask Law GPT (Demo Mode)
-  if (askBtn) {
-    askBtn.onclick = async () => {
-      const prompt = summaryBox?.textContent || "No summary available";
-      const analysis = `Law GPT Analysis (Demo Mode):
+  // Child name detector
+  function detectChild(text) {
+    const children = ["Jace", "Josh"];
+    const found = children.filter(name => new RegExp(`\\b${name}\\b`, "i").test(text));
+    if (found.length === 2) return "Both";
+    if (found.length === 1) return found[0];
+    return "Unknown";
+  }
 
-Based on: "${prompt.slice(0, 100)}..."
+  // Check for duplicates based on file name and summary (optimized for bulk)
+  function isDuplicate(fileName, summary) {
+    // Quick cache for performance
+    if (!window.summaryCache) {
+      window.summaryCache = new Set();
+      // Build initial cache
+      const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
+      for (const row of existingRows) {
+        const cells = row.cells;
+        if (cells && cells.length >= 4) {
+          window.summaryCache.add(cells[3].textContent.trim());
+        }
+      }
+    }
+    
+    const trimmedSummary = summary.trim();
+    
+    // Fast exact match check
+    if (window.summaryCache.has(trimmedSummary)) {
+      return { isDupe: true, reason: 'Identical summary content' };
+    }
+    
+    // For bulk operations, skip expensive similarity checks
+    if (isProcessingBulk) {
+      // Add to cache for future checks
+      window.summaryCache.add(trimmedSummary);
+      return { isDupe: false };
+    }
+    
+    // Expensive similarity check only for individual files
+    const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
+    
+    for (const row of existingRows) {
+      const cells = row.cells;
+      if (!cells || cells.length < 4) continue;
+      
+      const existingSummary = cells[3].textContent.trim();
+      
+      // Check for same filename if provided
+      if (fileName && existingSummary.length > 10 && summary.length > 10) {
+        const similarity = calculateSimilarity(existingSummary, summary);
+        if (similarity > 0.85) { // 85% similar
+          return { isDupe: true, reason: `${Math.round(similarity * 100)}% similar content` };
+        }
+      }
+    }
+    
+    // Add to cache
+    window.summaryCache.add(trimmedSummary);
+    return { isDupe: false };
+  }
 
-Key Legal Issues Identified:
-• Potential civil rights violations
-• Document evidence preservation needed
-• Recommend consulting with attorney
-• Consider filing formal complaint
+  // Calculate text similarity (basic implementation)
+  function calculateSimilarity(text1, text2) {
+    const words1 = text1.toLowerCase().split(/\s+/);
+    const words2 = text2.toLowerCase().split(/\s+/);
+    
+    if (words1.length === 0 && words2.length === 0) return 1;
+    if (words1.length === 0 || words2.length === 0) return 0;
+    
+    const commonWords = words1.filter(word => words2.includes(word));
+    const totalWords = Math.max(words1.length, words2.length);
+    
+    return commonWords.length / totalWords;
+  }
 
-Note: This is a demo. The full version would connect to a legal AI service.`;
+  // Save table to localStorage
+  function saveTable() {
+    localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
+    updateDashboardStats();
+    populateFilters();
+    updateNoCasesDisplay();
+  }
 
-      alert(analysis);
+  // Update the no cases display
+  function updateNoCasesDisplay() {
+    const rows = Array.from(trackerBody.querySelectorAll('tr'));
+    const noCasesMsg = document.getElementById('noCasesMsg');
+    
+    if (rows.length === 0) {
+      if (noCasesMsg) {
+        noCasesMsg.classList.remove('hidden');
+      }
+    } else {
+      if (noCasesMsg) {
+        noCasesMsg.classList.add('hidden');
+      }
+    }
+  }
+
+  // Create misconduct dropdown
+  function buildMisconductSelect(value = "Review Needed") {
+    const select = document.createElement("select");
+    const uid = `misconduct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    
+    select.id = uid;
+    select.name = uid;
+    select.className = "bg-transparent text-sm border-0";
+
+    const options = [
+      "Review Needed",
+      "Denial of Right to Medical Safety and Privacy (HIPAA Violations)",
+      "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
+    ];
+
+    options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = option.textContent = opt;
+      select.appendChild(option);
+    });
+
+    select.value = value;
+    select.onchange = saveTable;
+    return select;
+  }
+
+  // Helper function to get category icon
+  function getCategoryIcon(category) {
+    const icons = {
+      'Medical': '🏥',
+      'Legal': '⚖️',
+      'School': '🏫',
+      'General': '📝'
     };
+    return icons[category] || '📄';
+  }
+
+  // Add row to tracker with enhanced styling
+  function addRow({ category, child, misconduct, summary, tags, fileURL, fileName }) {
+    const row = trackerBody.insertRow();
+    row.className = "hover:bg-indigo-50 transition-all duration-200 group";
+    
+    // Category cell with icon
+    const categoryCell = row.insertCell();
+    categoryCell.className = "py-4 px-6 text-sm font-medium text-gray-900";
+    const categoryIcon = getCategoryIcon(category);
+    categoryCell.innerHTML = `<span class="flex items-center"><span class="mr-2">${categoryIcon}</span>${category}</span>`;
+    
+    // Child cell
+    const childCell = row.insertCell();
+    childCell.className = "py-4 px-6 text-sm text-gray-700";
+    childCell.textContent = child;
+    
+    // Misconduct cell with enhanced select
+    const misconductCell = row.insertCell();
+    misconductCell.className = "py-4 px-6";
+    const select = buildMisconductSelect(misconduct);
+    select.className = "w-full bg-transparent text-sm border border-gray-200 rounded-md px-2 py-1 hover:border-indigo-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 transition-all";
+    misconductCell.appendChild(select);
+    
+    // Summary cell with expand functionality
+    const summaryCell = row.insertCell();
+    summaryCell.className = "py-4 px-6 text-sm text-gray-700 min-w-[300px]";
+    const truncatedSummary = summary.length > 100 ? summary.slice(0, 97) + "..." : summary;
+    summaryCell.innerHTML = `
+      <div class="relative">
+        <p class="summary-text cursor-pointer hover:text-indigo-600 transition-colors" title="Click to expand">
+          ${truncatedSummary}
+        </p>
+        <div class="summary-full hidden absolute z-10 bg-white border border-gray-300 rounded-lg p-3 shadow-lg max-w-md mt-1">
+          <p class="text-sm text-gray-700 leading-relaxed">${summary}</p>
+          <button class="mt-2 text-xs text-indigo-600 hover:text-indigo-800">Close</button>
+        </div>
+      </div>
+    `;
+    
+    // Add click handlers for summary expansion
+    const summaryText = summaryCell.querySelector('.summary-text');
+    const summaryFull = summaryCell.querySelector('.summary-full');
+    const closeBtn = summaryCell.querySelector('.summary-full button');
+    
+    summaryText.addEventListener('click', () => {
+      summaryFull.classList.toggle('hidden');
+    });
+    
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      summaryFull.classList.add('hidden');
+    });
+    
+    // Tags cell with colored badges
+    const tagsCell = row.insertCell();
+    tagsCell.className = "py-4 px-6 text-sm";
+    if (tags && tags.length > 0) {
+      tagsCell.innerHTML = tags.map(tag => 
+        `<span class="inline-block bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1 border border-blue-200">${tag}</span>`
+      ).join('');
+    } else {
+      tagsCell.innerHTML = '<span class="text-gray-400 italic">None</span>';
+    }
+    
+    // Actions cell with enhanced buttons
+    const actionCell = row.insertCell();
+    actionCell.className = "py-4 px-6";
+    if (fileURL) {
+      actionCell.innerHTML = `
+        <div class="flex space-x-2">
+          <button onclick="window.open('${fileURL}', '_blank')" 
+                  class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-md text-xs hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">👁️</span>View
+          </button>
+          <button onclick="this.closest('tr').remove(); saveTable();" 
+                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">🗑️</span>Delete
+          </button>
+        </div>
+      `;
+    } else {
+      actionCell.innerHTML = `
+        <div class="flex space-x-2">
+          <span class="text-gray-400 text-xs italic">No file</span>
+          <button onclick="this.closest('tr').remove(); saveTable();" 
+                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
+            <span class="mr-1">🗑️</span>Delete
+          </button>
+        </div>
+      `;
+    }
+    
+    saveTable();
+    updateLastUpdated();
+  }
+
+  // Silent version of addRow (no alerts)
+  function addRowSilent({ category, child, misconduct, summary, tags, fileURL, fileName }) {
+    const row = trackerBody.insertRow();
+    
+    row.insertCell().innerText = category;
+    row.insertCell().innerText = child;
+    row.insertCell().appendChild(buildMisconductSelect(misconduct));
+    
+    const summaryCell = row.insertCell();
+    summaryCell.textContent = summary;
+    summaryCell.title = summary;
+    summaryCell.className = "max-w-xs truncate";
+    
+    row.insertCell().innerText = tags.join(", ");
+    
+    const actionCell = row.insertCell();
+    if (fileURL) {
+      const viewBtn = document.createElement("button");
+      viewBtn.className = "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
+      viewBtn.innerText = "View PDF";
+      viewBtn.onclick = () => window.open(fileURL, '_blank');
+      actionCell.appendChild(viewBtn);
+    } else {
+      actionCell.innerText = "N/A";
+    }
+    
+    // Save to localStorage (batch save for performance)
+    if (bulkProgress % 10 === 0 || bulkProgress === bulkTotal) {
+      saveTable();
+    }
+  }
+
+  // Optimize saving for bulk operations
+  let saveTimeout;
+  function saveTableDelayed() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      saveTable();
+    }, 1000); // Save after 1 second of no activity
+  }
+
+  // Main summarize button handler
+  summarizeBtn.onclick = async () => {
+    const files = fileInput?.files;
+    const hasText = docInput?.value?.trim();
+    
+    if (!files?.length && !hasText) {
+      alert("Upload PDF files or paste text first.");
+      return;
+    }
+    
+    // Handle multiple files
+    if (files?.length > 1) {
+      const proceed = confirm(
+        `You've selected ${files.length} files.\n\n` +
+        `Process all files? This may take a while.`
+      );
+      
+      if (proceed) {
+        await processBulkFiles(Array.from(files), false);
+        return;
+      } else {
+        return;
+      }
+    }
+    
+    // Handle single file or text (original logic)
+    const hasFile = files?.[0];
+    
+    if (!hasFile && !hasText) {
+      return;
+    }
+
+    let text = hasText || "";
+    let fileURL = null;
+    let fileName = null;
+
+    if (hasFile) {
+      const file = fileInput.files[0];
+      fileURL = URL.createObjectURL(file);
+      fileName = file.name;
+      
+      if (!text) {
+        text = await pdfToText(file);
+      }
+    }
+
+    const summary = quickSummary(text);
+    if (summaryBox) {
+      summaryBox.textContent = summary;
+    }
+    
+    // Check for duplicates before adding
+    const dupeCheck = isDuplicate(fileName, summary);
+    if (dupeCheck.isDupe) {
+      const userConfirm = confirm(
+        `⚠️ Potential duplicate detected!\n\n` +
+        `Reason: ${dupeCheck.reason}\n\n` +
+        `Do you want to add this document anyway?`
+      );
+      
+      if (!userConfirm) {
+        alert("Document not added - duplicate detected.");
+        if (fileInput) fileInput.value = "";
+        if (docInput) docInput.value = "";
+        return;
+      }
+    }
+    
+    addRow({
+      category: detectCategory(text, fileName),
+      child: detectChild(text),
+      misconduct: "Review Needed",
+      summary,
+      tags: keywordTags(text),
+      fileURL,
+      fileName
+    });
+
+    if (fileInput) fileInput.value = "";
+    if (docInput) docInput.value = "";
+    
+    alert("Summary added to tracker!");
+  };
+
+  // Bulk processing function
+  async function processBulkFiles(files, skipDuplicates = false) {
+    isProcessingBulk = true;
+    bulkTotal = files.length;
+    bulkProgress = 0;
+    
+    const progressDiv = document.getElementById('bulkProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    progressDiv.classList.remove('hidden');
+    
+    let processedCount = 0;
+    let duplicateCount = 0;
+    let errorCount = 0;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      bulkProgress = i + 1;
+      
+      // Update progress using CSS classes (CSP-compliant)
+      const percentage = (bulkProgress / bulkTotal) * 100;
+      const progressClass = `progress-${Math.round(percentage / 5) * 5}`;
+      
+      // Remove existing progress classes
+      progressBar.className = progressBar.className.replace(/progress-\d+/g, '');
+      // Add new progress class
+      progressBar.classList.add(progressClass);
+      
+      progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
+      
+      try {
+        // Add delay to prevent browser freezing
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        const text = await pdfToText(file);
+        const summary = quickSummary(text);
+        const fileURL = URL.createObjectURL(file);
+        
+        // Check for duplicates if requested
+        if (skipDuplicates) {
+          const dupeCheck = isDuplicate(file.name, summary);
+          if (dupeCheck.isDupe) {
+            duplicateCount++;
+            continue;
+          }
+        }
+        
+        // Add row without alerts
+        addRowSilent({
+          category: detectCategory(text, file.name),
+          child: detectChild(text),
+          misconduct: "Review Needed",
+          summary,
+          tags: keywordTags(text),
+          fileURL,
+          fileName: file.name
+        });
+        
+        processedCount++;
+        
+      } catch (error) {
+        console.error(`Error processing ${file.name}:`, error);
+        errorCount++;
+      }
+    }
+    
+    // Hide progress and show results
+    progressDiv.classList.add('hidden');
+    isProcessingBulk = false;
+    
+    alert(
+      `Bulk processing complete!\n\n` +
+      `✅ Processed: ${processedCount} files\n` +
+      `⚠️ Duplicates skipped: ${duplicateCount}\n` +
+      `❌ Errors: ${errorCount}\n` +
+      `📊 Total: ${bulkTotal} files`
+    );
+  }
+
+  // Bulk process button handler
+  const bulkProcessBtn = document.getElementById("bulkProcessBtn");
+  if (bulkProcessBtn) {
+    bulkProcessBtn.onclick = async () => {
+      const files = fileInput?.files;
+      
+      if (!files?.length) {
+        alert("Please select PDF files first.");
+        return;
+      }
+      
+      const proceed = confirm(
+        `Bulk process ${files.length} files?\n\n` +
+        `• Duplicates will be automatically skipped\n` +
+        `• Processing may take several minutes\n` +
+        `• Don't close the browser while processing`
+      );
+      
+      if (proceed) {
+        await processBulkFiles(Array.from(files), true);
+      }
+    };
+  }
+
+  // Export to CSV
+  if (exportBtn) {
+    exportBtn.onclick = () => {
+      const headers = Array.from(document.querySelectorAll("#trackerTable thead th") || [])
+        .map(th => th.textContent);
+      
+      const rows = Array.from(trackerBody.querySelectorAll("tr"))
+        .map(tr => Array.from(tr.children)
+          .map(td => td.innerText.replace(/\n/g, " ").replace(/"/g, '""'))
+          .join(","));
+      
+      const csv = [headers.join(","), ...rows].join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      
+      link.href = URL.createObjectURL(blob);
+      link.download = `justice_tracker_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      
+      alert("CSV exported successfully!");
+    };
+  }
+
+  // Update last updated timestamp
+  function updateLastUpdated() {
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+    if (lastUpdatedEl) {
+      const now = new Date();
+      lastUpdatedEl.textContent = now.toLocaleString();
+    }
+  }
+
+  // Update case count display
+  function updateCaseCount() {
+    const visibleRows = Array.from(trackerBody.querySelectorAll('tr:not([style*="display: none"])'));
+    const caseCountEl = document.getElementById('caseCount');
+    if (caseCountEl) {
+      const count = visibleRows.length;
+      caseCountEl.textContent = `${count} case${count === 1 ? '' : 's'}`;
+    }
   }
 
   // Initialize dashboard

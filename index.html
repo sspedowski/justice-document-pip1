@@ -22,8 +22,10 @@
   </div>
   
   <!-- Dashboard content with perfectly centered modern design -->
-  <div id="dashboardContent" class="hidden min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl ring-2 ring-indigo-200 p-8">
+  <div id="dashboardContent" class="hidden min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
+    <div class="max-w-7xl mx-auto space-y-8">
+      <!-- Main Content Container -->
+      <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-indigo-200 p-6 md:p-8">
       
       <!-- Enhanced Professional Header -->
       <header class="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -176,114 +178,150 @@
         </div>
       </section>
 
-      <!-- Smart Filters -->
-      <section class="bg-gradient-to-r from-gray-50 to-purple-50 rounded-xl p-4 mb-6 shadow-inner">
+      <!-- Smart Filters - Sticky and Enhanced -->
+      <section class="sticky top-0 z-10 bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-lg">
         <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
-          <span class="mr-2">🔍</span> Smart Filters
+          <span class="mr-2 text-lg">🔍</span> Smart Filters
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Category</label>
-            <select id="categoryFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+              <span class="mr-1">📁</span> Category
+            </label>
+            <select id="categoryFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all hover:border-indigo-300">
               <option value="">All Categories</option>
-              <option value="Medical">Medical</option>
-              <option value="Legal">Legal</option>
-              <option value="School">School</option>
-              <option value="General">General</option>
+              <option value="Medical">📋 Medical</option>
+              <option value="Legal">⚖️ Legal</option>
+              <option value="School">🏫 School</option>
+              <option value="General">📝 General</option>
             </select>
           </div>
           <div>
-            <label for="misconductFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Issue Type</label>
-            <select id="misconductFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <label for="misconductFilter" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+              <span class="mr-1">⚠️</span> Issue Type
+            </label>
+            <select id="misconductFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all hover:border-indigo-300">
               <option value="">All Types</option>
-              <option value="Review Needed">Review Needed</option>
-              <option value="Denial of Right to Medical Safety and Privacy (HIPAA Violations)">HIPAA Violations</option>
-              <option value="Violation of the Fourteenth Amendment - Due Process and Equal Protection">Due Process Violations</option>
+              <option value="Review Needed">🔍 Review Needed</option>
+              <option value="Denial of Right to Medical Safety and Privacy (HIPAA Violations)">🏥 HIPAA Violations</option>
+              <option value="Violation of the Fourteenth Amendment - Due Process and Equal Protection">⚖️ Due Process Violations</option>
             </select>
+          </div>
+          <div class="flex items-end">
+            <button id="clearFilters" class="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all font-medium text-sm border border-gray-300 flex items-center justify-center space-x-2">
+              <span>🔄</span>
+              <span>Clear Filters</span>
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- Case Tracker Table -->
+      <!-- Case Tracker Table - Enhanced and Professional -->
       <section class="mb-8">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <span class="mr-2">📊</span> Case Tracker
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <span class="mr-2 text-2xl">📊</span> 
+            <span>Case Tracker</span>
+            <span id="caseCount" class="ml-3 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">0 cases</span>
+          </div>
+          <div class="text-sm text-gray-500">
+            Last updated: <span id="lastUpdated">Never</span>
+          </div>
         </h2>
-        <div class="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
-          <table id="trackerTable" class="w-full">
-            <thead>
-              <tr class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>📁</span>
-                    <span>Category</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>👤</span>
-                    <span>Individual</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>⚠️</span>
-                    <span>Issue Type</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>📝</span>
-                    <span>Summary</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>🏷️</span>
-                    <span>Tags</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-left font-semibold">
-                  <div class="flex items-center space-x-2">
-                    <span>⚡</span>
-                    <span>Actions</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="results" class="bg-white divide-y divide-gray-200">
-              <!-- Dynamic rows will be inserted here by JS -->
-            </tbody>
-          </table>
+        
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table id="trackerTable" class="w-full min-w-[900px]">
+              <thead>
+                <tr class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white">
+                  <th class="py-4 px-6 text-left font-semibold text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">📁</span>
+                      <span>Category</span>
+                    </div>
+                  </th>
+                  <th class="py-4 px-6 text-left font-semibold text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">👤</span>
+                      <span>Individual</span>
+                    </div>
+                  </th>
+                  <th class="py-4 px-6 text-left font-semibold text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">⚠️</span>
+                      <span>Issue Type</span>
+                    </div>
+                  </th>
+                  <th class="py-4 px-6 text-left font-semibold text-sm min-w-[300px]">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">📝</span>
+                      <span>Summary</span>
+                    </div>
+                  </th>
+                  <th class="py-4 px-6 text-left font-semibold text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">🏷️</span>
+                      <span>Tags</span>
+                    </div>
+                  </th>
+                  <th class="py-4 px-6 text-left font-semibold text-sm">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-lg">⚡</span>
+                      <span>Actions</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="results" class="bg-white divide-y divide-gray-100">
+                <!-- Dynamic rows will be inserted here by JS -->
+              </tbody>
+            </table>
+          </div>
           
           <!-- No Cases Message -->
-          <div id="noCasesMsg" class="text-center py-12 text-gray-500">
-            <div class="flex flex-col items-center">
-              <svg class="w-16 h-16 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z" clip-rule="evenodd"></path>
-              </svg>
-              <p class="text-lg font-medium text-gray-600 mb-2">No cases found</p>
-              <p class="text-sm text-gray-500">Upload a document or paste text to begin case analysis</p>
+          <div id="noCasesMsg" class="text-center py-16 text-gray-500">
+            <div class="flex flex-col items-center max-w-md mx-auto">
+              <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+                <span class="text-4xl">📊</span>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-700 mb-3">No cases found</h3>
+              <p class="text-gray-500 mb-6 text-center leading-relaxed">
+                Start building your case tracker by uploading documents or pasting text for analysis. 
+                Our AI will automatically categorize and tag your legal documents.
+              </p>
+              <button onclick="document.getElementById('fileInput').click()" 
+                      class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                <span class="mr-2">📄</span>
+                Upload First Document
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Professional Footer -->
-      <footer class="text-center text-gray-500 text-sm border-t pt-6">
-        <div class="flex justify-center items-center space-x-4 flex-wrap">
-          <span>Justice Dashboard © 2025</span>
+      <footer class="text-center text-gray-500 text-sm border-t pt-6 mt-8">
+        <div class="flex justify-center items-center space-x-6 flex-wrap">
+          <span class="flex items-center">
+            <span class="mr-2">⚖️</span>
+            Justice Dashboard © 2025
+          </span>
           <span class="flex items-center">
             <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
             Secure & Compliant
           </span>
-          <span class="text-xs">
+          <span class="flex items-center text-xs">
             <span class="mr-1">🛡️</span>
             CSP Protected
           </span>
+          <span class="flex items-center text-xs">
+            <span class="mr-1">🔒</span>
+            SSL Encrypted
+          </span>
         </div>
       </footer>
-    </div>
+      
+    </div> <!-- End Main Content Container -->
   </div>
 
   <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
