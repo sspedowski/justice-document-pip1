@@ -539,6 +539,7 @@ const DashboardAuth = {
                   <th class="border border-gray-300 p-2">Child</th>
                   <th class="border border-gray-300 p-2">Misconduct</th>
                   <th class="border border-gray-300 p-2">Summary</th>
+                  <th class="border border-gray-300 p-2">File Name</th>
                   <th class="border border-gray-300 p-2">Tags</th>
                   <th class="border border-gray-300 p-2">Actions</th>
                 </tr>
@@ -1154,6 +1155,11 @@ function initializeJusticeDashboard() {
       summaryFull.classList.add('hidden');
     });
     
+    // File Name cell (NEW!)
+    const fileNameCell = row.insertCell();
+    fileNameCell.className = "py-4 px-6 text-sm text-gray-700";
+    fileNameCell.textContent = fileName || '';
+    
     // Tags cell with colored badges
     const tagsCell = row.insertCell();
     tagsCell.className = "py-4 px-6 text-sm";
@@ -1201,23 +1207,32 @@ function initializeJusticeDashboard() {
   function addRowSilent({ category, child, misconduct, summary, tags, fileURL, fileName }) {
     const row = trackerBody.insertRow();
 
+    // Category column
     row.insertCell().innerText = category;
+
+    // Child column
     row.insertCell().innerText = child;
+
+    // Misconduct column
     row.insertCell().appendChild(buildMisconductSelect(misconduct));
 
-    // Summary cell
+    // Legal Summary column
     const summaryCell = row.insertCell();
     summaryCell.textContent = summary;
     summaryCell.title = summary;
     summaryCell.className = "max-w-xs truncate";
+    summaryCell.setAttribute('data-label', 'Legal Summary');
 
-    // File Name cell (NEW!)
+    // File Name column
     const fileNameCell = row.insertCell();
     fileNameCell.className = "py-4 px-6 text-sm text-gray-700";
     fileNameCell.textContent = fileName || '';
+    fileNameCell.setAttribute('data-label', 'File Name');
 
-    row.insertCell().innerText = tags.join(", ");
-    
+    // Tags column
+    row.insertCell().innerText = tags && tags.length ? tags.join(", ") : "";
+
+    // Action column (View PDF or N/A)
     const actionCell = row.insertCell();
     if (fileURL) {
       const viewBtn = document.createElement("button");
@@ -1228,9 +1243,9 @@ function initializeJusticeDashboard() {
     } else {
       actionCell.innerText = "N/A";
     }
-    
+
     // Save to localStorage (batch save for performance)
-    if (bulkProgress % 10 === 0 || bulkProgress === bulkTotal) {
+    if (typeof bulkProgress !== "undefined" && (bulkProgress % 10 === 0 || bulkProgress === bulkTotal)) {
       saveTable();
     }
   }
