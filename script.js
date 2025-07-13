@@ -567,6 +567,61 @@ const DashboardAuth = {
   }
 };
 
+/********** Dashboard Statistics Functions **********/
+function updateDashboardStats() {
+  // Get all tracker rows to calculate statistics
+  const trackerBody = document.querySelector("#results");
+  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
+  
+  // Calculate total cases
+  const totalCases = rows.length;
+  
+  // Calculate active cases (assuming those without a "Closed" status)
+  let activeCases = 0;
+  let documentsProcessed = 0;
+  
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 4) {
+      // Check status column (assuming it's in the 4th column)
+      const status = cells[3].textContent.trim().toLowerCase();
+      if (status !== 'closed' && status !== 'complete' && status !== 'resolved') {
+        activeCases++;
+      }
+      
+      // Count documents (check if there are file attachments)
+      const fileLinks = row.querySelectorAll('a[href*="blob:"]');
+      documentsProcessed += fileLinks.length;
+    }
+  });
+  
+  // Update dashboard stat elements
+  const totalCasesEl = document.getElementById('totalCases');
+  const activeCasesEl = document.getElementById('activeCases');
+  const documentsProcessedEl = document.getElementById('documentsProcessed');
+  const systemStatusEl = document.getElementById('systemStatus');
+  
+  if (totalCasesEl) totalCasesEl.textContent = totalCases;
+  if (activeCasesEl) activeCasesEl.textContent = activeCases;
+  if (documentsProcessedEl) documentsProcessedEl.textContent = documentsProcessed;
+  if (systemStatusEl) systemStatusEl.textContent = totalCases > 0 ? 'Active' : 'Ready';
+  
+  console.log(`Dashboard stats updated: ${totalCases} total, ${activeCases} active, ${documentsProcessed} documents`);
+}
+
+function updateNoCasesDisplay() {
+  // Reset all stats to 0 when no cases exist
+  const totalCasesEl = document.getElementById('totalCases');
+  const activeCasesEl = document.getElementById('activeCases');
+  const documentsProcessedEl = document.getElementById('documentsProcessed');
+  const systemStatusEl = document.getElementById('systemStatus');
+  
+  if (totalCasesEl) totalCasesEl.textContent = '0';
+  if (activeCasesEl) activeCasesEl.textContent = '0';
+  if (documentsProcessedEl) documentsProcessedEl.textContent = '0';
+  if (systemStatusEl) systemStatusEl.textContent = 'Ready';
+}
+
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
   // DOM Elements
@@ -966,6 +1021,7 @@ function initializeJusticeDashboard() {
   }
 
   // Optimize saving for bulk operations
+  let saveTimeout;
   function saveTableDelayed() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
