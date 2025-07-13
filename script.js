@@ -819,8 +819,23 @@ function initializeJusticeDashboard() {
   // PDF to text converter
   async function pdfToText(file) {
     try {
-      // Check if PDF.js is loaded
-      if (typeof pdfjsLib === 'undefined') {
+      // Debug: Check all possible PDF.js references
+      console.log('=== PDF.js Debug Info ===');
+      console.log('typeof pdfjsLib:', typeof pdfjsLib);
+      console.log('typeof window.pdfjsLib:', typeof window.pdfjsLib);
+      console.log('pdfjsLib:', pdfjsLib);
+      console.log('window.pdfjsLib:', window.pdfjsLib);
+      
+      // Try to get PDF.js from different scopes
+      const pdfLib = (typeof pdfjsLib !== 'undefined') ? pdfjsLib : 
+                     (typeof window.pdfjsLib !== 'undefined') ? window.pdfjsLib :
+                     (typeof window.pdfjsLib !== 'undefined') ? window.pdfjsLib : null;
+      
+      console.log('pdfLib resolved to:', pdfLib);
+      console.log('pdfLib version:', pdfLib?.version);
+      
+      // Check if PDF.js is available
+      if (!pdfLib) {
         console.error('❌ PDF.js library not loaded. Cannot extract PDF content.');
         return `PDF Document: ${file.name}\n\n[Content extraction failed: PDF.js library not loaded]\n\nNote: Only filename was captured. Please ensure PDF.js is properly loaded for content extraction.`;
       }
@@ -828,7 +843,7 @@ function initializeJusticeDashboard() {
       console.log(`📄 Extracting text from PDF: ${file.name}`);
       
       const buffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const pdf = await pdfLib.getDocument({ data: buffer }).promise;
       let text = "";
       
       console.log(`📖 Processing ${pdf.numPages} pages...`);
