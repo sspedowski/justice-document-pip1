@@ -488,7 +488,24 @@ const DashboardAuth = {
             <div id="bulkProgress" class="hidden">
               <div class="bg-gray-200 rounded-full h-2.5 mb-2">
                 <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 progress-0"></div>
-            Summary will appear here...
+              </div>
+              <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
+            </div>
+            <!-- Action Buttons Row -->
+            <div class="flex flex-wrap gap-4 justify-center">
+              <button id="generateBtn" class="justice-btn-primary bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
+                🤖 Process Selected Files
+              </button>
+              <button id="bulkProcessBtn" class="justice-btn-secondary bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
+                📚 Bulk Process (Skip Duplicates)
+              </button>
+              <button id="exportBtn" class="justice-btn-accent bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
+                📊 Export CSV
+              </button>
+              <button id="askLawGpt" class="justice-btn-primary bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium text-base px-6 py-3 shadow-lg">
+                ⚖️ Ask Law GPT
+              </button>
+            </div>
           </div>
 
           <!-- Dashboard Stats -->
