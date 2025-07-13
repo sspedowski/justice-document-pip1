@@ -488,28 +488,6 @@ const DashboardAuth = {
             <div id="bulkProgress" class="hidden">
               <div class="bg-gray-200 rounded-full h-2.5 mb-2">
                 <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 progress-0"></div>
-              </div>
-              <p id="progressText" class="text-sm text-gray-600">Processing 0 of 0 files...</p>
-            </div>
-            
-            <div class="flex space-x-4">
-              <button id="generateBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Process Selected Files
-              </button>
-              <button id="bulkProcessBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
-                Bulk Process (Skip Duplicates)
-              </button>
-              <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                Export CSV
-              </button>
-              <button id="askLawGpt" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-                Ask Law GPT
-              </button>
-            </div>
-          </div>
-
-          <!-- Summary Display -->
-          <div id="summaryBox" class="bg-gray-50 border p-4 rounded mb-6 min-h-[100px]">
             Summary will appear here...
           </div>
 
