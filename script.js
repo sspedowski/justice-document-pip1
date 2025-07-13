@@ -1306,11 +1306,12 @@ function initializeJusticeDashboard() {
       }
     }
     
+    const misconduct = typeof detectMisconduct === 'function' ? detectMisconduct(text) : "Review Needed";
     addRow({
       category: detectCategory(text, fileName),
       child: detectChild(text),
-      misconduct: "Review Needed",
-      summary,
+      misconduct,
+      summary: misconduct,
       tags: keywordTags(text),
       fileURL,
       fileName
