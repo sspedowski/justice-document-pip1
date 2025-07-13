@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="justice-theme.css">
   <link rel="stylesheet" href="custom.css">
 </head>
-<body class="p-4 min-h-screen bg-faith-gradient">
+<body class="p-4 min-h-screen bg-blue-50">
   <!-- MAIN APP CONTAINER (must exist before scripts) -->
   <div id="app">
     <div class="container mx-auto">
@@ -61,18 +61,18 @@
           <!-- File Upload -->
           <div class="mb-6">
             <label for="fileInput" class="block mb-2 font-semibold text-gold">Upload Document</label>
-            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" title="Select a document to upload" placeholder="Choose a file..." class="w-full p-3 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" title="Select a document to upload" placeholder="Choose a file..." class="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
           </div>
 
           <!-- Action Buttons -->
           <div class="flex gap-4 mb-6 justify-center flex-wrap">
-            <button id="processBtn" class="bg-gold text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-faith-gold-600 transition-all">📄 Process Document</button>
+            <button id="processBtn" class="bg-blue-600 text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-blue-700 transition-all">📄 Process Document</button>
             <button id="exportBtn" class="bg-faith-indigo text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-indigo-700 transition-all">📊 Export Report</button>
           </div>
 
           <!-- Text Input Area -->
           <div class="mb-6">
-            <textarea id="textInput" placeholder="Paste legal document text here for immediate analysis..." class="w-full h-32 p-4 border-2 border-gold rounded-lg focus:outline-none focus:ring-2 focus:ring-faith-gold-400"></textarea>
+            <textarea id="textInput" placeholder="Paste legal document text here for immediate analysis..." class="w-full h-32 p-4 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
           </div>
 
           <!-- Quick Actions -->
@@ -90,19 +90,19 @@
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gold">Case Tracker</h2>
             <div class="flex items-center gap-4">
-              <select id="statusFilter" title="Filter cases by status" class="rounded-full border border-gold px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-faith-gold-400">
+              <select id="statusFilter" title="Filter cases by status" class="rounded-full border border-blue-600 px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-blue-400">
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
                 <option value="completed">Completed</option>
               </select>
-              <button id="clearFiltersBtn" class="bg-gold text-white px-5 py-2 rounded-full font-bold card-shadow hover:bg-faith-gold-600 transition">Clear Filters</button>
+              <button id="clearFiltersBtn" class="bg-blue-600 text-white px-5 py-2 rounded-full font-bold card-shadow hover:bg-blue-700 transition">Clear Filters</button>
             </div>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
-                <tr class="bg-gold text-white">
+                <tr class="bg-blue-600 text-white">
                   <th class="p-3 text-left">Case ID</th>
                   <th class="p-3 text-left">Title</th>
                   <th class="p-3 text-left">Status</th>
@@ -128,7 +128,7 @@
   </div> <!-- End app -->
 
   <!-- Dark Mode Toggle Button (Required by dark-mode.js) -->
-  <button id="darkModeToggle" class="fixed top-4 left-4 bg-gold text-white p-2 rounded-full shadow-lg z-50 hover:bg-faith-gold-600 transition">🌙</button>
+  <button id="darkModeToggle" class="fixed top-4 left-4 bg-blue-600 text-white p-2 rounded-full shadow-lg z-50 hover:bg-blue-700 transition">🌙</button>
   <!-- Notification System -->
   <div id="notifications" class="fixed top-4 right-4 z-50"></div>
   <!-- PDF Preview Modal -->

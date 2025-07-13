@@ -790,6 +790,15 @@ function initializeJusticeDashboard() {
   }
 
   // Dashboard elements
+  const textInput = document.getElementById('textInput');
+  const askLawGptBtn = document.getElementById('askLawGpt');
+
+  // Wire up Ask Law GPT button
+  if (askLawGptBtn) {
+    askLawGptBtn.addEventListener('click', () => {
+      showNotification('This feature is coming soon! AI legal assistant is not yet enabled.', 'info');
+    });
+  }
   const categoryFilter = document.getElementById('categoryFilter');
   const misconductFilter = document.getElementById('misconductFilter');
 
@@ -908,6 +917,11 @@ function initializeJusticeDashboard() {
     const clean = text.replace(/\s+/g, " ").trim();
     return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
   };
+
+  // Ensure summary logic only uses #textInput
+  function getDocumentInputText() {
+    return textInput ? textInput.value : '';
+  }
 
   // Legal keyword tagger
   function keywordTags(text) {
