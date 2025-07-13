@@ -625,7 +625,7 @@ function updateNoCasesDisplay() {
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
   // Timeout variable for optimized saving
-  let saveTimeout;
+  // let saveTimeout; // FIXED: Using declaration from function start
   
   // DOM Elements
   const fileInput = document.getElementById("fileInput");
@@ -1024,7 +1024,7 @@ function initializeJusticeDashboard() {
   }
 
   // Optimize saving for bulk operations
-  let saveTimeout;
+  // let saveTimeout; // FIXED: Using declaration from function start
   function saveTableDelayed() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -1527,7 +1527,7 @@ function initializeJusticeDashboard() {
   }
 
   // Optimize saving for bulk operations
-  let saveTimeout;
+  // let saveTimeout; // FIXED: Using declaration from function start
   function saveTableDelayed() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
