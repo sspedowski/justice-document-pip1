@@ -918,11 +918,10 @@ function initializeJusticeDashboard() {
     return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
   };
 
-  // Ensure summary logic only uses #docInput or #docText (never Personal Notes)
+  // Ensure summary logic only uses #textInput (never Personal Notes)
   function getDocumentInputText() {
-    // Try both possible ids for document input
-    const docInput = document.getElementById('docInput') || document.getElementById('docText');
-    return docInput ? docInput.value : '';
+    const mainInput = document.getElementById('textInput');
+    return mainInput ? mainInput.value : '';
   }
 
   // Legal keyword tagger
