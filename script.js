@@ -809,24 +809,39 @@ function initializeJusticeDashboard() {
   // PDF to text converter
   async function pdfToText(file) {
     try {
+      // Check if PDF.js is loaded
       if (typeof pdfjsLib === 'undefined') {
-        console.warn('PDF.js not loaded, using filename as text');
-        return `PDF File: ${file.name}`;
+        console.error('❌ PDF.js library not loaded. Cannot extract PDF content.');
+        return `PDF Document: ${file.name}\n\n[Content extraction failed: PDF.js library not loaded]\n\nNote: Only filename was captured. Please ensure PDF.js is properly loaded for content extraction.`;
       }
+
+      console.log(`📄 Extracting text from PDF: ${file.name}`);
       
       const buffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
       let text = "";
       
-      for (let p = 1; p <= pdf.numPages; p++) {
-        const page = await pdf.getPage(p);
+      console.log(`📖 Processing ${pdf.numPages} pages...`);
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
         const content = await page.getTextContent();
-        text += content.items.map(i => i.str).join(" ") + "\n";
+        const pageText = content.items.map(item => item.str).join(' ');
+        text += `Page ${pageNum}:\n${pageText}\n\n`;
       }
-      return text.trim();
+      
+      const extractedText = text.trim();
+      if (extractedText.length === 0) {
+        console.warn(`⚠️ No text content found in PDF: ${file.name}`);
+        return `PDF Document: ${file.name}\n\n[No extractable text content found]\n\nThis PDF may contain only images or be password-protected.`;
+      }
+      
+      console.log(`✅ Successfully extracted ${extractedText.length} characters from ${file.name}`);
+      return extractedText;
+      
     } catch (error) {
-      console.error('PDF parsing error:', error);
-      return `PDF Document: ${file.name} (content extraction failed)`;
+      console.error('❌ PDF parsing error:', error);
+      return `PDF Document: ${file.name}\n\n[Content extraction failed: ${error.message}]\n\nThe file may be corrupted, password-protected, or in an unsupported format.`;
     }
   }
 
