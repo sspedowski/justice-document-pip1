@@ -667,10 +667,16 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
 
 // ============= FRONTEND ROUTES =============
 
-// Serve frontend - DISABLED: Use secure-dashboard.html as default
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "client", "index.html"));
-// });
+// Serve frontend - FIXED: Serve index.html for all routes
+app.get("*", (req, res) => {
+  // For API routes, let them handle their own responses
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
+  
+  // Serve the main dashboard for all other routes
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // Start server
 app.listen(PORT, () => {
