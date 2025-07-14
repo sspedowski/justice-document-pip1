@@ -884,7 +884,6 @@ function initializeJusticeDashboard() {
       // Show no cases message initially
       updateNoCasesDisplay();
     }
-  })();
 
   // Migration function to update existing rows with new "View PDF" hyperlink format
   function migrateExistingRowsToHyperlinks() {
@@ -974,72 +973,7 @@ function initializeJusticeDashboard() {
     }
   }
 
-  // PDF to text converter
-  // Animate number counters
-  animateCounter(element, target, duration = 2000) {
-    const start = parseInt(element.textContent) || 0;
-    const increment = (target - start) / (duration / 16);
-    let current = start;
-    
-    const timer = setInterval(() => {
-      current += increment;
-      if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
-        current = target;
-        clearInterval(timer);
-      }
-      element.textContent = Math.floor(current);
-    }, 16);
-  },
-
-  // Initialize all counters with sample data
-  initCounters() {
-    const counters = [
-      { id: 'totalCases', target: 247 },
-      { id: 'activeCases', target: 23 },
-      { id: 'analysisResults', target: 184 }
-    ];
-
-    counters.forEach(counter => {
-      const element = document.getElementById(counter.id);
-      if (element) {
-        // Add stagger delay for visual appeal
-        setTimeout(() => {
-          this.animateCounter(element, counter.target);
-        }, Math.random() * 500);
-      }
-    });
-  },
-
-  // Add professional button interactions (CSP compliant - no inline styles)
-  initButtonAnimations() {
-    const buttons = document.querySelectorAll('.justice-btn-primary, .justice-btn-secondary, .justice-btn-accent');
-    buttons.forEach(button => {
-      // Add classes for positioning
-      button.classList.add('relative', 'overflow-hidden');
-      
-      button.addEventListener('click', function(e) {
-        // Simple pulse animation using CSS classes only
-        this.classList.add('animate-pulse');
-        
-        setTimeout(() => {
-          this.classList.remove('animate-pulse');
-        }, 600);
-      });
-    });
-  },
-
-  // Initialize all enhancements
-  init() {
-    // All styles are now in CSS files - no dynamic injection needed
-    console.log('Dashboard enhancements initializing...');
-
-    // Initialize features after DOM load
-    setTimeout(() => {
-      this.initCounters();
-      this.initButtonAnimations();
-    }, 500);
-  }
-};
+// PDF to text converter
 
 /********** Initialize Application **********/
 document.addEventListener('DOMContentLoaded', () => {
