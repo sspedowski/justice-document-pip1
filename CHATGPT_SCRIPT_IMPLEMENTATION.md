@@ -9,6 +9,7 @@ I've added the **exact ChatGPT script** as requested to your Justice Dashboard. 
 ## 📋 **What Was Added:**
 
 ### **1. ✅ ChatGPT's Exact Function**
+
 ```javascript
 // Add a new row to the tracker
 function addToTracker(summary) {
@@ -35,6 +36,7 @@ function addToTracker(summary) {
 ```
 
 ### **2. ✅ Example Data Initialization**
+
 ```javascript
 document.addEventListener("DOMContentLoaded", () => {
   const exampleSummaries = [
