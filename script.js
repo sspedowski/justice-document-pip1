@@ -1259,16 +1259,18 @@ function initializeJusticeDashboard() {
     // Tags column
     row.insertCell().innerText = tags && tags.length ? tags.join(", ") : "";
 
-    // Action column (View PDF or N/A)
+    // Action column (View PDF hyperlink or No PDF)
     const actionCell = row.insertCell();
     if (fileURL) {
-      const viewBtn = document.createElement("button");
-      viewBtn.className = "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
-      viewBtn.innerText = "View PDF";
-      viewBtn.onclick = () => window.open(fileURL, '_blank');
-      actionCell.appendChild(viewBtn);
+      const viewLink = document.createElement("a");
+      viewLink.innerText = "View PDF";
+      viewLink.href = fileURL;
+      viewLink.target = "_blank";
+      viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800";
+      actionCell.appendChild(viewLink);
     } else {
-      actionCell.innerText = "N/A";
+      actionCell.innerText = "No PDF";
+      actionCell.className = "text-gray-400 text-sm";
     }
 
     // Save to localStorage (batch save for performance)
