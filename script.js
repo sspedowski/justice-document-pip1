@@ -580,6 +580,71 @@ const DashboardAuth = {
       // Re-run the main dashboard code
       initializeJusticeDashboard();
     }, 100);
+  },
+
+  // Animate number counters
+  animateCounter(element, target, duration = 2000) {
+    const start = parseInt(element.textContent) || 0;
+    const increment = (target - start) / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+        current = target;
+        clearInterval(timer);
+      }
+      element.textContent = Math.floor(current);
+    }, 16);
+  },
+
+  // Initialize all counters with sample data
+  initCounters() {
+    const counters = [
+      { id: 'totalCases', target: 247 },
+      { id: 'activeCases', target: 23 },
+      { id: 'analysisResults', target: 184 }
+    ];
+
+    counters.forEach(counter => {
+      const element = document.getElementById(counter.id);
+      if (element) {
+        // Add stagger delay for visual appeal
+        setTimeout(() => {
+          this.animateCounter(element, counter.target);
+        }, Math.random() * 500);
+      }
+    });
+  },
+
+  // Add professional button interactions (CSP compliant - no inline styles)
+  initButtonAnimations() {
+    const buttons = document.querySelectorAll('.justice-btn-primary, .justice-btn-secondary, .justice-btn-accent');
+    buttons.forEach(button => {
+      // Add classes for positioning
+      button.classList.add('relative', 'overflow-hidden');
+      
+      button.addEventListener('click', function(e) {
+        // Simple pulse animation using CSS classes only
+        this.classList.add('animate-pulse');
+        
+        setTimeout(() => {
+          this.classList.remove('animate-pulse');
+        }, 600);
+      });
+    });
+  },
+
+  // Initialize all enhancements
+  init() {
+    // All styles are now in CSS files - no dynamic injection needed
+    console.log('Dashboard enhancements initializing...');
+
+    // Initialize features after DOM load
+    setTimeout(() => {
+      this.initCounters();
+      this.initButtonAnimations();
+    }, 500);
   }
 };
 
@@ -805,71 +870,6 @@ function initializeJusticeDashboard() {
 
   // Wire up Ask Wolfram Alpha button
   if (askWolframBtn) {
-    askWolframBtn.addEventListener('click', async () => {
-      const query = prompt("What legal or factual question would you like to ask Wolfram Alpha?\n\nExample: 'What is the constitutional standard for removal of a child from parental custody in Michigan?'");
-      if (!query || !query.trim()) return;
-      
-      try {
-        askWolframBtn.disabled = true;
-        askWolframBtn.innerHTML = '🔄 Asking Wolfram...';
-        
-        const result = await askWolfram(query.trim());
-        
-        // Display result in a modal or alert
-        showWolframResult(query, result);
-        
-      } catch (error) {
-        console.error('Wolfram Alpha error:', error);
-        showNotification('Error: ' + error.message, 'error');
-      } finally {
-        askWolframBtn.disabled = false;
-        askWolframBtn.innerHTML = '🧠 Ask Wolfram Alpha';
-      }
-    });
-  }
-  const categoryFilter = document.getElementById('categoryFilter');
-  const misconductFilter = document.getElementById('misconductFilter');
-
-  // Daily Prayer Persistence
-  const dailyPrayer = document.getElementById('dailyPrayer');
-  if (dailyPrayer) {
-    // Restore saved prayer
-    const savedPrayer = localStorage.getItem('dailyPrayerText');
-    if (savedPrayer) dailyPrayer.value = savedPrayer;
-    // Save on input
-    dailyPrayer.addEventListener('input', () => {
-      localStorage.setItem('dailyPrayerText', dailyPrayer.value);
-    });
-  }
-
-  // Essential elements check
-  if (!summarizeBtn || !trackerBody) {
-    console.error('Required DOM elements not found');
-    console.log('Available elements:');
-    console.log('summarizeBtn:', summarizeBtn);
-    console.log('trackerBody:', trackerBody);
-    console.log('fileInput:', fileInput);
-    console.log('Available IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
-    return;
-  }
-
-  console.log('All essential elements found, initializing dashboard...');
-
-  // Clear old localStorage data on load to refresh with new options
-  function clearOldData() {
-    const saved = localStorage.getItem("justiceTrackerRows");
-    if (saved && saved.includes("CPS Negligence")) {
-      localStorage.removeItem("justiceTrackerRows");
-      console.log("Cleared old data with outdated misconduct options");
-      // Also clear the current table
-      if (trackerBody) {
-        trackerBody.innerHTML = "";
-      }
-    }
-  }
-
-  // Restore saved data
-  (() => {
     clearOldData();
     const saved = localStorage.getItem("justiceTrackerRows");
     if (saved) {
