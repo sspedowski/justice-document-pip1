@@ -874,6 +874,10 @@ function initializeJusticeDashboard() {
     const saved = localStorage.getItem("justiceTrackerRows");
     if (saved) {
       trackerBody.innerHTML = saved;
+      
+      // ✅ MIGRATION: Update existing rows to use "View PDF" hyperlinks
+      migrateExistingRowsToHyperlinks();
+      
       updateDashboardStats();
       populateFilters();
     } else {
@@ -882,685 +886,95 @@ function initializeJusticeDashboard() {
     }
   })();
 
-  // PDF to text converter
-  async function pdfToText(file) {
-    try {
-      // Debug: Check all possible PDF.js references
-      console.log('=== PDF.js Debug Info ===');
-      console.log('typeof pdfjsLib:', typeof pdfjsLib);
-      console.log('typeof window.pdfjsLib:', typeof window.pdfjsLib);
-      console.log('pdfjsLib:', pdfjsLib);
-      console.log('window.pdfjsLib:', window.pdfjsLib);
-      
-      // Try to get PDF.js from different scopes
-      const pdfLib = (typeof pdfjsLib !== 'undefined') ? pdfjsLib : 
-                     (typeof window.pdfjsLib !== 'undefined') ? window.pdfjsLib :
-                     (typeof window.pdfjsLib !== 'undefined') ? window.pdfjsLib : null;
-      
-      console.log('pdfLib resolved to:', pdfLib);
-      console.log('pdfLib version:', pdfLib?.version);
-      
-      // Check if PDF.js is available
-      if (!pdfLib) {
-        console.error('❌ PDF.js library not loaded. Cannot extract PDF content.');
-        return `PDF Document: ${file.name}\n\n[Content extraction failed: PDF.js library not loaded]\n\nNote: Only filename was captured. Please ensure PDF.js is properly loaded for content extraction.`;
-      }
-
-      console.log(`📄 Extracting text from PDF: ${file.name}`);
-      
-      const buffer = await file.arrayBuffer();
-      const pdf = await pdfLib.getDocument({ data: buffer }).promise;
-      let text = "";
-      
-      console.log(`📖 Processing ${pdf.numPages} pages...`);
-      
-      let summaryArr = [];
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const content = await page.getTextContent();
-        const pageText = content.items.map(item => item.str).join(' ').trim();
-        if (pageText && pageText.replace(/\s+/g, '').length > 10) {
-          summaryArr.push(pageText);
-        }
-      }
-      const extractedText = summaryArr.join('\n\n');
-      if (extractedText.length === 0) {
-        console.warn(`⚠️ No text content found in PDF: ${file.name}`);
-        return `PDF Document: ${file.name}`;
-      }
-      // Optionally truncate to 1000 chars for summary display
-      const summaryText = extractedText.length > 1000 ? extractedText.substring(0, 1000) + '...' : extractedText;
-      console.log(`✅ Successfully extracted ${extractedText.length} characters from ${file.name}`);
-      // Show success notification to user
-      showNotification(`📄 PDF processed: ${file.name} (${extractedText.length} characters extracted)`, 'success');
-      return summaryText;
-      
-    } catch (error) {
-      console.error('❌ PDF parsing error:', error);
-      return `PDF Document: ${file.name}\n\n[Content extraction failed: ${error.message}]\n\nThe file may be corrupted, password-protected, or in an unsupported format.`;
-    }
-  }
-
-  // Text summarizer
-  const quickSummary = (text) => {
-    const clean = text.replace(/\s+/g, " ").trim();
-    return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
-  };
-
-  // Ensure summary logic only uses main document textarea (never Personal Notes)
-  function getDocumentInputText() {
-    const mainInput = document.getElementById('textInput') || document.getElementById('docInput') || document.getElementById('docText');
-    return mainInput ? mainInput.value : '';
-  }
-
-  // Legal keyword tagger
-  function keywordTags(text) {
-    const keywords = {
-      "Brady Violation": /\bbrady\b|exculpatory/i,
-      "Civil Rights": /civil rights|§?1983/i,
-      "CPS Negligence": /cps (?:failed|negligence)/i,
-      "Custody Interference": /denied visitation|interference/i
-    };
+  // Migration function to update existing rows with new "View PDF" hyperlink format
+  function migrateExistingRowsToHyperlinks() {
+    const rows = trackerBody.querySelectorAll('tr');
+    let updated = false;
     
-    return Object.entries(keywords)
-      .filter(([, regex]) => regex.test(text))
-      .map(([tag]) => tag);
-  }
-
-  // Category detector
-  function detectCategory(text, fileName) {
-    const lowerText = text.toLowerCase();
-    const lowerFileName = (fileName || "").toLowerCase();
-    
-    // Medical keywords
-    if (/medical|doctor|hospital|health|hipaa|patient|treatment|prescription|diagnosis/.test(lowerText) ||
-        /medical|doctor|hospital|health/.test(lowerFileName)) {
-      return "Medical";
-    }
-    
-    // School keywords  
-    if (/school|education|teacher|classroom|iep|504|special education|principal|counselor/.test(lowerText) ||
-        /school|education|iep/.test(lowerFileName)) {
-      return "School";
-    }
-    
-    // Legal keywords
-    if (/court|judge|attorney|lawyer|legal|custody|visitation|case|lawsuit|hearing/.test(lowerText) ||
-        /court|legal|case/.test(lowerFileName)) {
-      return "Legal";
-    }
-    
-    return "General";
-  }
-
-  // Child name detector
-  function detectChild(text) {
-    const children = ["Jace", "Josh"];
-    const found = children.filter(name => new RegExp(`\\b${name}\\b`, "i").test(text));
-    if (found.length === 2) return "Both";
-    if (found.length === 1) return found[0];
-    return "Unknown";
-  }
-
-  // Check for duplicates based on file name and summary (optimized for bulk)
-  function isDuplicate(fileName, summary) {
-    // Quick cache for performance
-    if (!window.summaryCache) {
-      window.summaryCache = new Set();
-      // Build initial cache
-      const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
-      for (const row of existingRows) {
-        const cells = row.cells;
-        if (cells && cells.length >= 4) {
-          window.summaryCache.add(cells[3].textContent.trim());
-        }
-      }
-    }
-    
-    const trimmedSummary = summary.trim();
-    
-    // Fast exact match check
-    if (window.summaryCache.has(trimmedSummary)) {
-      return { isDupe: true, reason: 'Identical summary content' };
-    }
-    
-    // For bulk operations, skip expensive similarity checks
-    if (isProcessingBulk) {
-      // Add to cache for future checks
-      window.summaryCache.add(trimmedSummary);
-      return { isDupe: false };
-    }
-    
-    // Expensive similarity check only for individual files
-    const existingRows = Array.from(trackerBody.querySelectorAll('tr'));
-    
-    for (const row of existingRows) {
-      const cells = row.cells;
-      if (!cells || cells.length < 4) continue;
-      
-      const existingSummary = cells[3].textContent.trim();
-      
-      // Check for same filename if provided
-      if (fileName && existingSummary.length > 10 && summary.length > 10) {
-        const similarity = calculateSimilarity(existingSummary, summary);
-        if (similarity > 0.85) { // 85% similar
-          return { isDupe: true, reason: `${Math.round(similarity * 100)}% similar content` };
-        }
-      }
-    }
-    
-    // Add to cache
-    window.summaryCache.add(trimmedSummary);
-    return { isDupe: false };
-  }
-
-  // Calculate text similarity (basic implementation)
-  function calculateSimilarity(text1, text2) {
-    const words1 = text1.toLowerCase().split(/\s+/);
-    const words2 = text2.toLowerCase().split(/\s+/);
-    
-    if (words1.length === 0 && words2.length === 0) return 1;
-    if (words1.length === 0 || words2.length === 0) return 0;
-    
-    const commonWords = words1.filter(word => words2.includes(word));
-    const totalWords = Math.max(words1.length, words2.length);
-    
-    return commonWords.length / totalWords;
-  }
-
-  // Save table to localStorage
-  function saveTable() {
-    localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
-    updateDashboardStats();
-    populateFilters();
-    updateNoCasesDisplay();
-  }
-
-  // Update the no cases display
-  function updateNoCasesDisplay() {
-    const rows = Array.from(trackerBody.querySelectorAll('tr'));
-    const noCasesMsg = document.getElementById('noCasesMsg');
-    
-    if (rows.length === 0) {
-      if (noCasesMsg) {
-        noCasesMsg.classList.remove('hidden');
-      }
-    } else {
-      if (noCasesMsg) {
-        noCasesMsg.classList.add('hidden');
-      }
-    }
-  }
-
-  // Create misconduct dropdown
-  function buildMisconductSelect(value = "Review Needed") {
-    const select = document.createElement("select");
-    const uid = `misconduct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    
-    select.id = uid;
-    select.name = uid;
-    select.className = "bg-transparent text-sm border-0";
-
-    const options = [
-      "Review Needed",
-      "Denial of Right to Medical Safety and Privacy (HIPAA Violations)",
-      "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
-    ];
-
-    options.forEach(opt => {
-      const option = document.createElement("option");
-      option.value = option.textContent = opt;
-      select.appendChild(option);
-    });
-
-    select.value = value;
-    select.onchange = saveTable;
-    return select;
-  }
-
-  // Helper function to get category icon
-  function getCategoryIcon(category) {
-    const icons = {
-      'Medical': '🏥',
-      'Legal': '⚖️',
-      'School': '🏫',
-      'General': '📝'
-    };
-    return icons[category] || '📄';
-  }
-
-  // Add row to tracker with enhanced styling
-  function addRow({ category, child, misconduct, summary, tags, fileURL, fileName }) {
-    const row = trackerBody.insertRow();
-    row.className = "hover:bg-indigo-50 transition-all duration-200 group";
-    
-    // Category cell with icon
-    const categoryCell = row.insertCell();
-    categoryCell.className = "py-4 px-6 text-sm font-medium text-gray-900";
-    const categoryIcon = getCategoryIcon(category);
-    categoryCell.innerHTML = `<span class="flex items-center"><span class="mr-2">${categoryIcon}</span>${category}</span>`;
-    
-    // Child cell
-    const childCell = row.insertCell();
-    childCell.className = "py-4 px-6 text-sm text-gray-700";
-    childCell.textContent = child;
-    
-    // Misconduct cell with enhanced select
-    const misconductCell = row.insertCell();
-    misconductCell.className = "py-4 px-6";
-    const select = buildMisconductSelect(misconduct);
-    select.className = "w-full bg-transparent text-sm border border-gray-200 rounded-md px-2 py-1 hover:border-indigo-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 transition-all";
-    misconductCell.appendChild(select);
-    
-    // Summary cell with expand functionality
-    const summaryCell = row.insertCell();
-    summaryCell.className = "py-4 px-6 text-sm text-gray-700 min-w-[300px]";
-    const truncatedSummary = summary.length > 100 ? summary.slice(0, 97) + "..." : summary;
-    summaryCell.innerHTML = `
-      <div class="relative">
-        <p class="summary-text cursor-pointer hover:text-indigo-600 transition-colors" title="Click to expand">
-          ${truncatedSummary}
-        </p>
-        <div class="summary-full hidden absolute z-10 bg-white border border-gray-300 rounded-lg p-3 shadow-lg max-w-md mt-1">
-          <p class="text-sm text-gray-700 leading-relaxed">${summary}</p>
-          <button class="mt-2 text-xs text-indigo-600 hover:text-indigo-800">Close</button>
-        </div>
-      </div>
-    `;
-    
-    // Add click handlers for summary expansion
-    const summaryText = summaryCell.querySelector('.summary-text');
-    const summaryFull = summaryCell.querySelector('.summary-full');
-    const closeBtn = summaryCell.querySelector('.summary-full button');
-    
-    summaryText.addEventListener('click', () => {
-      summaryFull.classList.toggle('hidden');
-    });
-    
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      summaryFull.classList.add('hidden');
-    });
-    
-    // File Name cell (NEW!)
-    const fileNameCell = row.insertCell();
-    fileNameCell.className = "py-4 px-6 text-sm text-gray-700";
-    fileNameCell.textContent = fileName || '';
-    
-    // Tags cell with colored badges
-    const tagsCell = row.insertCell();
-    tagsCell.className = "py-4 px-6 text-sm";
-    if (tags && tags.length > 0) {
-      tagsCell.innerHTML = tags.map(tag => 
-        `<span class="inline-block bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1 border border-blue-200">${tag}</span>`
-      ).join('');
-    } else {
-      tagsCell.innerHTML = '<span class="text-gray-400 italic">None</span>';
-    }
-    
-    // Actions cell with enhanced buttons
-    const actionCell = row.insertCell();
-    actionCell.className = "py-4 px-6";
-    if (fileURL) {
-      const viewLink = document.createElement("a");
-      viewLink.innerText = "View PDF";
-      viewLink.href = fileURL;
-      viewLink.target = "_blank";
-      viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
-      
-      const deleteBtn = document.createElement("button");
-      deleteBtn.innerHTML = '<span class="mr-1">�️</span>Delete';
-      deleteBtn.className = "px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md";
-      deleteBtn.onclick = function() {
-        this.closest('tr').remove();
-        saveTable();
-      };
-      
-      actionCell.appendChild(viewLink);
-      actionCell.appendChild(deleteBtn);
-    } else {
-      actionCell.innerHTML = `
-        <div class="flex space-x-2">
-          <span class="text-gray-400 text-xs italic">No PDF</span>
-          <button onclick="this.closest('tr').remove(); saveTable();" 
-                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
-            <span class="mr-1">🗑️</span>Delete
-          </button>
-        </div>
-      `;
-    }
-    
-    saveTable();
-    updateLastUpdated();
-  }
-
-  // Silent version of addRow (no alerts)
-  function addRowSilent({ category, child, misconduct, summary, tags, fileURL, fileName }) {
-    const row = trackerBody.insertRow();
-
-    // Category column
-    row.insertCell().innerText = category;
-
-    // Child column
-    row.insertCell().innerText = child;
-
-    // Misconduct column
-    row.insertCell().appendChild(buildMisconductSelect(misconduct));
-
-    // Enhanced Summary column
-    const summaryCell = row.insertCell();
-    summaryCell.textContent = summary;
-    summaryCell.title = summary;
-    summaryCell.className = "max-w-xs truncate";
-    summaryCell.setAttribute('data-label', 'Enhanced Summary');
-
-    // File Name column
-    const fileNameCell = row.insertCell();
-    fileNameCell.className = "py-4 px-6 text-sm text-gray-700";
-    fileNameCell.textContent = fileName || '';
-    fileNameCell.setAttribute('data-label', 'File Name');
-
-    // Tags column
-    row.insertCell().innerText = tags && tags.length ? tags.join(", ") : "";
-
-    // Action column (View PDF hyperlink or No PDF)
-    const actionCell = row.insertCell();
-    if (fileURL) {
-      const viewLink = document.createElement("a");
-      viewLink.innerText = "View PDF";
-      viewLink.href = fileURL;
-      viewLink.target = "_blank";
-      viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800";
-      actionCell.appendChild(viewLink);
-    } else {
-      actionCell.innerText = "No PDF";
-      actionCell.className = "text-gray-400 text-sm";
-    }
-
-    // Save to localStorage (batch save for performance)
-    if (typeof bulkProgress !== "undefined" && (bulkProgress % 10 === 0 || bulkProgress === bulkTotal)) {
-      saveTable();
-    }
-  }
-
-  // Optimize saving for bulk operations
-  // let saveTimeout; // FIXED: Using declaration from function start
-  function saveTableDelayed() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      saveTable();
-    }, 1000); // Save after 1 second of no activity
-  }
-
-  // Main summarize button handler
-  summarizeBtn.onclick = async () => {
-  justiceDebugLog('summarizeBtn clicked');
-    const files = fileInput?.files;
-    const hasText = docInput?.value?.trim();
-    
-    if (!files?.length && !hasText) {
-      alert("Upload PDF files or paste text first.");
-      return;
-    }
-    
-    // Handle multiple files
-    if (files?.length > 1) {
-      const proceed = confirm(
-        `You've selected ${files.length} files.\n\n` +
-        `Process all files? This may take a while.`
-      );
-      
-      if (proceed) {
-        await processBulkFiles(Array.from(files), false);
-        return;
-      } else {
-        return;
-      }
-    }
-    
-    // Handle single file or text (original logic)
-    const hasFile = files?.[0];
-    
-    if (!hasFile && !hasText) {
-      return;
-    }
-
-    let text = hasText || "";
-    let fileURL = null;
-    let fileName = null;
-
-    if (hasFile) {
-      const file = fileInput.files[0];
-      fileURL = URL.createObjectURL(file);
-      fileName = file.name;
-      
-      if (!text) {
-        text = await pdfToText(file);
-      }
-    }
-
-    const summary = quickSummary(text);
-    if (summaryBox) {
-      summaryBox.textContent = summary;
-    }
-    
-    // Check for duplicates before adding
-    const dupeCheck = isDuplicate(fileName, summary);
-    if (dupeCheck.isDupe) {
-      const userConfirm = confirm(
-        `⚠️ Potential duplicate detected!\n\n` +
-        `Reason: ${dupeCheck.reason}\n\n` +
-        `Do you want to add this document anyway?`
-      );
-      
-      if (!userConfirm) {
-        alert("Document not added - duplicate detected.");
-        if (fileInput) fileInput.value = "";
-        if (docInput) docInput.value = "";
-        return;
-      }
-    }
-    
-    addRow({
-      category: detectCategory(text, fileName),
-      child: detectChild(text),
-      misconduct: "Review Needed",
-      summary,
-      tags: keywordTags(text),
-      fileURL,
-      fileName
-    });
-
-    if (fileInput) fileInput.value = "";
-    if (docInput) docInput.value = "";
-    
-    alert("Summary added to tracker!");
-  };
-
-  // Bulk processing function
-  async function processBulkFiles(files, skipDuplicates = false) {
-    if (!files || files.length === 0) return;
-
-    justiceDebugLog('processBulkFiles called', { fileCount: files.length, skipDuplicates });
-    
-    isProcessingBulk = true;
-    bulkTotal = files.length;
-    bulkProgress = 0;
-    
-    const progressDiv = document.getElementById('bulkProgress');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    
-    if (progressDiv) progressDiv.classList.remove('hidden');
-    
-    let processedCount = 0;
-    let duplicateCount = 0;
-    let errorCount = 0;
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      bulkProgress = i + 1;
-      
-      justiceDebugLog(`Processing file [${i+1}/${files.length}]`, file?.name);
-
-      // Update progress display
-      if (progressBar && progressText) {
-        const percentage = (bulkProgress / bulkTotal) * 100;
-        const progressClass = `progress-${Math.round(percentage / 5) * 5}`;
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 7) { // Ensure we have enough columns
+        const actionCell = cells[6]; // Actions column (7th column, index 6)
         
-        // Remove existing progress classes and add new one
-        progressBar.className = progressBar.className.replace(/progress-\d+/g, '');
-        progressBar.classList.add(progressClass);
-        progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
-      }
-
-      try {
-        // Ensure file is a PDF
-        if (file.type !== 'application/pdf') {
-          showNotification('Only PDF files are supported: ' + file.name, 'error');
-          errorCount++;
-          continue;
-        }
-
-        // Add delay to prevent browser freezing
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        // Process the PDF
-        const text = await pdfToText(file);
-        const summary = quickSummary(text);
-        const fileURL = URL.createObjectURL(file);
-
-        // Check for duplicates if requested
-        if (skipDuplicates) {
-          const dupeCheck = isDuplicate(file.name, summary);
-          if (dupeCheck.isDupe) {
-            justiceDebugLog(`Duplicate skipped: ${file.name}`);
-            duplicateCount++;
-            continue;
+        // Check if this row has old button format
+        const oldViewButton = actionCell.querySelector('button[onclick*="window.open"]');
+        const oldViewButtonText = actionCell.querySelector('button');
+        
+        if (oldViewButton) {
+          // Extract the fileURL from the onclick attribute
+          const onclickAttr = oldViewButton.getAttribute('onclick');
+          const fileURLMatch = onclickAttr.match(/window\.open\(['"]([^'"]+)['"]/);
+          
+          if (fileURLMatch) {
+            const fileURL = fileURLMatch[1];
+            
+            // Replace button with hyperlink
+            const viewLink = document.createElement("a");
+            viewLink.innerText = "View PDF";
+            viewLink.href = fileURL;
+            viewLink.target = "_blank";
+            viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
+            
+            // Keep delete button if it exists
+            const deleteButton = actionCell.querySelector('button[onclick*="remove"]');
+            
+            // Clear the cell and add the new hyperlink
+            actionCell.innerHTML = '';
+            actionCell.appendChild(viewLink);
+            
+            if (deleteButton) {
+              actionCell.appendChild(deleteButton);
+            }
+            
+            updated = true;
           }
         }
-
-        // Compose row data for tracker
-        const rowData = {
-          category: detectCategory(text, file.name),
-          child: detectChild(text),
-          misconduct: "Review Needed",
-          summary: summary || '',
-          tags: keywordTags(text),
-          fileURL: fileURL,
-          fileName: file.name || ''
-        };
-
-        // Add row to tracker
-        addRowSilent(rowData);
-        justiceDebugLog(`File processed and added: ${file.name}`);
-        processedCount++;
-
-      } catch (error) {
-        justiceDebugLog(`Error processing file: ${file.name}`, error);
-        showNotification('Failed to process: ' + (file.name || 'Unknown file'), 'error');
-        errorCount++;
+        // Check for old "View" button with emoji
+        else if (oldViewButtonText && oldViewButtonText.textContent.includes('👁️')) {
+          const onclickAttr = oldViewButtonText.getAttribute('onclick');
+          if (onclickAttr) {
+            const fileURLMatch = onclickAttr.match(/window\.open\(['"]([^'"]+)['"]/);
+            
+            if (fileURLMatch) {
+              const fileURL = fileURLMatch[1];
+              
+              // Replace with hyperlink
+              const viewLink = document.createElement("a");
+              viewLink.innerText = "View PDF";
+              viewLink.href = fileURL;
+              viewLink.target = "_blank";
+              viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
+              
+              // Keep delete button
+              const deleteButton = actionCell.querySelector('button[onclick*="remove"]');
+              
+              actionCell.innerHTML = '';
+              actionCell.appendChild(viewLink);
+              
+              if (deleteButton) {
+                actionCell.appendChild(deleteButton);
+              }
+              
+              updated = true;
+            }
+          }
+        }
+        // Check for "N/A" or "No file" text and update to "No PDF"
+        else if (actionCell.textContent.trim() === 'N/A' || actionCell.textContent.includes('No file')) {
+          actionCell.innerHTML = '<span class="text-gray-400 text-sm">No PDF</span>';
+          updated = true;
+        }
       }
-    }
-
-    // Hide progress and show results
-    if (progressDiv) progressDiv.classList.add('hidden');
-    isProcessingBulk = false;
-
-    justiceDebugLog('Bulk processing complete', {
-      processedCount,
-      duplicateCount,
-      errorCount,
-      total: bulkTotal
     });
-
-    // Show completion notification
-    const message = `Bulk processing complete!\n\n` +
-      `✅ Processed: ${processedCount} files\n` +
-      `⚠️ Duplicates skipped: ${duplicateCount}\n` +
-      `❌ Errors: ${errorCount}\n` +
-      `📊 Total: ${bulkTotal} files`;
     
-    showNotification(message, processedCount > 0 ? 'success' : 'warning');
-  }
-
-  // Bulk process button handler
-  const bulkProcessBtnHandler = document.getElementById("bulkProcessBtn");
-  if (bulkProcessBtnHandler) {
-    bulkProcessBtnHandler.onclick = async () => {
-      justiceDebugLog('bulkProcessBtn clicked');
-      const files = fileInput?.files;
-      
-      if (!files?.length) {
-        alert("Please select PDF files first.");
-        return;
-      }
-      
-      const proceed = confirm(
-        `Bulk process ${files.length} files?\n\n` +
-        `• Duplicates will be automatically skipped\n` +
-        `• Processing may take several minutes\n` +
-        `• Don't close the browser while processing`
-      );
-      
-      if (proceed) {
-        await processBulkFiles(Array.from(files), true);
-      }
-    };
-  }
-
-  // Export to CSV
-  if (exportBtn) {
-    exportBtn.onclick = () => {
-      const headers = Array.from(document.querySelectorAll("#trackerTable thead th") || [])
-        .map(th => th.textContent);
-      
-      const rows = Array.from(trackerBody.querySelectorAll("tr"))
-        .map(tr => Array.from(tr.children)
-          .map(td => td.innerText.replace(/\n/g, " ").replace(/"/g, '""'))
-          .join(","));
-      
-      const csv = [headers.join(","), ...rows].join("\r\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const link = document.createElement("a");
-      
-      link.href = URL.createObjectURL(blob);
-      link.download = `justice_tracker_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      
-      alert("CSV exported successfully!");
-    };
-  }
-
-  // Update last updated timestamp
-  function updateLastUpdated() {
-    const lastUpdatedEl = document.getElementById('lastUpdated');
-    if (lastUpdatedEl) {
-      const now = new Date();
-      lastUpdatedEl.textContent = now.toLocaleString();
+    // Save the updated table if changes were made
+    if (updated) {
+      console.log('✅ Migrated existing rows to use "View PDF" hyperlinks');
+      saveTable();
     }
   }
 
-  // Update case count display
-  function updateCaseCount() {
-    const visibleRows = Array.from(trackerBody.querySelectorAll('tr:not([style*="display: none"])'));
-    const caseCountEl = document.getElementById('caseCount');
-    if (caseCountEl) {
-      const count = visibleRows.length;
-      caseCountEl.textContent = `${count} case${count === 1 ? '' : 's'}`;
-    }
-  }
-
-  // Initialize dashboard
-  updateDashboardStats();
-  populateFilters();
-  updateNoCasesDisplay();
-  
-  console.log('✅ Justice Dashboard initialized successfully');
-}
-
-/********** ANIMATED COUNTERS & DASHBOARD ENHANCEMENTS **********/
-const DashboardEnhancements = {
+  // PDF to text converter
   // Animate number counters
   animateCounter(element, target, duration = 2000) {
     const start = parseInt(element.textContent) || 0;
@@ -1976,3 +1390,4 @@ document.addEventListener("DOMContentLoaded", () => {
 // ====================================================================
 // End ChatGPT's Implementation
 // ====================================================================
+                                                                                                   
