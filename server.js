@@ -633,34 +633,45 @@ app.post("/api/report-error", (req, res) => {
 app.post("/api/wolfram", authenticateToken, async (req, res) => {
   try {
     const { query } = req.body;
+    console.log("🧠 Wolfram API called with query:", query);
     
     if (!query) {
+      console.log("❌ Wolfram API: No query provided");
       return res.status(400).json({ error: "Query parameter required" });
     }
 
     const WOLFRAM_APP_ID = process.env.WOLFRAM_APP_ID;
+    console.log("🔑 Wolfram App ID status:", WOLFRAM_APP_ID ? `Set (${WOLFRAM_APP_ID.substring(0, 6)}...)` : 'Not Set');
+    
     if (!WOLFRAM_APP_ID) {
+      console.log("❌ Wolfram API: App ID not configured");
       return res.status(500).json({ error: "Wolfram API not configured" });
     }
 
     const wolframUrl = `https://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
+    console.log("🌐 Making Wolfram API request...");
     
     const response = await fetch(wolframUrl);
+    console.log("📡 Wolfram API response status:", response.status);
+    
     const data = await response.json();
+    console.log("📊 Wolfram API response success:", data.queryresult?.success);
     
     if (data.queryresult && data.queryresult.success) {
+      console.log("✅ Wolfram API: Success - returning results");
       res.json({
         success: true,
         result: data.queryresult
       });
     } else {
+      console.log("⚠️ Wolfram API: No results or error:", data.queryresult?.error);
       res.status(400).json({ 
         error: "No results found",
         details: data.queryresult?.error || "Unknown error"
       });
     }
   } catch (error) {
-    console.error("Wolfram API error:", error);
+    console.error("❌ Wolfram API error:", error);
     res.status(500).json({ error: "Wolfram API request failed" });
   }
 });
