@@ -1922,6 +1922,45 @@ function showWolframResult(query, result) {
   document.addEventListener('keydown', handleEscape);
 }
 
+// Example function to demonstrate "View PDF" hyperlink functionality
+// This matches the ChatGPT implementation exactly
+function addToTracker(summary) {
+  const tableBody = document.querySelector("#trackerTable tbody");
+  const newRow = tableBody.insertRow();
+
+  newRow.insertCell().innerText = summary.category;
+  newRow.insertCell().innerText = summary.child;
+  newRow.insertCell().innerText = summary.misconduct;
+  newRow.insertCell().innerText = summary.summary;
+  newRow.insertCell().innerText = summary.fileName || '';
+  newRow.insertCell().innerText = summary.tags || '';
+
+  const viewCell = newRow.insertCell();
+  if (summary.fileURL) {
+    const viewLink = document.createElement("a");
+    viewLink.innerText = "View PDF";
+    viewLink.href = summary.fileURL;
+    viewLink.target = "_blank";
+    viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800";
+    viewCell.appendChild(viewLink);
+  } else {
+    viewCell.innerText = "No PDF";
+  }
+}
+
+// Test function to add sample data with PDF links
+function addSampleRowWithPDF() {
+  addToTracker({
+    category: "Family Court",
+    child: "Child A",
+    misconduct: "Procedural Violation",
+    summary: "Sample case with PDF attachment for testing hyperlink functionality",
+    fileName: "sample-document.pdf",
+    tags: "test, sample",
+    fileURL: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" // Sample PDF URL
+  });
+}
+
 // Show full PDF content in modal
 window.showFullContent = function(caseId) {
   const cases = JSON.parse(localStorage.getItem('legalCases') || '[]');
