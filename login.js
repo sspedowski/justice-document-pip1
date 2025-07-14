@@ -140,50 +140,20 @@ document.addEventListener('DOMContentLoaded', function () {
   checkServerStatus();
   setInterval(checkServerStatus, 30000);
 
-  // Guest login functionality
-  const guestLoginButton = document.getElementById('guestLoginButton');
-  if (guestLoginButton) {
-    guestLoginButton.addEventListener('click', async function() {
-      // Disable the button
-      guestLoginButton.disabled = true;
-      guestLoginButton.innerHTML = `
-        <span class="flex items-center">
-          <svg class="h-5 w-5 text-gray-400 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Logging in as Guest...
-        </span>
-      `;
-
-      try {
-        const result = await window.authManager.login('guest', 'guest123');
-        if (result.success) {
-          window.location.href = '/secure-dashboard.html';
-        } else {
-          showAlert('Guest login failed. Please try again.', 'error');
-          resetGuestButton();
-        }
-      } catch (error) {
-        console.error('Guest login error:', error);
-        showAlert('An error occurred during guest login.', 'error');
-        resetGuestButton();
-      }
+  // ChatGPT's exact guest login code
+  document.getElementById('guestLoginBtn').addEventListener('click', async function() {
+    const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: 'guest',
+            password: 'guest123'
+        })
     });
-  }
-
-  function resetGuestButton() {
-    const guestLoginButton = document.getElementById('guestLoginButton');
-    if (guestLoginButton) {
-      guestLoginButton.disabled = false;
-      guestLoginButton.innerHTML = `
-        <span class="flex items-center">
-          <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-          </svg>
-          Continue as Guest
-        </span>
-      `;
+    if (response.ok) {
+        window.location.href = '/secure-dashboard.html'; // Your dashboard route
+    } else {
+        alert('Guest login failed!');
     }
-  }
+  });
 });
