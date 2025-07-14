@@ -1358,7 +1358,6 @@ function addToTracker(summary) {
     viewLink.innerText = "View PDF";
     viewLink.href = summary.fileURL;
     viewLink.target = "_blank";
-    viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800";
     viewCell.appendChild(viewLink);
   } else {
     viewCell.innerText = "No PDF";
@@ -1390,4 +1389,19 @@ document.addEventListener("DOMContentLoaded", () => {
 // ====================================================================
 // End ChatGPT's Implementation
 // ====================================================================
-                                                                                                   
+
+// Manual migration function for users to update existing documents
+  function updateExistingDocuments() {
+    console.log('🔄 Updating existing documents to use "View PDF" hyperlinks...');
+    migrateExistingRowsToHyperlinks();
+    
+    // Also trigger a re-render to ensure all updates are visible
+    updateDashboardStats();
+    populateFilters();
+    
+    // Show success notification
+    showNotification('✅ Successfully updated existing documents with "View PDF" hyperlinks!', 'success');
+  }
+
+  // Expose function globally for console access
+  window.updateExistingDocuments = updateExistingDocuments;
