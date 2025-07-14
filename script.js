@@ -547,7 +547,7 @@ const DashboardAuth = {
                   <th class="border border-gray-300 p-2">Category</th>
                   <th class="border border-gray-300 p-2">Child</th>
                   <th class="border border-gray-300 p-2">Misconduct</th>
-                  <th class="border border-gray-300 p-2">Summary</th>
+                  <th class="border border-gray-300 p-2">Enhanced Summary</th>
                   <th class="border border-gray-300 p-2">File Name</th>
                   <th class="border border-gray-300 p-2">Tags</th>
                   <th class="border border-gray-300 p-2">Actions</th>
@@ -1243,12 +1243,12 @@ function initializeJusticeDashboard() {
     // Misconduct column
     row.insertCell().appendChild(buildMisconductSelect(misconduct));
 
-    // Legal Summary column
+    // Enhanced Summary column
     const summaryCell = row.insertCell();
     summaryCell.textContent = summary;
     summaryCell.title = summary;
     summaryCell.className = "max-w-xs truncate";
-    summaryCell.setAttribute('data-label', 'Legal Summary');
+    summaryCell.setAttribute('data-label', 'Enhanced Summary');
 
     // File Name column
     const fileNameCell = row.insertCell();
