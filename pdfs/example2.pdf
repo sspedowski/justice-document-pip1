@@ -1,0 +1,14 @@
+This is a sample PDF placeholder file for testing the Justice Dashboard "View PDF" hyperlink functionality.
+
+In a real implementation, this would be an actual PDF file containing:
+- Legal proceedings documentation
+- Court orders
+- Due process records
+- Case evidence
+
+File: example2.pdf
+Category: Legal
+Child: Josh
+Case: Due process violation
+
+This file demonstrates how the "View PDF" hyperlinks work in the Justice Dashboard table when clicking "View PDF" links.
