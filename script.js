@@ -1338,4 +1338,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Expose function globally for console access
-  window.updateExistingDocuments = updateExistingDocuments;
+    window.updateExistingDocuments = updateExistingDocuments;
+  }
