@@ -324,13 +324,24 @@ const DashboardAuth = {
       return;
     }
 
-    // The dashboard is already rendered in the HTML, just initialize it
-    console.log('✅ Dashboard content already rendered, initializing functionality...');
+    // Show the dashboard content that's already in the HTML
+    const loadingScreen = document.getElementById('loadingScreen');
+    const dashboardContent = document.getElementById('dashboardContent');
     
-    // Initialize dashboard functionality
-    setTimeout(() => {
-      initializeJusticeDashboard();
-    }, 50);
+    if (loadingScreen) {
+      loadingScreen.classList.add('hidden');
+    }
+    
+    if (dashboardContent) {
+      dashboardContent.classList.remove('hidden');
+      
+      // Initialize dashboard functionality only after content is visible
+      setTimeout(() => {
+        initializeJusticeDashboard();
+      }, 50);
+    } else {
+      console.error('Dashboard content container not found');
+    }
   },
 
   showLoginForm() {
@@ -777,12 +788,9 @@ function initializeJusticeDashboard() {
   const exportBtn = document.getElementById("exportBtn");
   const askBtn = document.getElementById("askWolfram");
   const summaryBox = document.getElementById("summaryBox");
-  let trackerBody = document.querySelector("#caseTableBody");
+  let trackerBody = document.querySelector("#results");
   
   // Fallback for trackerBody
-  if (!trackerBody) {
-    trackerBody = document.querySelector("#results");
-  }
   if (!trackerBody) {
     trackerBody = document.querySelector("#trackerTable tbody");
   }
