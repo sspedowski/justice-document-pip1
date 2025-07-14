@@ -1202,22 +1202,26 @@ function initializeJusticeDashboard() {
     const actionCell = row.insertCell();
     actionCell.className = "py-4 px-6";
     if (fileURL) {
-      actionCell.innerHTML = `
-        <div class="flex space-x-2">
-          <button onclick="window.open('${fileURL}', '_blank')" 
-                  class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-md text-xs hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md">
-            <span class="mr-1">👁️</span>View
-          </button>
-          <button onclick="this.closest('tr').remove(); saveTable();" 
-                  class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
-            <span class="mr-1">🗑️</span>Delete
-          </button>
-        </div>
-      `;
+      const viewLink = document.createElement("a");
+      viewLink.innerText = "View PDF";
+      viewLink.href = fileURL;
+      viewLink.target = "_blank";
+      viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
+      
+      const deleteBtn = document.createElement("button");
+      deleteBtn.innerHTML = '<span class="mr-1">�️</span>Delete';
+      deleteBtn.className = "px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md";
+      deleteBtn.onclick = function() {
+        this.closest('tr').remove();
+        saveTable();
+      };
+      
+      actionCell.appendChild(viewLink);
+      actionCell.appendChild(deleteBtn);
     } else {
       actionCell.innerHTML = `
         <div class="flex space-x-2">
-          <span class="text-gray-400 text-xs italic">No file</span>
+          <span class="text-gray-400 text-xs italic">No PDF</span>
           <button onclick="this.closest('tr').remove(); saveTable();" 
                   class="px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-md text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-sm hover:shadow-md">
             <span class="mr-1">🗑️</span>Delete
