@@ -61,7 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
 ```
 
 ### **3. ✅ PDF Directory Structure**
-```
+
+```text
 justice-dashboard/
 ├── pdfs/
 │   ├── example1.pdf (Medical case)
@@ -74,10 +75,12 @@ justice-dashboard/
 ## 🧪 **Testing the Implementation:**
 
 ### **Step 1: Open Dashboard**
-- Visit: http://localhost:3000
+
+- Visit: [Justice Dashboard](http://localhost:3000)
 - The dashboard will automatically load with 2 example rows
 
 ### **Step 2: Verify Table Structure**
+
 - **Column 1:** Category (Medical, Legal)
 - **Column 2:** Child (Jace, Josh)
 - **Column 3:** Misconduct (descriptions)
@@ -85,6 +88,7 @@ justice-dashboard/
 - **Column 5:** View PDF (blue hyperlinks)
 
 ### **Step 3: Test Hyperlinks**
+
 - Click "View PDF" links in the last column
 - Should open PDF files in new tabs
 - Links are blue, underlined, and clickable
@@ -94,12 +98,14 @@ justice-dashboard/
 ## 🎨 **Visual Results:**
 
 ### **Table Appearance:**
+
 | Category | Child | Misconduct | Summary | View PDF |
 |----------|-------|------------|---------|----------|
 | Medical | Jace | Withholding treatment | Medical report shows delayed care. | **[View PDF](pdfs/example1.pdf)** |
 | Legal | Josh | Due process violation | Court order issued without proper hearing. | **[View PDF](pdfs/example2.pdf)** |
 
 ### **Link Styling:**
+
 - ✅ **Blue color** (`text-blue-600`)
 - ✅ **Underlined** (`underline`)
 - ✅ **Small text** (`text-sm`)
@@ -111,6 +117,7 @@ justice-dashboard/
 ## 🔧 **Integration with Existing System:**
 
 ### **Works Alongside:**
+
 - ✅ **Your existing `addRow()` function** - Enhanced version
 - ✅ **Your existing `addRowSilent()` function** - Bulk processing
 - ✅ **ChatGPT's `addToTracker()` function** - Simple version
@@ -118,6 +125,7 @@ justice-dashboard/
 - ✅ **Table management** - Automatic row creation
 
 ### **Server Configuration:**
+
 - ✅ **Static file serving** already configured
 - ✅ **PDF directory** accessible at `/pdfs/`
 - ✅ **File URLs** work correctly
@@ -128,12 +136,14 @@ justice-dashboard/
 ## 🚀 **Ready for Use:**
 
 ### **Local Development:**
-1. **Server running:** ✅ http://localhost:3000
+
+1. **Server running:** ✅ [Local Dashboard](http://localhost:3000)
 2. **Script loaded:** ✅ ChatGPT implementation active
 3. **Sample data:** ✅ Two example rows automatically added
 4. **PDF links:** ✅ Working hyperlinks to sample files
 
 ### **Production Deployment:**
+
 1. **Replace sample PDFs** with real case documents
 2. **Update fileURLs** to point to cloud storage or hosted files
 3. **Add upload functionality** to generate dynamic fileURLs
@@ -143,7 +153,7 @@ justice-dashboard/
 
 ## 📁 **File Structure:**
 
-```
+```text
 justice-dashboard/
 ├── index.html (your existing dashboard)
 ├── script.js (enhanced with ChatGPT code)
