@@ -3,10 +3,12 @@
 ## 🎯 **Quick Deploy to Render**
 
 ### **Step 1: Prepare Repository**
+
 1. **Push your code to GitHub** (if not already done)
 2. **Ensure all files are committed** including the new guest login functionality
 
 ### **Step 2: Create Render Service**
+
 1. **Go to [render.com](https://render.com)** and sign up/login
 2. **Click "New +"** → **"Web Service"**
 3. **Connect GitHub** and select your `justice-dashboard` repository
@@ -18,6 +20,7 @@
    - **Node Version:** `22` (or latest)
 
 ### **Step 3: Configure Environment Variables**
+
 In Render dashboard → **Environment** tab, add these variables:
 
 ```bash
@@ -46,17 +49,20 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ### **How Users Access the System:**
 
 #### **🎯 Option 1: Guest Login (Recommended for Public Access)**
+
 - **URL:** `https://your-app-name.onrender.com`
 - **Method:** Click **"Continue as Guest"** button
 - **Access Level:** Standard user permissions
 - **No credentials needed!**
 
 #### **🔑 Option 2: Admin Login**
+
 - **Username:** `admin`
 - **Password:** `[Set ADMIN_PASSWORD in Render environment]`
 - **Access Level:** Full administrative access
 
 #### **🔑 Option 3: Direct Guest Credentials**
+
 - **Username:** `guest`
 - **Password:** `guest123`
 - **Access Level:** Standard user permissions
@@ -64,6 +70,7 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ## 🎨 **User Experience Features**
 
 ### **Login Page Features:**
+
 ✅ **Beautiful, modern UI** with Tailwind CSS  
 ✅ **One-click guest access** - no registration needed  
 ✅ **Server status indicator** - shows connection health  
@@ -71,6 +78,7 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ✅ **Enhanced security** - JWT tokens, rate limiting  
 
 ### **Dashboard Features:**
+
 ✅ **Wolfram Alpha Integration** - AI-powered legal research  
 ✅ **Secure file processing** - Upload and analyze documents  
 ✅ **Modern table interface** - Organized case management  
@@ -80,13 +88,16 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ## 🔧 **Render-Specific Configuration**
 
 ### **Step 4: Update server.js for Render**
+
 The server is already configured for Render with:
+
 - ✅ **Dynamic PORT** from environment variables
-- ✅ **Production optimizations** 
+- ✅ **Production optimizations**
 - ✅ **CORS configuration** for cross-origin requests
 - ✅ **Helmet security** with proper CSP headers
 
 ### **Step 5: Deploy!**
+
 1. **Click "Create Web Service"** in Render
 2. **Wait for deployment** (usually 2-5 minutes)
 3. **Get your live URL:** `https://your-app-name.onrender.com`
@@ -94,13 +105,15 @@ The server is already configured for Render with:
 ## 🧪 **Testing Your Deployment**
 
 ### **Immediate Tests:**
+
 1. **Visit your Render URL**
-2. **Click "Continue as Guest"** 
+2. **Click "Continue as Guest"**
 3. **Verify dashboard loads**
 4. **Test Wolfram Alpha** with query: "What is 2+2?"
 5. **Upload a test file**
 
 ### **Expected Results:**
+
 - ✅ **Login page loads** with guest button
 - ✅ **Guest login works** instantly
 - ✅ **Dashboard displays** with all features
@@ -112,12 +125,14 @@ The server is already configured for Render with:
 This setup is **ideal for showcasing** your Justice Dashboard:
 
 ### **🎯 For Potential Clients:**
+
 - **No account creation required**
 - **Instant access** via guest login
 - **Full feature demonstration**
 - **Professional appearance**
 
 ### **🎯 For Presentations:**
+
 - **Reliable cloud hosting**
 - **Fast loading times**
 - **Mobile-friendly interface**
@@ -126,6 +141,7 @@ This setup is **ideal for showcasing** your Justice Dashboard:
 ## 🔒 **Security Notes**
 
 ### **Production Security Checklist:**
+
 - ✅ **Change default passwords** in environment variables
 - ✅ **Generate strong JWT_SECRET** (32+ characters)
 - ✅ **Add SESSION_SECRET** for enhanced security  
@@ -133,6 +149,7 @@ This setup is **ideal for showcasing** your Justice Dashboard:
 - ✅ **Enable HTTPS** (automatic with Render)
 
 ### **Guest Account Limitations:**
+
 - ✅ **Read-only for sensitive data**
 - ✅ **Standard user permissions** only
 - ✅ **No admin functions** accessible
@@ -149,12 +166,14 @@ This setup is **ideal for showcasing** your Justice Dashboard:
 ## 📞 **Support & Troubleshooting**
 
 ### **Common Issues:**
+
 - **Build fails:** Check Node.js version in Render settings
 - **Environment variables:** Verify all required vars are set
 - **Login issues:** Check JWT_SECRET is properly configured
 - **API errors:** Verify OPENAI_API_KEY and WOLFRAM_APP_ID
 
 ### **Render Logs:**
+
 Access real-time logs in your Render dashboard to debug any issues.
 
 ---
@@ -162,6 +181,7 @@ Access real-time logs in your Render dashboard to debug any issues.
 ## 🎉 **Your Justice Dashboard is Now Live!**
 
 **Features Available:**
+
 - ✅ **Guest Login** - One-click access
 - ✅ **Wolfram Alpha** - AI legal research  
 - ✅ **Document Processing** - File analysis
