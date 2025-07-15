@@ -1,3 +1,8 @@
+/*
+  Tailwind CSS variable initialization for all elements and pseudo-elements.
+  These variables are used for spacing, transforms, gradients, borders, rings, shadows, filters, and containment.
+  They provide a consistent base for utility classes and custom styles throughout the dashboard.
+*/
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -52,6 +57,10 @@
   --tw-contain-style:  ;
 }
 
+/*
+  Tailwind CSS variable initialization for the ::backdrop pseudo-element.
+  Ensures consistent styling for modal and dialog backgrounds.
+*/
 ::backdrop {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -107,461 +116,316 @@
 }
 
 /*
-! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
+  Tailwind CSS v3.4.17 license and version information.
+  For full documentation, visit https://tailwindcss.com
 */
-
 /*
-1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
-2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+  Reset box sizing, border, and color for all elements and pseudo-elements.
+  Ensures consistent layout and border appearance across browsers.
 */
-
-*,
-::before,
-::after {
-  box-sizing: border-box;
-  /* 1 */
-  border-width: 0;
-  /* 2 */
-  border-style: solid;
-  /* 2 */
-  border-color: #e5e7eb;
-  /* 2 */
+*, ::before, ::after {
+  box-sizing: border-box; /* Ensures padding and border do not expand the width/height */
+  border-width: 0;        /* Resets default border widths so borders only appear when defined */
+  border-style: solid;    /* Sets the default border style to solid for utility-based control */
+  border-color: #e5e7eb;  /* Sets a neutral default border color (Tailwind's gray-200) */
 }
 
-::before,
-::after {
+/*
+  Set default content for pseudo-elements to empty string for consistent rendering.
+*/
+::before, ::after {
   --tw-content: '';
 }
 
 /*
-1. Use a consistent sensible line-height in all browsers.
-2. Prevent adjustments of font size after orientation changes in iOS.
-3. Use a more readable tab size.
-4. Use the user's configured `sans` font-family by default.
-5. Use the user's configured `sans` font-feature-settings by default.
-6. Use the user's configured `sans` font-variation-settings by default.
-7. Disable tap highlights on iOS
+  Set sensible defaults for html and :host elements:
+  - Line height
+  - Font family and features
+  - Tab size
+  - Tap highlight color
+  - Text size adjustment
 */
-
-html,
-:host {
+html, :host {
   line-height: 1.5;
-  /* 1 */
   -webkit-text-size-adjust: 100%;
-  /* 2 */
+  text-size-adjust: 100%;
   -moz-tab-size: 4;
-  /* 3 */
   -o-tab-size: 4;
-     tab-size: 4;
-  /* 3 */
+  tab-size: 4;
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  /* 4 */
   font-feature-settings: normal;
-  /* 5 */
   font-variation-settings: normal;
-  /* 6 */
   -webkit-tap-highlight-color: transparent;
-  /* 7 */
 }
 
 /*
-1. Remove the margin in all browsers.
-2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+  Remove default body margin and inherit line height from html.
 */
-
 body {
   margin: 0;
-  /* 1 */
   line-height: inherit;
-  /* 2 */
 }
 
 /*
-1. Add the correct height in Firefox.
-2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
-3. Ensure horizontal rules are visible by default.
+  Style horizontal rules for visibility and color inheritance.
 */
-
 hr {
   height: 0;
-  /* 1 */
   color: inherit;
-  /* 2 */
   border-top-width: 1px;
-  /* 3 */
 }
 
 /*
-Add the correct text decoration in Chrome, Edge, and Safari.
+  Style abbreviations with underline dotted decoration for clarity.
 */
-
 abbr:where([title]) {
   -webkit-text-decoration: underline dotted;
-          text-decoration: underline dotted;
+  text-decoration: underline dotted;
 }
 
 /*
-Remove the default font size and weight for headings.
+  Remove default font size and weight for headings to allow custom styling.
 */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-size: inherit;
   font-weight: inherit;
 }
 
 /*
-Reset links to optimize for opt-in styling instead of opt-out.
+  Reset link styles to allow opt-in styling.
 */
-
 a {
   color: inherit;
   text-decoration: inherit;
 }
 
 /*
-Add the correct font weight in Edge and Safari.
+  Set b and strong elements to use bolder font weight for emphasis.
 */
-
-b,
-strong {
+b, strong {
   font-weight: bolder;
 }
 
 /*
-1. Use the user's configured `mono` font-family by default.
-2. Use the user's configured `mono` font-feature-settings by default.
-3. Use the user's configured `mono` font-variation-settings by default.
-4. Correct the odd `em` font sizing in all browsers.
+  Set sensible defaults for code, kbd, samp, and pre elements:
+  - Monospace font family
+  - Font features
+  - Font size
 */
-
-code,
-kbd,
-samp,
-pre {
+code, kbd, samp, pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  /* 1 */
   font-feature-settings: normal;
-  /* 2 */
   font-variation-settings: normal;
-  /* 3 */
   font-size: 1em;
-  /* 4 */
 }
 
 /*
-Add the correct font size in all browsers.
+  Set default font size for small elements.
 */
-
 small {
   font-size: 80%;
 }
 
 /*
-Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+  Prevent sub and sup elements from affecting line height.
 */
-
-sub,
-sup {
+sub, sup {
   font-size: 75%;
   line-height: 0;
   position: relative;
   vertical-align: baseline;
 }
-
-sub {
-  bottom: -0.25em;
-}
-
-sup {
-  top: -0.5em;
-}
+sub { bottom: -0.25em; }
+sup { top: -0.5em; }
 
 /*
-1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
-2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
-3. Remove gaps between table borders by default.
+  Table styling for consistent border, spacing, and collapse behavior.
 */
-
 table {
   text-indent: 0;
-  /* 1 */
   border-color: inherit;
-  /* 2 */
   border-collapse: collapse;
-  /* 3 */
 }
 
 /*
-1. Change the font styles in all browsers.
-2. Remove the margin in Firefox and Safari.
-3. Remove default padding in all browsers.
+  Form element styling for font, margin, and padding consistency.
 */
-
-button,
-input,
-optgroup,
-select,
-textarea {
+button, input, optgroup, select, textarea {
   font-family: inherit;
-  /* 1 */
   font-feature-settings: inherit;
-  /* 1 */
   font-variation-settings: inherit;
-  /* 1 */
   font-size: 100%;
-  /* 1 */
   font-weight: inherit;
-  /* 1 */
   line-height: inherit;
-  /* 1 */
   letter-spacing: inherit;
-  /* 1 */
   color: inherit;
-  /* 1 */
   margin: 0;
-  /* 2 */
   padding: 0;
-  /* 3 */
 }
 
 /*
-Remove the inheritance of text transform in Edge and Firefox.
+  Remove text transform inheritance for buttons and selects.
 */
-
-button,
-select {
+button, select {
   text-transform: none;
 }
 
 /*
-1. Correct the inability to style clickable types in iOS and Safari.
-2. Remove default button styles.
+  Remove default button styles and set appearance for clickable inputs.
 */
-
-button,
-input:where([type='button']),
-input:where([type='reset']),
-input:where([type='submit']) {
+button, input:where([type='button']), input:where([type='reset']), input:where([type='submit']) {
   -webkit-appearance: button;
   appearance: button;
-  /* 1 */
   background-color: transparent;
-  /* 2 */
   background-image: none;
-  /* 2 */
 }
 
 /*
-Use the modern Firefox focus style for all focusable elements.
+  Use modern Firefox focus style for all focusable elements.
 */
-
 :-moz-focusring {
   outline: auto;
 }
 
 /*
-Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+  Remove additional :invalid styles in Firefox.
 */
-
 :-moz-ui-invalid {
   box-shadow: none;
 }
 
 /*
-Add the correct vertical alignment in Chrome and Firefox.
+  Set vertical alignment for progress elements.
 */
-
 progress {
   vertical-align: baseline;
 }
 
 /*
-Correct the cursor style of increment and decrement buttons in Safari.
+  Correct cursor style for increment/decrement buttons in Safari.
 */
-
-::-webkit-inner-spin-button,
-::-webkit-outer-spin-button {
+::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
   height: auto;
 }
 
 /*
-1. Correct the odd appearance in Chrome and Safari.
-2. Correct the outline style in Safari.
+  Style search inputs for consistent appearance and outline.
 */
-
 [type='search'] {
   -webkit-appearance: textfield;
   appearance: textfield;
-  /* 1 */
   outline-offset: -2px;
-  /* 2 */
 }
 
 /*
-Remove the inner padding in Chrome and Safari on macOS.
+  Remove inner padding for search inputs in Chrome/Safari on macOS.
 */
-
 ::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
 /*
-1. Correct the inability to style clickable types in iOS and Safari.
-2. Change font properties to `inherit` in Safari.
+  Style file upload buttons for consistent appearance and font.
 */
-
 ::-webkit-file-upload-button {
   -webkit-appearance: button;
   appearance: button;
-  /* 1 */
   font: inherit;
-  /* 2 */
 }
 
 /*
-Add the correct display in Chrome and Safari.
+  Set display for summary elements in Chrome/Safari.
 */
-
 summary {
   display: list-item;
 }
 
 /*
-Removes the default spacing and border for appropriate elements.
+  Remove default spacing and border for block elements.
 */
-
-blockquote,
-dl,
-dd,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-hr,
-figure,
-p,
-pre {
+blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
   margin: 0;
 }
-
 fieldset {
   margin: 0;
   padding: 0;
 }
-
 legend {
   padding: 0;
 }
-
-ol,
-ul,
-menu {
+ol, ul, menu {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 /*
-Reset default styling for dialogs.
+  Reset default styling for dialogs.
 */
-
 dialog {
   padding: 0;
 }
 
 /*
-Prevent resizing textareas horizontally by default.
+  Prevent resizing textareas horizontally by default.
 */
-
 textarea {
   resize: vertical;
 }
 
 /*
-1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
-2. Set the default placeholder color to the user's configured gray 400 color.
+  Set default placeholder opacity and color for inputs and textareas.
 */
-
 input::-moz-placeholder, textarea::-moz-placeholder {
   opacity: 1;
-  /* 1 */
   color: #9ca3af;
-  /* 2 */
 }
-
-input::placeholder,
-textarea::placeholder {
+input::placeholder, textarea::placeholder {
   opacity: 1;
-  /* 1 */
   color: #9ca3af;
-  /* 2 */
 }
 
 /*
-Set the default cursor for buttons.
+  Set default cursor for buttons and role="button" elements.
 */
-
-button,
-[role="button"] {
+button, [role="button"] {
   cursor: pointer;
 }
 
 /*
-Make sure disabled buttons don't get the pointer cursor.
+  Ensure disabled buttons do not use pointer cursor.
 */
-
 :disabled {
   cursor: default;
 }
 
 /*
-1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
-2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
-   This can trigger a poorly considered lint error in some tools but is included by design.
+  Set display and alignment for replaced elements (images, videos, etc.).
 */
-
-img,
-svg,
-video,
-canvas,
-audio,
-iframe,
-embed,
-object {
+img, svg, video, canvas, audio, iframe, embed, object {
   display: block;
-  /* 1 */
-  /* vertical-align removed because it's ignored with display: block */
 }
 
 /*
-Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+  Constrain images and videos to parent width and preserve aspect ratio.
 */
-
-img,
-video {
+img, video {
   max-width: 100%;
   height: auto;
 }
 
-/* Make elements with the HTML hidden attribute stay hidden by default */
-
+/*
+  Hide elements with the hidden attribute by default.
+*/
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
 
-/* CSP-Compliant Justice Dashboard - Faith-Based CSS */
-
-/* Import Tailwind v4 styles */
+/*
+  CSP-Compliant Justice Dashboard custom styles and utilities.
+  Includes faith-based color system, backgrounds, text, borders, shadows, and component classes.
+*/
 @import "tailwindcss";
-
-/* Faith color system for CSP compliance */
 :root {
   --faith-gold-400: #BA9930;
   --faith-gold-600: #9A7A20;
@@ -569,51 +433,56 @@ video {
   --faith-indigo: #4F46E5;
 }
 
-/* Background utilities */
+/*
+  Custom background utilities for faith-based branding.
+*/
 .bg-faith-gradient {
   background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
 }
-
 .bg-gold {
   background-color: var(--faith-gold-400);
 }
-
 .bg-faith-indigo {
   background-color: var(--faith-indigo);
 }
 
-/* Text utilities */
+/*
+  Custom text color utilities for faith-based branding.
+*/
 .text-gold {
   color: var(--faith-gold-400);
 }
-
 .text-gray-600 {
   color: #6b7280;
 }
-
 .text-gray-700 {
   color: #374151;
 }
-
 .text-white {
   color: #ffffff;
 }
 
-/* Border utilities */
+/*
+  Custom border utilities for faith-based branding.
+*/
 .border-gold {
   border-color: var(--faith-gold-400);
 }
-
 .border-2 {
   border-width: 2px;
 }
 
-/* Shadow utilities */
+/*
+  Custom shadow utility for dashboard cards.
+*/
 .card-shadow {
   box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
 }
 
-/* Component classes */
+/*
+  Component classes for dashboard header, stats cards, tables, and footer.
+  These provide consistent styling and branding for the Justice Dashboard.
+*/
 .faith-dashboard-header {
   background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
   border-radius: 1.5rem;
@@ -621,7 +490,6 @@ video {
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
-
 .faith-stats-card {
   background: white;
   box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
@@ -631,32 +499,27 @@ video {
   border: 2px solid var(--faith-gold-400);
   transition: all 0.3s ease;
 }
-
 .faith-stats-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 40px rgba(186, 153, 48, 0.15);
 }
-
 .faith-table {
   background: white;
   border-radius: 1rem;
   box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
   overflow: hidden;
 }
-
 .faith-footer {
   margin-top: 2rem;
   font-size: 0.75rem;
   color: #6b7280;
   line-height: 1.4;
 }
-
 .scripture-text {
   font-family: Georgia, serif;
   font-style: italic;
   color: var(--faith-gold-700);
 }
-
 .faith-title {
   color: var(--faith-gold-400);
   font-weight: bold;
@@ -664,19 +527,20 @@ video {
   line-height: 1.2;
   letter-spacing: -0.025em;
 }
-
 .victory-text {
   color: var(--faith-gold-400);
   font-weight: 600;
   animation: sparkle 2.5s infinite alternate;
 }
-
 @keyframes sparkle {
   from { filter: brightness(1.1); }
   to   { filter: brightness(1.6); }
 }
 
-/* Essential utilities for dashboard */
+/*
+  Essential utility classes for layout, spacing, typography, and responsiveness.
+  These classes are used throughout the dashboard for consistent design.
+*/
 .container { width: 100%; max-width: 1200px; margin: 0 auto; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 .p-4 { padding: 1rem; }
@@ -749,7 +613,9 @@ video {
 .bg-red-500 { background-color: #ef4444; }
 .bg-opacity-50 { --tw-bg-opacity: 0.5; }
 
-/* Responsive utilities */
+/*
+  Responsive utility classes for grid layouts on medium screens and above.
+*/
 @media (min-width: 768px) {
   .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
