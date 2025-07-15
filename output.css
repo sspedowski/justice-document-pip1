@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /*
   Tailwind CSS variable initialization for all elements and pseudo-elements.
   These variables are used for spacing, transforms, gradients, borders, rings, shadows, filters, and containment.
@@ -426,7 +427,10 @@ img, video {
   CSP-Compliant Justice Dashboard custom styles and utilities.
   Includes faith-based color system, backgrounds, text, borders, shadows, and component classes.
 */
-@import "tailwindcss";
+/*
+  CSP-Compliant Justice Dashboard custom styles and utilities.
+  Includes faith-based color system, backgrounds, text, borders, shadows, and component classes.
+*/
 :root {
   --faith-gold-400: #BA9930;
   --faith-gold-600: #9A7A20;
