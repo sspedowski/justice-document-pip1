@@ -58,4 +58,24 @@ document.addEventListener('DOMContentLoaded', function() {
             column: e.colno
         });
     });
+
+    // Binding upload and lawyer event handlers
+    console.log('🔍 Binding upload and lawyer event handlers...');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const lawyerBtn = document.getElementById('lawyerBtn');
+    console.log('Upload button:', !!uploadBtn);
+    console.log('Lawyer button:', !!lawyerBtn);
+
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', function() {
+            console.log('✅ Upload button clicked!');
+            // Add your upload logic here
+        });
+    }
+    if (lawyerBtn) {
+        lawyerBtn.addEventListener('click', function() {
+            console.log('✅ Lawyer button clicked!');
+            // Add your lawyer logic here
+        });
+    }
 });
