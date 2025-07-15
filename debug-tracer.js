@@ -69,12 +69,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (uploadBtn) {
         uploadBtn.addEventListener('click', function() {
             console.log('✅ Upload button clicked!');
+            alert('Upload button was clicked!');
             // Add your upload logic here
         });
     }
     if (lawyerBtn) {
         lawyerBtn.addEventListener('click', function() {
             console.log('✅ Lawyer button clicked!');
+            alert('Lawyer button was clicked!');
             // Add your lawyer logic here
         });
     }
