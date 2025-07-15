@@ -1,3 +1,12 @@
+// Ensure Upload and Lawyer buttons always work, even if added dynamically
+document.addEventListener('click', function(event) {
+  if (event.target && event.target.id === 'uploadBtn') {
+    alert('Upload button (delegated)');
+  }
+  if (event.target && event.target.id === 'lawyerBtn') {
+    alert('Lawyer button (delegated)');
+  }
+});
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
