@@ -841,6 +841,16 @@ function clearAllFilters() {
   updateDashboardStats();
 }
 
+// Helper to clear stored table data
+function clearOldData() {
+  const trackerBody = document.querySelector("#results");
+  localStorage.removeItem("justiceTrackerRows");
+  if (trackerBody) {
+    trackerBody.innerHTML = "";
+  }
+  console.log("Justice tracker data cleared");
+}
+
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
   // Timeout variable for optimized saving
@@ -1016,15 +1026,8 @@ window.clearJusticeData = function() {
   location.reload();
 };
 
-// Make clearOldData available globally for testing
-window.clearOldData = function() {
-  const trackerBody = document.querySelector("#results");
-  localStorage.removeItem("justiceTrackerRows");
-  if (trackerBody) {
-    trackerBody.innerHTML = "";
-  }
-  console.log("Justice tracker data cleared");
-};
+// Expose clearOldData globally for debugging
+window.clearOldData = clearOldData;
 
 // Global debugging functions
 window.debugDashboard = function() {
