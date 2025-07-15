@@ -35,17 +35,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Test app container functionality
     if (app) {
         console.log('✅ DEBUG: App container found - testing functionality');
-        
-        // Add test content to verify app container works
+        // Use class instead of inline style (CSP compliant)
         const testDiv = document.createElement('div');
-        testDiv.innerHTML = '<div style="background: white; padding: 20px; margin: 20px; border-radius: 10px; text-align: center; border: 2px solid #BA9930;"><h2 style="color: #BA9930; margin: 0;">🎯 DEBUG: App Container Working!</h2><p style="margin: 10px 0;">Justice Dashboard initialization successful</p><p style="color: #666; font-size: 12px;">This debug message confirms the app container is functional</p></div>';
+        testDiv.className = 'debug-message'; // Add a class instead of using style attribute
+        testDiv.innerHTML = `
+            <h2 class="debug-message-title">🎯 DEBUG: App Container Working!</h2>
+            <p class="debug-message-body">Justice Dashboard initialization successful</p>
+            <p class="debug-message-footer">This debug message confirms the app container is functional</p>
+        `;
         app.appendChild(testDiv);
-        
         console.log('✅ DEBUG: Test content added to app container');
     } else {
         console.error('❌ DEBUG: CRITICAL ERROR - App container not found!');
     }
-    
+
     // Check for script loading errors
     window.addEventListener('error', function(e) {
         console.error('❌ DEBUG: Script loading error:', {
@@ -55,9 +58,4 @@ document.addEventListener('DOMContentLoaded', function() {
             column: e.colno
         });
     });
-    
-    console.log('🔍 DEBUG: Initialization check complete');
 });
-
-// Check if scripts are loading in order
-console.log('🔍 DEBUG: Script execution order - debug-tracer.js executing now');
