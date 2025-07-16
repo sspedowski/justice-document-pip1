@@ -117,6 +117,17 @@ app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
 
+// Ensure uploads/ exists
+const UPLOADS_PATH = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_PATH)) {
+  fs.mkdirSync(UPLOADS_PATH, { recursive: true });
+}
+const upload = multer({ dest: UPLOADS_PATH });
+
+// Serve ONLY from 'client/dist'
+const PUBLIC_DIR = path.join(__dirname, 'client', 'dist');
+app.use(express.static(PUBLIC_DIR));
+
 // Default route - serve main dashboard
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -542,16 +553,6 @@ app.delete("/api/admin/users/:id", authenticateToken, requireAdmin, (req, res) =
     console.error("Delete user error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-// File upload configuration
-const upload = multer({
-  dest: "uploads/",
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
-  fileFilter: (_req, file, cb) =>
-    file.mimetype === "application/pdf"
-      ? cb(null, true)
-      : cb(new Error("Only PDF files allowed"))
 });
 
 // OCR function

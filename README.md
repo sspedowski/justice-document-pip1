@@ -70,6 +70,29 @@ npm start
 
 Then visit <http://localhost:3000>
 
+## Justice Dashboard Setup
+
+### 1. Install
+
+```bash
+git clone https://github.com/YOUR_NAME/justice-dashboard.git
+cd justice-dashboard
+npm install
+```
+
+### 2. Create required folders
+
+```bash
+mkdir -p uploads
+mkdir -p client/dist
+```
+
+### 3. Start server
+
+```bash
+node server.js
+```
+
 ## Legal Notes
 
 This project is released under the [MIT License](./LICENSE).

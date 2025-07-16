@@ -7,20 +7,20 @@
     "dev": "nodemon server.js",
     "build": "npx tailwindcss -i ./input.css -o ./output.css",
     "watch": "npx tailwindcss -i ./input.css -o ./output.css --watch",
-    "test": "echo \"No tests specified in root - run 'cd justice-dashboard && npm test' for main tests\" && exit 0"
+    "test": "jest"
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^4.21.2",
+    "express": "^4.18.2",
     "express-rate-limit": "^7.5.1",
     "express-session": "^1.18.1",
     "firebase": "^11.10.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^1.4.5",
     "node-fetch": "^3.3.2",
     "openai": "^4.104.0",
     "pdf-parse": "^1.1.1",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
-    "jest": "^30.0.4",
+    "jest": "^29.6.1",
     "markdownlint-cli": "^0.45.0",
     "tailwindcss": "^4.1.11"
   }
