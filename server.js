@@ -702,3 +702,35 @@ app.listen(PORT, () => {
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
 });
+
+const path = require('path');
+const express = require('express');
+const fs = require('fs');
+const multer = require('multer');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Ensure uploads/ exists
+const UPLOADS_PATH = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_PATH)) {
+  fs.mkdirSync(UPLOADS_PATH, { recursive: true });
+}
+const upload = multer({ dest: UPLOADS_PATH });
+
+// Serve only from client/dist
+const PUBLIC_DIR = path.join(__dirname, 'client', 'dist');
+app.use(express.static(PUBLIC_DIR));
+
+// Example upload route
+app.post('/upload', upload.single('file'), (req, res) => {
+  res.send({ filename: req.file.filename });
+});
+
+// Fallback to index.html for client routing (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Justice Dashboard running at http://localhost:${PORT}`);
+});

@@ -72,26 +72,28 @@ Then visit <http://localhost:3000>
 
 ## Justice Dashboard Setup
 
-### 1. Install
+## 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_NAME/justice-dashboard.git
+git clone https://github.com/YOUR_USERNAME/justice-dashboard.git
 cd justice-dashboard
 npm install
 ```
 
-### 2. Create required folders
+## 2. Create required folders
 
 ```bash
 mkdir -p uploads
 mkdir -p client/dist
 ```
 
-### 3. Start server
+## 3. Start server
 
 ```bash
 node server.js
 ```
+
+App will be available at: [http://localhost:3000](http://localhost:3000)
 
 ## Legal Notes
 
