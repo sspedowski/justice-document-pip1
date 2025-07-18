@@ -6,23 +6,21 @@ module.exports = {
     es2021: true,
     jest: true,
   },
-  extends: [
-    'eslint:recommended'
-  ],
+  extends: ['eslint:recommended'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
   rules: {
-    "no-unused-vars": "warn",
-    "no-console": "off", // Allow console.log for debugging
-    "semi": ["error", "always"],
+    'no-unused-vars': 'warn',
+    'no-console': 'off', // Allow console.log for debugging
+    semi: ['error', 'always'],
   },
   ignorePatterns: [
-    "node_modules/", 
-    "frontend/dist/", 
-    "build/",
-    "uploads/",
-    "coverage/"
-  ]
+    'node_modules/',
+    'frontend/dist/',
+    'build/',
+    'uploads/',
+    'coverage/',
+  ],
 };

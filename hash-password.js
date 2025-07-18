@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 
 async function hashPassword(password) {
   try {
@@ -8,10 +8,10 @@ async function hashPassword(password) {
     console.log(`Hash: ${hash}`);
     return hash;
   } catch (error) {
-    console.error('Error hashing password:', error);
+    console.error("Error hashing password:", error);
   }
 }
 
 // Hash guest password
-const password = process.argv[2] || 'guest123';
+const password = process.argv[2] || "guest123";
 hashPassword(password);

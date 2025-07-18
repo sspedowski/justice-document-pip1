@@ -12,11 +12,13 @@ const requiredEnvVars = [
   'VITE_FIREBASE_PROJECT_ID',
   'VITE_FIREBASE_STORAGE_BUCKET',
   'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID'
+  'VITE_FIREBASE_APP_ID',
 ];
 
 // Check for missing environment variables
-const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+const missingVars = requiredEnvVars.filter(
+  varName => !import.meta.env[varName]
+);
 
 let app = null;
 let db = null;
@@ -25,9 +27,15 @@ let storage = null;
 let functions = null;
 
 if (missingVars.length > 0) {
-  console.warn(`⚠️ Firebase not configured: Missing variables: ${missingVars.join(', ')}`);
-  console.warn('📝 Please update your .env file with real Firebase configuration values');
-  console.warn('🔗 Get config from: https://console.firebase.google.com -> Project Settings -> Your Apps');
+  console.warn(
+    `⚠️ Firebase not configured: Missing variables: ${missingVars.join(', ')}`
+  );
+  console.warn(
+    '📝 Please update your .env file with real Firebase configuration values'
+  );
+  console.warn(
+    '🔗 Get config from: https://console.firebase.google.com -> Project Settings -> Your Apps'
+  );
 } else {
   const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -45,7 +53,7 @@ if (missingVars.length > 0) {
     auth = getAuth(app);
     storage = getStorage(app);
     functions = getFunctions(app);
-    
+
     // Connect to emulators in development
     if (import.meta.env.DEV) {
       try {
@@ -55,10 +63,12 @@ if (missingVars.length > 0) {
         connectFunctionsEmulator(functions, 'localhost', 5001);
         console.log('🔧 Connected to Firebase emulators');
       } catch (error) {
-        console.log('⚠️ Firebase emulators not running (this is normal for production)');
+        console.log(
+          '⚠️ Firebase emulators not running (this is normal for production)'
+        );
       }
     }
-    
+
     console.log('🔥 Firebase initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing Firebase:', error);
@@ -67,7 +77,8 @@ if (missingVars.length > 0) {
       authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'MISSING',
       projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'MISSING',
       storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'MISSING',
-      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || 'MISSING',
+      messagingSenderId:
+        import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || 'MISSING',
       appId: import.meta.env.VITE_FIREBASE_APP_ID || 'MISSING',
     });
   }

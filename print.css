@@ -1,238 +1,246 @@
 /* Print-Friendly Styles for Justice Dashboard - Enhanced */
 @media print {
-    /* Hide non-essential elements */
-    .toggle-button,
-    .action-buttons,
-    .print-hidden,
-    button,
-    input[type="file"],
-    #darkModeToggle,
-    .no-print {
-        display: none !important;
+  /* Hide non-essential elements */
+  .toggle-button,
+  .action-buttons,
+  .print-hidden,
+  button,
+  input[type="file"],
+  #darkModeToggle,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Reset backgrounds and colors for better printing */
+  * {
+    background: white !important;
+    color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Ensure good contrast */
+  .text-gray-600,
+  .text-secondary {
+    color: #333 !important;
+  }
+
+  .text-gray-400 {
+    color: #666 !important;
+  }
+
+  /* Optimize layout for print */
+  body {
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    margin: 0.5in !important;
+    background: white !important;
+  }
+
+  /* Headers */
+  h1 {
+    font-size: 20pt !important;
+    margin-bottom: 0.5in !important;
+    text-align: center !important;
+    border-bottom: 2px solid #000 !important;
+    padding-bottom: 0.2in !important;
+    page-break-after: avoid !important;
+  }
+
+  h2 {
+    font-size: 16pt !important;
+    margin: 0.3in 0 0.1in 0 !important;
+    page-break-after: avoid !important;
+    font-weight: bold !important;
+  }
+
+  h3 {
+    font-size: 14pt !important;
+    margin: 0.2in 0 0.1in 0 !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Scripture banner */
+  .scripture-banner {
+    background: #f5f5f5 !important;
+    border: 2px solid #333 !important;
+    padding: 0.3in !important;
+    margin: 0.2in 0 0.5in 0 !important;
+    text-align: center !important;
+    font-style: italic !important;
+    font-size: 14pt !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Statistics cards - convert to simple list */
+  .stats-card {
+    display: inline-block !important;
+    width: 22% !important;
+    margin: 0.1in 1% !important;
+    padding: 0.15in !important;
+    border: 1px solid #333 !important;
+    text-align: center !important;
+    vertical-align: top !important;
+    page-break-inside: avoid !important;
+  }
+
+  .stats-card .text-4xl,
+  .stats-card .text-3xl,
+  .stats-card .text-2xl {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    display: block !important;
+    margin: 0.1in 0 !important;
+  }
+
+  /* Tables */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0.3in 0 !important;
+    page-break-inside: avoid !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #000 !important;
+    padding: 0.1in !important;
+    text-align: left !important;
+    vertical-align: top !important;
+    font-size: 10pt !important;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: bold !important;
+    font-size: 11pt !important;
+  }
+
+  /* Forms - make readable */
+  input,
+  select,
+  textarea {
+    border: 1px solid #000 !important;
+    background: white !important;
+    padding: 0.05in !important;
+    font-size: 10pt !important;
+  }
+
+  /* Text areas */
+  textarea {
+    border: 1px solid #333 !important;
+    min-height: 1in !important;
+    font-family: "Courier New", monospace !important;
+    font-size: 9pt !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always !important;
+  }
+
+  .no-break {
+    page-break-inside: avoid !important;
+  }
+
+  .page-break-after {
+    page-break-after: always !important;
+  }
+
+  /* Links */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  a:after {
+    content: " (" attr(href) ")" !important;
+    font-size: 8pt !important;
+  }
+
+  /* Footer for printed pages */
+  @page {
+    margin: 0.75in 0.5in !important;
+    @top-center {
+      content: "Justice Dashboard - Legal Case Management System" !important;
+      font-size: 10pt !important;
+      border-bottom: 1px solid #333 !important;
+      padding-bottom: 0.1in !important;
     }
-    
-    /* Show print-only elements */
-    .print-only {
-        display: block !important;
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages) !important;
+      font-size: 10pt !important;
+      border-top: 1px solid #333 !important;
+      padding-top: 0.1in !important;
     }
-    
-    /* Reset backgrounds and colors for better printing */
-    * {
-        background: white !important;
-        color: black !important;
-        text-shadow: none !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-    }
-    
-    /* Ensure good contrast */
-    .text-gray-600,
-    .text-secondary {
-        color: #333 !important;
-    }
-    
-    .text-gray-400 {
-        color: #666 !important;
-    }
-    
-    /* Optimize layout for print */
-    body {
-        font-family: "Times New Roman", Times, serif !important;
-        font-size: 12pt !important;
-        line-height: 1.5 !important;
-        margin: 0.5in !important;
-        background: white !important;
-    }
-    
-    /* Headers */
-    h1 {
-        font-size: 20pt !important;
-        margin-bottom: 0.5in !important;
-        text-align: center !important;
-        border-bottom: 2px solid #000 !important;
-        padding-bottom: 0.2in !important;
-        page-break-after: avoid !important;
-    }
-    
-    h2 {
-        font-size: 16pt !important;
-        margin: 0.3in 0 0.1in 0 !important;
-        page-break-after: avoid !important;
-        font-weight: bold !important;
-    }
-    
-    h3 {
-        font-size: 14pt !important;
-        margin: 0.2in 0 0.1in 0 !important;
-        page-break-after: avoid !important;
-    }
-    
-    /* Scripture banner */
-    .scripture-banner {
-        background: #f5f5f5 !important;
-        border: 2px solid #333 !important;
-        padding: 0.3in !important;
-        margin: 0.2in 0 0.5in 0 !important;
-        text-align: center !important;
-        font-style: italic !important;
-        font-size: 14pt !important;
-        page-break-inside: avoid !important;
-    }
-    
-    /* Statistics cards - convert to simple list */
-    .stats-card {
-        display: inline-block !important;
-        width: 22% !important;
-        margin: 0.1in 1% !important;
-        padding: 0.15in !important;
-        border: 1px solid #333 !important;
-        text-align: center !important;
-        vertical-align: top !important;
-        page-break-inside: avoid !important;
-    }
-    
-    .stats-card .text-4xl,
-    .stats-card .text-3xl,
-    .stats-card .text-2xl {
-        font-size: 18pt !important;
-        font-weight: bold !important;
-        display: block !important;
-        margin: 0.1in 0 !important;
-    }
-    
-    /* Tables */
-    table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin: 0.3in 0 !important;
-        page-break-inside: avoid !important;
-    }
-    
-    th, td {
-        border: 1px solid #000 !important;
-        padding: 0.1in !important;
-        text-align: left !important;
-        vertical-align: top !important;
-        font-size: 10pt !important;
-    }
-    
-    th {
-        background: #f0f0f0 !important;
-        font-weight: bold !important;
-        font-size: 11pt !important;
-    }
-    
-    /* Forms - make readable */
-    input, select, textarea {
-        border: 1px solid #000 !important;
-        background: white !important;
-        padding: 0.05in !important;
-        font-size: 10pt !important;
-    }
-    
-    /* Text areas */
-    textarea {
-        border: 1px solid #333 !important;
-        min-height: 1in !important;
-        font-family: "Courier New", monospace !important;
-        font-size: 9pt !important;
-    }
-    
-    /* Page breaks */
-    .page-break {
-        page-break-before: always !important;
-    }
-    
-    .no-break {
-        page-break-inside: avoid !important;
-    }
-    
-    .page-break-after {
-        page-break-after: always !important;
-    }
-    
-    /* Links */
-    a {
-        color: #000 !important;
-        text-decoration: underline !important;
-    }
-    
-    a:after {
-        content: " (" attr(href) ")" !important;
-        font-size: 8pt !important;
-    }
-    
-    /* Footer for printed pages */
-    @page {
-        margin: 0.75in 0.5in !important;
-        @top-center {
-            content: "Justice Dashboard - Legal Case Management System" !important;
-            font-size: 10pt !important;
-            border-bottom: 1px solid #333 !important;
-            padding-bottom: 0.1in !important;
-        }
-        @bottom-center {
-            content: "Page " counter(page) " of " counter(pages) !important;
-            font-size: 10pt !important;
-            border-top: 1px solid #333 !important;
-            padding-top: 0.1in !important;
-        }
-    }
-    
-    /* Ensure readability */
-    .text-sm {
-        font-size: 10pt !important;
-    }
-    
-    .text-lg {
-        font-size: 14pt !important;
-    }
-    
-    .text-xl {
-        font-size: 16pt !important;
-    }
-    
-    /* Convert gradients and colors to print-friendly versions */
-    .bg-gradient-to-br,
-    .bg-gradient-to-r,
-    .bg-blue-400,
-    .bg-green-400,
-    .bg-purple-400,
-    .bg-orange-400 {
-        background: #f9f9f9 !important;
-        border: 1px solid #333 !important;
-    }
-    
-    /* Print-specific typography */
-    .font-bold {
-        font-weight: bold !important;
-    }
-    
-    .italic {
-        font-style: italic !important;
-    }
-    
-    /* Ensure proper spacing */
-    .mb-8, .mb-6, .mb-4 {
-        margin-bottom: 0.2in !important;
-    }
-    
-    .mt-8, .mt-6, .mt-4 {
-        margin-top: 0.2in !important;
-    }
-    
-    .p-6, .p-4 {
-        padding: 0.15in !important;
-    }
-    
-    /* Grid layouts - convert to linear for print */
-    .grid {
-        display: block !important;
-    }
-    
-    .grid > * {
-        display: block !important;
-        width: 100% !important;
-        margin-bottom: 0.1in !important;
-    }
+  }
+
+  /* Ensure readability */
+  .text-sm {
+    font-size: 10pt !important;
+  }
+
+  .text-lg {
+    font-size: 14pt !important;
+  }
+
+  .text-xl {
+    font-size: 16pt !important;
+  }
+
+  /* Convert gradients and colors to print-friendly versions */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r,
+  .bg-blue-400,
+  .bg-green-400,
+  .bg-purple-400,
+  .bg-orange-400 {
+    background: #f9f9f9 !important;
+    border: 1px solid #333 !important;
+  }
+
+  /* Print-specific typography */
+  .font-bold {
+    font-weight: bold !important;
+  }
+
+  .italic {
+    font-style: italic !important;
+  }
+
+  /* Ensure proper spacing */
+  .mb-8,
+  .mb-6,
+  .mb-4 {
+    margin-bottom: 0.2in !important;
+  }
+
+  .mt-8,
+  .mt-6,
+  .mt-4 {
+    margin-top: 0.2in !important;
+  }
+
+  .p-6,
+  .p-4 {
+    padding: 0.15in !important;
+  }
+
+  /* Grid layouts - convert to linear for print */
+  .grid {
+    display: block !important;
+  }
+
+  .grid > * {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 0.1in !important;
+  }
 }

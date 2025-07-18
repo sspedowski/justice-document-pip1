@@ -6,10 +6,7 @@ export default defineConfig({
   envDir: '../', // Look for .env files in the parent directory (project root)
   css: {
     postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-      ],
+      plugins: [require('tailwindcss'), require('autoprefixer')],
     },
   },
   server: {

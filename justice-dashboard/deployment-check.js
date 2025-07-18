@@ -4,7 +4,7 @@ const requiredFiles = [
   'backend/server.js',
   'frontend/index.html',
   'frontend/script.js',
-  'frontend/dist/output.css'  // Add CSS file check
+  'frontend/dist/output.css', // Add CSS file check
 ];
 
 let allPresent = true;
@@ -20,6 +20,8 @@ if (allPresent) {
   console.log('✅ All required files present.');
   process.exit(0);
 } else {
-  console.log('❗ Deployment check failed. Please ensure all files are in place.');
+  console.log(
+    '❗ Deployment check failed. Please ensure all files are in place.'
+  );
   process.exit(1);
 }

@@ -1,143 +1,204 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Firebase Test - Justice Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #0056b3; }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      .test-result {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>🔥 Firebase Integration Test</h1>
     <div id="results"></div>
-    
+
     <div>
-        <button onclick="testFirebaseConnection()">Test Firebase Connection</button>
-        <button onclick="testFirestore()">Test Firestore</button>
-        <button onclick="testAuth()">Test Authentication</button>
-        <button onclick="testStorage()">Test Storage</button>
+      <button onclick="testFirebaseConnection()">
+        Test Firebase Connection
+      </button>
+      <button onclick="testFirestore()">Test Firestore</button>
+      <button onclick="testAuth()">Test Authentication</button>
+      <button onclick="testStorage()">Test Storage</button>
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getStorage, ref, uploadBytes } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+        getDoc,
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAQm3l0On3Ka13xrGgl2Ebuuq1UcsLBc8E",
-            authDomain: "justice-dashboard-2025-4154e.firebaseapp.com",
-            projectId: "justice-dashboard-2025-4154e",
-            storageBucket: "justice-dashboard-2025-4154e.firebasestorage.app",
-            messagingSenderId: "241577747238",
-            appId: "1:241577747238:web:d9b8dfeb56a77a5aae17e7"
-        };
+      // Your Firebase configuration
+      const firebaseConfig = {
+        apiKey: 'AIzaSyAQm3l0On3Ka13xrGgl2Ebuuq1UcsLBc8E',
+        authDomain: 'justice-dashboard-2025-4154e.firebaseapp.com',
+        projectId: 'justice-dashboard-2025-4154e',
+        storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
+        messagingSenderId: '241577747238',
+        appId: '1:241577747238:web:d9b8dfeb56a77a5aae17e7',
+      };
 
-        let app, db, auth, storage;
-        let results = document.getElementById('results');
+      let app, db, auth, storage;
+      let results = document.getElementById('results');
 
-        function addResult(message, type = 'info') {
-            const div = document.createElement('div');
-            div.className = `test-result ${type}`;
-            div.innerHTML = message;
-            results.appendChild(div);
+      function addResult(message, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `test-result ${type}`;
+        div.innerHTML = message;
+        results.appendChild(div);
+      }
+
+      // Initialize Firebase
+      try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        storage = getStorage(app);
+        addResult('✅ Firebase initialized successfully!', 'success');
+      } catch (error) {
+        addResult(
+          `❌ Firebase initialization failed: ${error.message}`,
+          'error'
+        );
+      }
+
+      // Test functions
+      window.testFirebaseConnection = function () {
+        if (app) {
+          addResult('✅ Firebase connection active', 'success');
+          addResult(`📊 Project ID: ${app.options.projectId}`, 'info');
+          addResult(`🔗 Auth Domain: ${app.options.authDomain}`, 'info');
+        } else {
+          addResult('❌ Firebase not connected', 'error');
         }
+      };
 
-        // Initialize Firebase
+      window.testFirestore = async function () {
         try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            storage = getStorage(app);
-            addResult('✅ Firebase initialized successfully!', 'success');
+          const testDoc = doc(db, 'test', 'connection');
+          await setDoc(testDoc, {
+            timestamp: new Date().toISOString(),
+            test: 'Firebase connection test',
+          });
+
+          const docSnap = await getDoc(testDoc);
+          if (docSnap.exists()) {
+            addResult('✅ Firestore read/write successful!', 'success');
+            addResult(
+              `📄 Test data: ${JSON.stringify(docSnap.data())}`,
+              'info'
+            );
+          } else {
+            addResult('❌ Firestore write succeeded but read failed', 'error');
+          }
         } catch (error) {
-            addResult(`❌ Firebase initialization failed: ${error.message}`, 'error');
+          if (error.code === 'permission-denied') {
+            addResult(
+              '⚠️ Firestore permission denied - please enable Firestore in Firebase Console and set up security rules',
+              'error'
+            );
+          } else {
+            addResult(`❌ Firestore test failed: ${error.message}`, 'error');
+          }
         }
+      };
 
-        // Test functions
-        window.testFirebaseConnection = function() {
-            if (app) {
-                addResult('✅ Firebase connection active', 'success');
-                addResult(`📊 Project ID: ${app.options.projectId}`, 'info');
-                addResult(`🔗 Auth Domain: ${app.options.authDomain}`, 'info');
+      window.testAuth = async function () {
+        try {
+          // Test auth service availability
+          if (auth) {
+            addResult(
+              '✅ Firebase Authentication service available',
+              'success'
+            );
+            addResult(`🔐 Auth domain: ${auth.config.authDomain}`, 'info');
+
+            // Check current user
+            if (auth.currentUser) {
+              addResult(`👤 Current user: ${auth.currentUser.email}`, 'info');
             } else {
-                addResult('❌ Firebase not connected', 'error');
+              addResult('👤 No user currently signed in', 'info');
             }
-        };
+          } else {
+            addResult('❌ Firebase Authentication not available', 'error');
+          }
+        } catch (error) {
+          addResult(`❌ Auth test failed: ${error.message}`, 'error');
+        }
+      };
 
-        window.testFirestore = async function() {
-            try {
-                const testDoc = doc(db, 'test', 'connection');
-                await setDoc(testDoc, { 
-                    timestamp: new Date().toISOString(),
-                    test: 'Firebase connection test'
-                });
-                
-                const docSnap = await getDoc(testDoc);
-                if (docSnap.exists()) {
-                    addResult('✅ Firestore read/write successful!', 'success');
-                    addResult(`📄 Test data: ${JSON.stringify(docSnap.data())}`, 'info');
-                } else {
-                    addResult('❌ Firestore write succeeded but read failed', 'error');
-                }
-            } catch (error) {
-                if (error.code === 'permission-denied') {
-                    addResult('⚠️ Firestore permission denied - please enable Firestore in Firebase Console and set up security rules', 'error');
-                } else {
-                    addResult(`❌ Firestore test failed: ${error.message}`, 'error');
-                }
-            }
-        };
+      window.testStorage = async function () {
+        try {
+          if (storage) {
+            addResult('✅ Firebase Storage service available', 'success');
+            addResult(
+              `📁 Storage bucket: ${storage.app.options.storageBucket}`,
+              'info'
+            );
 
-        window.testAuth = async function() {
-            try {
-                // Test auth service availability
-                if (auth) {
-                    addResult('✅ Firebase Authentication service available', 'success');
-                    addResult(`🔐 Auth domain: ${auth.config.authDomain}`, 'info');
-                    
-                    // Check current user
-                    if (auth.currentUser) {
-                        addResult(`👤 Current user: ${auth.currentUser.email}`, 'info');
-                    } else {
-                        addResult('👤 No user currently signed in', 'info');
-                    }
-                } else {
-                    addResult('❌ Firebase Authentication not available', 'error');
-                }
-            } catch (error) {
-                addResult(`❌ Auth test failed: ${error.message}`, 'error');
-            }
-        };
+            // Test file upload capability (without actually uploading)
+            const testRef = ref(storage, 'test/connection-test.txt');
+            addResult('📤 Storage upload endpoint ready', 'success');
+          } else {
+            addResult('❌ Firebase Storage not available', 'error');
+          }
+        } catch (error) {
+          addResult(`❌ Storage test failed: ${error.message}`, 'error');
+        }
+      };
 
-        window.testStorage = async function() {
-            try {
-                if (storage) {
-                    addResult('✅ Firebase Storage service available', 'success');
-                    addResult(`📁 Storage bucket: ${storage.app.options.storageBucket}`, 'info');
-                    
-                    // Test file upload capability (without actually uploading)
-                    const testRef = ref(storage, 'test/connection-test.txt');
-                    addResult('📤 Storage upload endpoint ready', 'success');
-                } else {
-                    addResult('❌ Firebase Storage not available', 'error');
-                }
-            } catch (error) {
-                addResult(`❌ Storage test failed: ${error.message}`, 'error');
-            }
-        };
-
-        // Initial connection test
-        addResult('🔥 Starting Firebase Integration Test...', 'info');
-        testFirebaseConnection();
+      // Initial connection test
+      addResult('🔥 Starting Firebase Integration Test...', 'info');
+      testFirebaseConnection();
     </script>
-</body>
+  </body>
 </html>

@@ -8,7 +8,7 @@
   --justice-cream: #fefbf3;
   --justice-success: #059669;
   --justice-warning: #d97706;
-  
+
   /* Light Mode Variables */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
@@ -17,15 +17,20 @@
   --border-color: #e2e8f0;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --card-bg: #ffffff;
-  
+
   /* System Font Stack - No External Fonts Needed */
-  --font-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-system:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 /* Dark Mode Variables */
-body.dark-mode, [data-theme="dark"] {
+body.dark-mode,
+[data-theme="dark"] {
   --bg-primary: #1a202c;
   --bg-secondary: #2d3748;
   --text-primary: #f7fafc;
@@ -41,38 +46,78 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-system);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* System Font Classes */
-.font-system { font-family: var(--font-system); }
-.font-serif { font-family: var(--font-serif); }
-.font-mono { font-family: var(--font-mono); }
+.font-system {
+  font-family: var(--font-system);
+}
+.font-serif {
+  font-family: var(--font-serif);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
 
 /* Unicode Icon Replacements for Font Awesome */
-.icon-shield::before { content: "🛡️"; }
-.icon-moon::before { content: "🌙"; }
-.icon-sun::before { content: "☀️"; }
-.icon-folder::before { content: "📁"; }
-.icon-gavel::before { content: "⚖️"; }
-.icon-cogs::before { content: "⚙️"; }
-.icon-chart::before { content: "📊"; }
-.icon-plus::before { content: "➕"; }
-.icon-search::before { content: "🔍"; }
-.icon-download::before { content: "⬇️"; }
-.icon-logout::before { content: "🔚"; }
-.icon-file::before { content: "📄"; }
-.icon-check::before { content: "✅"; }
-.icon-warning::before { content: "⚠️"; }
-
-/* Enhanced professional shadows */
-.justice-shadow-elegant {
-  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px var(--shadow-color);
+.icon-shield::before {
+  content: "🛡️";
+}
+.icon-moon::before {
+  content: "🌙";
+}
+.icon-sun::before {
+  content: "☀️";
+}
+.icon-folder::before {
+  content: "📁";
+}
+.icon-gavel::before {
+  content: "⚖️";
+}
+.icon-cogs::before {
+  content: "⚙️";
+}
+.icon-chart::before {
+  content: "📊";
+}
+.icon-plus::before {
+  content: "➕";
+}
+.icon-search::before {
+  content: "🔍";
+}
+.icon-download::before {
+  content: "⬇️";
+}
+.icon-logout::before {
+  content: "🔚";
+}
+.icon-file::before {
+  content: "📄";
+}
+.icon-check::before {
+  content: "✅";
+}
+.icon-warning::before {
+  content: "⚠️";
 }
 
 /* Enhanced professional shadows */
 .justice-shadow-elegant {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px var(--shadow-color),
+    0 10px 10px -5px var(--shadow-color);
+}
+
+/* Enhanced professional shadows */
+.justice-shadow-elegant {
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Professional gradient backgrounds */
@@ -202,20 +247,40 @@ body {
 }
 
 @keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(90deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
 }
 
 @keyframes scale {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-5px); }
-  60% { transform: translateY(-3px); }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
 }
 
 .justice-btn-primary:hover {
@@ -225,7 +290,11 @@ body {
 
 /* Elegant typography */
 .justice-heading {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-weight: 700;
   color: var(--justice-navy);
   letter-spacing: -0.025em;
@@ -287,8 +356,14 @@ body {
 
 /* Elegant animations */
 @keyframes justice-fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .justice-animate-in {
@@ -306,8 +381,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Faith-Based Gold Theme Extensions - CSP Compliant */
@@ -315,72 +394,119 @@ body {
 /* Add gold color palette */
 :root {
   /* ...existing code... */
-  
+
   /* Faith-based gold extensions */
-  --faith-gold-50: #FFFEF7;
-  --faith-gold-100: #FFFACD;
-  --faith-gold-200: #FFF8DC;
-  --faith-gold-300: #FFE135;
-  --faith-gold-400: #FFD700;
-  --faith-gold-500: #FFC300;
-  --faith-gold-600: #FFB300;
-  --faith-gold-700: #DAA520;
-  --faith-gold-800: #B8860B;
-  --faith-gold-900: #B08D32;
-  
-  --faith-indigo-50: #F8F9FF;
-  --faith-indigo-100: #E6E8FF;
-  --faith-indigo-400: #6366F1;
-  --faith-indigo-500: #4F46E5;
-  --faith-indigo-600: #4338CA;
-  --faith-indigo-700: #3730A3;
-  --faith-indigo-800: #312E81;
-  --faith-indigo-900: #1E1B4B;
+  --faith-gold-50: #fffef7;
+  --faith-gold-100: #fffacd;
+  --faith-gold-200: #fff8dc;
+  --faith-gold-300: #ffe135;
+  --faith-gold-400: #ffd700;
+  --faith-gold-500: #ffc300;
+  --faith-gold-600: #ffb300;
+  --faith-gold-700: #daa520;
+  --faith-gold-800: #b8860b;
+  --faith-gold-900: #b08d32;
+
+  --faith-indigo-50: #f8f9ff;
+  --faith-indigo-100: #e6e8ff;
+  --faith-indigo-400: #6366f1;
+  --faith-indigo-500: #4f46e5;
+  --faith-indigo-600: #4338ca;
+  --faith-indigo-700: #3730a3;
+  --faith-indigo-800: #312e81;
+  --faith-indigo-900: #1e1b4b;
 }
 
 /* Faith-themed utilities */
-.text-gold-400 { color: var(--faith-gold-400); }
-.text-gold-500 { color: var(--faith-gold-500); }
-.text-gold-600 { color: var(--faith-gold-600); }
-.text-gold-700 { color: var(--faith-gold-700); }
-.text-gold-800 { color: var(--faith-gold-800); }
-.bg-gold-400 { background-color: var(--faith-gold-400); }
-.bg-gold-300 { background-color: var(--faith-gold-300); }
-.border-gold-400 { border-color: var(--faith-gold-400); }
+.text-gold-400 {
+  color: var(--faith-gold-400);
+}
+.text-gold-500 {
+  color: var(--faith-gold-500);
+}
+.text-gold-600 {
+  color: var(--faith-gold-600);
+}
+.text-gold-700 {
+  color: var(--faith-gold-700);
+}
+.text-gold-800 {
+  color: var(--faith-gold-800);
+}
+.bg-gold-400 {
+  background-color: var(--faith-gold-400);
+}
+.bg-gold-300 {
+  background-color: var(--faith-gold-300);
+}
+.border-gold-400 {
+  border-color: var(--faith-gold-400);
+}
 
 /* Faith gradients */
 .bg-faith-gradient {
-  background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
+  background: linear-gradient(
+    135deg,
+    #fff9e3 0%,
+    var(--faith-gold-400) 60%,
+    #fffacd 100%
+  );
 }
 
 .bg-heaven-gradient {
-  background: linear-gradient(to bottom, var(--faith-indigo-500), var(--faith-indigo-100), var(--faith-gold-100));
+  background: linear-gradient(
+    to bottom,
+    var(--faith-indigo-500),
+    var(--faith-indigo-100),
+    var(--faith-gold-100)
+  );
 }
 
 /* Custom animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes glow {
-  0% { 
-    box-shadow: 0 0 5px var(--faith-gold-400), 0 0 10px var(--faith-gold-400), 0 0 15px var(--faith-gold-400);
+  0% {
+    box-shadow:
+      0 0 5px var(--faith-gold-400),
+      0 0 10px var(--faith-gold-400),
+      0 0 15px var(--faith-gold-400);
   }
-  100% { 
-    box-shadow: 0 0 10px var(--faith-gold-400), 0 0 20px var(--faith-gold-400), 0 0 30px var(--faith-gold-400);
+  100% {
+    box-shadow:
+      0 0 10px var(--faith-gold-400),
+      0 0 20px var(--faith-gold-400),
+      0 0 30px var(--faith-gold-400);
   }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Animation classes */
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-glow { animation: glow 2s ease-in-out infinite alternate; }
-.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
 
 /* Faith-themed components */
 .faith-card {
@@ -396,7 +522,11 @@ body {
 }
 
 .faith-button {
-  background: linear-gradient(135deg, var(--faith-gold-400), var(--faith-gold-500));
+  background: linear-gradient(
+    135deg,
+    var(--faith-gold-400),
+    var(--faith-gold-500)
+  );
   color: var(--faith-indigo-900);
   font-weight: bold;
   padding: 0.75rem 1.5rem;
@@ -420,20 +550,20 @@ body {
 /* CSP-Compliant Faith-Based Gold Design System */
 
 /* Gold color utilities */
-.bg-gold { 
-  background-color: var(--faith-gold-400); 
+.bg-gold {
+  background-color: var(--faith-gold-400);
 }
 
-.text-gold { 
-  color: var(--faith-gold-400); 
+.text-gold {
+  color: var(--faith-gold-400);
 }
 
-.border-gold { 
-  border-color: var(--faith-gold-400); 
+.border-gold {
+  border-color: var(--faith-gold-400);
 }
 
 .card-shadow {
-  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.1);
 }
 
 .animate-sparkle {
@@ -441,22 +571,31 @@ body {
 }
 
 @keyframes sparkle {
-  from { filter: brightness(1.1); }
-  to   { filter: brightness(1.6); }
+  from {
+    filter: brightness(1.1);
+  }
+  to {
+    filter: brightness(1.6);
+  }
 }
 
 /* Professional faith-based components */
 .faith-dashboard-header {
-  background: linear-gradient(135deg, #FFF9E3 0%, var(--faith-gold-400) 60%, #FFFACD 100%);
+  background: linear-gradient(
+    135deg,
+    #fff9e3 0%,
+    var(--faith-gold-400) 60%,
+    #fffacd 100%
+  );
   border-radius: 1.5rem;
-  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.1);
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .faith-stats-card {
   background: white;
-  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.1);
   border-radius: 0.75rem;
   padding: 2rem 1.5rem;
   text-align: center;
@@ -472,7 +611,7 @@ body {
 .faith-table {
   background: white;
   border-radius: 1rem;
-  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.10);
+  box-shadow: 0 6px 32px rgba(186, 153, 48, 0.1);
   overflow: hidden;
 }
 

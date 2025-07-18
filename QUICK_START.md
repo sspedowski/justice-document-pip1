@@ -135,14 +135,14 @@ justice-dashboard/
 
 ## 🌐 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/login` | User authentication |
-| POST | `/api/logout` | User logout |
-| GET | `/api/profile` | Get user profile |
-| POST | `/api/summarize` | Process documents |
-| GET | `/api/health` | Health check |
-| POST | `/api/wolfram` | Wolfram Alpha queries |
+| Method | Endpoint         | Description           |
+| ------ | ---------------- | --------------------- |
+| POST   | `/api/login`     | User authentication   |
+| POST   | `/api/logout`    | User logout           |
+| GET    | `/api/profile`   | Get user profile      |
+| POST   | `/api/summarize` | Process documents     |
+| GET    | `/api/health`    | Health check          |
+| POST   | `/api/wolfram`   | Wolfram Alpha queries |
 
 ---
 

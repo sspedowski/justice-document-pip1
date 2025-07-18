@@ -75,7 +75,7 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ✅ **One-click guest access** - no registration needed  
 ✅ **Server status indicator** - shows connection health  
 ✅ **Responsive design** - works on mobile and desktop  
-✅ **Enhanced security** - JWT tokens, rate limiting  
+✅ **Enhanced security** - JWT tokens, rate limiting
 
 ### **Dashboard Features:**
 
@@ -83,7 +83,7 @@ Your Justice Dashboard now includes a **Guest Login** feature perfect for Render
 ✅ **Secure file processing** - Upload and analyze documents  
 ✅ **Modern table interface** - Organized case management  
 ✅ **Dark mode support** - Eye-friendly interface  
-✅ **Session management** - Automatic token refresh  
+✅ **Session management** - Automatic token refresh
 
 ## 🔧 **Render-Specific Configuration**
 
@@ -144,7 +144,7 @@ This setup is **ideal for showcasing** your Justice Dashboard:
 
 - ✅ **Change default passwords** in environment variables
 - ✅ **Generate strong JWT_SECRET** (32+ characters)
-- ✅ **Add SESSION_SECRET** for enhanced security  
+- ✅ **Add SESSION_SECRET** for enhanced security
 - ✅ **Monitor logs** in Render dashboard
 - ✅ **Enable HTTPS** (automatic with Render)
 
@@ -183,7 +183,7 @@ Access real-time logs in your Render dashboard to debug any issues.
 **Features Available:**
 
 - ✅ **Guest Login** - One-click access
-- ✅ **Wolfram Alpha** - AI legal research  
+- ✅ **Wolfram Alpha** - AI legal research
 - ✅ **Document Processing** - File analysis
 - ✅ **Secure Authentication** - JWT tokens
 - ✅ **Modern UI** - Professional appearance

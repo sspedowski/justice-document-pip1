@@ -1,20 +1,20 @@
 /* login.css -- All login page CSS, CSP-safe */
 
 .login-container {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-    min-height: 100vh;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  min-height: 100vh;
 }
 
 .auth-form {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .status-indicator {
-    height: 4px;
-    background: linear-gradient(90deg, #10b981, #3b82f6);
-    border-radius: 2px;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  border-radius: 2px;
 }
 
 /* Add any additional login-page-specific custom styles here */

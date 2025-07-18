@@ -1,42 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Test</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #FFF9E3 0%, #BA9930 60%, #FFFACD 100%); }
-        .test-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .status { color: green; font-weight: bold; }
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: linear-gradient(
+          135deg,
+          #fff9e3 0%,
+          #ba9930 60%,
+          #fffacd 100%
+        );
+      }
+      .test-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .status {
+        color: green;
+        font-weight: bold;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="test-container">
-        <h1>🚀 Justice Dashboard - Server Test</h1>
-        <div id="status" class="status">Loading...</div>
-        <div id="app-test">
-            <h2>✅ Basic HTML Loaded Successfully</h2>
-            <p>If you can see this page, the server is running.</p>
-            <p><strong>Current Time:</strong> <span id="time"></span></p>
-            <p><strong>Faith Message:</strong> "Victory by Faith! 🙏✨"</p>
-        </div>
+      <h1>🚀 Justice Dashboard - Server Test</h1>
+      <div id="status" class="status">Loading...</div>
+      <div id="app-test">
+        <h2>✅ Basic HTML Loaded Successfully</h2>
+        <p>If you can see this page, the server is running.</p>
+        <p><strong>Current Time:</strong> <span id="time"></span></p>
+        <p><strong>Faith Message:</strong> "Victory by Faith! 🙏✨"</p>
+      </div>
     </div>
-    
+
     <script>
-        document.getElementById('time').textContent = new Date().toLocaleString();
-        document.getElementById('status').textContent = '✅ JavaScript Working - Server is operational!';
-        
-        // Test if we can access the main dashboard
-        fetch('/api/health')
-            .then(response => response.json())
-            .then(data => {
-                console.log('API Health Check:', data);
-                document.getElementById('status').innerHTML += '<br>✅ API Endpoint accessible';
-            })
-            .catch(error => {
-                console.log('API not available:', error);
-                document.getElementById('status').innerHTML += '<br>⚠️ API may not be available';
-            });
+      document.getElementById("time").textContent = new Date().toLocaleString();
+      document.getElementById("status").textContent =
+        "✅ JavaScript Working - Server is operational!";
+
+      // Test if we can access the main dashboard
+      fetch("/api/health")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("API Health Check:", data);
+          document.getElementById("status").innerHTML +=
+            "<br>✅ API Endpoint accessible";
+        })
+        .catch((error) => {
+          console.log("API not available:", error);
+          document.getElementById("status").innerHTML +=
+            "<br>⚠️ API may not be available";
+        });
     </script>
-</body>
+  </body>
 </html>

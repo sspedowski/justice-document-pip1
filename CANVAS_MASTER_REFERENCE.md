@@ -4,31 +4,31 @@
 
 ## 1. 🎯 **Project Status**
 
-* **API:** [http://localhost:3000](http://localhost:3000) (secure, functional)
-* **Authentication:** Secure, JWT + bcrypt (default: admin/justice2025 – CHANGE IN PROD)
-* **Dashboard:** CSP-compliant, all DOM/init errors resolved
-* **Security:** All critical issues fixed, warnings show if settings are unsafe
-* **Documentation:** Unified, production-grade, audit-ready
+- **API:** [http://localhost:3000](http://localhost:3000) (secure, functional)
+- **Authentication:** Secure, JWT + bcrypt (default: admin/justice2025 – CHANGE IN PROD)
+- **Dashboard:** CSP-compliant, all DOM/init errors resolved
+- **Security:** All critical issues fixed, warnings show if settings are unsafe
+- **Documentation:** Unified, production-grade, audit-ready
 
 ---
 
 ## 2. 🛡️ **Security Audit Checklist**
 
-| Issue           | Status  | Notes                          |
-| --------------- | ------- | ------------------------------ |
+| Issue           | Status   | Notes                          |
+| --------------- | -------- | ------------------------------ |
 | HTTPS API Calls | ✅ Fixed | All APIs use HTTPS             |
 | Session Secret  | ✅ Fixed | Required, must be ≥ 32 chars   |
 | Env Validation  | ✅ Fixed | App aborts if missing/insecure |
 | .env.example    | ✅ Fixed | Provided with security notes   |
 | CSP/Helmet      | ✅ Fixed | Strict, no inline or CDN       |
-| Inline Styles   | ✅ Fixed | All JS inline styles removed  |
+| Inline Styles   | ✅ Fixed | All JS inline styles removed   |
 | CORS/Cookies    | ✅ Fixed | Secure/HTTPOnly, proper origin |
 | Auth/JWT/bcrypt | ✅ Fixed | No plaintext storage           |
 | Rate Limiting   | ✅ Fixed | Express-rate-limit in place    |
 | README Cleanup  | ✅ Fixed | No accidental CLI output       |
 | Folder Cleanup  | ✅ Fixed | Old/duplicate dirs removed     |
 | DOM Elements    | ✅ Fixed | All required elements present  |
-| Dark Mode JS    | ✅ Fixed | Null checks & error handling  |
+| Dark Mode JS    | ✅ Fixed | Null checks & error handling   |
 
 ---
 
@@ -42,25 +42,25 @@ npm install
 npm start
 ```
 
-* Visit [http://localhost:3000](http://localhost:3000)
-* Default login: admin / justice2025 (**change after first login!**)
-* Set SESSION_SECRET to something unique and long (min 32 chars)
-* Never commit .env to version control
+- Visit [http://localhost:3000](http://localhost:3000)
+- Default login: admin / justice2025 (**change after first login!**)
+- Set SESSION_SECRET to something unique and long (min 32 chars)
+- Never commit .env to version control
 
 ---
 
 ## 4. 🏁 **Deployment Checklist**
 
-* [ ] All API calls are HTTPS
-* [ ] SESSION_SECRET is secure, not default
-* [ ] Default accounts are removed/changed
-* [ ] .env **never** committed to repo
-* [ ] CSP is strict; no CDN or inline scripts/styles
-* [ ] Only current folders present (no cleaned.zip, etc)
-* [ ] No accidental shell output in README/docs
-* [ ] All DOM elements present, dashboard loads clean
-* [ ] Security warnings show for missing/insecure settings
-* [ ] Passwords/usernames changed from defaults
+- [ ] All API calls are HTTPS
+- [ ] SESSION_SECRET is secure, not default
+- [ ] Default accounts are removed/changed
+- [ ] .env **never** committed to repo
+- [ ] CSP is strict; no CDN or inline scripts/styles
+- [ ] Only current folders present (no cleaned.zip, etc)
+- [ ] No accidental shell output in README/docs
+- [ ] All DOM elements present, dashboard loads clean
+- [ ] Security warnings show for missing/insecure settings
+- [ ] Passwords/usernames changed from defaults
 
 ---
 
@@ -77,9 +77,9 @@ WOLFRAM_APP_ID=xxxxx
 
 ## 6. 📋 **Team Handoff / Audit Notes**
 
-* Use this section as your "living README + Security/Audit" for onboarding, audits, and compliance.
-* For new features: update checklist, add to audit section.
-* For handoff: print, PDF, or copy this page as the canonical reference.
+- Use this section as your "living README + Security/Audit" for onboarding, audits, and compliance.
+- For new features: update checklist, add to audit section.
+- For handoff: print, PDF, or copy this page as the canonical reference.
 
 ---
 
@@ -101,7 +101,7 @@ WOLFRAM_APP_ID=xxxxx
 
 ---
 
-*Need this as a downloadable .md, PDF, or for a team wiki? Just ask!*
+_Need this as a downloadable .md, PDF, or for a team wiki? Just ask!_
 
 ---
 

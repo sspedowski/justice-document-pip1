@@ -9,10 +9,10 @@ The catch-all route is properly configured in `server.js`:
 ```javascript
 app.get("*", (req, res) => {
   // For API routes, let them handle their own responses
-  if (req.path.startsWith('/api/')) {
+  if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "API endpoint not found" });
   }
-  
+
   // Serve the main dashboard for all other routes
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -24,23 +24,28 @@ The HTML contains all required elements:
 
 ```html
 <body class="p-4 min-h-screen bg-faith-gradient">
-    <!-- Main App Container - Required by script.js -->
-    <div id="app">
-        <div class="container mx-auto">
-            <!-- All dashboard content here -->
-        </div>
+  <!-- Main App Container - Required by script.js -->
+  <div id="app">
+    <div class="container mx-auto">
+      <!-- All dashboard content here -->
     </div>
-    
-    <!-- Dark Mode Toggle - Required by dark-mode.js -->
-    <button id="darkModeToggle" class="fixed top-4 left-4 bg-gold text-white p-2 rounded-full shadow-lg z-50 hover:bg-faith-gold-600 transition">🌙</button>
+  </div>
 
-    <!-- Scripts load AFTER DOM elements -->
-    <script src="dashboard-init.js"></script>
-    <script src="script.js"></script>
-    <script src="auth-manager.js"></script>
-    <script src="dark-mode.js"></script>
-    <script src="pdf-config.js"></script>
-    <script src="pdf.min.js"></script>
+  <!-- Dark Mode Toggle - Required by dark-mode.js -->
+  <button
+    id="darkModeToggle"
+    class="fixed top-4 left-4 bg-gold text-white p-2 rounded-full shadow-lg z-50 hover:bg-faith-gold-600 transition"
+  >
+    🌙
+  </button>
+
+  <!-- Scripts load AFTER DOM elements -->
+  <script src="dashboard-init.js"></script>
+  <script src="script.js"></script>
+  <script src="auth-manager.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="pdf-config.js"></script>
+  <script src="pdf.min.js"></script>
 </body>
 ```
 
@@ -107,7 +112,10 @@ The Dashboard must always load into a `<div id="app"></div>` that exists **befor
 - CSP meta tag should be present and allow only local scripts/styles:
 
 ```html
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self';">
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self';"
+/>
 ```
 
 - No `<script src="https://cdn.tailwindcss.com">` or similar!
@@ -125,7 +133,7 @@ The Dashboard must always load into a `<div id="app"></div>` that exists **befor
 - Make sure all scripts use:
 
 ```js
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
   // JS that mounts into #app
 });
 ```
@@ -161,7 +169,7 @@ window.addEventListener('DOMContentLoaded', () => {
 - Paste any errors from the browser console for further debugging.
 
 **💡 QUICK COPILOT PROMPT:**
-*"Copy this checklist to Copilot, explain your current symptom (e.g. blank screen, console error), and say: 'Follow these steps. What do I fix?'"*
+_"Copy this checklist to Copilot, explain your current symptom (e.g. blank screen, console error), and say: 'Follow these steps. What do I fix?'"_
 
 ## 🔧 STARTUP INSTRUCTIONS
 

@@ -38,7 +38,7 @@ const FontInspector = (function FontInspectorClosure() {
   }
   function selectFont(fontName, show) {
     const divs = document.querySelectorAll(
-      `span[${fontAttribute}=${fontName}]`
+      `span[${fontAttribute}=${fontName}]`,
     );
     for (const div of divs) {
       div.className = show ? "debuggerShowText" : "debuggerHideText";
@@ -128,7 +128,7 @@ const FontInspector = (function FontInspectorClosure() {
           download.href = url[1];
         } else if (fontObj.data) {
           download.href = URL.createObjectURL(
-            new Blob([fontObj.data], { type: fontObj.mimetype })
+            new Blob([fontObj.data], { type: fontObj.mimetype }),
           );
         }
         download.textContent = "Download";
@@ -300,7 +300,7 @@ class Stepper {
       this.#c("th", "Break"),
       this.#c("th", "Idx"),
       this.#c("th", "fn"),
-      this.#c("th", "args")
+      this.#c("th", "args"),
     );
     panel.append(content);
     this.table = table;
@@ -328,7 +328,7 @@ class Stepper {
     const chunk = document.createDocumentFragment();
     const operatorsToDisplay = Math.min(
       MAX_OPERATORS_COUNT,
-      operatorList.fnArray.length
+      operatorList.fnArray.length,
     );
     for (let i = this.operatorListIdx; i < operatorsToDisplay; i++) {
       const line = this.#c("tr");
@@ -419,7 +419,7 @@ class Stepper {
     StepperManager.selectStepper(this.pageIndex, true);
     this.currentIdx = idx;
 
-    const listener = evt => {
+    const listener = (evt) => {
       switch (evt.keyCode) {
         case 83: // step
           document.removeEventListener("keydown", listener);
@@ -565,7 +565,7 @@ class PDFBug {
       const panel = document.createElement("div");
       const panelButton = document.createElement("button");
       panelButton.textContent = tool.name;
-      panelButton.addEventListener("click", event => {
+      panelButton.addEventListener("click", (event) => {
         event.preventDefault();
         this.selectPanel(tool);
       });

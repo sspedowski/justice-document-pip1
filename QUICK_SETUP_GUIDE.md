@@ -13,11 +13,13 @@ npm install
 ### **Step 2: Create Environment File**
 
 **Windows (PowerShell):**
+
 ```powershell
 Copy-Item .env.example .env
 ```
 
 **Linux/macOS:**
+
 ```bash
 cp .env.example .env
 ```
@@ -78,6 +80,7 @@ If you see this error when starting:
 ```
 
 **Solution:** Make sure your `.env` file contains:
+
 ```env
 JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
 ```
@@ -87,6 +90,7 @@ The JWT_SECRET **must be at least 32 characters long** for security.
 ### **Weak JWT_SECRET Warning**
 
 If you see:
+
 ```
 ⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.
 ```
@@ -98,7 +102,9 @@ If you see:
 ## 🎯 **SUCCESS INDICATORS**
 
 ### **Server Startup Success**
+
 You should see:
+
 ```
 ✅ Justice Dashboard API running on http://localhost:3000
 📋 API endpoints available:
@@ -112,7 +118,9 @@ You should see:
 ```
 
 ### **Dashboard Display Success**
+
 The dashboard should show:
+
 - ⚖️✝️ **Faith-based header** with scales of justice and cross
 - 📜 **Scripture verses**: "For I know the plans I have for you..." (Jeremiah 29:11)
 - 🏆 **"Victory by Faith in Legal Excellence"** subtitle
@@ -126,16 +134,19 @@ The dashboard should show:
 ## 🔧 **ADDITIONAL SETUP OPTIONS**
 
 ### **Development Mode (Auto-Restart)**
+
 ```bash
 npm run dev
 ```
 
 ### **Build and Watch CSS (Development)**
+
 ```bash
 npm run watch
 ```
 
 ### **Production Setup**
+
 1. Set `NODE_ENV=production` in `.env`
 2. Use proper production-grade JWT_SECRET
 3. Configure HTTPS if needed

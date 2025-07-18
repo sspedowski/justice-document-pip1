@@ -11,15 +11,17 @@ const helmet = require("helmet");
 const app = express();
 
 // Unified Content Security Policy
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "http://localhost:3000"],
-    styleSrc: ["'self'", "http://localhost:3000"],
-    frameSrc: ["'none'"],
-    // Add other directives as needed
-  },
-}));
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "http://localhost:3000"],
+      styleSrc: ["'self'", "http://localhost:3000"],
+      frameSrc: ["'none'"],
+      // Add other directives as needed
+    },
+  }),
+);
 const upload = multer({ dest: "uploads/" });
 
 app.use(cors());
@@ -43,7 +45,8 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
     const cleanText = parsed.text.trim();
 
     const wordCount = (cleanText.match(/[a-zA-Z]{3,}/g) || []).length;
-    const isJunk = cleanText.length < 100 || /%PDF|obj|stream|endobj/i.test(cleanText);
+    const isJunk =
+      cleanText.length < 100 || /%PDF|obj|stream|endobj/i.test(cleanText);
 
     if (wordCount > 5 && !isJunk) {
       console.log("✅ Clean text detected, summary returning.");
@@ -69,7 +72,8 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
     console.log("✅ OCR complete. Summary extracted.");
 
     res.json({
-      summary: ocrText.trim().substring(0, 500) || "OCR failed to extract text.",
+      summary:
+        ocrText.trim().substring(0, 500) || "OCR failed to extract text.",
       fileURL: `/files/${sanitized}`,
       fileName: originalName,
     });

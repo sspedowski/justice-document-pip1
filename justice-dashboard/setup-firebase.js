@@ -37,14 +37,20 @@ console.log('10. Scroll to "Your apps" and click "Add app"');
 console.log('11. Choose "Web" and register your app');
 console.log('12. Copy the config values to your .env file');
 
-console.log('\n⚠️  Important: After getting your Firebase config, update the .env file:');
-console.log('   Replace the dummy values with your actual Firebase configuration');
+console.log(
+  '\n⚠️  Important: After getting your Firebase config, update the .env file:'
+);
+console.log(
+  '   Replace the dummy values with your actual Firebase configuration'
+);
 
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
   console.log(`\n📄 Your .env file is located at: ${envPath}`);
 } else {
-  console.log('\n❌ .env file not found. Please ensure it exists in the project root.');
+  console.log(
+    '\n❌ .env file not found. Please ensure it exists in the project root.'
+  );
 }
 
 console.log('\n🚀 Once configured, you can run:');

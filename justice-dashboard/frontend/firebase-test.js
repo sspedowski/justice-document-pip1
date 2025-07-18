@@ -6,16 +6,16 @@ import { collection, getDocs } from 'firebase/firestore';
 export async function testFirebaseConnection() {
   try {
     console.log('Testing Firebase connection...');
-    
+
     // Try to access a collection (this will test the connection)
     const testCollection = collection(db, 'test');
     await getDocs(testCollection);
-    
+
     console.log('✅ Firebase connection successful');
     return { success: true, message: 'Firebase connection successful' };
   } catch (error) {
     console.error('❌ Firebase connection failed:', error);
-    
+
     // Provide helpful error messages based on error type
     let message = 'Firebase connection failed';
     if (error.code === 'permission-denied') {
@@ -23,11 +23,12 @@ export async function testFirebaseConnection() {
     } else if (error.code === 'unavailable') {
       message = 'Firebase service unavailable - check your internet connection';
     } else if (error.message.includes('Missing or insufficient permissions')) {
-      message = 'Firebase permissions error - check your Firestore security rules';
+      message =
+        'Firebase permissions error - check your Firestore security rules';
     } else if (error.message.includes('Failed to get document')) {
       message = 'Firebase project not found - check your project ID';
     }
-    
+
     return { success: false, message, error: error.message };
   }
 }

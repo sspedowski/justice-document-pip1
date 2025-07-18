@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginBtn.addEventListener('click', async () => {
       const username = userInput.value;
       const password = passInput.value;
-      
+
       if (!username || !password) {
         if (loginErr) {
           loginErr.textContent = 'Please enter both username and password';
@@ -98,9 +98,9 @@ async function tryLogin(username, password) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
-      credentials: 'include'
+      credentials: 'include',
     });
-    
+
     const data = await response.json();
     if (response.ok && data.success) {
       console.log('Login successful');
@@ -122,7 +122,7 @@ async function tryLogin(username, password) {
 async function validateToken(token) {
   try {
     const response = await fetch('/api/profile', {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.ok;
   } catch {
@@ -135,7 +135,7 @@ async function validateToken(token) {
 function showDashboard() {
   const loginForm = document.getElementById('login-form');
   const dashboard = document.getElementById('dashboard');
-  
+
   if (loginForm) loginForm.style.display = 'none';
   if (dashboard) dashboard.style.display = 'block';
 }

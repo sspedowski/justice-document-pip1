@@ -1,5 +1,5 @@
 // Add crash detection handlers at the very top to prevent silent crashes
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('🚨 Uncaught Exception:', err);
 });
 
@@ -19,7 +19,7 @@ const path = require('path');
 const fs = require('fs');
 
 // 🔥 CRASH DETECTION - Add this to catch silent crashes
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('🚨 UNCAUGHT EXCEPTION - Server will crash:', err);
   console.error('Stack:', err.stack);
   process.exit(1);
@@ -38,14 +38,17 @@ const admin = require('firebase-admin');
 
 // Initialize Firebase Admin
 try {
-  const serviceAccountPath = process.env.FIREBASE_ADMIN_KEY_PATH || './firebase-admin-key.json';
-  const serviceAccount = require(path.resolve(__dirname, '..', serviceAccountPath.replace('./', '')));
-  
+  const serviceAccountPath =
+    process.env.FIREBASE_ADMIN_KEY_PATH || './firebase-admin-key.json';
+  const serviceAccount = require(
+    path.resolve(__dirname, '..', serviceAccountPath.replace('./', ''))
+  );
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app'
+    storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
   });
-  
+
   console.log('🔥 Firebase Admin SDK initialized successfully');
 } catch (error) {
   console.warn('⚠️ Firebase Admin SDK not initialized:', error.message);
@@ -54,12 +57,16 @@ try {
 
 // Security: Environment variable validation
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-  console.error('FATAL ERROR: JWT_SECRET environment variable not set or too weak (min 32 characters required)');
+  console.error(
+    'FATAL ERROR: JWT_SECRET environment variable not set or too weak (min 32 characters required)'
+  );
   process.exit(1);
 }
 
 if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS) {
-  console.error('WARNING: ADMIN_USER and ADMIN_PASS environment variables should be set for secure authentication');
+  console.error(
+    'WARNING: ADMIN_USER and ADMIN_PASS environment variables should be set for secure authentication'
+  );
 }
 
 // API Configurations
@@ -76,7 +83,7 @@ async function createAdminUser() {
       adminUser = {
         username: process.env.ADMIN_USER,
         password: hashedPassword,
-        role: 'admin'
+        role: 'admin',
       };
       console.log('✅ Secure admin user created');
     } else {
@@ -115,10 +122,10 @@ app.use(cors());
 app.use(express.json());
 
 // Static files
-app.use(express.static(path.join(__dirname, "..")));
-app.use(express.static(path.join(__dirname, "../frontend")));
-app.use('/dist', express.static(path.join(__dirname, "../frontend/dist")));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/dist', express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -520,12 +527,12 @@ function generateJWT(user) {
     username: user.username,
     role: user.role,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
   };
-  
-  return jwt.sign(payload, process.env.JWT_SECRET, { 
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     algorithm: 'HS256',
-    expiresIn: '24h'
+    expiresIn: '24h',
   });
 }
 
@@ -541,51 +548,61 @@ function verifyJWT(token) {
 app.post('/api/login', express.json(), async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     // Input validation
     if (!username || !password) {
-      return res.status(400).json({ ok: false, error: 'Username and password required' });
+      return res
+        .status(400)
+        .json({ ok: false, error: 'Username and password required' });
     }
-    
+
     // Use secure admin user if available
     if (adminUser && username === adminUser.username) {
-      const isValidPassword = await bcrypt.compare(password, adminUser.password);
+      const isValidPassword = await bcrypt.compare(
+        password,
+        adminUser.password
+      );
       if (isValidPassword) {
         console.log(`✅ Secure admin login successful for: ${username}`);
-        const user = { 
-          username: adminUser.username, 
-          role: adminUser.role 
+        const user = {
+          username: adminUser.username,
+          role: adminUser.role,
         };
         const token = generateJWT(user);
-        return res.json({ 
-          success: true, 
+        return res.json({
+          success: true,
           token: token,
-          user: user
+          user: user,
         });
       }
     }
-    
+
     // Fallback to legacy authentication (backward compatibility)
     if (
       username === process.env.DASH_USER &&
       password === process.env.DASH_PASS
     ) {
-      console.log(`⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`);
+      console.log(
+        `⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`
+      );
       const user = { username, role: 'admin' };
       const token = generateJWT(user);
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         token: token,
-        user: user
+        user: user,
       });
     }
-    
+
     console.log(`❌ Login failed for username: ${username}`);
-    return res.status(401).json({ success: false, error: 'Invalid credentials' });
-    
+    return res
+      .status(401)
+      .json({ success: false, error: 'Invalid credentials' });
   } catch (error) {
     console.error('Login error:', error);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
+    return res
+      .status(500)
+      .json({ success: false, error: 'Internal server error' });
   }
 });
 
@@ -594,26 +611,30 @@ app.get('/api/profile', (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ success: false, error: 'No token provided' });
+      return res
+        .status(401)
+        .json({ success: false, error: 'No token provided' });
     }
-    
+
     const token = authHeader.substring(7);
     const decoded = verifyJWT(token);
-    
+
     if (decoded) {
-      return res.json({ 
-        success: true, 
-        user: { 
-          username: decoded.username, 
-          role: decoded.role 
-        } 
+      return res.json({
+        success: true,
+        user: {
+          username: decoded.username,
+          role: decoded.role,
+        },
       });
     }
-    
+
     return res.status(401).json({ success: false, error: 'Invalid token' });
   } catch (error) {
     console.error('Profile validation error:', error);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
+    return res
+      .status(500)
+      .json({ success: false, error: 'Internal server error' });
   }
 });
 
@@ -621,14 +642,14 @@ app.get('/api/profile', (req, res) => {
 app.post('/api/register', express.json(), async (req, res) => {
   try {
     // const { username, password, role = 'user' } = req.body;
-    
+
     // TODO: Add admin authentication check here
     // For now, this endpoint is disabled for security
-    return res.status(403).json({ 
-      ok: false, 
-      error: 'User registration disabled. Contact administrator.' 
+    return res.status(403).json({
+      ok: false,
+      error: 'User registration disabled. Contact administrator.',
     });
-    
+
     /* Future implementation:
     if (!username || !password) {
       return res.status(400).json({ ok: false, error: 'Username and password required' });
@@ -650,7 +671,6 @@ app.post('/api/register', express.json(), async (req, res) => {
     // For now, just return success
     return res.json({ ok: true, user: { username, role } });
     */
-    
   } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({ ok: false, error: 'Internal server error' });
@@ -1176,7 +1196,7 @@ app.post(
 // Helper function to process queries batch
 async function processQueriesBatch(queries, analysisType) {
   // Use the same logic as the batch-analyze endpoint
-  
+
   const results = {
     timestamp: new Date().toISOString(),
     analysisType,

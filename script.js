@@ -1,39 +1,44 @@
 // Ensure Upload and Lawyer buttons always work, even if added dynamically
-document.addEventListener('click', function(event) {
-  if (event.target && event.target.id === 'uploadBtn') {
-    alert('Upload button (delegated)');
+document.addEventListener("click", function (event) {
+  if (event.target && event.target.id === "uploadBtn") {
+    alert("Upload button (delegated)");
   }
-  if (event.target && event.target.id === 'lawyerBtn') {
-    alert('Lawyer button (delegated)');
+  if (event.target && event.target.id === "lawyerBtn") {
+    alert("Lawyer button (delegated)");
   }
 });
 // Justice Dashboard - Authentication & Main App
 // Secure authentication with proper session management
 
 // PDF.js Status Check
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof pdfjsLib !== 'undefined') {
-    console.log('✅ PDF.js library loaded successfully');
-    console.log('📚 PDF.js version:', pdfjsLib.version);
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof pdfjsLib !== "undefined") {
+    console.log("✅ PDF.js library loaded successfully");
+    console.log("📚 PDF.js version:", pdfjsLib.version);
   } else {
-    console.error('❌ PDF.js library not found - PDF content extraction will not work');
+    console.error(
+      "❌ PDF.js library not found - PDF content extraction will not work",
+    );
   }
 });
 
 // Environment detection helper
 function getApiBaseUrl() {
   // If API_BASE_URL is defined globally (from index.html), use it
-  if (typeof window.API_BASE_URL !== 'undefined') {
+  if (typeof window.API_BASE_URL !== "undefined") {
     return window.API_BASE_URL;
   }
-  
+
   // Fallback: Check if running locally
-  const isLocal = window.location.hostname === 'localhost' || 
-                  window.location.hostname === '127.0.0.1' ||
-                  window.location.hostname === '';
-  
+  const isLocal =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "";
+
   // Return appropriate base URL
-  return isLocal ? "http://localhost:3000" : "https://justice-dashboard.onrender.com";
+  return isLocal
+    ? "http://localhost:3000"
+    : "https://justice-dashboard.onrender.com";
 }
 
 // Use dynamic API base URL (will use window.API_BASE_URL when available)
@@ -49,7 +54,7 @@ const JUSTICE_DEBUG = true; // Set to false to disable debug logs
 
 function justiceDebugLog(...args) {
   if (JUSTICE_DEBUG) {
-    console.log('[JusticeDashboard]', ...args);
+    console.log("[JusticeDashboard]", ...args);
   }
 }
 
@@ -67,12 +72,13 @@ const DashboardAuth = {
 
   // Check existing authentication
   checkAuth() {
-    const saved = localStorage.getItem('justiceAuth');
+    const saved = localStorage.getItem("justiceAuth");
     if (saved) {
       try {
         const authData = JSON.parse(saved);
-        const isValid = authData.timestamp && 
-          (Date.now() - authData.timestamp) < 24 * 60 * 60 * 1000; // 24 hour expiry
+        const isValid =
+          authData.timestamp &&
+          Date.now() - authData.timestamp < 24 * 60 * 60 * 1000; // 24 hour expiry
 
         if (isValid && authData.user && authData.token) {
           this.currentUser = authData.user;
@@ -84,7 +90,7 @@ const DashboardAuth = {
           this.clearAuth();
         }
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error("Auth check error:", error);
         this.clearAuth();
       }
     }
@@ -95,14 +101,14 @@ const DashboardAuth = {
   async authenticate(username, password) {
     try {
       const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
@@ -111,20 +117,23 @@ const DashboardAuth = {
         this.currentUser = data.user;
         this.authToken = data.token;
         this.isAuthenticated = true;
-        
+
         // Store auth info securely with timestamp
-        localStorage.setItem('justiceAuth', JSON.stringify({
-          user: this.currentUser,
-          token: this.authToken,
-          timestamp: Date.now()
-        }));
-        
+        localStorage.setItem(
+          "justiceAuth",
+          JSON.stringify({
+            user: this.currentUser,
+            token: this.authToken,
+            timestamp: Date.now(),
+          }),
+        );
+
         return { success: true, user: this.currentUser };
       }
-      
-      return { success: false, error: data.error || 'Login failed' };
+
+      return { success: false, error: data.error || "Login failed" };
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error("Authentication error:", error);
       return { success: false, error: error.message };
     }
   },
@@ -135,17 +144,17 @@ const DashboardAuth = {
       // Call server logout endpoint if token exists
       if (this.authToken) {
         await fetch(`${DYNAMIC_API_BASE_URL}/api/logout`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${this.authToken}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.authToken}`,
+            "Content-Type": "application/json",
           },
         });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
-    
+
     this.clearAuth();
     this.renderLoginForm();
   },
@@ -155,14 +164,14 @@ const DashboardAuth = {
     this.currentUser = null;
     this.authToken = null;
     this.isAuthenticated = false;
-    localStorage.removeItem('justiceAuth');
+    localStorage.removeItem("justiceAuth");
   },
 
   // Render login form
   renderLoginForm() {
-    const app = document.getElementById('app');
+    const app = document.getElementById("app");
     if (!app) {
-      console.error('App container not found');
+      console.error("App container not found");
       return;
     }
 
@@ -214,19 +223,19 @@ const DashboardAuth = {
   // Helper function to make authenticated requests
   async makeAuthenticatedRequest(url, options = {}) {
     if (!DashboardAuth.isAuthenticated) {
-      console.error('User not authenticated');
+      console.error("User not authenticated");
       DashboardAuth.showLoginForm();
       return null;
     }
     const headers = {
       ...options.headers,
-      'Authorization': `Bearer ${DashboardAuth.authToken}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${DashboardAuth.authToken}`,
+      "Content-Type": "application/json",
     };
     try {
       const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, {
         ...options,
-        headers
+        headers,
       });
       if (response.status === 401) {
         // Token expired or invalid
@@ -236,7 +245,7 @@ const DashboardAuth = {
       }
       return response;
     } catch (error) {
-      console.error('API request error:', error);
+      console.error("API request error:", error);
       return null;
     }
   },
@@ -244,16 +253,16 @@ const DashboardAuth = {
   // Initialize login form event listeners
   initializeLoginForm() {
     // Add event listeners
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById("loginForm");
     if (loginForm) {
-      loginForm.addEventListener('submit', this.handleLogin.bind(this));
+      loginForm.addEventListener("submit", this.handleLogin.bind(this));
     }
 
     // Add Enter key support for password field
-    const passwordField = document.getElementById('loginPassword');
+    const passwordField = document.getElementById("loginPassword");
     if (passwordField) {
-      passwordField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+      passwordField.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
           this.handleLogin(e);
         }
       });
@@ -263,16 +272,16 @@ const DashboardAuth = {
   // Handle login form submission
   async handleLogin(event) {
     event.preventDefault();
-    
-    const usernameEl = document.getElementById('loginUsername');
-    const passwordEl = document.getElementById('loginPassword');
-    const errorEl = document.getElementById('loginError');
-    const btnEl = document.getElementById('loginBtn');
-    const btnTextEl = document.getElementById('loginBtnText');
-    const btnSpinnerEl = document.getElementById('loginBtnSpinner');
+
+    const usernameEl = document.getElementById("loginUsername");
+    const passwordEl = document.getElementById("loginPassword");
+    const errorEl = document.getElementById("loginError");
+    const btnEl = document.getElementById("loginBtn");
+    const btnTextEl = document.getElementById("loginBtnText");
+    const btnSpinnerEl = document.getElementById("loginBtnSpinner");
 
     if (!usernameEl || !passwordEl) {
-      this.showLoginError('Login form not properly initialized');
+      this.showLoginError("Login form not properly initialized");
       return;
     }
 
@@ -281,88 +290,94 @@ const DashboardAuth = {
 
     // Basic validation
     if (!username || !password) {
-      this.showLoginError('Please enter both username and password');
+      this.showLoginError("Please enter both username and password");
       return;
     }
 
     // Show loading state
     btnEl.disabled = true;
-    btnTextEl.classList.add('hidden');
-    btnSpinnerEl.classList.remove('hidden');
-    errorEl.classList.add('hidden');
+    btnTextEl.classList.add("hidden");
+    btnSpinnerEl.classList.remove("hidden");
+    errorEl.classList.add("hidden");
 
     try {
       const result = await this.authenticate(username, password);
-      
+
       if (result.success) {
         // Success - redirect to dashboard
         this.renderDashboard();
       } else {
-        this.showLoginError(result.error || 'Invalid credentials. Please try again.');
+        this.showLoginError(
+          result.error || "Invalid credentials. Please try again.",
+        );
       }
     } catch (error) {
-      console.error('Login error:', error);
-      this.showLoginError('Connection error. Please check your network and try again.');
+      console.error("Login error:", error);
+      this.showLoginError(
+        "Connection error. Please check your network and try again.",
+      );
     } finally {
       // Reset button state
       btnEl.disabled = false;
-      btnTextEl.classList.remove('hidden');
-      btnSpinnerEl.classList.add('hidden');
+      btnTextEl.classList.remove("hidden");
+      btnSpinnerEl.classList.add("hidden");
     }
   },
 
   // Show login error message
   showLoginError(message) {
-    const errorEl = document.getElementById('loginError');
+    const errorEl = document.getElementById("loginError");
     if (errorEl) {
       errorEl.textContent = message;
-      errorEl.classList.remove('hidden');
-      
+      errorEl.classList.remove("hidden");
+
       // Auto-hide error after 5 seconds
       setTimeout(() => {
-        errorEl.classList.add('hidden');
+        errorEl.classList.add("hidden");
       }, 5000);
     }
   },
 
   // Render main dashboard
   renderDashboard() {
-    const app = document.getElementById('app');
+    const app = document.getElementById("app");
     if (!app) {
-      console.error('App container not found');
+      console.error("App container not found");
       return;
     }
 
     // Show the dashboard content that's already in the HTML
-    const loadingScreen = document.getElementById('loadingScreen');
-    const dashboardContent = document.getElementById('dashboardContent');
-    
+    const loadingScreen = document.getElementById("loadingScreen");
+    const dashboardContent = document.getElementById("dashboardContent");
+
     if (loadingScreen) {
-      loadingScreen.classList.add('hidden');
+      loadingScreen.classList.add("hidden");
     }
-    
+
     if (dashboardContent) {
-      dashboardContent.classList.remove('hidden');
-      
+      dashboardContent.classList.remove("hidden");
+
       // Initialize dashboard functionality only after content is visible
       setTimeout(() => {
         initializeJusticeDashboard();
       }, 50);
     } else {
-      console.error('Dashboard content container not found');
+      console.error("Dashboard content container not found");
     }
   },
 
   showLoginForm() {
-    console.log('showLoginForm() called');
+    console.log("showLoginForm() called");
     // Use the existing app div instead of replacing the entire body
-    const appDiv = document.getElementById('app');
-    console.log('App div found in showLoginForm?', !!appDiv);
-    
+    const appDiv = document.getElementById("app");
+    console.log("App div found in showLoginForm?", !!appDiv);
+
     if (!appDiv) {
-      console.error('App div not found for login form');
-      console.log('Available elements with IDs:', 
-        Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+      console.error("App div not found for login form");
+      console.log(
+        "Available elements with IDs:",
+        Array.from(document.querySelectorAll("[id]")).map((el) => el.id),
+      );
       return;
     }
 
@@ -404,46 +419,47 @@ const DashboardAuth = {
 
     // Initialize login form functionality
     setTimeout(() => {
-      const loginForm = document.getElementById('loginForm');
-      const loginBtn = document.getElementById('loginBtn');
-      const errorDiv = document.getElementById('loginError');
+      const loginForm = document.getElementById("loginForm");
+      const loginBtn = document.getElementById("loginBtn");
+      const errorDiv = document.getElementById("loginError");
 
       if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          
-          const username = document.getElementById('username').value.trim();
-          const password = document.getElementById('password').value;
-          
+
+          const username = document.getElementById("username").value.trim();
+          const password = document.getElementById("password").value;
+
           if (!username || !password) {
-            errorDiv.textContent = 'Please enter both username and password';
-            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = "Please enter both username and password";
+            errorDiv.classList.remove("hidden");
             return;
           }
-          
+
           // Clear previous errors
-          errorDiv.classList.add('hidden');
-          
+          errorDiv.classList.add("hidden");
+
           // Update button state
-          loginBtn.textContent = 'Authenticating...';
+          loginBtn.textContent = "Authenticating...";
           loginBtn.disabled = true;
-          
+
           try {
             const result = await this.authenticate(username, password);
-            
+
             if (result.success) {
               this.loadDashboard();
             } else {
-              errorDiv.textContent = result.error || 'Invalid username or password';
-              errorDiv.classList.remove('hidden');
+              errorDiv.textContent =
+                result.error || "Invalid username or password";
+              errorDiv.classList.remove("hidden");
             }
           } catch (error) {
-            console.error('Login error:', error);
-            errorDiv.textContent = 'Connection error. Please try again.';
-            errorDiv.classList.remove('hidden');
+            console.error("Login error:", error);
+            errorDiv.textContent = "Connection error. Please try again.";
+            errorDiv.classList.remove("hidden");
           } finally {
             // Reset button state
-            loginBtn.textContent = 'Access Dashboard';
+            loginBtn.textContent = "Access Dashboard";
             loginBtn.disabled = false;
           }
         });
@@ -453,9 +469,9 @@ const DashboardAuth = {
 
   loadDashboard() {
     // Instead of replacing the entire body, just replace the app div content
-    const appDiv = document.getElementById('app');
+    const appDiv = document.getElementById("app");
     if (!appDiv) {
-      console.error('App div not found');
+      console.error("App div not found");
       return;
     }
 
@@ -579,13 +595,13 @@ const DashboardAuth = {
     // Wait a moment for DOM to be ready, then initialize
     setTimeout(() => {
       // Add logout event listener
-      const logoutBtn = document.getElementById('logoutBtn');
+      const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener("click", () => {
           this.logout();
         });
       }
-      
+
       // Re-run the main dashboard code
       initializeJusticeDashboard();
     }, 100);
@@ -596,10 +612,13 @@ const DashboardAuth = {
     const start = parseInt(element.textContent) || 0;
     const increment = (target - start) / (duration / 16);
     let current = start;
-    
+
     const timer = setInterval(() => {
       current += increment;
-      if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+      if (
+        (increment > 0 && current >= target) ||
+        (increment < 0 && current <= target)
+      ) {
         current = target;
         clearInterval(timer);
       }
@@ -610,12 +629,12 @@ const DashboardAuth = {
   // Initialize all counters with sample data
   initCounters() {
     const counters = [
-      { id: 'totalCases', target: 247 },
-      { id: 'activeCases', target: 23 },
-      { id: 'analysisResults', target: 184 }
+      { id: "totalCases", target: 247 },
+      { id: "activeCases", target: 23 },
+      { id: "analysisResults", target: 184 },
     ];
 
-    counters.forEach(counter => {
+    counters.forEach((counter) => {
       const element = document.getElementById(counter.id);
       if (element) {
         // Add stagger delay for visual appeal
@@ -628,17 +647,19 @@ const DashboardAuth = {
 
   // Add professional button interactions (CSP compliant - no inline styles)
   initButtonAnimations() {
-    const buttons = document.querySelectorAll('.justice-btn-primary, .justice-btn-secondary, .justice-btn-accent');
-    buttons.forEach(button => {
+    const buttons = document.querySelectorAll(
+      ".justice-btn-primary, .justice-btn-secondary, .justice-btn-accent",
+    );
+    buttons.forEach((button) => {
       // Add classes for positioning
-      button.classList.add('relative', 'overflow-hidden');
-      
-      button.addEventListener('click', function(e) {
+      button.classList.add("relative", "overflow-hidden");
+
+      button.addEventListener("click", function (e) {
         // Simple pulse animation using CSS classes only
-        this.classList.add('animate-pulse');
-        
+        this.classList.add("animate-pulse");
+
         setTimeout(() => {
-          this.classList.remove('animate-pulse');
+          this.classList.remove("animate-pulse");
         }, 600);
       });
     });
@@ -647,205 +668,216 @@ const DashboardAuth = {
   // Initialize all enhancements
   init() {
     // All styles are now in CSS files - no dynamic injection needed
-    console.log('Dashboard enhancements initializing...');
+    console.log("Dashboard enhancements initializing...");
 
     // Initialize features after DOM load
     setTimeout(() => {
       this.initCounters();
       this.initButtonAnimations();
     }, 500);
-  }
+  },
 };
 
 /********** Dashboard Statistics Functions **********/
 function updateDashboardStats() {
   // Get all tracker rows to calculate statistics
   const trackerBody = document.querySelector("#results");
-  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
-  
+  const rows = trackerBody ? trackerBody.querySelectorAll("tr") : [];
+
   // Calculate total cases
   const totalCases = rows.length;
-  
+
   // Calculate active cases and PDF statistics
   let activeCases = 0;
   let documentsProcessed = 0;
   let pdfDocuments = 0;
   let totalPdfCharacters = 0;
-  
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
+
+  rows.forEach((row) => {
+    const cells = row.querySelectorAll("td");
     if (cells.length >= 4) {
       // Check status column (assuming it's in the 4th column)
       const status = cells[3].textContent.trim().toLowerCase();
-      if (status !== 'closed' && status !== 'complete' && status !== 'resolved') {
+      if (
+        status !== "closed" &&
+        status !== "complete" &&
+        status !== "resolved"
+      ) {
         activeCases++;
       }
-      
+
       // Count documents and analyze PDF content
       const fileLinks = row.querySelectorAll('a[href*="blob:"]');
       documentsProcessed += fileLinks.length;
-      
+
       // Check for PDF documents and count characters
-      fileLinks.forEach(link => {
-        if (link.textContent.toLowerCase().includes('.pdf')) {
+      fileLinks.forEach((link) => {
+        if (link.textContent.toLowerCase().includes(".pdf")) {
           pdfDocuments++;
           // Try to estimate content from visible text in the row
           const rowText = row.textContent;
-          if (rowText.length > 200) { // Likely contains extracted PDF content
+          if (rowText.length > 200) {
+            // Likely contains extracted PDF content
             totalPdfCharacters += rowText.length;
           }
         }
       });
     }
   });
-  
+
   // Update dashboard stat elements
-  const totalCasesEl = document.getElementById('totalCases');
-  const activeCasesEl = document.getElementById('activeCases');
-  const documentsProcessedEl = document.getElementById('documentsProcessed');
-  const systemStatusEl = document.getElementById('systemStatus');
-  
+  const totalCasesEl = document.getElementById("totalCases");
+  const activeCasesEl = document.getElementById("activeCases");
+  const documentsProcessedEl = document.getElementById("documentsProcessed");
+  const systemStatusEl = document.getElementById("systemStatus");
+
   if (totalCasesEl) totalCasesEl.textContent = totalCases;
   if (activeCasesEl) activeCasesEl.textContent = activeCases;
-  if (documentsProcessedEl) documentsProcessedEl.textContent = documentsProcessed;
-  if (systemStatusEl) systemStatusEl.textContent = totalCases > 0 ? 'Active' : 'Ready';
-  
+  if (documentsProcessedEl)
+    documentsProcessedEl.textContent = documentsProcessed;
+  if (systemStatusEl)
+    systemStatusEl.textContent = totalCases > 0 ? "Active" : "Ready";
+
   // Update PDF-specific stats if elements exist
-  const pdfDocumentsEl = document.getElementById('pdfDocuments');
-  const pdfCharactersEl = document.getElementById('pdfCharacters');
-  
+  const pdfDocumentsEl = document.getElementById("pdfDocuments");
+  const pdfCharactersEl = document.getElementById("pdfCharacters");
+
   if (pdfDocumentsEl) pdfDocumentsEl.textContent = pdfDocuments;
-  if (pdfCharactersEl) pdfCharactersEl.textContent = `${(totalPdfCharacters / 1000).toFixed(1)}K`;
-  
-  console.log(`📊 Dashboard stats updated: ${totalCases} total, ${activeCases} active, ${documentsProcessed} documents, ${pdfDocuments} PDFs (${totalPdfCharacters} chars)`);
+  if (pdfCharactersEl)
+    pdfCharactersEl.textContent = `${(totalPdfCharacters / 1000).toFixed(1)}K`;
+
+  console.log(
+    `📊 Dashboard stats updated: ${totalCases} total, ${activeCases} active, ${documentsProcessed} documents, ${pdfDocuments} PDFs (${totalPdfCharacters} chars)`,
+  );
 }
 
 function updateNoCasesDisplay() {
   // Reset all stats to 0 when no cases exist
-  const totalCasesEl = document.getElementById('totalCases');
-  const activeCasesEl = document.getElementById('activeCases');
-  const documentsProcessedEl = document.getElementById('documentsProcessed');
-  const systemStatusEl = document.getElementById('systemStatus');
-  
-  if (totalCasesEl) totalCasesEl.textContent = '0';
-  if (activeCasesEl) activeCasesEl.textContent = '0';
-  if (documentsProcessedEl) documentsProcessedEl.textContent = '0';
-  if (systemStatusEl) systemStatusEl.textContent = 'Ready';
+  const totalCasesEl = document.getElementById("totalCases");
+  const activeCasesEl = document.getElementById("activeCases");
+  const documentsProcessedEl = document.getElementById("documentsProcessed");
+  const systemStatusEl = document.getElementById("systemStatus");
+
+  if (totalCasesEl) totalCasesEl.textContent = "0";
+  if (activeCasesEl) activeCasesEl.textContent = "0";
+  if (documentsProcessedEl) documentsProcessedEl.textContent = "0";
+  if (systemStatusEl) systemStatusEl.textContent = "Ready";
 }
 
 /********** Filter Functions **********/
 function populateFilters() {
   // Get all tracker rows to read existing data
   const trackerBody = document.querySelector("#results");
-  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
-  
+  const rows = trackerBody ? trackerBody.querySelectorAll("tr") : [];
+
   // Get filter elements
-  const categoryFilter = document.getElementById('categoryFilter');
-  const misconductFilter = document.getElementById('misconductFilter');
-  const clearFiltersBtn = document.getElementById('clearFilters');
-  
+  const categoryFilter = document.getElementById("categoryFilter");
+  const misconductFilter = document.getElementById("misconductFilter");
+  const clearFiltersBtn = document.getElementById("clearFilters");
+
   // Collect unique values from existing data
   const categories = new Set();
   const misconductTypes = new Set();
-  
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
+
+  rows.forEach((row) => {
+    const cells = row.querySelectorAll("td");
     if (cells.length >= 3) {
       // Category is in first column
       const category = cells[0].textContent.trim();
       if (category) categories.add(category);
-      
+
       // Misconduct type is in third column (misconduct select)
-      const misconductSelect = cells[2].querySelector('select');
+      const misconductSelect = cells[2].querySelector("select");
       if (misconductSelect && misconductSelect.value) {
         misconductTypes.add(misconductSelect.value);
       }
     }
   });
-  
+
   // Populate category filter (keep existing static options + dynamic ones)
   if (categoryFilter) {
     const staticOptions = categoryFilter.innerHTML;
     const dynamicOptions = Array.from(categories)
-      .filter(cat => !staticOptions.includes(cat)) // Don't duplicate existing options
-      .map(cat => `<option value="${cat}">${cat}</option>`)
-      .join('');
-    
+      .filter((cat) => !staticOptions.includes(cat)) // Don't duplicate existing options
+      .map((cat) => `<option value="${cat}">${cat}</option>`)
+      .join("");
+
     if (dynamicOptions) {
       categoryFilter.innerHTML = staticOptions + dynamicOptions;
     }
   }
-  
+
   // Populate misconduct filter (keep existing static options + dynamic ones)
   if (misconductFilter) {
     const staticOptions = misconductFilter.innerHTML;
     const dynamicOptions = Array.from(misconductTypes)
-      .filter(type => !staticOptions.includes(type)) // Don't duplicate existing options
-      .map(type => `<option value="${type}">${type}</option>`)
-      .join('');
-    
+      .filter((type) => !staticOptions.includes(type)) // Don't duplicate existing options
+      .map((type) => `<option value="${type}">${type}</option>`)
+      .join("");
+
     if (dynamicOptions) {
       misconductFilter.innerHTML = staticOptions + dynamicOptions;
     }
   }
-  
+
   // Set up filter event handlers
   if (categoryFilter) {
-    categoryFilter.addEventListener('change', applyFilters);
+    categoryFilter.addEventListener("change", applyFilters);
   }
-  
+
   if (misconductFilter) {
-    misconductFilter.addEventListener('change', applyFilters);
+    misconductFilter.addEventListener("change", applyFilters);
   }
-  
+
   if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener('click', clearAllFilters);
+    clearFiltersBtn.addEventListener("click", clearAllFilters);
   }
 }
 
 function applyFilters() {
   const trackerBody = document.querySelector("#results");
-  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
-  
-  const categoryFilter = document.getElementById('categoryFilter');
-  const misconductFilter = document.getElementById('misconductFilter');
-  
-  const selectedCategory = categoryFilter ? categoryFilter.value : '';
-  const selectedMisconduct = misconductFilter ? misconductFilter.value : '';
-  
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
+  const rows = trackerBody ? trackerBody.querySelectorAll("tr") : [];
+
+  const categoryFilter = document.getElementById("categoryFilter");
+  const misconductFilter = document.getElementById("misconductFilter");
+
+  const selectedCategory = categoryFilter ? categoryFilter.value : "";
+  const selectedMisconduct = misconductFilter ? misconductFilter.value : "";
+
+  rows.forEach((row) => {
+    const cells = row.querySelectorAll("td");
     if (cells.length >= 3) {
       const category = cells[0].textContent.trim();
-      const misconductSelect = cells[2].querySelector('select');
-      const misconduct = misconductSelect ? misconductSelect.value : '';
-      
+      const misconductSelect = cells[2].querySelector("select");
+      const misconduct = misconductSelect ? misconductSelect.value : "";
+
       const categoryMatch = !selectedCategory || category === selectedCategory;
-      const misconductMatch = !selectedMisconduct || misconduct === selectedMisconduct;
-      
+      const misconductMatch =
+        !selectedMisconduct || misconduct === selectedMisconduct;
+
       // Show/hide row based on filter matches
-      row.style.display = (categoryMatch && misconductMatch) ? '' : 'none';
+      row.style.display = categoryMatch && misconductMatch ? "" : "none";
     }
   });
-  
+
   // Update stats after filtering
   updateDashboardStats();
 }
 
 function clearAllFilters() {
-  const categoryFilter = document.getElementById('categoryFilter');
-  const misconductFilter = document.getElementById('misconductFilter');
-  
-  if (categoryFilter) categoryFilter.value = '';
-  if (misconductFilter) misconductFilter.value = '';
-  
+  const categoryFilter = document.getElementById("categoryFilter");
+  const misconductFilter = document.getElementById("misconductFilter");
+
+  if (categoryFilter) categoryFilter.value = "";
+  if (misconductFilter) misconductFilter.value = "";
+
   // Show all rows
   const trackerBody = document.querySelector("#results");
-  const rows = trackerBody ? trackerBody.querySelectorAll('tr') : [];
-  rows.forEach(row => {
-    row.style.display = '';
+  const rows = trackerBody ? trackerBody.querySelectorAll("tr") : [];
+  rows.forEach((row) => {
+    row.style.display = "";
   });
-  
+
   // Update stats
   updateDashboardStats();
 }
@@ -864,7 +896,7 @@ function clearOldData() {
 function initializeJusticeDashboard() {
   // Timeout variable for optimized saving
   // let saveTimeout; // FIXED: Using declaration from function start
-  
+
   // DOM Elements
   const fileInput = document.getElementById("fileInput");
   const docInput = document.getElementById("docInput");
@@ -873,19 +905,19 @@ function initializeJusticeDashboard() {
   const askBtn = document.getElementById("askWolfram");
   const summaryBox = document.getElementById("summaryBox");
   let trackerBody = document.querySelector("#results");
-  
+
   // Fallback for trackerBody
   if (!trackerBody) {
     trackerBody = document.querySelector("#trackerTable tbody");
   }
   if (!trackerBody) {
-    console.error('Could not find tracker table body');
+    console.error("Could not find tracker table body");
     return;
   }
 
   // Dashboard elements
-  const textInput = document.getElementById('textInput');
-  const askWolframBtn = document.getElementById('askWolfram');
+  const textInput = document.getElementById("textInput");
+  const askWolframBtn = document.getElementById("askWolfram");
 
   // Wire up Ask Wolfram Alpha button
   if (askWolframBtn) {
@@ -893,10 +925,10 @@ function initializeJusticeDashboard() {
     const saved = localStorage.getItem("justiceTrackerRows");
     if (saved) {
       trackerBody.innerHTML = saved;
-      
+
       // ✅ MIGRATION: Update existing rows to use "View PDF" hyperlinks
       migrateExistingRowsToHyperlinks();
-      
+
       updateDashboardStats();
       populateFilters();
     } else {
@@ -904,317 +936,345 @@ function initializeJusticeDashboard() {
       updateNoCasesDisplay();
     }
 
-  // Migration function to update existing rows with new "View PDF" hyperlink format
-  function migrateExistingRowsToHyperlinks() {
-    const rows = trackerBody.querySelectorAll('tr');
-    let updated = false;
-    
-    rows.forEach(row => {
-      const cells = row.querySelectorAll('td');
-      if (cells.length >= 7) { // Ensure we have enough columns
-        const actionCell = cells[6]; // Actions column (7th column, index 6)
-        
-        // Check if this row has old button format
-        const oldViewButton = actionCell.querySelector('button[onclick*="window.open"]');
-        const oldViewButtonText = actionCell.querySelector('button');
-        
-        if (oldViewButton) {
-          // Extract the fileURL from the onclick attribute
-          const onclickAttr = oldViewButton.getAttribute('onclick');
-          const fileURLMatch = onclickAttr.match(/window\.open\(['"]([^'"]+)['"]/);
-          
-          if (fileURLMatch) {
-            const fileURL = fileURLMatch[1];
-            
-            // Replace button with hyperlink
-            const viewLink = document.createElement("a");
-            viewLink.innerText = "View PDF";
-            viewLink.href = fileURL;
-            viewLink.target = "_blank";
-            viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
-            
-            // Keep delete button if it exists
-            const deleteButton = actionCell.querySelector('button[onclick*="remove"]');
-            
-            // Clear the cell and add the new hyperlink
-            actionCell.innerHTML = '';
-            actionCell.appendChild(viewLink);
-            
-            if (deleteButton) {
-              actionCell.appendChild(deleteButton);
-            }
-            
-            updated = true;
-          }
-        }
-        // Check for old "View" button with emoji
-        else if (oldViewButtonText && oldViewButtonText.textContent.includes('👁️')) {
-          const onclickAttr = oldViewButtonText.getAttribute('onclick');
-          if (onclickAttr) {
-            const fileURLMatch = onclickAttr.match(/window\.open\(['"]([^'"]+)['"]/);
-            
+    // Migration function to update existing rows with new "View PDF" hyperlink format
+    function migrateExistingRowsToHyperlinks() {
+      const rows = trackerBody.querySelectorAll("tr");
+      let updated = false;
+
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length >= 7) {
+          // Ensure we have enough columns
+          const actionCell = cells[6]; // Actions column (7th column, index 6)
+
+          // Check if this row has old button format
+          const oldViewButton = actionCell.querySelector(
+            'button[onclick*="window.open"]',
+          );
+          const oldViewButtonText = actionCell.querySelector("button");
+
+          if (oldViewButton) {
+            // Extract the fileURL from the onclick attribute
+            const onclickAttr = oldViewButton.getAttribute("onclick");
+            const fileURLMatch = onclickAttr.match(
+              /window\.open\(['"]([^'"]+)['"]/,
+            );
+
             if (fileURLMatch) {
               const fileURL = fileURLMatch[1];
-              
-              // Replace with hyperlink
+
+              // Replace button with hyperlink
               const viewLink = document.createElement("a");
               viewLink.innerText = "View PDF";
               viewLink.href = fileURL;
               viewLink.target = "_blank";
-              viewLink.className = "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
-              
-              // Keep delete button
-              const deleteButton = actionCell.querySelector('button[onclick*="remove"]');
-              
-              actionCell.innerHTML = '';
+              viewLink.className =
+                "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
+
+              // Keep delete button if it exists
+              const deleteButton = actionCell.querySelector(
+                'button[onclick*="remove"]',
+              );
+
+              // Clear the cell and add the new hyperlink
+              actionCell.innerHTML = "";
               actionCell.appendChild(viewLink);
-              
+
               if (deleteButton) {
                 actionCell.appendChild(deleteButton);
               }
-              
+
               updated = true;
             }
           }
+          // Check for old "View" button with emoji
+          else if (
+            oldViewButtonText &&
+            oldViewButtonText.textContent.includes("👁️")
+          ) {
+            const onclickAttr = oldViewButtonText.getAttribute("onclick");
+            if (onclickAttr) {
+              const fileURLMatch = onclickAttr.match(
+                /window\.open\(['"]([^'"]+)['"]/,
+              );
+
+              if (fileURLMatch) {
+                const fileURL = fileURLMatch[1];
+
+                // Replace with hyperlink
+                const viewLink = document.createElement("a");
+                viewLink.innerText = "View PDF";
+                viewLink.href = fileURL;
+                viewLink.target = "_blank";
+                viewLink.className =
+                  "text-blue-600 underline text-sm hover:text-blue-800 mr-3";
+
+                // Keep delete button
+                const deleteButton = actionCell.querySelector(
+                  'button[onclick*="remove"]',
+                );
+
+                actionCell.innerHTML = "";
+                actionCell.appendChild(viewLink);
+
+                if (deleteButton) {
+                  actionCell.appendChild(deleteButton);
+                }
+
+                updated = true;
+              }
+            }
+          }
+          // Check for "N/A" or "No file" text and update to "No PDF"
+          else if (
+            actionCell.textContent.trim() === "N/A" ||
+            actionCell.textContent.includes("No file")
+          ) {
+            actionCell.innerHTML =
+              '<span class="text-gray-400 text-sm">No PDF</span>';
+            updated = true;
+          }
         }
-        // Check for "N/A" or "No file" text and update to "No PDF"
-        else if (actionCell.textContent.trim() === 'N/A' || actionCell.textContent.includes('No file')) {
-          actionCell.innerHTML = '<span class="text-gray-400 text-sm">No PDF</span>';
-          updated = true;
-        }
+      });
+
+      // Save the updated table if changes were made
+      if (updated) {
+        console.log('✅ Migrated existing rows to use "View PDF" hyperlinks');
+        saveTable();
+      }
+    }
+
+    // PDF to text converter
+
+    /********** Initialize Application **********/
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("Justice Dashboard starting...");
+
+      // Check if app container exists
+      const appContainer = document.getElementById("app");
+      if (!appContainer) {
+        console.error("App container (#app) not found in DOM");
+        return;
+      }
+
+      // Initialize dashboard enhancements first
+      DashboardEnhancements.init();
+
+      // Initialize authentication and render appropriate view
+      if (DashboardAuth.init()) {
+        // User is authenticated - show dashboard
+        console.log("User authenticated, loading dashboard...");
+        DashboardAuth.renderDashboard();
+
+        // Initialize counters after dashboard is rendered
+        setTimeout(() => {
+          DashboardEnhancements.initCounters();
+          console.log("Dashboard enhancements initialized");
+        }, 1000);
+      } else {
+        // User not authenticated - show login form
+        console.log("User not authenticated, showing login form...");
+        DashboardAuth.renderLoginForm();
       }
     });
-    
-    // Save the updated table if changes were made
-    if (updated) {
-      console.log('✅ Migrated existing rows to use "View PDF" hyperlinks');
-      saveTable();
-    }
-  }
 
-// PDF to text converter
+    // Make DashboardAuth globally available
+    window.DashboardAuth = DashboardAuth;
 
-/********** Initialize Application **********/
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('Justice Dashboard starting...');
-  
-  // Check if app container exists
-  const appContainer = document.getElementById('app');
-  if (!appContainer) {
-    console.error('App container (#app) not found in DOM');
-    return;
-  }
-
-  // Initialize dashboard enhancements first
-  DashboardEnhancements.init();
-
-  // Initialize authentication and render appropriate view
-  if (DashboardAuth.init()) {
-    // User is authenticated - show dashboard
-    console.log('User authenticated, loading dashboard...');
-    DashboardAuth.renderDashboard();
-    
-    // Initialize counters after dashboard is rendered
-    setTimeout(() => {
-      DashboardEnhancements.initCounters();
-      console.log('Dashboard enhancements initialized');
-    }, 1000);
-  } else {
-    // User not authenticated - show login form
-    console.log('User not authenticated, showing login form...');
-    DashboardAuth.renderLoginForm();
-  }
-});
-
-// Make DashboardAuth globally available
-window.DashboardAuth = DashboardAuth;
-
-// Global function to manually clear data (can be called from console)
-window.clearJusticeData = function() {
-  localStorage.removeItem("justiceTrackerRows");
-  location.reload();
-};
-
-// Expose clearOldData globally for debugging
-window.clearOldData = clearOldData;
-
-// Global debugging functions
-window.debugDashboard = function() {
-  console.log('=== Dashboard Debug Info ===');
-  console.log('Authentication:', {
-    isAuthenticated: DashboardAuth.isAuthenticated,
-    user: DashboardAuth.currentUser,
-    token: DashboardAuth.authToken ? 'Present' : 'Missing'
-  });
-  console.log('DOM elements:', {
-    fileInput: document.getElementById("fileInput"),
-    generateBtn: document.getElementById("generateBtn"),
-    results: document.querySelector("#results"),
-    trackerTable: document.getElementById("trackerTable")
-  });
-  console.log('All elements with IDs:', 
-    Array.from(document.querySelectorAll('[id]')).map(el => el.id)
-  );
-};
-
-// Helper function to check if user is authenticated (for use in other parts of app)
-function isUserAuthenticated() {
-  return DashboardAuth.isAuthenticated;
-}
-
-// Helper function to get current user info (for use in other parts of app)
-function getCurrentUser() {
-  return DashboardAuth.currentUser;
-}
-
-// Helper function to get auth token for API calls
-function getAuthToken() {
-  return DashboardAuth.authToken;
-}
-
-// Helper function to logout (for use in UI)
-function logoutUser() {
-  DashboardAuth.logout();
-}
-
-// Export auth functions for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    DashboardAuth,
-    isUserAuthenticated,
-    getCurrentUser,
-    getAuthToken,
-    logoutUser
-  };
-}
-
-// API Helper Functions for Authenticated Requests
-const ApiHelper = {
-  // Make authenticated API requests
-  async makeRequest(url, options = {}) {
-    const authToken = getAuthToken();
-    const defaultOptions = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-      },
-      ...options
+    // Global function to manually clear data (can be called from console)
+    window.clearJusticeData = function () {
+      localStorage.removeItem("justiceTrackerRows");
+      location.reload();
     };
-    
-    // Merge headers if provided
-    if (options.headers) {
-      defaultOptions.headers = {
-        ...defaultOptions.headers,
-        ...options.headers
+
+    // Expose clearOldData globally for debugging
+    window.clearOldData = clearOldData;
+
+    // Global debugging functions
+    window.debugDashboard = function () {
+      console.log("=== Dashboard Debug Info ===");
+      console.log("Authentication:", {
+        isAuthenticated: DashboardAuth.isAuthenticated,
+        user: DashboardAuth.currentUser,
+        token: DashboardAuth.authToken ? "Present" : "Missing",
+      });
+      console.log("DOM elements:", {
+        fileInput: document.getElementById("fileInput"),
+        generateBtn: document.getElementById("generateBtn"),
+        results: document.querySelector("#results"),
+        trackerTable: document.getElementById("trackerTable"),
+      });
+      console.log(
+        "All elements with IDs:",
+        Array.from(document.querySelectorAll("[id]")).map((el) => el.id),
+      );
+    };
+
+    // Helper function to check if user is authenticated (for use in other parts of app)
+    function isUserAuthenticated() {
+      return DashboardAuth.isAuthenticated;
+    }
+
+    // Helper function to get current user info (for use in other parts of app)
+    function getCurrentUser() {
+      return DashboardAuth.currentUser;
+    }
+
+    // Helper function to get auth token for API calls
+    function getAuthToken() {
+      return DashboardAuth.authToken;
+    }
+
+    // Helper function to logout (for use in UI)
+    function logoutUser() {
+      DashboardAuth.logout();
+    }
+
+    // Export auth functions for use in other modules
+    if (typeof module !== "undefined" && module.exports) {
+      module.exports = {
+        DashboardAuth,
+        isUserAuthenticated,
+        getCurrentUser,
+        getAuthToken,
+        logoutUser,
       };
     }
-    
-    try {
-      const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, defaultOptions);
-      
-      // Handle unauthorized responses
-      if (response.status === 401) {
-        DashboardAuth.logout();
-        throw new Error('Session expired. Please log in again.');
+
+    // API Helper Functions for Authenticated Requests
+    const ApiHelper = {
+      // Make authenticated API requests
+      async makeRequest(url, options = {}) {
+        const authToken = getAuthToken();
+        const defaultOptions = {
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          },
+          ...options,
+        };
+
+        // Merge headers if provided
+        if (options.headers) {
+          defaultOptions.headers = {
+            ...defaultOptions.headers,
+            ...options.headers,
+          };
+        }
+
+        try {
+          const response = await fetch(
+            `${DYNAMIC_API_BASE_URL}${url}`,
+            defaultOptions,
+          );
+
+          // Handle unauthorized responses
+          if (response.status === 401) {
+            DashboardAuth.logout();
+            throw new Error("Session expired. Please log in again.");
+          }
+
+          return response;
+        } catch (error) {
+          console.error("API request failed:", error);
+          throw error;
+        }
+      },
+
+      // Upload file with authentication
+      async uploadFile(file, additionalData = {}) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Add any additional data
+        Object.keys(additionalData).forEach((key) => {
+          formData.append(key, additionalData[key]);
+        });
+
+        const authToken = getAuthToken();
+        return this.makeRequest("/api/summarize", {
+          method: "POST",
+          body: formData,
+          headers: {
+            // Don't set Content-Type for FormData, let browser set it
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          },
+        });
+      },
+
+      // Get user profile
+      async getProfile() {
+        const response = await this.makeRequest("/api/profile");
+        return response.json();
+      },
+
+      // Admin: Get all users
+      async getUsers() {
+        const response = await this.makeRequest("/api/admin/users");
+        return response.json();
+      },
+
+      // Admin: Add user
+      async addUser(userData) {
+        const response = await this.makeRequest("/api/admin/users", {
+          method: "POST",
+          body: JSON.stringify(userData),
+        });
+        return response.json();
+      },
+
+      // Admin: Delete user
+      async deleteUser(userId) {
+        const response = await this.makeRequest(`/api/admin/users/${userId}`, {
+          method: "DELETE",
+        });
+        return response.json();
+      },
+    };
+
+    // Wolfram Alpha Integration Functions
+    async function askWolfram(query) {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        throw new Error("Authentication required to use Wolfram Alpha");
       }
-      
-      return response;
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+
+      const response = await fetch("/api/wolfram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        return data.result;
+      } else {
+        throw new Error(data.error || "Wolfram Alpha API error");
+      }
     }
-  },
-  
-  // Upload file with authentication
-  async uploadFile(file, additionalData = {}) {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    // Add any additional data
-    Object.keys(additionalData).forEach(key => {
-      formData.append(key, additionalData[key]);
-    });
 
-    const authToken = getAuthToken();
-    return this.makeRequest('/api/summarize', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        // Don't set Content-Type for FormData, let browser set it
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-      }
-    });
-  },
-  
-  // Get user profile
-  async getProfile() {
-    const response = await this.makeRequest('/api/profile');
-    return response.json();
-  },
-  
-  // Admin: Get all users
-  async getUsers() {
-    const response = await this.makeRequest('/api/admin/users');
-    return response.json();
-  },
-  
-  // Admin: Add user
-  async addUser(userData) {
-    const response = await this.makeRequest('/api/admin/users', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    });
-    return response.json();
-  },
-  
-  // Admin: Delete user
-  async deleteUser(userId) {
-    const response = await this.makeRequest(`/api/admin/users/${userId}`, {
-      method: 'DELETE'
-    });
-    return response.json();
-  }
-};
+    function showWolframResult(query, result) {
+      // Create modal overlay
+      const overlay = document.createElement("div");
+      overlay.className =
+        "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4";
 
-// Wolfram Alpha Integration Functions
-async function askWolfram(query) {
-  const authToken = getAuthToken();
-  if (!authToken) {
-    throw new Error('Authentication required to use Wolfram Alpha');
-  }
+      // Create modal content
+      const modal = document.createElement("div");
+      modal.className =
+        "bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden";
 
-  const response = await fetch('/api/wolfram', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`
-    },
-    body: JSON.stringify({ query })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  if (data.success) {
-    return data.result;
-  } else {
-    throw new Error(data.error || 'Wolfram Alpha API error');
-  }
-}
-
-function showWolframResult(query, result) {
-  // Create modal overlay
-  const overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-  
-  // Create modal content
-  const modal = document.createElement('div');
-  modal.className = 'bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden';
-  
-  modal.innerHTML = `
+      modal.innerHTML = `
     <div class="flex items-center justify-between p-6 border-b border-gray-200">
       <h3 class="text-lg font-semibold text-gray-900">🧠 Wolfram Alpha Response</h3>
       <button id="closeWolframModal" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -1247,109 +1307,117 @@ function showWolframResult(query, result) {
       </button>
     </div>
   `;
-  
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-  
-  // Event handlers
-  const closeModal = () => {
-    document.body.removeChild(overlay);
-  };
-  
-  document.getElementById('closeWolframModal').onclick = closeModal;
-  document.getElementById('closeWolframModalBtn').onclick = closeModal;
-  
-  document.getElementById('copyWolframResult').onclick = () => {
-    navigator.clipboard.writeText(JSON.stringify(result, null, 2)).then(() => {
-      showNotification('Wolfram result copied to clipboard!', 'success');
-    }).catch(() => {
-      showNotification('Failed to copy to clipboard', 'error');
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      // Event handlers
+      const closeModal = () => {
+        document.body.removeChild(overlay);
+      };
+
+      document.getElementById("closeWolframModal").onclick = closeModal;
+      document.getElementById("closeWolframModalBtn").onclick = closeModal;
+
+      document.getElementById("copyWolframResult").onclick = () => {
+        navigator.clipboard
+          .writeText(JSON.stringify(result, null, 2))
+          .then(() => {
+            showNotification("Wolfram result copied to clipboard!", "success");
+          })
+          .catch(() => {
+            showNotification("Failed to copy to clipboard", "error");
+          });
+      };
+
+      // Close on overlay click
+      overlay.onclick = (e) => {
+        if (e.target === overlay) closeModal();
+      };
+
+      // Close on Escape key
+      const handleEscape = (e) => {
+        if (e.key === "Escape") {
+          closeModal();
+          document.removeEventListener("keydown", handleEscape);
+        }
+      };
+      document.addEventListener("keydown", handleEscape);
+    }
+
+    // ====================================================================
+    // ChatGPT's Exact "View PDF" Implementation - Added as requested
+    // ====================================================================
+
+    // Justice Dashboard Script - ChatGPT Version
+
+    // Add a new row to the tracker
+    function addToTracker(summary) {
+      const tableBody = document.querySelector("#trackerTable tbody");
+      const newRow = tableBody.insertRow();
+
+      newRow.insertCell().innerText = summary.category;
+      newRow.insertCell().innerText = summary.child;
+      newRow.insertCell().innerText = summary.misconduct;
+      newRow.insertCell().innerText = summary.summary;
+
+      const viewCell = newRow.insertCell();
+      if (summary.fileURL) {
+        const viewLink = document.createElement("a");
+        viewLink.innerText = "View PDF";
+        viewLink.href = summary.fileURL;
+        viewLink.target = "_blank";
+        viewCell.appendChild(viewLink);
+      } else {
+        viewCell.innerText = "No PDF";
+      }
+    }
+
+    // Example initialization with mock data
+    document.addEventListener("DOMContentLoaded", () => {
+      const exampleSummaries = [
+        {
+          category: "Medical",
+          child: "Jace",
+          misconduct: "Withholding treatment",
+          summary: "Medical report shows delayed care.",
+          fileURL: "pdfs/example1.pdf",
+        },
+        {
+          category: "Legal",
+          child: "Josh",
+          misconduct: "Due process violation",
+          summary: "Court order issued without proper hearing.",
+          fileURL: "pdfs/example2.pdf",
+        },
+      ];
+
+      exampleSummaries.forEach(addToTracker);
     });
-  };
-  
-  // Close on overlay click
-  overlay.onclick = (e) => {
-    if (e.target === overlay) closeModal();
-  };
-  
-  // Close on Escape key
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      document.removeEventListener('keydown', handleEscape);
+
+    // ====================================================================
+    // End ChatGPT's Implementation
+    // ====================================================================
+
+    // Manual migration function for users to update existing documents
+    function updateExistingDocuments() {
+      console.log(
+        '🔄 Updating existing documents to use "View PDF" hyperlinks...',
+      );
+      migrateExistingRowsToHyperlinks();
+
+      // Also trigger a re-render to ensure all updates are visible
+      updateDashboardStats();
+      populateFilters();
+
+      // Show success notification
+      showNotification(
+        '✅ Successfully updated existing documents with "View PDF" hyperlinks!',
+        "success",
+      );
     }
-  };
-  document.addEventListener('keydown', handleEscape);
-}
 
-// ====================================================================
-// ChatGPT's Exact "View PDF" Implementation - Added as requested
-// ====================================================================
-
-// Justice Dashboard Script - ChatGPT Version
-
-// Add a new row to the tracker
-function addToTracker(summary) {
-  const tableBody = document.querySelector("#trackerTable tbody");
-  const newRow = tableBody.insertRow();
-
-  newRow.insertCell().innerText = summary.category;
-  newRow.insertCell().innerText = summary.child;
-  newRow.insertCell().innerText = summary.misconduct;
-  newRow.insertCell().innerText = summary.summary;
-
-  const viewCell = newRow.insertCell();
-  if (summary.fileURL) {
-    const viewLink = document.createElement("a");
-    viewLink.innerText = "View PDF";
-    viewLink.href = summary.fileURL;
-    viewLink.target = "_blank";
-    viewCell.appendChild(viewLink);
-  } else {
-    viewCell.innerText = "No PDF";
+    // Expose function globally for console access
+    window.updateExistingDocuments = updateExistingDocuments;
   }
-}
-
-// Example initialization with mock data
-document.addEventListener("DOMContentLoaded", () => {
-  const exampleSummaries = [
-    {
-      category: "Medical",
-      child: "Jace",
-      misconduct: "Withholding treatment",
-      summary: "Medical report shows delayed care.",
-      fileURL: "pdfs/example1.pdf"
-    },
-    {
-      category: "Legal",
-      child: "Josh",
-      misconduct: "Due process violation",
-      summary: "Court order issued without proper hearing.",
-      fileURL: "pdfs/example2.pdf"
-    }
-  ];
-
-  exampleSummaries.forEach(addToTracker);
-});
-
-// ====================================================================
-// End ChatGPT's Implementation
-// ====================================================================
-
-// Manual migration function for users to update existing documents
-  function updateExistingDocuments() {
-    console.log('🔄 Updating existing documents to use "View PDF" hyperlinks...');
-    migrateExistingRowsToHyperlinks();
-    
-    // Also trigger a re-render to ensure all updates are visible
-    updateDashboardStats();
-    populateFilters();
-    
-    // Show success notification
-    showNotification('✅ Successfully updated existing documents with "View PDF" hyperlinks!', 'success');
-  }
-
-  // Expose function globally for console access
-      window.updateExistingDocuments = updateExistingDocuments;
-    }
-  } // <-- Add this closing brace to end initializeJusticeDashboard
+} // <-- Add this closing brace to end initializeJusticeDashboard

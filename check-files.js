@@ -3,11 +3,11 @@ const fs = require("fs");
 const path = require("path");
 
 const required = [
-  "server.js",                    // Root level server
-  "index.html",                   // Root level index 
-  "script.js",                    // Root level script
-  "package.json",                 // Package config
-  ".env"                          // Environment variables
+  "server.js", // Root level server
+  "index.html", // Root level index
+  "script.js", // Root level script
+  "package.json", // Package config
+  ".env", // Environment variables
 ];
 
 console.log("🔍 Checking Justice Dashboard file structure...\n");
@@ -17,9 +17,9 @@ for (const r of required) {
   const fullPath = path.join(__dirname, r);
   if (fs.existsSync(fullPath)) {
     console.log("✅", r);
-  } else { 
-    console.error("❌ MISSING:", r); 
-    ok = false; 
+  } else {
+    console.error("❌ MISSING:", r);
+    ok = false;
   }
 }
 

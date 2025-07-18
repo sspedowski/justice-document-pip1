@@ -45,15 +45,15 @@ document.addEventListener("DOMContentLoaded", () => {
       child: "Jace",
       misconduct: "Withholding treatment",
       summary: "Medical report shows delayed care.",
-      fileURL: "pdfs/example1.pdf"
+      fileURL: "pdfs/example1.pdf",
     },
     {
       category: "Legal",
       child: "Josh",
       misconduct: "Due process violation",
       summary: "Court order issued without proper hearing.",
-      fileURL: "pdfs/example2.pdf"
-    }
+      fileURL: "pdfs/example2.pdf",
+    },
   ];
 
   exampleSummaries.forEach(addToTracker);
@@ -99,10 +99,10 @@ justice-dashboard/
 
 ### **Table Appearance:**
 
-| Category | Child | Misconduct | Summary | View PDF |
-|----------|-------|------------|---------|----------|
-| Medical | Jace | Withholding treatment | Medical report shows delayed care. | **[View PDF](pdfs/example1.pdf)** |
-| Legal | Josh | Due process violation | Court order issued without proper hearing. | **[View PDF](pdfs/example2.pdf)** |
+| Category | Child | Misconduct            | Summary                                    | View PDF                          |
+| -------- | ----- | --------------------- | ------------------------------------------ | --------------------------------- |
+| Medical  | Jace  | Withholding treatment | Medical report shows delayed care.         | **[View PDF](pdfs/example1.pdf)** |
+| Legal    | Josh  | Due process violation | Court order issued without proper hearing. | **[View PDF](pdfs/example2.pdf)** |
 
 ### **Link Styling:**
 
@@ -173,7 +173,7 @@ justice-dashboard/
 ✅ **Sample Data Loading** - Automatic initialization  
 ✅ **File Structure Created** - PDFs directory ready  
 ✅ **Server Integration** - Static file serving configured  
-✅ **Production Ready** - Ready for Render deployment  
+✅ **Production Ready** - Ready for Render deployment
 
 ### **Success Summary**
 
