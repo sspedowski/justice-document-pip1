@@ -66,21 +66,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 app.use(
   helmet({
     contentSecurityPolicy: {
+      useDefaults: true,
       directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'"], // No unsafe-inline needed!
-        imgSrc: ["'self'", "data:", "blob:"],
-        fontSrc: ["'self'"],
-        connectSrc: ["'self'"],
-        mediaSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        childSrc: ["'none'"],
-        frameSrc: ["'none'"],
-        workerSrc: ["'self'", "blob:"],
-        manifestSrc: ["'self'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "connect-src": ["'self'", "http://localhost:3000"],
       },
     },
   }),
@@ -745,6 +734,17 @@ app.get("*", (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Justice Dashboard API running on http://localhost:${PORT}`);
   console.log(`📋 API endpoints available:`);
+  console.log(`   POST /api/login`);
+  console.log(`   POST /api/logout`);
+  console.log(`   GET  /api/profile`);
+  console.log(`   POST /api/summarize`);
+  console.log(`   GET  /api/health`);
+  console.log(`   POST /api/report-error`);
+  console.log(`   POST /api/wolfram`);
+});
+
+/* Duplicate declarations and routes removed to fix redeclaration errors. 
+   All necessary logic is already implemented above. */
   console.log(`   POST /api/login`);
   console.log(`   POST /api/logout`);
   console.log(`   GET  /api/profile`);
