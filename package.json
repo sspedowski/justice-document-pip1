@@ -8,7 +8,8 @@
     "dev:client": "vite --host",
     "dev:server": "nodemon backend/server.js",
     "lint": "eslint .",
-    "husky:check": "husky -v"
+    "husky:check": "husky -v",
+    "test": "echo \"No tests defined\" && exit 0"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
