@@ -137,8 +137,8 @@ app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Ensure uploads/ exists
-const UPLOADS_PATH = path.join(__dirname, "uploads");
+// Ensure uploads/ exists before multer setup
+const UPLOADS_PATH = "uploads";
 if (!fs.existsSync(UPLOADS_PATH)) {
   fs.mkdirSync(UPLOADS_PATH, { recursive: true });
 }
