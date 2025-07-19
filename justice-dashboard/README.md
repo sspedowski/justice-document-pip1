@@ -1,314 +1,196 @@
 # Justice Dashboard
 
-A web-based application for managing and analyzing justice-related documents with intelligent categorization, child detection, and misconduct type assignment.
+A web-based application for managing and analyzing justice-related documents with intelligent categorization, child detection, misconduct type assignment, and optional AI-powered summaries and tagging.
 
-## Quick Start
+---
 
-1. **Install Node.js** (if not already installed)
+## 🚀 Quick Start
 
-2. **Navigate to project folder**:
-
-   ```powershell
-   cd c:\path\to\justice-dashboard\justice-dashboard
-   ```
-
-3. **Install dependencies**:
+1. **Install Node.js** (v16 or higher)
+2. **Install dependencies:**
 
    ```powershell
    npm install
    ```
-
-4. **Build CSS**:
+3. **Build Tailwind CSS:**
 
    ```powershell
    npm run build:css
    ```
+4. **Start the application:**
 
-5. **Open application**: Navigate to `justice-dashboard/index.html` in your browser
+   * **Client-only:** Open `justice-dashboard/index.html` in your browser
+   * **With backend:**
 
-That's it! The dashboard is ready to use.
+     ```powershell
+     node backend/server.js
+     ```
 
-## Features
+     Visit [http://localhost:3000](http://localhost:3000)
 
-- **Bulk PDF Upload**: Upload multiple PDF files simultaneously
-- **Auto-Categorization**: Automatically categorizes documents into Medical, School, Legal, or General
-- **Child Detection**: Identifies documents related to Jace, Josh, Both, or Unknown
-- **Misconduct Classification**: Assigns misconduct types with AI-powered keyword detection
-- **CSV Export**: Export analysis results for further processing
-- **Accessibility**: ARIA labels and keyboard navigation support
-- **Modern UI**: Clean, responsive design with Tailwind CSS
+---
 
-## Project Structure
+## 🌟 Features
+
+* **Bulk PDF Upload:** Upload and process multiple legal documents at once
+* **Auto-Categorization:** Classifies documents as Medical, School, Legal, or General
+* **Child Detection:** Identifies Jace, Josh, Both, or Unknown based on document text
+* **Misconduct Classification:** Assigns misconduct types (abuse, neglect, etc.)
+* **AI Summarization:** Optional AI-powered document summaries and keyword tagging (requires OpenAI key)
+* **CSV Export:** Download your processed and classified results
+* **Accessibility:** ARIA labels, keyboard navigation, and readable contrast
+* **Modern UI:** Fast, responsive, and easy-to-use interface with Tailwind CSS
+* **Faith Integration:** Add prayers or scripture per case (optional)
+
+---
+
+## 📁 Project Structure
 
 ```text
 justice-dashboard/
-├── justice-dashboard/           # Main web app
-│   ├── dist/                   # Compiled CSS
-│   │   └── styles.css         # Production Tailwind CSS
-│   ├── index.html             # Main application (production)
-│   ├── index-working.html     # Development version with CDN fallback
-│   ├── script.js              # Application logic
-│   └── styles.css             # Source Tailwind CSS
-├── backend/                    # Backend server (for AI features)
-│   └── server.js              # Express server with AI summarization
-├── package.json               # Dependencies and build scripts
-├── postcss.config.js          # PostCSS configuration
-├── tailwind.config.js         # Tailwind CSS configuration
-└── README.md                  # This file
+├── backend/                  # Backend server (Express, AI features)
+│   └── server.js             # Main Express server
+├── frontend/                 # Frontend app files
+│   ├── dist/                 # Built CSS output
+│   ├── styles.css            # Tailwind CSS source
+│   └── ...                   # Other frontend assets
+├── index.html                # Main app (served directly or by Express)
+├── script.js                 # Main client JS logic
+├── users.json                # User accounts (do not commit in production)
+├── package.json              # NPM scripts, dependencies
+├── postcss.config.js         # PostCSS config
+├── tailwind.config.js        # Tailwind config
+└── README.md                 # Project instructions (this file)
 ```
 
-## Prerequisites
+---
 
-- **Node.js** (version 16 or higher)
-- **npm** (comes with Node.js)
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+## ⚙️ Prerequisites
 
-## Installation
+* **Node.js** (v16 or higher recommended; works with v22.x)
+* **npm** (comes with Node.js)
+* **Modern browser:** Chrome, Firefox, Edge, Safari (no IE support)
 
-1. **Clone or download the project** to your local machine
+---
 
-2. **Navigate to the project directory**:
+## 🔧 Installation & Setup
 
-   ```powershell
-   cd c:\path\to\justice-dashboard\justice-dashboard
-   ```
-
-3. **Install dependencies**:
-
-   ```powershell
-   npm install
-   ```
-
-## Development Setup
-
-### Building CSS (Required)
-
-The application uses Tailwind CSS for styling. You need to compile the CSS before running the application:
-
-```powershell
-# Build CSS once
-npm run build:css
-
-# Or watch for changes during development
-npm run watch:css
-```
-
-### Running the Application
-
-#### Client-Only Mode (Recommended)
-
-1. **Build the CSS** (if not already done):
-
-   ```powershell
-   npm run build:css
-   ```
-
-2. **Open the application** in your browser:
-   - Navigate to `justice-dashboard/index.html`
-   - Or use VS Code's Live Server extension
-   - Or serve via any local web server
-
-#### Server Mode (Optional - for AI features)
-
-If you want to use the optional server for AI-powered document summarization:
-
-1. **Set up environment variables**:
-
-   Create a `.env` file in the root directory:
+1. **Clone the project:**
 
    ```bash
-   OPENAI_API_KEY=your_openai_api_key_here
-   PORT=3000
+   git clone https://github.com/YOUR_USERNAME/justice-dashboard.git
+   cd justice-dashboard
    ```
+2. **Install NPM dependencies:**
 
-   **Note**: Without `OPENAI_API_KEY`, the server will run but AI summarization will be disabled. Documents will still be processed with basic categorization.
-
-2. **Start the server**:
-
-   ```powershell
-   node backend/server.js
-   ```
-
-3. **Open the application** at `http://localhost:3000`
-
-## Usage
-
-### Basic Document Processing
-
-1. **Upload Documents**:
-   - Click "Choose Files" to select PDF files
-   - Multiple files can be selected at once
-   - Files are processed client-side for privacy
-
-2. **Review Auto-Classification**:
-   - Documents are automatically categorized based on filename
-   - Child detection identifies relevant subjects
-   - Misconduct types are suggested based on keywords
-
-3. **Manual Adjustments**:
-   - Use dropdown menus to adjust categories
-   - Modify misconduct types as needed
-   - Add notes for specific documents
-
-4. **Export Results**:
-   - Click "Export to CSV" to download analysis results
-   - CSV includes all classification data and metadata
-
-### Category Classification
-
-Documents are automatically classified into:
-
-- **Medical**: Healthcare, therapy, psychiatric records
-- **School**: Educational records, IEPs, report cards
-- **Legal**: Court documents, legal proceedings
-- **General**: Other document types
-
-### Child Detection
-
-The system identifies documents related to:
-
-- **Jace**: Documents containing "jace" in filename
-- **Josh**: Documents containing "josh" in filename
-- **Both**: Documents containing both names
-- **Unknown**: Documents with unclear associations
-
-### Misconduct Types
-
-Available misconduct classifications:
-
-- Physical Abuse
-- Emotional Abuse
-- Neglect
-- Educational Neglect
-- Medical Neglect
-- Inappropriate Supervision
-- Failure to Protect
-- Substance Abuse
-- Domestic Violence
-- Other/Multiple
-
-## Development
-
-### CSS Development
-
-The project uses Tailwind CSS with a custom build process and optimized browser compatibility:
-
-1. **Source CSS**: `justice-dashboard/styles.css`
-2. **Compiled CSS**: `justice-dashboard/dist/styles.css`
-3. **Configuration**: `tailwind.config.js`, `postcss.config.js`, and `browserslist` in `package.json`
-4. **Browser Support**: Modern browsers (Chrome 54+, Firefox 60+, Safari 12+, Edge 79+)
-
-To make style changes:
-
-1. Edit `justice-dashboard/styles.css`
-2. Run `npm run watch:css` for live rebuilding
-3. Or run `npm run build:css` for one-time compilation
-
-### JavaScript Development
-
-The main application logic is in `justice-dashboard/script.js`. Key functions:
-
-- `processFiles()`: Handles file upload and processing
-- `categorizeDocument()`: Auto-categorization logic
-- `detectChild()`: Child detection logic
-- `exportToCSV()`: Data export functionality
-
-## Troubleshooting
-
-### CSS Not Loading
-
-1. **Ensure CSS is built**:
-
-   ```powershell
-   npm run build:css
-   ```
-
-2. **Check file paths** - ensure `dist/styles.css` exists
-
-3. **Use development version** - try `index-working.html` which uses CDN fallback
-
-### Build Errors
-
-1. **Clear node_modules and reinstall**:
-
-   ```powershell
-   Remove-Item -Recurse -Force node_modules
-   Remove-Item package-lock.json
+   ```bash
    npm install
    ```
+3. **Create required folders (if not present):**
 
-2. **Check Node.js version**:
-
-   ```powershell
-   node --version
-   npm --version
+   ```bash
+   mkdir -p uploads
+   mkdir -p frontend/dist
    ```
+4. **Build CSS:**
 
-### Performance Issues
+   ```bash
+   npm run build:css
+   ```
+5. **(Optional) Set up environment variables:**
 
-1. **Large file uploads**: The system processes files client-side, so very large PDFs may be slow
-2. **Memory usage**: Processing many large files simultaneously may cause browser slowdown
-3. **Recommendations**: Process files in smaller batches for optimal performance
+   * Copy `.env.example` to `.env` and set keys:
 
-## Browser Compatibility
+     ```
+     OPENAI_API_KEY=your-openai-api-key
+     JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
+     PORT=3000
+     ```
 
-- **Chrome**: Full support
-- **Firefox**: Full support
-- **Safari**: Full support
-- **Edge**: Full support
-- **Internet Explorer**: Not supported
+---
 
-## Security & Privacy
+## 🏃 Development & Usage
 
-- **Client-side processing**: Files are processed in the browser, not uploaded to servers
-- **No data transmission**: Document content stays on your local machine
-- **Privacy-first**: No external API calls for document processing (in client-only mode)
+* **Client-only mode:**
 
-## Production Deployment
+  * Open `index.html` in your browser (no server needed for basic features)
+* **Full backend mode (AI features):**
 
-### Static Hosting
+  * Run `node backend/server.js` and open [http://localhost:3000](http://localhost:3000)
+* **Watch CSS during development:**
 
-## Firebase Deployment
+  * `npm run watch:css`
 
-1. **Install Firebase CLI**:
+---
 
-### Server Deployment
+## 📝 Key Features (How-To)
 
-If using the optional server features:
+* **Upload PDFs:** Click "Choose Files" to upload multiple PDFs for batch processing
+* **Review Classifications:** Auto-detected categories, children, and misconduct types shown per file
+* **Edit & Tag:** Adjust categories/misconduct, add notes, and assign child tags manually if needed
+* **Export:** Download full analysis as CSV
+* **Faith & Encouragement:** Store prayers or intentions for each document
+* **AI Summaries:** If OpenAI API key is set, generate AI-powered summaries (backend mode only)
 
-1. **Environment setup** on your server
-2. **Install dependencies**: `npm install --production`
-3. **Start server**: `node backend/server.js`
-4. **Configure reverse proxy** (nginx, Apache) if needed
+---
 
-## Contributing
+## 🛠 Developer Notes
 
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature-name`
-3. **Make changes** and test thoroughly
-4. **Build CSS**: `npm run build:css`
-5. **Commit changes**: `git commit -am 'Add feature'`
-6. **Push to branch**: `git push origin feature-name`
-7. **Create Pull Request**
+* **Scripts:** See `package.json` for build, lint, deploy, and test commands
+* **.nojekyll:** If deploying static files to GitHub Pages, create a `.nojekyll` file in the root to disable Jekyll
+* **users.json:** Do NOT commit real user passwords to GitHub in production
 
-## License
+---
 
-This project is released under the **MIT License** (see `LICENSE`).
+## ⚠️ Troubleshooting
 
-## Support
+* **CSS not loading?** Run `npm run build:css` and open `index.html` from `frontend/dist/`
+* **Backend won’t start?** Ensure Node version >=16, all env vars are set, and `uploads/` folder exists
+* **Browser errors?** Use Chrome/Firefox for best support; clear cache if UI is outdated
+* **Large files?** For very large PDFs, process in smaller batches to avoid browser memory issues
 
-For issues, questions, or feature requests:
+---
 
-1. **Check troubleshooting section** above
-2. **Review browser console** for error messages
-3. **Verify CSS build** completed successfully
-4. **Test with development version** (`index-working.html`)
+## 🔒 Security & Privacy
+
+* **Client-only:** All processing happens in the browser unless backend is enabled
+* **No data sent externally** unless server/AI features are enabled by you
+* **User data and uploads** are ignored by `.gitignore` and never tracked in source control
+
+---
+
+## 🌍 Production/Deployment
+
+* **Static hosting:** Place everything in `/frontend/dist` or root, and serve `index.html` statically
+* **Firebase deploy:** Use `npm run deploy:firebase` (see `firebase.json` if present)
+* **Vercel deploy:** Use `npm run deploy:vercel` (add a `vercel.json` for custom config)
+
+---
+
+## 📜 License
+
+MIT License (see `LICENSE`)
+
+---
+
+## 🤝 Contributing
+
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/something`)
+3. Make and test your changes
+4. Build and lint: `npm run lint` / `npm run build:css`
+5. Commit and push
+6. Open a Pull Request on GitHub
+
+---
+
+## 📧 Support / Questions
+
+* Open an issue on GitHub
+* For security, legal, or technical questions, email the project maintainer
+
+---
 
 ## Version History
 
-- **v1.0.0**: Initial release with core document processing features
-- Bulk PDF upload and processing
-- Auto-categorization and child detection
-- Misconduct type classification
-- CSV export functionality
-- Production-ready Tailwind CSS build
+* **v1.0.0**: Initial release with core document processing features, auto-classification, child detection, misconduct tagging, and CSV export
