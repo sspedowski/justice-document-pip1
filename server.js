@@ -74,6 +74,8 @@ app.use(
     },
   }),
 );
+
+// CORS middleware should be applied before any routes
 app.use(
   cors({
     origin: [
