@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm-run-all --parallel dev:client dev:server",
     "dev:client": "vite --host",
-    "dev:server": "nodemon backend/server.js",
+    "dev:server": "nodemon server.js",
     "lint": "eslint .",
     "husky:check": "husky -v",
     "test": "echo \"No tests defined\" && exit 0"
