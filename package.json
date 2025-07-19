@@ -12,7 +12,8 @@
     "husky:check": "husky -v",
     "test": "echo \"No tests defined\" && exit 0",
     "build": "vite build",
-    "build:css": "tailwindcss -i ./src/input.css -o ./public/output.css --minify"
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/output.css --minify",
+    "start": "node server.js"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
