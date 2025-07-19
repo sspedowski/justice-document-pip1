@@ -12,59 +12,38 @@ import Tesseract from "tesseract.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
-
 dotenv.config();
 
-// Add debugging statements
+// Debugging
 const DEBUG = process.env.NODE_ENV !== "production";
 if (DEBUG) {
   console.log("Environment Variables:");
   console.log("NODE_ENV:", process.env.NODE_ENV);
   console.log("JWT_SECRET:", process.env.JWT_SECRET ? "Set" : "Not Set");
   console.log("MONGODB_URI:", process.env.MONGODB_URI ? "Set" : "Not Set");
-  console.log(
-    "SESSION_SECRET:",
-    process.env.SESSION_SECRET ? "Set" : "Not Set",
-  );
-  console.log(
-    "WOLFRAM_APP_ID:",
-    process.env.WOLFRAM_APP_ID ? "Set" : "Not Set",
-  );
+  console.log("SESSION_SECRET:", process.env.SESSION_SECRET ? "Set" : "Not Set");
+  console.log("WOLFRAM_APP_ID:", process.env.WOLFRAM_APP_ID ? "Set" : "Not Set");
 }
 
-// Validate required environment variables
+// Env check
 const requiredEnvVars = ["JWT_SECRET"];
 const recommendedEnvVars = ["SESSION_SECRET", "WOLFRAM_APP_ID"];
-
 requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(`❌ CRITICAL: Environment variable ${varName} is required`);
-  }
+  if (!process.env[varName]) throw new Error(`❌ CRITICAL: Environment variable ${varName} is required`);
 });
-
 recommendedEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    console.warn(
-      `⚠️  WARNING: Environment variable ${varName} is not set. Some features may not work.`,
-    );
-  }
+  if (!process.env[varName]) console.warn(`⚠️  WARNING: Environment variable ${varName} is not set. Some features may not work.`);
 });
-
-// Additional security validation
 if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
-  console.warn(
-    "⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.",
-  );
+  console.warn("⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.");
 }
 
-// Initialize Express app
 const app = express();
-app.set("trust proxy", 1); // Trust Render's reverse proxy for rate limiting
-
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Security middleware - Strictest CSP for maximum security
+// Security
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -77,7 +56,7 @@ app.use(
   }),
 );
 
-// CORS middleware should be applied before any routes
+// CORS
 app.use(
   cors({
     origin: [
@@ -92,37 +71,29 @@ app.use(
     credentials: true,
   }),
 );
-
-// Add this after the CORS middleware
 app.use((req, res, next) => {
-  console.log("Request origin:", req.headers.origin);
+  if (DEBUG) console.log("Request origin:", req.headers.origin);
   next();
 });
 
-// Rate limiting
+// Rate limit
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: "Too many login attempts, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session middleware
-// Note: Using MemoryStore for sessions - acceptable for demo/testing
-// For production scale, consider: connect-mongo, connect-redis, or express-session-file-store
+// Session
 app.use(
   session({
     secret:
       process.env.SESSION_SECRET ||
       (() => {
-        console.warn(
-          "⚠️  WARNING: Using default session secret. Set SESSION_SECRET environment variable for production!",
-        );
+        console.warn("⚠️  WARNING: Using default session secret. Set SESSION_SECRET environment variable for production!");
         return "justice-dashboard-default-secret-" + Date.now();
       })(),
     resave: false,
@@ -130,96 +101,55 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
     },
   }),
 );
 
-// Static files
+// Static
 app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "client", "dist")));
 
-// Ensure uploads/ exists before multer setup
+// Multer upload
 const UPLOADS_PATH = "uploads";
-if (!fs.existsSync(UPLOADS_PATH)) {
-  fs.mkdirSync(UPLOADS_PATH, { recursive: true });
-}
+if (!fs.existsSync(UPLOADS_PATH)) fs.mkdirSync(UPLOADS_PATH, { recursive: true });
 const upload = multer({ dest: UPLOADS_PATH });
 
-// Serve ONLY from 'client/dist'
-const PUBLIC_DIR = path.join(__dirname, "client", "dist");
-app.use(express.static(PUBLIC_DIR));
-
-// Default route - serve main dashboard
+// Default route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// File-based user storage for security
+// USERS: file-based dev only
 const usersPath = path.join(__dirname, "users.json");
-
-// Load users from file
 function getUsers() {
   if (!fs.existsSync(usersPath)) {
-    console.log("Creating initial users file...");
-    // Create initial users file if it doesn't exist
     const hashedPassword = bcrypt.hashSync("justice2025", 10);
-
     const initialUsers = [
-      {
-        id: 1,
-        username: "admin",
-        password: hashedPassword,
-        role: "admin",
-        fullName: "System Administrator",
-        createdAt: new Date().toISOString(),
-      },
+      { id: 1, username: "admin", password: hashedPassword, role: "admin", fullName: "System Administrator", createdAt: new Date().toISOString() },
     ];
-    console.log("✅ Initial admin user created with username: admin");
     saveUsers(initialUsers);
     return initialUsers;
   }
   try {
-    const users = JSON.parse(fs.readFileSync(usersPath, "utf8"));
-    console.log(`Loaded ${users.length} users from file`);
-    return users;
+    return JSON.parse(fs.readFileSync(usersPath, "utf8"));
   } catch (error) {
-    console.error("Error reading users file:", error);
-    // Create backup of corrupted file
-    if (fs.existsSync(usersPath)) {
-      fs.copyFileSync(usersPath, `${usersPath}.backup.${Date.now()}`);
-    }
-    // Return empty array to prevent crashes
+    if (fs.existsSync(usersPath)) fs.copyFileSync(usersPath, `${usersPath}.backup.${Date.now()}`);
     return [];
   }
 }
-
-// Save users to file
 function saveUsers(users) {
   try {
     fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
-  } catch (error) {
-    console.error("Error saving users file:", error);
-  }
+  } catch (error) { console.error("Error saving users file:", error); }
 }
-
-// Add user function (for admin use)
 async function addUser(username, password, role = "user", fullName = "") {
-  // Input validation
-  if (!username || !password) {
-    throw new Error("Username and password are required");
-  }
-  if (password.length < 8) {
-    throw new Error("Password must be at least 8 characters long");
-  }
+  if (!username || !password) throw new Error("Username and password required");
+  if (password.length < 8) throw new Error("Password must be at least 8 chars");
   const users = getUsers();
-  const existingUser = users.find((u) => u.username === username);
-
-  if (existingUser) {
-    throw new Error("Username already exists");
-  }
-
+  if (users.find((u) => u.username === username)) throw new Error("Username already exists");
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = {
     id: Math.max(...users.map((u) => u.id), 0) + 1,
@@ -229,50 +159,21 @@ async function addUser(username, password, role = "user", fullName = "") {
     fullName,
     createdAt: new Date().toISOString(),
   };
-
   users.push(newUser);
   saveUsers(users);
   return newUser;
 }
 
-// Initialize users (load from file)
-const users = getUsers();
-
-// Enhanced authentication middleware with better error handling
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({
-      error: "Access token required",
-      code: "TOKEN_MISSING",
-    });
-  }
-
+  if (!token) return res.status(401).json({ error: "Access token required" });
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      console.log(`Token verification failed: ${err.message}`);
-
-      if (err.name === "TokenExpiredError") {
-        return res.status(401).json({
-          error: "Token has expired",
-          code: "TOKEN_EXPIRED",
-        });
-      } else if (err.name === "JsonWebTokenError") {
-        return res.status(403).json({
-          error: "Invalid token",
-          code: "TOKEN_INVALID",
-        });
-      } else {
-        return res.status(403).json({
-          error: "Token verification failed",
-          code: "TOKEN_ERROR",
-        });
-      }
+      if (err.name === "TokenExpiredError") return res.status(401).json({ error: "Token expired" });
+      if (err.name === "JsonWebTokenError") return res.status(403).json({ error: "Invalid token" });
+      return res.status(403).json({ error: "Token verification failed" });
     }
-
-    // Add timestamp of token verification
     req.user = { ...user, tokenVerifiedAt: new Date().toISOString() };
     next();
   });
@@ -657,6 +558,105 @@ app.get("/api/health", (req, res) => {
       authStatus = "authenticated";
     } catch (err) {
       if (err.name === "TokenExpiredError") {
+        authStatus = "token_expired";
+      } else {
+        authStatus = "invalid_token";
+      }
+    }
+  }
+
+  res.json({
+    status: "online",
+    timestamp: new Date().toISOString(),
+    authentication: authStatus,
+    version: "1.0.0",
+  });
+});
+
+// Error handling endpoint
+app.post("/api/report-error", (req, res) => {
+  console.error("Client error:", req.body);
+  res.json({ success: true, message: "Error reported" });
+});
+
+// Wolfram API endpoint
+app.post("/api/wolfram", authenticateToken, async (req, res) => {
+  try {
+    const { query } = req.body;
+    console.log("🧠 Wolfram API called with query:", query);
+
+    if (!query) {
+      console.log("❌ Wolfram API: No query provided");
+      return res.status(400).json({ error: "Query parameter required" });
+    }
+
+    const WOLFRAM_APP_ID = process.env.WOLFRAM_APP_ID;
+    console.log(
+      "🔑 Wolfram App ID status:",
+      WOLFRAM_APP_ID ? `Set (${WOLFRAM_APP_ID.substring(0, 6)}...)` : "Not Set",
+    );
+
+    if (!WOLFRAM_APP_ID) {
+      console.log("❌ Wolfram API: App ID not configured");
+      return res.status(500).json({ error: "Wolfram API not configured" });
+    }
+
+    const wolframUrl = `https://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
+    console.log("🌐 Making Wolfram API request...");
+
+    const response = await fetch(wolframUrl);
+    console.log("📡 Wolfram API response status:", response.status);
+
+    const data = await response.json();
+    console.log("📊 Wolfram API response success:", data.queryresult?.success);
+
+    if (data.queryresult && data.queryresult.success) {
+      console.log("✅ Wolfram API: Success - returning results");
+      res.json({
+        success: true,
+        result: data.queryresult,
+      });
+    } else {
+      console.log(
+        "⚠️ Wolfram API: No results or error:",
+        data.queryresult?.error,
+      );
+      res.status(400).json({
+        error: "No results found",
+        details: data.queryresult?.error || "Unknown error",
+      });
+    }
+  } catch (error) {
+    console.error("❌ Wolfram API error:", error);
+    res.status(500).json({ error: "Wolfram API request failed" });
+  }
+});
+
+// ============= FRONTEND ROUTES =============
+
+// Wildcard route: serve ONLY index.html for all non-API routes (fix)
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Start server - only ONE set of startup logs
+app.listen(PORT, () => {
+  console.log(`✅ Justice Dashboard API running on http://localhost:${PORT}`);
+  console.log(`📋 API endpoints available:`);
+  console.log(`   POST /api/login`);
+  console.log(`   POST /api/logout`);
+  console.log(`   GET  /api/profile`);
+  console.log(`   POST /api/summarize`);
+  console.log(`   GET  /api/health`);
+  console.log(`   POST /api/report-error`);
+  console.log(`   POST /api/wolfram`);
+});
+// NOTE: For backend/server.js --
+// TODO: Implement admin registration and persistent database storage (not file-based).
+// Track as issue in README. Current file-based approach is for demo/development only.
         authStatus = "token_expired";
       } else {
         authStatus = "invalid_token";
