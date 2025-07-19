@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "husky:check": "husky -v",
     "test": "echo \"No tests defined\" && exit 0",
-    "build": "vite build"
+    "build": "vite build",
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/output.css --minify"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
