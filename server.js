@@ -1,17 +1,19 @@
-const express = require("express");
-const multer = require("multer");
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
-const pdfParse = require("pdf-parse");
-const { fromPath } = require("pdf2pic");
-const Tesseract = require("tesseract.js");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const session = require("express-session");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import session from "express-session";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+import pdfParse from "pdf-parse";
+import { fromPath } from "pdf2pic";
+import Tesseract from "tesseract.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
+
+dotenv.config();
 
 // Add debugging statements
 const DEBUG = process.env.NODE_ENV !== "production";
