@@ -431,4 +431,9 @@ app.get("/api/health", (req, res) => {
       if (err.name === "TokenExpiredError") {
         authStatus = "token_expired";
       } else {
-        authStatus = "invalid_token";
+                authStatus = "invalid_token";
+              }
+            }
+          }
+          res.json({ status: "ok", authStatus });
+        });
