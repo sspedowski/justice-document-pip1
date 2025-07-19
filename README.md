@@ -1,4 +1,6 @@
-# Justice Dashboard
+# ⚖️ Justice Dashboard
+
+[![CI](https://github.com/sspedowski/justice-dashboard/actions/workflows/main.yml/badge.svg)](https://github.com/sspedowski/justice-dashboard/actions/workflows/main.yml)
 
 > Open-source legal document analysis tool with AI-driven tagging and summaries.
 
