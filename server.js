@@ -31,8 +31,8 @@ if (DEBUG) {
 }
 
 // Validate required environment variables
-const requiredEnvVars = ["JWT_SECRET"];
-const recommendedEnvVars = ["SESSION_SECRET", "WOLFRAM_APP_ID"];
+const requiredEnvVars = ["JWT_SECRET", "SESSION_SECRET"];
+const recommendedEnvVars = ["WOLFRAM_APP_ID"];
 
 requiredEnvVars.forEach((varName) => {
   if (!process.env[varName]) {
@@ -115,14 +115,7 @@ app.use(express.urlencoded({ extended: true }));
 // For production scale, consider: connect-mongo, connect-redis, or express-session-file-store
 app.use(
   session({
-    secret:
-      process.env.SESSION_SECRET ||
-      (() => {
-        console.warn(
-          "⚠️  WARNING: Using default session secret. Set SESSION_SECRET environment variable for production!",
-        );
-        return "justice-dashboard-default-secret-" + Date.now();
-      })(),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
