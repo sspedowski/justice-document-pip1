@@ -55,6 +55,12 @@ if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
   );
 }
 
+if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
+  console.warn(
+    "⚠️  WARNING: SESSION_SECRET should be at least 32 characters long for security.",
+  );
+}
+
 // Initialize Express app
 const app = express();
 app.set("trust proxy", 1); // Trust Render's reverse proxy for rate limiting

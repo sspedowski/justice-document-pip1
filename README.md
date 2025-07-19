@@ -51,11 +51,11 @@ Then edit `.env` with your values:
 ```bash
 OPENAI_API_KEY=your-key-here
 JWT_SECRET=your-super-secure-jwt-secret-at-least-32-characters-long
-SESSION_SECRET=your-session-secret-key
+SESSION_SECRET=your-session-secret-key-at-least-32-characters-long
 PORT=3000
 ```
 
-Both `JWT_SECRET` and `SESSION_SECRET` must be defined before starting the server.
+Both `JWT_SECRET` and `SESSION_SECRET` must be defined before starting the server. Each should be a random string of at least 32 characters.
 
 Run the server:
 
