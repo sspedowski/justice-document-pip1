@@ -769,3 +769,19 @@ app.listen(PORT, () => {
 
 /* Duplicate declarations and routes removed to fix redeclaration errors. 
    All necessary logic is already implemented above. */
+
+/* Environment validation - ensure all required secrets are set */
+const REQUIRED_ENV_VARS = [
+  "JWT_SECRET",
+  "SESSION_SECRET",
+  "MONGODB_URI",
+  "WOLFRAM_APP_ID"
+];
+
+const missingVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+if (missingVars.length > 0) {
+  console.error(
+    `ERROR: Missing required environment variables: ${missingVars.join(", ")}`
+  );
+  process.exit(1);
+}
