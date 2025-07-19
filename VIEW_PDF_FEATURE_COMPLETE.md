@@ -138,4 +138,4 @@ This feature is **production-ready** and will work perfectly on Render:
    - Add file size indicators
    - Add PDF preview thumbnails
 
-**Your Justice Dashboard now has professional PDF viewing with clean, accessible hyperlinks! 🎊**
+## Your Justice Dashboard now has professional PDF viewing with clean, accessible hyperlinks! 🎊
