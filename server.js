@@ -91,6 +91,12 @@ app.use(
   }),
 );
 
+// Logging middleware to debug request origins
+app.use((req, res, next) => {
+  console.log("Request origin:", req.headers.origin);
+  next();
+});
+
 // Rate limiting
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
