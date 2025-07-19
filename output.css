@@ -141,6 +141,7 @@ html,
 :host {
   line-height: 1.5; /* 1 */
   -webkit-text-size-adjust: 100%; /* 2 */
+  text-size-adjust: 100%; /* 2 - added for broader support */
   -moz-tab-size: 4; /* 3 */
   -o-tab-size: 4;
   tab-size: 4; /* 3 */
@@ -652,7 +653,7 @@ video {
   float: inline-start;
 }
 .float-end {
-  float: inline-end;
+  float: right;
 }
 .float-right {
   float: right;
