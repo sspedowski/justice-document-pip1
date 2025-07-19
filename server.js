@@ -139,6 +139,7 @@ app.use(
 app.use(express.static(path.join(__dirname, ".")));
 app.use(express.static(path.join(__dirname, "justice-dashboard", "frontend")));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static('public'));
 
 // Ensure uploads/ exists before multer setup
 const UPLOADS_PATH = "uploads";
