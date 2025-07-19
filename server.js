@@ -752,7 +752,6 @@ app.listen(PORT, () => {
   console.log(`   GET  /api/health`);
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
-});
 
 /* Duplicate declarations and routes removed to fix redeclaration errors. 
    All necessary logic is already implemented above. */
