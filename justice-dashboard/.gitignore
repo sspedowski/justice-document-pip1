@@ -1,4 +1,4 @@
-# Dependencies
+# Node.js dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -58,8 +58,6 @@ styles/output.css
 *.min.js
 
 # Binary artifacts and shortcuts
-*.lnk
-*.traineddata
 *.exe
 *.dll
 *.so
@@ -93,3 +91,6 @@ ENV/
 secrets.json
 private_keys/
 certificates/
+
+# Other
+.nojekyll
