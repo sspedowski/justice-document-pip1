@@ -2,6 +2,7 @@
   "name": "justice-dashboard",
   "version": "1.0.0",
   "description": "Justice Dashboard for secure case tracking",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "npm-run-all --parallel dev:client dev:server",
