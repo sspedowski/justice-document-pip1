@@ -137,3 +137,27 @@ This project is licensed under the [MIT License](LICENSE).
 ## 📧 Support
 
 For questions or support, please open an issue on GitHub.
+
+## CORS Usage
+
+This project uses standard Express CORS middleware:
+
+```js
+const cors = require('cors');
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    // more as needed
+  ],
+  credentials: true,
+}));
+```
+
+No code citation is required for generic usage.
+
+---
+
+If you adapt unique configuration or logic, add this at the bottom:
+
+> CORS configuration adapted from [CaioMMendes/Servidor-node-mysql](https://github.com/CaioMMendes/Servidor-node-mysql/blob/67bf7163f5debbaebebe864677e10586255da08f/src/config/corsOptions.ts)
