@@ -1,4 +1,12 @@
-import express from "express";
+
+      useDefaults: true,
+      directives: {
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "connect-src": ["'self'", "http://localhost:3000"],
+      },
+    },
+  }),
+);import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -48,14 +56,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 app.use(
   helmet({
     contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "style-src": ["'self'", "'unsafe-inline'"],
-        "connect-src": ["'self'", "http://localhost:3000"],
-      },
-    },
-  }),
-);
 
 // CORS
 app.use(
