@@ -133,11 +133,18 @@ if (OpenAI && process.env.OPENAI_API_KEY) {
 app.use(cors());
 app.use(express.json());
 
-// Static files
-app.use(express.static(path.join(__dirname, '..')));
-app.use(express.static(path.join(__dirname, '../frontend')));
-app.use('/dist', express.static(path.join(__dirname, '../frontend/dist')));
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve uploaded files statically
+app.use('/uploads', express.static(uploadsDir));
+// Serve static files from the frontend's build directory
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
+// Catch-all route: serves the frontend's index.html for all other non-API requests
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    res.sendFile(path.resolve(__dirname, '../../frontend/dist/index.html'));
+});
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -150,13 +157,6 @@ const publicUploadsDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(publicUploadsDir)) {
   fs.mkdirSync(publicUploadsDir, { recursive: true });
 }
-
-// Serve uploaded files statically
-app.use('/uploads', express.static(uploadsDir));
-
-// Serve frontend files
-app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
