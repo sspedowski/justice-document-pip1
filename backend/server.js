@@ -558,18 +558,19 @@ app.get("/api/health", (req, res) => {
       authStatus = "authenticated";
     } catch (err) {
       if (err.name === "TokenExpiredError") {
-      authStatus = "token_expired";
-    } else {
-      authStatus = "invalid_token";
+        authStatus = "token_expired";
+      } else {
+        authStatus = "invalid_token";
+      }
     }
   }
-}
 
-res.json({
-  status: "online",
-  timestamp: new Date().toISOString(),
-  authentication: authStatus,
-  version: "1.0.0",
+  res.json({
+    status: "online",
+    timestamp: new Date().toISOString(),
+    authentication: authStatus,
+    version: "1.0.0",
+  });
 });
 
 // Wolfram API endpoint
@@ -647,7 +648,6 @@ app.listen(PORT, () => {
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
 });
-// NOTE: For backend/server.js --
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
         authStatus = "token_expired";
