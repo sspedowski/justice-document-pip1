@@ -11,6 +11,7 @@
     "husky:check": "husky -v",
     "test": "echo \"No tests defined\" && exit 0"
   },
+  "type": "module",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
     "bcryptjs": "^3.0.2",
