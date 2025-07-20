@@ -1,37 +1,35 @@
 services:
   js-backend:
     build:
-      context: ./justice-dashboard/backend
-      dockerfile: ../../backendDockerfile
+      context: ./backend
+      dockerfile: ../backendDockerfile
     working_dir: /app
     restart: unless-stopped
     init: true
     # Exposes port 3000 as per Dockerfile
     ports:
       - "3000:3000"
-    # Use env_file if .env exists in backend directory
-    env_file:
-      - ./justice-dashboard/backend/.env
+    # env_file: ./backend/.env  # Uncomment if .env file exists
     networks:
       - justice-net
 
   js-frontend:
     build:
-      context: ./justice-dashboard/frontend
-      dockerfile: ../../frontendDockerfile
+      context: ./frontend
+      dockerfile: ../frontendDockerfile
     working_dir: /app
     restart: unless-stopped
     init: true
-    # If your frontend serves on a port, expose it here. If not, remove this section.
-    # ports:
-    #   - "8080:8080"  # Uncomment and adjust if your frontend serves on a port
-    # Use env_file if .env exists in frontend directory
-    env_file:
-      - ./justice-dashboard/frontend/.env
+    # Exposes ports 4173 and 8080 as per Dockerfile
+    ports:
+      - "4173:4173"
+      - "8080:8080"
+    # env_file: ./frontend/.env  # Uncomment if .env file exists
     networks:
       - justice-net
     depends_on:
       - js-backend
+    # The frontend likely needs to talk to the backend
 
   js-justice-server:
     build:
@@ -43,15 +41,11 @@ services:
     # Exposes port 3000 as per Dockerfile
     ports:
       - "3001:3000"
-    # Use env_file if .env exists in justice-server directory
-    # env_file:
-    #   - ./justice-server/.env  # Uncomment if .env file exists
+    # env_file: ./justice-server/.env  # Uncomment if .env file exists
     networks:
       - justice-net
-    depends_on:
-      - js-backend
 
-# Create a shared network for inter-service communication
+# Shared network for inter-service communication
 networks:
   justice-net:
     driver: bridge
