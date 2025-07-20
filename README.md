@@ -161,3 +161,13 @@ No code citation is required for generic usage.
 If you adapt unique configuration or logic, add this at the bottom:
 
 > CORS configuration adapted from [CaioMMendes/Servidor-node-mysql](https://github.com/CaioMMendes/Servidor-node-mysql/blob/67bf7163f5debbaebebe864677e10586255da08f/src/config/corsOptions.ts)
+
+## 🚧 Status & Legacy TODOs
+
+- Admin registration and persistent database storage are NOT yet implemented. User credentials are file-based and for demo/dev only.
+- All authentication and secure case management logic is now in server.js (project root).
+- The backend/server.js file is for legacy reference only.
+- The file users.json is no longer tracked for security—see .gitignore.
+- Automated tests are not yet implemented. See `package.json` for test status.
+
+**God’s path to justice continues—thank you for joining the mission.**

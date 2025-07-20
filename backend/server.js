@@ -1,26 +1,26 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import helmet from "helmet";
-import session from "express-session";
-import multer from "multer";
-import fs from "fs";
-import path from "path";
-import pdfParse from "pdf-parse";
-import { fromPath } from "pdf2pic";
-import Tesseract from "tesseract.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import rateLimit from "express-rate-limit";
-dotenv.config();
+/**
+ * Justice Dashboard - Legacy Backend Server
+ * =========================================
+ * This file was used for earlier versions and for demonstration purposes only.
+ * 
+ * NOTE: This backend does NOT implement persistent admin registration
+ *       or database storage. All authentication and case management
+ *       features are now handled in the main server.js (project root).
+ *
+ * LEGACY TODOs: (Documented here for reference)
+ *   - [ ] Implement admin registration for secure onboarding
+ *   - [ ] Implement persistent database storage (move away from file-based)
+ *   - [ ] Remove any development credentials from version control
+ * 
+ * THIS FILE IS RETAINED FOR REFERENCE ONLY.
+ * DO NOT USE FOR PRODUCTION.
+ */
 
-// Debugging
-const DEBUG = process.env.NODE_ENV !== "production";
-if (DEBUG) {
-  console.log("Environment Variables:");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("JWT_SECRET:", process.env.JWT_SECRET ? "Set" : "Not Set");
-  console.log("MONGODB_URI:", process.env.MONGODB_URI ? "Set" : "Not Set");
+// [No actual server code is included. All legacy logic has been migrated.]
+
+console.log('⚠️ This backend/server.js is for historical reference only. See server.js in the root directory for the real backend.');
+
+module.exports = {}; // Just to avoid module errors if imported.
   console.log("SESSION_SECRET:", process.env.SESSION_SECRET ? "Set" : "Not Set");
   console.log("WOLFRAM_APP_ID:", process.env.WOLFRAM_APP_ID ? "Set" : "Not Set");
 }
