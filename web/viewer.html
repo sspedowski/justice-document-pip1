@@ -38,7 +38,6 @@ See https://github.com/adobe-type-tools/cmap-resources
 
   <body tabindex="0">
     <div id="outerContainer">
-
       <div id="sidebarContainer">
         <div id="toolbarSidebar" class="toolbarHorizontalGroup">
           <div id="toolbarSidebarLeft">
@@ -730,7 +729,16 @@ See https://github.com/adobe-type-tools/cmap-resources
         </div>
       </div> <!-- editorUndoBar -->
 
-    </div> <!-- outerContainer -->
+      <!-- Example accessible buttons and form elements -->
+      <button type="button" title="Open sidebar">Open Sidebar</button>
+      <button type="button" title="Zoom in">Zoom In</button>
+      <button type="button" title="Zoom out">Zoom Out</button>
+      <form>
+        <label for="searchInput">Search:</label>
+        <input id="searchInput" type="text" placeholder="Search document" title="Search document">
+        <button type="submit" title="Submit search">Search</button>
+      </form>
+    </div>
     <div id="printContainer"></div>
   </body>
 </html>
