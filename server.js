@@ -6,7 +6,13 @@ import session from "express-session";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import pdfParse from "pdf-parse";
+import { fileURLToPath } from "url";
+// Import the library's main module directly to avoid running its
+// standalone debug script when using ESM. The package's default entry
+// contains a check for `module.parent` which evaluates incorrectly
+// under `import` and causes a missing test PDF error.
+// See https://github.com/modesty/pdf-parse/issues/151
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { fromPath } from "pdf2pic";
 import Tesseract from "tesseract.js";
 import bcrypt from "bcryptjs";
@@ -14,6 +20,11 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 
 dotenv.config();
+
+// __dirname is not available in ES modules by default. This replicates the
+// CommonJS __dirname behavior so path-based logic continues to work.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Add debugging statements
 const DEBUG = process.env.NODE_ENV !== "production";
