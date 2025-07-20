@@ -226,11 +226,16 @@
         <!-- PDF Documents Section -->
         <div class="bg-blue-50 p-4 rounded-lg mb-6 border-l-4 border-blue-500">
           <h3 class="text-lg font-semibold mb-3">📄 Key Legal Documents</h3>
-          
+
           <div class="space-y-3">
             <div class="bg-white p-3 rounded shadow-sm">
-              <h4 class="font-medium text-blue-800 mb-2">MCL + Federal Law Misconduct Analysis</h4>
-              <p class="text-sm text-gray-600 mb-2">Comprehensive legal analysis covering constitutional violations, due process breaches, and statutory misconduct.</p>
+              <h4 class="font-medium text-blue-800 mb-2">
+                MCL + Federal Law Misconduct Analysis
+              </h4>
+              <p class="text-sm text-gray-600 mb-2">
+                Comprehensive legal analysis covering constitutional violations,
+                due process breaches, and statutory misconduct.
+              </p>
               <a
                 href="https://drive.google.com/file/d/1JhBVCk_AxPYDfROgkpQhzR3wkOl-NybD/view"
                 target="_blank"
@@ -240,10 +245,15 @@
                 📖 View PDF Document
               </a>
             </div>
-            
+
             <div class="bg-white p-3 rounded shadow-sm">
-              <h4 class="font-medium text-blue-800 mb-2">Full Justice Exhibit Collection</h4>
-              <p class="text-sm text-gray-600 mb-2">Complete folder containing all supporting evidence, court documents, and correspondence.</p>
+              <h4 class="font-medium text-blue-800 mb-2">
+                Full Justice Exhibit Collection
+              </h4>
+              <p class="text-sm text-gray-600 mb-2">
+                Complete folder containing all supporting evidence, court
+                documents, and correspondence.
+              </p>
               <a
                 href="https://drive.google.com/drive/folders/1PJMN5h7n0edWHAd4W7n4qTHE490Uz4x6"
                 target="_blank"
@@ -385,122 +395,130 @@
               id="uploadProgressBar"
               class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 upload-progress-bar"
             ></div>
-              class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-              style="width: 0%"
-            ></div>
-          </div>
-          <div class="mt-2 text-xs text-gray-500" id="uploadDetails">
-            Preparing files...
+            class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+            style="width: 0%" >
           </div>
         </div>
-
-        <!-- Search and Filter Controls -->
-        <div class="mb-4 flex gap-4 items-center">
-          <div>
-            <label for="searchInput" class="block text-sm font-medium mb-1"
-              >Search:</label
-            >
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search documents..."
-              class="border border-gray-300 rounded px-3 py-2 w-64"
-            />
-          </div>
-          <div>
-            <label for="childFilter" class="block text-sm font-medium mb-1"
-              >Filter by Child:</label
-            >
-            <select
-              id="childFilter"
-              class="border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="">All</option>
-              <option value="Jace">Jace</option>
-              <option value="Josh">Josh</option>
-              <option value="Both">Both</option>
-              <option value="Unknown">Unknown</option>
-            </select>
-          </div>
+        <div class="mt-2 text-xs text-gray-500" id="uploadDetails">
+          Preparing files...
         </div>
+      </div>
 
-        <!-- Results Table -->
-        <table
-          id="trackerTable"
-          class="w-full mt-4 text-sm border-collapse border border-gray-300"
-        >
-          <thead>
-            <tr class="bg-gray-200">
-              <th class="border border-gray-300 p-2">Filename</th>
-              <th class="border border-gray-300 p-2">Summary</th>
-              <th class="border border-gray-300 p-2">Category</th>
-              <th class="border border-gray-300 p-2">Child</th>
-              <th class="border border-gray-300 p-2">Misconduct</th>
-              <th class="border border-gray-300 p-2">Legal Statutes</th>
-              <th class="border border-gray-300 p-2">Duplicate</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <!-- Export Button -->
-        <button
-          id="exportCsv"
-          class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Export CSV
-        </button>
-
-        <!-- Summary Cards Toggle -->
-        <button
-          id="toggleCards"
-          class="mt-4 ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          View Summary Cards
-        </button>
-
-        <!-- Summary Cards Section (hidden by default) -->
-        <div id="summaryCards" class="mt-6 hidden">
-          <h3 class="text-lg font-semibold mb-4">📄 Document Summary Cards</h3>
-          <div
-            id="cardsContainer"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      <!-- Search and Filter Controls -->
+      <div class="mb-4 flex gap-4 items-center">
+        <div>
+          <label for="searchInput" class="block text-sm font-medium mb-1"
+            >Search:</label
           >
-            <!-- Cards will be generated here -->
-          </div>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search documents..."
+            class="border border-gray-300 rounded px-3 py-2 w-64"
+          />
         </div>
+        <div>
+          <label for="childFilter" class="block text-sm font-medium mb-1"
+            >Filter by Child:</label
+          >
+          <select
+            id="childFilter"
+            class="border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="">All</option>
+            <option value="Jace">Jace</option>
+            <option value="Josh">Josh</option>
+            <option value="Both">Both</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
 
-        <!-- Legal Reference Section -->
-        <div class="mt-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-          <h3 class="text-lg font-semibold mb-3">📚 Legal Reference Documents</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-3 rounded shadow-sm">
-              <h4 class="font-medium text-blue-800 mb-1">📄 MCL + Federal Law Analysis</h4>
-              <p class="text-xs text-gray-600 mb-2">Constitutional violations & statutory misconduct analysis</p>
-              <a
-                href="https://drive.google.com/file/d/1JhBVCk_AxPYDfROgkpQhzR3wkOl-NybD/view"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                📖 View Document →
-              </a>
-            </div>
-            <div class="bg-white p-3 rounded shadow-sm">
-              <h4 class="font-medium text-green-800 mb-1">📂 Evidence Collection</h4>
-              <p class="text-xs text-gray-600 mb-2">Complete exhibit folder with supporting documents</p>
-              <a
-                href="https://drive.google.com/drive/folders/1PJMN5h7n0edWHAd4W7n4qTHE490Uz4x6"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-green-600 hover:text-green-800 text-sm font-medium"
-              >
-                📂 Access Folder →
-              </a>
-            </div>
+      <!-- Results Table -->
+      <table
+        id="trackerTable"
+        class="w-full mt-4 text-sm border-collapse border border-gray-300"
+      >
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border border-gray-300 p-2">Filename</th>
+            <th class="border border-gray-300 p-2">Summary</th>
+            <th class="border border-gray-300 p-2">Category</th>
+            <th class="border border-gray-300 p-2">Child</th>
+            <th class="border border-gray-300 p-2">Misconduct</th>
+            <th class="border border-gray-300 p-2">Legal Statutes</th>
+            <th class="border border-gray-300 p-2">Duplicate</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Export Button -->
+      <button
+        id="exportCsv"
+        class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      >
+        Export CSV
+      </button>
+
+      <!-- Summary Cards Toggle -->
+      <button
+        id="toggleCards"
+        class="mt-4 ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        View Summary Cards
+      </button>
+
+      <!-- Summary Cards Section (hidden by default) -->
+      <div id="summaryCards" class="mt-6 hidden">
+        <h3 class="text-lg font-semibold mb-4">📄 Document Summary Cards</h3>
+        <div
+          id="cardsContainer"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          <!-- Cards will be generated here -->
+        </div>
+      </div>
+
+      <!-- Legal Reference Section -->
+      <div class="mt-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+        <h3 class="text-lg font-semibold mb-3">📚 Legal Reference Documents</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-3 rounded shadow-sm">
+            <h4 class="font-medium text-blue-800 mb-1">
+              📄 MCL + Federal Law Analysis
+            </h4>
+            <p class="text-xs text-gray-600 mb-2">
+              Constitutional violations & statutory misconduct analysis
+            </p>
+            <a
+              href="https://drive.google.com/file/d/1JhBVCk_AxPYDfROgkpQhzR3wkOl-NybD/view"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              📖 View Document →
+            </a>
+          </div>
+          <div class="bg-white p-3 rounded shadow-sm">
+            <h4 class="font-medium text-green-800 mb-1">
+              📂 Evidence Collection
+            </h4>
+            <p class="text-xs text-gray-600 mb-2">
+              Complete exhibit folder with supporting documents
+            </p>
+            <a
+              href="https://drive.google.com/drive/folders/1PJMN5h7n0edWHAd4W7n4qTHE490Uz4x6"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-green-600 hover:text-green-800 text-sm font-medium"
+            >
+              📂 Access Folder →
+            </a>
           </div>
         </div>
       </div>
+    </div>
     <!-- Removed extra closing div tag to fix HTML syntax error -->
 
     <script type="module" src="./firebase.js"></script>

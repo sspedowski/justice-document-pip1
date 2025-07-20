@@ -148,15 +148,17 @@ For questions or support, please open an issue on GitHub.
 This project uses standard Express CORS middleware:
 
 ```js
-const cors = require('cors');
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    // more as needed
-  ],
-  credentials: true,
-}));
+const cors = require("cors");
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      // more as needed
+    ],
+    credentials: true,
+  }),
+);
 ```
 
 No code citation is required for generic usage.

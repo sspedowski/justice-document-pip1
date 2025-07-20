@@ -150,11 +150,11 @@
 
 ## ✅ Sign-off
 
-**Technical Lead:** ********\_******** Date: ****\_****
+**Technical Lead:** **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
-**Security Review:** ********\_******** Date: ****\_****
+**Security Review:** **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
-**Operations Team:** ********\_******** Date: ****\_****
+**Operations Team:** **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
 ---
 
@@ -166,6 +166,6 @@
 
 ---
 
-**Deployment Date:** ******\_\_\_******
-**Next Security Review:** ******\_\_\_******
+**Deployment Date:** **\*\***\_\_\_**\*\***
+**Next Security Review:** **\*\***\_\_\_**\*\***
 **Documentation Version:** 1.0
