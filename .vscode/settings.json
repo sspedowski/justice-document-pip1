@@ -6,5 +6,12 @@
         "cmd": "workbench.action.tasks.runTask Start Server"
       }
     ]
+  },
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.vscode": false
   }
 }
