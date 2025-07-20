@@ -36,13 +36,14 @@ console.log('🔍 Crash detection handlers installed');
 // Firebase Admin SDK
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin using environment variable
 try {
-  const serviceAccountPath =
-    process.env.FIREBASE_ADMIN_KEY_PATH || './firebase-admin-key.json';
-  const serviceAccount = require(
-    path.resolve(__dirname, '..', serviceAccountPath.replace('./', ''))
-  );
+  let serviceAccount = null;
+  if (process.env.FIREBASE_ADMIN_KEY) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
+  } else {
+    throw new Error('FIREBASE_ADMIN_KEY environment variable not set');
+  }
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
