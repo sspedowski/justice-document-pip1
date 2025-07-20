@@ -635,12 +635,12 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
 
 // ============= FRONTEND ROUTES =============
 
-// Wildcard route: serve ONLY index.html for all non-API routes (fix)
+// Catch-all route: serves index.html for all unmatched routes
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Start server - only ONE set of startup logs
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Justice Dashboard API running on http://localhost:${PORT}`);
   console.log(`📋 API endpoints available:`);
