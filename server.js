@@ -13,6 +13,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 dotenv.config();
+if (!process.env.PORT) throw new Error("PORT not set");
 
 // Debugging
 const DEBUG = process.env.NODE_ENV !== "production";
@@ -654,7 +655,6 @@ app.listen(PORT, () => {
 // NOTE: For backend/server.js --
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
-// NOTE: For backend/server.js --
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
         authStatus = "token_expired";
