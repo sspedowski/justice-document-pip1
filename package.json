@@ -15,7 +15,6 @@
     "build:css": "tailwindcss -i ./src/input.css -o ./public/output.css --minify",
     "start": "node server.js"
   },
-  "type": "module",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
     "bcryptjs": "^3.0.2",
@@ -32,6 +31,7 @@
     "openai": "^4.104.0",
     "pdf-parse": "^1.1.1",
     "pdf2pic": "^3.2.0",
+    "sharp": "^0.34.3",
     "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
