@@ -635,9 +635,15 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
 
 // ============= FRONTEND ROUTES =============
 
-// Catch-all route: serves index.html for all unmatched routes
+// Serve frontend - FIXED: Serve index-csp.html for all routes
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  // For API routes, let them handle their own responses
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
+
+  // Serve the main dashboard for all other routes
+  res.sendFile(path.join(__dirname, "index-csp.html"));
 });
 
 // Start server
@@ -652,15 +658,9 @@ app.listen(PORT, () => {
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
 });
-// NOTE: For backend/server.js --
-// TODO: Implement admin registration and persistent database storage (not file-based).
-// Track as issue in README. Current file-based approach is for demo/development only.
-// TODO: Implement admin registration and persistent database storage (not file-based).
-// Track as issue in README. Current file-based approach is for demo/development only.
-        authStatus = "token_expired";
-      } else {
-        authStatus = "invalid_token";
-      }
+
+/* Duplicate declarations and routes removed to fix redeclaration errors. 
+   All necessary logic is already implemented above. */
     }
   }
 

@@ -648,6 +648,12 @@ app.listen(PORT, () => {
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
 });
+
+// NOT IMPLEMENTED: Admin-only registration endpoint
+// app.post('/api/admin/register', (req, res) => {
+//   // TODO: Implement admin registration
+//   res.status(501).send('Not implemented');
+// });
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
         authStatus = "token_expired";

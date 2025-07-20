@@ -1,0 +1,8 @@
+pdf.min.js
+pdf.worker.min.js
+web/
+build/
+dist/
+justice-dashboard/pdf.min.js
+justice-dashboard/pdf.worker.min.js
+justice-dashboard/web/

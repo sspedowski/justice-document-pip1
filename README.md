@@ -204,3 +204,15 @@ This ensures a clean, maintainable project for everyone!**
 - Automated tests are not yet implemented. See `package.json` for test status.
 
 **God’s path to justice continues—thank you for joining the mission.**
+
+## Environment Variables
+
+Set the following in your `.env` file:
+
+- JWT_SECRET
+- SESSION_SECRET
+- WOLFRAM_APP_ID
+- MONGODB_URI
+- PORT
+- NODE_ENV
+- OPENAI_API_KEY
