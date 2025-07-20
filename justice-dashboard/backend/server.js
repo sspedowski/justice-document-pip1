@@ -56,6 +56,17 @@ try {
   console.warn('📝 Some features may be limited without Firebase Admin');
 }
 
+// Firebase client config from environment variables
+      const firebaseConfig = {
+        apiKey: 'AIzaSyAQm3l0On3Ka13xrGgl2Ebuuq1UcsLBc8E',
+        authDomain: 'justice-dashboard-2025-4154e.firebaseapp.com',
+        projectId: 'justice-dashboard-2025-4154e',
+        storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
+        messagingSenderId: '241577747238',
+        appId: '1:241577747238:web:d9b8dfeb56a77a5aae17e7',
+      };
+// You can use firebaseConfig for initializing Firebase client SDK if needed
+
 // Security: Environment variable validation
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error(
