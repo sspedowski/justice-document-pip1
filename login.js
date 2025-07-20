@@ -165,3 +165,5 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 });
+// Demo credentials: guest/guest123
+// See README for security warning

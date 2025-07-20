@@ -321,3 +321,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log("🔐 Enhanced Authentication Manager loaded");
+
+// Password reset feature: Coming soon (see README)

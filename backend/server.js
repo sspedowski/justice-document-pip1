@@ -16,6 +16,7 @@
  * DO NOT USE FOR PRODUCTION.
  */
 
+// LEGACY REFERENCE: This file is no longer used in production.
 // [No actual server code is included. All legacy logic has been migrated.]
 
 console.log('⚠️ This backend/server.js is for historical reference only. See server.js in the root directory for the real backend.');
@@ -23,7 +24,6 @@ console.log('⚠️ This backend/server.js is for historical reference only. See
 module.exports = {}; // Just to avoid module errors if imported.
   console.log("SESSION_SECRET:", process.env.SESSION_SECRET ? "Set" : "Not Set");
   console.log("WOLFRAM_APP_ID:", process.env.WOLFRAM_APP_ID ? "Set" : "Not Set");
-}
 
 // Env check
 const requiredEnvVars = ["JWT_SECRET"];
@@ -558,25 +558,18 @@ app.get("/api/health", (req, res) => {
       authStatus = "authenticated";
     } catch (err) {
       if (err.name === "TokenExpiredError") {
-        authStatus = "token_expired";
-      } else {
-        authStatus = "invalid_token";
-      }
+      authStatus = "token_expired";
+    } else {
+      authStatus = "invalid_token";
     }
   }
+}
 
-  res.json({
-    status: "online",
-    timestamp: new Date().toISOString(),
-    authentication: authStatus,
-    version: "1.0.0",
-  });
-});
-
-// Error handling endpoint
-app.post("/api/report-error", (req, res) => {
-  console.error("Client error:", req.body);
-  res.json({ success: true, message: "Error reported" });
+res.json({
+  status: "online",
+  timestamp: new Date().toISOString(),
+  authentication: authStatus,
+  version: "1.0.0",
 });
 
 // Wolfram API endpoint
@@ -658,114 +651,38 @@ app.listen(PORT, () => {
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
         authStatus = "token_expired";
+      app.get("/api/health", (req, res) => {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+      
+        let authStatus = "unauthenticated";
+      
+        if (token) {
+          try {
+            jwt.verify(token, JWT_SECRET);
+            authStatus = "authenticated";
+          } catch (err) {
+            if (err.name === "TokenExpiredError") {
+              authStatus = "token_expired";
+            } else {
+              authStatus = "invalid_token";
+            }
+          }
+        }
+      
+        res.json({
+          status: "online",
+          timestamp: new Date().toISOString(),
+          authentication: authStatus,
+          version: "1.0.0",
+        });
+      });
+    }
+  }
+        authStatus = "token_expired";
       } else {
         authStatus = "invalid_token";
       }
     }
   }
-
-  res.json({
-    status: "online",
-    timestamp: new Date().toISOString(),
-    authentication: authStatus,
-    version: "1.0.0",
-  });
-});
-
-// Error handling endpoint
-app.post("/api/report-error", (req, res) => {
-  console.error("Client error:", req.body);
-  res.json({ success: true, message: "Error reported" });
-});
-
-// Wolfram API endpoint
-app.post("/api/wolfram", authenticateToken, async (req, res) => {
-  try {
-    const { query } = req.body;
-    console.log("🧠 Wolfram API called with query:", query);
-
-    if (!query) {
-      console.log("❌ Wolfram API: No query provided");
-      return res.status(400).json({ error: "Query parameter required" });
-    }
-
-    const WOLFRAM_APP_ID = process.env.WOLFRAM_APP_ID;
-    console.log(
-      "🔑 Wolfram App ID status:",
-      WOLFRAM_APP_ID ? `Set (${WOLFRAM_APP_ID.substring(0, 6)}...)` : "Not Set",
-    );
-
-    if (!WOLFRAM_APP_ID) {
-      console.log("❌ Wolfram API: App ID not configured");
-      return res.status(500).json({ error: "Wolfram API not configured" });
-    }
-
-    const wolframUrl = `https://api.wolframalpha.com/v2/query?input=${encodeURIComponent(query)}&format=plaintext&output=JSON&appid=${WOLFRAM_APP_ID}`;
-    console.log("🌐 Making Wolfram API request...");
-
-    const response = await fetch(wolframUrl);
-    console.log("📡 Wolfram API response status:", response.status);
-
-    const data = await response.json();
-    console.log("📊 Wolfram API response success:", data.queryresult?.success);
-
-    if (data.queryresult && data.queryresult.success) {
-      console.log("✅ Wolfram API: Success - returning results");
-      res.json({
-        success: true,
-        result: data.queryresult,
-      });
-    } else {
-      console.log(
-        "⚠️ Wolfram API: No results or error:",
-        data.queryresult?.error,
-      );
-      res.status(400).json({
-        error: "No results found",
-        details: data.queryresult?.error || "Unknown error",
-      });
-    }
-  } catch (error) {
-    console.error("❌ Wolfram API error:", error);
-    res.status(500).json({ error: "Wolfram API request failed" });
-  }
-});
-
-// ============= FRONTEND ROUTES =============
-
-// Serve frontend - FIXED: Serve index-csp.html for all routes
-app.get("*", (req, res) => {
-  // For API routes, let them handle their own responses
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ error: "API endpoint not found" });
-  }
-
-  // Serve the main dashboard for all other routes
-  res.sendFile(path.join(__dirname, "index-csp.html"));
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Justice Dashboard API running on http://localhost:${PORT}`);
-  console.log(`📋 API endpoints available:`);
-  console.log(`   POST /api/login`);
-  console.log(`   POST /api/logout`);
-  console.log(`   GET  /api/profile`);
-  console.log(`   POST /api/summarize`);
-  console.log(`   GET  /api/health`);
-  console.log(`   POST /api/report-error`);
-  console.log(`   POST /api/wolfram`);
-});
-
-/* Duplicate declarations and routes removed to fix redeclaration errors. 
-   All necessary logic is already implemented above. */
-  console.log(`   POST /api/login`);
-  console.log(`   POST /api/logout`);
-  console.log(`   GET  /api/profile`);
-  console.log(`   POST /api/summarize`);
-  console.log(`   GET  /api/health`);
-  console.log(`   POST /api/report-error`);
-  console.log(`   POST /api/wolfram`);
-
-/* Duplicate declarations and routes removed to fix redeclaration errors. 
-   All necessary logic is already implemented above. */
+};

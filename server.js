@@ -636,9 +636,6 @@ app.post("/api/wolfram", authenticateToken, async (req, res) => {
 
 // Wildcard route: serve ONLY index.html for all non-API routes (fix)
 app.get("*", (req, res) => {
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ error: "API endpoint not found" });
-  }
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
@@ -654,6 +651,9 @@ app.listen(PORT, () => {
   console.log(`   POST /api/report-error`);
   console.log(`   POST /api/wolfram`);
 });
+// NOTE: For backend/server.js --
+// TODO: Implement admin registration and persistent database storage (not file-based).
+// Track as issue in README. Current file-based approach is for demo/development only.
 // NOTE: For backend/server.js --
 // TODO: Implement admin registration and persistent database storage (not file-based).
 // Track as issue in README. Current file-based approach is for demo/development only.
