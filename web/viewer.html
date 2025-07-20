@@ -62,7 +62,9 @@ See https://github.com/adobe-type-tools/cmap-resources
               <div class="verticalToolbarSeparator"></div>
 
               <button id="currentOutlineItem" class="toolbarButton" type="button" disabled="disabled" tabindex="0" data-l10n-id="pdfjs-current-outline-item-button">
-                <span data-l10n-id="pdfjs-current-outline-item-button-label"></span>
+                <span data-l10n-id="pdfjs-current-outline-item-button-label">Current Outline Item</span>
+                <!-- Accessibility: Add title attribute -->
+                <!-- Note: If button is always disabled, consider aria-disabled="true" -->
               </button>
             </div>
           </div>
@@ -111,22 +113,22 @@ See https://github.com/adobe-type-tools/cmap-resources
 
                     <div id="findbarOptionsOneContainer" class="toolbarHorizontalGroup">
                       <div class="toggleButton toolbarLabel">
-                        <input type="checkbox" id="findHighlightAll" tabindex="0" />
-                        <label for="findHighlightAll" data-l10n-id="pdfjs-find-highlight-checkbox"></label>
+                        <input type="checkbox" id="findHighlightAll" tabindex="0" title="Highlight all matches" />
+                        <label for="findHighlightAll" data-l10n-id="pdfjs-find-highlight-checkbox">Highlight all matches</label>
                       </div>
                       <div class="toggleButton toolbarLabel">
-                        <input type="checkbox" id="findMatchCase" tabindex="0" />
-                        <label for="findMatchCase" data-l10n-id="pdfjs-find-match-case-checkbox-label"></label>
+                        <input type="checkbox" id="findMatchCase" tabindex="0" title="Match case" />
+                        <label for="findMatchCase" data-l10n-id="pdfjs-find-match-case-checkbox-label">Match case</label>
                       </div>
                     </div>
                     <div id="findbarOptionsTwoContainer" class="toolbarHorizontalGroup">
                       <div class="toggleButton toolbarLabel">
-                        <input type="checkbox" id="findMatchDiacritics" tabindex="0" />
-                        <label for="findMatchDiacritics" data-l10n-id="pdfjs-find-match-diacritics-checkbox-label"></label>
+                        <input type="checkbox" id="findMatchDiacritics" tabindex="0" title="Match diacritics" />
+                        <label for="findMatchDiacritics" data-l10n-id="pdfjs-find-match-diacritics-checkbox-label">Match diacritics</label>
                       </div>
                       <div class="toggleButton toolbarLabel">
-                        <input type="checkbox" id="findEntireWord" tabindex="0" />
-                        <label for="findEntireWord" data-l10n-id="pdfjs-find-entire-word-checkbox-label"></label>
+                        <input type="checkbox" id="findEntireWord" tabindex="0" title="Match entire word" />
+                        <label for="findEntireWord" data-l10n-id="pdfjs-find-entire-word-checkbox-label">Match entire word</label>
                       </div>
                     </div>
 
@@ -195,7 +197,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                     </div>
                   </div>
                   <div id="editorHighlight" class="toolbarButtonWithContainer">
-                    <button id="editorHighlightButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-expanded="false" aria-haspopup="true" aria-controls="editorHighlightParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-highlight-button" title="Highlight">
+                    <button id="editorHighlightButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-checked="false" aria-haspopup="true" aria-controls="editorHighlightParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-highlight-button" title="Highlight">
                       <span data-l10n-id="pdfjs-editor-highlight-button-label">Highlight</span>
                     </button>
                     <div class="editorParamsToolbar hidden doorHangerRight" id="editorHighlightParamsToolbar">
@@ -220,7 +222,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                     </div>
                   </div>
                   <div id="editorFreeText" class="toolbarButtonWithContainer">
-                    <button id="editorFreeTextButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-expanded="false" aria-haspopup="true" aria-controls="editorFreeTextParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-free-text-button" title="Add Free Text">
+                    <button id="editorFreeTextButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-checked="false" aria-haspopup="true" aria-controls="editorFreeTextParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-free-text-button" title="Add Free Text">
                       <span data-l10n-id="pdfjs-editor-free-text-button-label">Free Text</span>
                     </button>
                     <div class="editorParamsToolbar hidden doorHangerRight" id="editorFreeTextParamsToolbar">
@@ -237,7 +239,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                     </div>
                   </div>
                   <div id="editorInk" class="toolbarButtonWithContainer">
-                    <button id="editorInkButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-expanded="false" aria-haspopup="true" aria-controls="editorInkParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-ink-button" title="Add Ink Annotation">
+                    <button id="editorInkButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-checked="false" aria-haspopup="true" aria-controls="editorInkParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-ink-button" title="Add Ink Annotation">
                       <span data-l10n-id="pdfjs-editor-ink-button-label">Ink Annotation</span>
                     </button>
                     <div class="editorParamsToolbar hidden doorHangerRight" id="editorInkParamsToolbar">
@@ -258,7 +260,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                     </div>
                   </div>
                   <div id="editorStamp" class="toolbarButtonWithContainer">
-                    <button id="editorStampButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-expanded="false" aria-haspopup="true" aria-controls="editorStampParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-stamp-button" title="Add Stamp">
+                    <button id="editorStampButton" class="toolbarButton" type="button" disabled="disabled" role="radio" aria-checked="false" aria-haspopup="true" aria-controls="editorStampParamsToolbar" tabindex="0" data-l10n-id="pdfjs-editor-stamp-button" title="Add Stamp">
                       <span data-l10n-id="pdfjs-editor-stamp-button-label">Stamp</span>
                     </button>
                     <div class="editorParamsToolbar hidden doorHangerRight menu" id="editorStampParamsToolbar">

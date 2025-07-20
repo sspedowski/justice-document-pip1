@@ -97,28 +97,30 @@
         Document Processing
       </h2>
       <div class="flex flex-col md:flex-row gap-4 items-center mb-4">
+        <label for="fileInput" class="sr-only">Upload Document Files</label>
         <input type="file" id="fileInput" multiple accept=".pdf,.txt,.doc,.docx" 
-               class="border-2 border-yellow-400 rounded-lg p-3 bg-yellow-50 font-medium text-indigo-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-yellow-200 file:text-indigo-800 file:font-bold hover:file:bg-yellow-300 transition cursor-pointer" />
-        <button id="processBtn" class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-indigo-900 font-bold px-6 py-3 rounded-full shadow-lg hover:from-yellow-400 hover:to-yellow-300 hover:scale-105 transition-all">
+               class="border-2 border-yellow-400 rounded-lg p-3 bg-yellow-50 font-medium text-indigo-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-yellow-200 file:text-indigo-800 file:font-bold hover:file:bg-yellow-300 transition cursor-pointer" title="Upload Document Files" />
+        <button id="processBtn-main" class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-indigo-900 font-bold px-6 py-3 rounded-full shadow-lg hover:from-yellow-400 hover:to-yellow-300 hover:scale-105 transition-all" title="Process Files">
           ⚡ Process Files
         </button>
-        <button id="exportBtn" class="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:from-indigo-400 hover:to-indigo-300 hover:scale-105 transition-all">
+        <button id="exportBtn-main" class="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:from-indigo-400 hover:to-indigo-300 hover:scale-105 transition-all" title="Export CSV">
           📁 Export CSV
         </button>
       </div>
       <div class="flex flex-col gap-2">
         <label class="font-semibold text-indigo-800">Or Paste Document Text</label>
+        <label for="textInput" class="sr-only">Paste Document Text</label>
         <textarea id="textInput" placeholder="Paste legal document text here for immediate analysis..." 
-                  class="w-full border-2 border-indigo-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-colors bg-indigo-50"></textarea>
+                  class="w-full border-2 border-indigo-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-colors bg-indigo-50" title="Paste Document Text"></textarea>
       </div>
       <div class="flex gap-4 items-center mt-4">
-        <button id="addCaseBtn" class="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-teal-500 hover:to-green-500 transition">
+        <button id="addCaseBtn-main" class="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-teal-500 hover:to-green-500 transition" title="Add New Case">
           ➕ Add New Case
         </button>
-        <button id="smartFilterBtn" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-pink-500 hover:to-purple-500 transition">
+        <button id="smartFilterBtn-main" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-pink-500 hover:to-purple-500 transition" title="Smart Filters">
           🎯 Smart Filters
         </button>
-        <button id="clearBtn" class="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-pink-500 hover:to-red-500 transition">
+        <button id="clearBtn-main" class="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold px-5 py-2 rounded-full shadow hover:from-pink-500 hover:to-red-500 transition" title="Clear All">
           🗑️ Clear All
         </button>
       </div>
@@ -135,19 +137,21 @@
               <span id="caseCount" class="ml-3 px-3 py-1 bg-yellow-400 text-indigo-900 rounded-full text-sm font-bold">0 cases</span>
             </h2>
             <div class="flex gap-2 items-center">
-              <select id="categoryFilter" class="rounded-full border border-indigo-400 px-3 py-2 bg-indigo-50 text-indigo-900 font-medium">
+              <label for="categoryFilter" class="sr-only">Filter by Category</label>
+              <select id="categoryFilter" class="rounded-full border border-indigo-400 px-3 py-2 bg-indigo-50 text-indigo-900 font-medium" title="Filter by Category">
                 <option value="">All Categories</option>
                 <option value="Legal">Legal</option>
                 <option value="Medical">Medical</option>
                 <option value="General">General</option>
               </select>
-              <select id="statusFilter" class="rounded-full border border-indigo-400 px-3 py-2 bg-indigo-50 text-indigo-900 font-medium">
+              <label for="statusFilter" class="sr-only">Filter by Status</label>
+              <select id="statusFilter" class="rounded-full border border-indigo-400 px-3 py-2 bg-indigo-50 text-indigo-900 font-medium" title="Filter by Status">
                 <option value="">All Status</option>
                 <option value="Active">Active</option>
                 <option value="Pending">Pending</option>
                 <option value="Closed">Closed</option>
               </select>
-              <button id="clearFiltersBtn" class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-full shadow font-bold hover:bg-yellow-300 transition">
+              <button id="clearFiltersBtn" class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-full shadow font-bold hover:bg-yellow-300 transition" title="Clear Filters">
                 Clear
               </button>
             </div>
@@ -351,7 +355,7 @@
               <span>📂</span>
               <span>Bulk Process</span>
             </button>
-            <button id="exportBtn" 
+            <button id="exportBtn-bulk" 
                     class="py-2 px-4 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-all duration-200 flex items-center justify-center space-x-2 font-medium shadow-lg hover:shadow-xl">
               <span>⬇️</span>
               <span>Export CSV</span>
@@ -431,7 +435,8 @@
               <span class="text-2xl mr-2">📄</span>
               Document Processing
             </label>
-            <input type="file" id="fileInput" multiple accept=".pdf,.txt,.doc,.docx" 
+            <label for="fileInput-faith" class="sr-only">Upload Document Files</label>
+            <input type="file" id="fileInput-faith" multiple accept=".pdf,.txt,.doc,.docx" 
                    class="block w-full sm:w-auto file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer" />
             <button id="processBtn" class="bg-gradient-to-r from-gold-400 to-yellow-300 text-blue-900 font-extrabold px-8 py-2 rounded-full shadow-lg hover:scale-105 hover:from-yellow-300 hover:to-gold-400 transition-all text-lg animate-pulse">
               Process Files
@@ -477,13 +482,14 @@
                 <option value="General">General</option>
               </select>
               <label class="font-semibold text-blue-900">Status</label>
-              <select id="statusFilter" class="rounded-full border border-blue-400 px-4 py-2 bg-blue-50 text-blue-900 focus:ring-gold-400">
+              <label for="statusFilter-faith" class="sr-only">Filter by Status</label>
+              <select id="statusFilter-faith" class="rounded-full border border-blue-400 px-4 py-2 bg-blue-50 text-blue-900 focus:ring-gold-400" title="Filter by Status">
                 <option value="">All Status</option>
                 <option value="Active">Active</option>
                 <option value="Pending">Pending</option>
                 <option value="Closed">Closed</option>
               </select>
-              <button id="clearFiltersBtn" class="ml-2 bg-gold-400 text-blue-900 px-5 py-2 rounded-full shadow font-bold hover:scale-105 transition">
+              <button id="clearFiltersBtn-faith" class="ml-2 bg-gold-400 text-blue-900 px-5 py-2 rounded-full shadow font-bold hover:scale-105 transition" title="Clear Filters">
                 Clear Filters
               </button>
             </div>
