@@ -44,8 +44,8 @@ if (DEBUG) {
 }
 
 // Validate required environment variables
-const requiredEnvVars = ["JWT_SECRET"];
-const recommendedEnvVars = ["SESSION_SECRET", "WOLFRAM_APP_ID"];
+const requiredEnvVars = ["JWT_SECRET", "SESSION_SECRET"];
+const recommendedEnvVars = ["WOLFRAM_APP_ID"];
 
 requiredEnvVars.forEach((varName) => {
   if (!process.env[varName]) {
@@ -65,6 +65,12 @@ recommendedEnvVars.forEach((varName) => {
 if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
   console.warn(
     "⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.",
+  );
+}
+
+if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
+  console.warn(
+    "⚠️  WARNING: SESSION_SECRET should be at least 32 characters long for security.",
   );
 }
 
@@ -128,14 +134,7 @@ app.use(express.urlencoded({ extended: true }));
 // For production scale, consider: connect-mongo, connect-redis, or express-session-file-store
 app.use(
   session({
-    secret:
-      process.env.SESSION_SECRET ||
-      (() => {
-        console.warn(
-          "⚠️  WARNING: Using default session secret. Set SESSION_SECRET environment variable for production!",
-        );
-        return "justice-dashboard-default-secret-" + Date.now();
-      })(),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
