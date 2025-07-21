@@ -33,27 +33,28 @@ process.on('unhandledRejection', (reason, promise) => {
 
 console.log('🔍 Crash detection handlers installed');
 
-// Firebase Admin SDK
+// NEW Firebase Admin SDK Initialization (REPLACE THE ENTIRE EXISTING BLOCK)
+// Locate the 'Firebase Admin SDK' comment and replace the try-catch block below it.
 const admin = require('firebase-admin');
-
-// Initialize Firebase Admin using environment variable
 try {
-  let serviceAccount = null;
-  if (process.env.FIREBASE_ADMIN_KEY) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
-  } else {
-    throw new Error('FIREBASE_ADMIN_KEY environment variable not set');
-  }
+    if (!process.env.FIREBASE_ADMIN_CREDENTIALS_JSON) {
+        throw new Error('FIREBASE_ADMIN_CREDENTIALS_JSON environment variable is not set.');
+    }
+    if (!process.env.FIREBASE_STORAGE_BUCKET) {
+        throw new Error('FIREBASE_STORAGE_BUCKET environment variable is not set.');
+    }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
-  });
-
-  console.log('🔥 Firebase Admin SDK initialized successfully');
+    const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS_JSON);
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    });
+    console.log('🔥 Firebase Admin SDK initialized successfully using environment variables.');
 } catch (error) {
-  console.warn('⚠️ Firebase Admin SDK not initialized:', error.message);
-  console.warn('📝 Some features may be limited without Firebase Admin');
+    console.error('❌ Error initializing Firebase Admin SDK:', error.message);
+    console.error('Ensure FIREBASE_ADMIN_CREDENTIALS_JSON and FIREBASE_STORAGE_BUCKET environment variables are correctly configured in your .env file.');
+    // It's crucial for most features, so we'll exit if it fails
+    process.exit(1);
 }
 
 // Firebase client config from environment variables
