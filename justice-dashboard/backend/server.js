@@ -561,9 +561,16 @@ function verifyJWT(token) {
 app.post('/api/login', express.json(), async (req, res) => {
   try {
     const { username, password } = req.body;
+    // Debug: log received credentials (obscure password)
+    console.log('[LOGIN DEBUG] Received login attempt:', {
+      username,
+      passwordLength: password ? password.length : 0,
+      passwordPreview: password ? password.slice(0, 2) + '***' : undefined
+    });
 
     // Input validation
     if (!username || !password) {
+      console.log('[LOGIN DEBUG] Missing username or password');
       return res
         .status(400)
         .json({ ok: false, error: 'Username and password required' });
@@ -571,6 +578,7 @@ app.post('/api/login', express.json(), async (req, res) => {
 
     // Use secure admin user if available
     if (adminUser && username === adminUser.username) {
+      console.log('[LOGIN DEBUG] Attempting secure admin auth');
       const isValidPassword = await bcrypt.compare(
         password,
         adminUser.password
@@ -587,6 +595,8 @@ app.post('/api/login', express.json(), async (req, res) => {
           token: token,
           user: user,
         });
+      } else {
+        console.log('[LOGIN DEBUG] Secure admin password mismatch');
       }
     }
 
@@ -595,6 +605,7 @@ app.post('/api/login', express.json(), async (req, res) => {
       username === process.env.DASH_USER &&
       password === process.env.DASH_PASS
     ) {
+      console.log('[LOGIN DEBUG] Legacy auth path taken');
       console.log(
         `⚠️  Legacy login successful for: ${username} (consider upgrading to secure auth)`
       );
@@ -608,6 +619,7 @@ app.post('/api/login', express.json(), async (req, res) => {
     }
 
     console.log(`❌ Login failed for username: ${username}`);
+    console.log('[LOGIN DEBUG] No matching credentials for user');
     return res
       .status(401)
       .json({ success: false, error: 'Invalid credentials' });
