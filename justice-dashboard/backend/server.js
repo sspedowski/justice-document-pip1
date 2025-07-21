@@ -17,6 +17,20 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const path = require('path');
 const fs = require('fs');
+const winston = require('winston');
+
+// Logger configuration
+const logger = winston.createLogger({
+  level: 'error',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'error.log' }),
+    new winston.transports.Console(),
+  ],
+});
 
 // 🔥 CRASH DETECTION - Add this to catch silent crashes
 process.on('uncaughtException', err => {
@@ -37,35 +51,35 @@ console.log('🔍 Crash detection handlers installed');
 // Locate the 'Firebase Admin SDK' comment and replace the try-catch block below it.
 const admin = require('firebase-admin');
 try {
-    if (!process.env.FIREBASE_ADMIN_CREDENTIALS_JSON) {
-        throw new Error('FIREBASE_ADMIN_CREDENTIALS_JSON environment variable is not set.');
-    }
-    if (!process.env.FIREBASE_STORAGE_BUCKET) {
-        throw new Error('FIREBASE_STORAGE_BUCKET environment variable is not set.');
-    }
+  if (!process.env.FIREBASE_ADMIN_CREDENTIALS_JSON) {
+    throw new Error('FIREBASE_ADMIN_CREDENTIALS_JSON environment variable is not set.');
+  }
+  if (!process.env.FIREBASE_STORAGE_BUCKET) {
+    throw new Error('FIREBASE_STORAGE_BUCKET environment variable is not set.');
+  }
 
-    const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS_JSON);
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    });
-    console.log('🔥 Firebase Admin SDK initialized successfully using environment variables.');
+  const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS_JSON);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  });
+  console.log('🔥 Firebase Admin SDK initialized successfully using environment variables.');
 } catch (error) {
-    console.error('❌ Error initializing Firebase Admin SDK:', error.message);
-    console.error('Ensure FIREBASE_ADMIN_CREDENTIALS_JSON and FIREBASE_STORAGE_BUCKET environment variables are correctly configured in your .env file.');
-    // It's crucial for most features, so we'll exit if it fails
-    process.exit(1);
+  console.error('❌ Error initializing Firebase Admin SDK:', error.message);
+  console.error('Ensure FIREBASE_ADMIN_CREDENTIALS_JSON and FIREBASE_STORAGE_BUCKET environment variables are correctly configured in your .env file.');
+  // It's crucial for most features, so we'll exit if it fails
+  process.exit(1);
 }
 
 // Firebase client config from environment variables
-      const firebaseConfig = {
-        apiKey: 'AIzaSyAQm3l0On3Ka13xrGgl2Ebuuq1UcsLBc8E',
-        authDomain: 'justice-dashboard-2025-4154e.firebaseapp.com',
-        projectId: 'justice-dashboard-2025-4154e',
-        storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
-        messagingSenderId: '241577747238',
-        appId: '1:241577747238:web:d9b8dfeb56a77a5aae17e7',
-      };
+const firebaseConfig = {
+  apiKey: 'AIzaSyAQm3l0On3Ka13xrGgl2Ebuuq1UcsLBc8E',
+  authDomain: 'justice-dashboard-2025-4154e.firebaseapp.com',
+  projectId: 'justice-dashboard-2025-4154e',
+  storageBucket: 'justice-dashboard-2025-4154e.firebasestorage.app',
+  messagingSenderId: '241577747238',
+  appId: '1:241577747238:web:d9b8dfeb56a77a5aae17e7',
+};
 // You can use firebaseConfig for initializing Firebase client SDK if needed
 
 // Security: Environment variable validation
@@ -153,10 +167,10 @@ app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Catch-all route: serves the frontend's index.html for all other non-API requests
 app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'API endpoint not found' });
-    }
-    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
 });
 
 // Multer configuration for file uploads
@@ -565,7 +579,7 @@ app.post('/api/login', express.json(), async (req, res) => {
     console.log('[LOGIN DEBUG] Received login attempt:', {
       username,
       passwordLength: password ? password.length : 0,
-      passwordPreview: password ? password.slice(0, 2) + '***' : undefined
+      passwordPreview: password ? password.slice(0, 2) + '***' : undefined,
     });
 
     // Input validation
@@ -1457,6 +1471,12 @@ process.on('uncaughtException', err => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   // Don't exit the process - keep server running
+});
+
+// Global error handler for Express
+app.use((err, req, res, next) => {
+  logger.error({ message: err.message, stack: err.stack, url: req.url });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // Start server
