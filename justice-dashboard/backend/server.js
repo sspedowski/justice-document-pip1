@@ -133,6 +133,18 @@ if (OpenAI && process.env.OPENAI_API_KEY) {
 app.use(cors());
 app.use(express.json());
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Also create public/uploads for additional file storage if needed
+const publicUploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(publicUploadsDir)) {
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
+}
+
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 // Serve static files from the frontend's build directory
@@ -145,18 +157,6 @@ app.get('*', (req, res) => {
     }
     res.sendFile(path.resolve(__dirname, '../../frontend/dist/index.html'));
 });
-
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Also create public/uploads for additional file storage if needed
-const publicUploadsDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(publicUploadsDir)) {
-  fs.mkdirSync(publicUploadsDir, { recursive: true });
-}
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
