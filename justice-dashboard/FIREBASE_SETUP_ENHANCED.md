@@ -18,7 +18,7 @@ firebase projects:create justice-dashboard-prod --display-name "Justice Dashboar
 cd c:\Users\ssped\justice-dashboard\justice-dashboard
 firebase init
 # Select: Functions, Firestore, Storage, Hosting
-```
+```text
 
 ### 1.2 Environment-Specific Configuration
 
@@ -33,7 +33,7 @@ firebase projects:create justice-dashboard-staging
 
 # Production
 firebase projects:create justice-dashboard-prod
-```
+```text
 
 ### 1.3 Enhanced Environment Variables
 
@@ -193,7 +193,7 @@ service firebase.storage {
 
 ### 3.1 Function Organization
 
-```
+
 functions/
 ├── src/
 │   ├── document/
@@ -247,6 +247,8 @@ function handleError(error, context = {}) {
   if (error.isOperational) {
     logger.warn('Operational error:', errorDetails);
   } else {
+
+```text
     logger.error('System error:', errorDetails);
   }
 
