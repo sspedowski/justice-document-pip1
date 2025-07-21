@@ -149,14 +149,14 @@ if (!fs.existsSync(publicUploadsDir)) {
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 // Serve static files from the frontend's build directory
-app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Catch-all route: serves the frontend's index.html for all other non-API requests
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'API endpoint not found' });
     }
-    res.sendFile(path.resolve(__dirname, '../../frontend/dist/index.html'));
+    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
 });
 
 // Multer configuration for file uploads
