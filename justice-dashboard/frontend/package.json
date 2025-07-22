@@ -6,7 +6,7 @@
     "dev": "vite --host",
     "build:css": "postcss styles.css -o dist/styles.css",
     "watch:css": "postcss styles.css -o dist/styles.css --watch",
-    "build": "npm run build:css && vite build",
+    "build": "vite build",
     "check": "node check-files.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
