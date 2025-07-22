@@ -1,7 +1,6 @@
 {
   "name": "justice-dashboard",
   "version": "1.0.0",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "npm-run-all --parallel dev:client dev:server",
