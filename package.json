@@ -1,0 +1,7 @@
+{
+  "name": "justice-dashboard-root",
+  "private": true,
+  "scripts": {
+    "test": "cd justice-dashboard && npm test"
+  }
+}
