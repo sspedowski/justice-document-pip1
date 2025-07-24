@@ -1,0 +1,31 @@
+name: E2E Tests (Cypress)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Start backend
+        run: npm run dev:server &
+      - name: Start frontend
+        run: npm run dev:client &
+      - name: Wait for app to be ready
+        run: npx wait-on http://localhost:5174
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run dev
+          wait-on: 'http://localhost:5174'
+          wait-on-timeout: 120
