@@ -1,4 +1,0 @@
-// check-env.js
-console.log(process.env.JWT_SECRET ? "JWT_SECRET loaded" : "JWT_SECRET missing");
-console.log(process.env.SESSION_SECRET ? "SESSION_SECRET loaded" : "SESSION_SECRET missing");^X
-

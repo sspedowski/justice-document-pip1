@@ -16,18 +16,25 @@ else
   exit 1
 fi
 
-# 2. User Management Setup
+# 2. .env Check (moved up, since it's needed for backend & frontend)
+if [ -f "justice-dashboard/backend/.env" ]; then
+  echo "\n[2/5] .env file found in backend."
+else
+  echo "\n[2/5] WARNING: .env file missing in backend!"
+fi
+
+# 3. User Management Setup
 if [ -f "admin-users.js" ]; then
-  echo "\n[2/5] Installing bcrypt for user management..."
+  echo "\n[3/5] Installing bcrypt for user management..."
   npm install bcrypt
-  echo "\n[2/5] You can now run: node admin-users.js to add/reset users."
+  echo "\n[3/5] You can now run: node admin-users.js to add/reset users."
 else
   echo "admin-users.js not found!"
 fi
 
-# 3. Frontend Setup
+# 4. Frontend Setup
 if [ -d "justice-dashboard/frontend" ]; then
-  echo "\n[3/5] Installing frontend dependencies..."
+  echo "\n[4/5] Installing frontend dependencies..."
   cd justice-dashboard/frontend
   npm install
   npm run build
@@ -35,13 +42,6 @@ if [ -d "justice-dashboard/frontend" ]; then
 else
   echo "Frontend folder not found!"
   exit 1
-fi
-
-# 4. .env Check
-if [ -f "justice-dashboard/backend/.env" ]; then
-  echo "\n[4/5] .env file found in backend."
-else
-  echo "\n[4/5] WARNING: .env file missing in backend!"
 fi
 
 # 5. Start Backend
@@ -53,3 +53,6 @@ else
   echo "server.js not found in backend!"
   exit 1
 fi
+
+# Note: To start the frontend dev server, run:
+# cd justice-dashboard/frontend && npm run dev
