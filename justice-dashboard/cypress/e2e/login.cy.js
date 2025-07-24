@@ -1,6 +1,18 @@
-// Cypress E2E test for login
+// Cypress E2E test for Justice Dashboard
 
-describe('Justice Dashboard Login', () => {
+describe('Justice Dashboard', () => {
+  it('loads the homepage and sees the title', () => {
+    cy.visit('/'); // Uses baseUrl from cypress.config.js (http://localhost:5174)
+    cy.contains('Justice Dashboard'); // Matches your site's headline
+    cy.get('title').should('contain', 'Justice Dashboard'); // Also check page title
+  });
+
+  it('shows login form when not authenticated', () => {
+    cy.visit('/');
+    cy.get('input[name="username"]').should('exist');
+    cy.get('input[name="password"]').should('exist');
+  });
+
   it('shows login form and rejects invalid login', () => {
     cy.visit('/');
     cy.get('input[name="username"]').type('wrong');
