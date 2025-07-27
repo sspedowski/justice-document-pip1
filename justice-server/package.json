@@ -1,11 +1,18 @@
 {
-    "name":  "justice-server",
-    "version":  "1.0.0",
-    "main":  "server.js",
-    "scripts":  {
-                    "start":  "node server.js"
-                },
-    "dependencies":  {
-
-                     }
+    "name": "justice-server",
+    "version": "1.0.0",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
+        "fs-extra": "^11.3.0",
+        "helmet": "^8.1.0",
+        "multer": "^2.0.2",
+        "pdf-parse": "^1.1.1",
+        "pdf2pic": "^3.2.0",
+        "tesseract.js": "^6.0.1"
+    }
 }
