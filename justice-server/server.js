@@ -28,7 +28,40 @@ app.use(
 const upload = multer({ dest: "uploads/" });
 
 app.use(cors());
+app.use(bodyParser.json());
 app.use("/files", express.static(path.join(__dirname, "public")));
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ status: "UP", message: "Justice Dashboard backend is running." });
+});
+
+// ✅ LOGIN ROUTE
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  const adminUser = process.env.ADMIN_USER || "admin";
+  const adminPass = process.env.ADMIN_PASS || "adminpass";
+
+  console.log(`🔐 Login attempt: ${username}`);
+
+  if (username === adminUser && password === adminPass) {
+    const token = jwt.sign({ username }, process.env.JWT_SECRET || "secret", {
+      expiresIn: "1h",
+    });
+    console.log("✅ Login successful");
+    return res.status(200).json({ success: true, token, user: username });
+  } else {
+    console.log("❌ Login failed");
+    return res.status(401).json({ success: false, message: "Invalid credentials" });
+  }
+});
+
+// ✅ LOGOUT ROUTE
+app.post("/api/logout", (req, res) => {
+  console.log("👋 Logout requested");
+  res.json({ success: true, message: "Logged out successfully" });
+});
 
 app.post("/api/summarize", upload.single("file"), async (req, res) => {
   const tempPath = req.file.path;
