@@ -1080,6 +1080,16 @@ function initializeJusticeDashboard() {
 
     // Make DashboardAuth globally available
     window.DashboardAuth = DashboardAuth;
+    console.log("✅ DashboardAuth attached to window object");
+    console.log("✅ checkAuth method exists:", typeof DashboardAuth.checkAuth === 'function');
+
+    // Initialize authentication on load
+    try {
+      DashboardAuth.init();
+      console.log("✅ DashboardAuth initialized successfully");
+    } catch (error) {
+      console.error("❌ DashboardAuth initialization error:", error);
+    }
 
     // Global function to manually clear data (can be called from console)
     window.clearJusticeData = function () {
@@ -1412,7 +1422,7 @@ function initializeJusticeDashboard() {
 
       // Show success notification
       showNotification(
-        '✅ Successfully updated existing documents with "View PDF" hyperlinks!',
+        "✅ Successfully updated existing documents with \"View PDF\" hyperlinks!",
         "success",
       );
     }
@@ -1420,4 +1430,14 @@ function initializeJusticeDashboard() {
     // Expose function globally for console access
     window.updateExistingDocuments = updateExistingDocuments;
   }
-} // <-- Add this closing brace to end initializeJusticeDashboard
+} // End of initializeJusticeDashboard function
+
+// Initialize the dashboard when DOM is loaded
+document.addEventListener("DOMContentLoaded", initializeJusticeDashboard);
+
+// Also initialize if DOM is already loaded (in case script loads late)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeJusticeDashboard);
+} else {
+  initializeJusticeDashboard();
+}
