@@ -7,6 +7,9 @@ const pdfParse = require("pdf-parse");
 const { fromPath } = require("pdf2pic");
 const Tesseract = require("tesseract.js");
 const helmet = require("helmet");
+const jwt = require("jsonwebtoken");
+const bodyParser = require("body-parser");
+require("dotenv").config();
 
 const app = express();
 
