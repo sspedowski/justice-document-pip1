@@ -40,8 +40,8 @@ app.get("/api/health", (req, res) => {
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
-  const adminUser = process.env.ADMIN_USER || "admin";
-  const adminPass = process.env.ADMIN_PASS || "adminpass";
+  const adminUser = process.env.ADMIN_USERNAME || "admin";
+  const adminPass = process.env.ADMIN_PASSWORD || "adminpass";
 
   console.log(`🔐 Login attempt: ${username}`);
 
