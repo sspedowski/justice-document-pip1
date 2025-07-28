@@ -3,20 +3,26 @@ const path = require('path');
 
 console.log('🔍 Justice Dashboard Environment Validation\n');
 
-// Check if .env file exists
+// Check if we're in CI environment
+const isCI = process.env.CI === 'true';
+console.log(`🔧 Environment: ${isCI ? 'CI/CD' : 'Local Development'}\n`);
+
+// Check if .env file exists (only for local development)
 const envPath = path.join(__dirname, '..', 'justice-server', '.env');
 const envExamplePath = path.join(__dirname, '..', '.env.example');
 
-if (!fs.existsSync(envPath)) {
+if (!isCI && !fs.existsSync(envPath)) {
   console.log('❌ .env file not found in justice-server/');
   console.log(`📝 Please copy ${envExamplePath} to ${envPath} and configure it`);
   process.exit(1);
 }
 
-// Load environment variables
-const dotenvPath = path.join(__dirname, '..', 'justice-server', 'node_modules', 'dotenv');
-const dotenv = require(dotenvPath);
-dotenv.config({ path: envPath });
+// Load environment variables (from .env file or CI environment)
+if (!isCI && fs.existsSync(envPath)) {
+  const dotenvPath = path.join(__dirname, '..', 'justice-server', 'node_modules', 'dotenv');
+  const dotenv = require(dotenvPath);
+  dotenv.config({ path: envPath });
+}
 
 const checks = [
   { name: 'JWT_SECRET', required: true, minLength: 32 },
