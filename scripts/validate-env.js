@@ -4,8 +4,8 @@ const path = require('path');
 console.log('🔍 Justice Dashboard Environment Validation\n');
 
 // Check if .env file exists
-const envPath = path.join(__dirname, 'justice-server', '.env');
-const envExamplePath = path.join(__dirname, '.env.example');
+const envPath = path.join(__dirname, '..', 'justice-server', '.env');
+const envExamplePath = path.join(__dirname, '..', '.env.example');
 
 if (!fs.existsSync(envPath)) {
   console.log('❌ .env file not found in justice-server/');
