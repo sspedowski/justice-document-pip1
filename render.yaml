@@ -3,8 +3,12 @@ services:
     name: justice-dashboard
     env: node
     plan: free
-    buildCommand: npm run build
-    startCommand: npm start
+    buildCommand: |
+      npm install
+      cd justice-server && npm install
+      cd ../justice-dashboard && npm install && npm run build
+      cp -r dist/* ../justice-server/public/
+    startCommand: cd justice-server && node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -15,7 +19,5 @@ services:
       - key: ADMIN_USERNAME
         value: admin
       - key: ADMIN_PASSWORD
-        value: adminpass
-      - key: PORT
-        value: 3000
+        generateValue: true
     healthCheckPath: /api/health

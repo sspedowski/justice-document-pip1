@@ -1,6 +1,6 @@
 // API integration test using supertest and Jest
 const request = require('supertest');
-const app = require('../backend/server');
+const app = require('../../justice-server/server');
 
 describe('API Authentication', () => {
   it('should reject login with invalid credentials', async () => {

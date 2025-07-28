@@ -4,7 +4,7 @@ const request = require('supertest');
 const path = require('path');
 const fs = require('fs');
 
-const app = require('../backend/server');
+const app = require('../../justice-server/server');
 
 describe('Document Management API', () => {
   let authToken;

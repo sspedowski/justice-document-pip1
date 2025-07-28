@@ -4,7 +4,7 @@ const request = require('supertest');
 const path = require('path');
 
 // Import your server app
-const app = require('../backend/server');
+const app = require('../../justice-server/server');
 
 describe('Authentication API', () => {
   describe('POST /api/login', () => {

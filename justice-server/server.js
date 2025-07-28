@@ -32,6 +32,20 @@ if (!envLoaded) {
   console.warn('⚠️  No .env file found. Checking for environment variables...');
 }
 
+// ✅ Security Check: Enforce production-ready admin credentials
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+    console.error("❌ CRITICAL: Missing admin credentials for production deployment.");
+    console.error("Set ADMIN_USERNAME and ADMIN_PASSWORD in Render environment variables.");
+    process.exit(1);
+  }
+  if (process.env.ADMIN_PASSWORD === 'adminpass' || process.env.ADMIN_PASSWORD.length < 8) {
+    console.error("❌ CRITICAL: Insecure admin password detected in production.");
+    console.error("Use a strong password (8+ characters) for ADMIN_PASSWORD.");
+    process.exit(1);
+  }
+}
+
 const app = express();
 
 // Unified Content Security Policy
@@ -77,8 +91,14 @@ app.get("/", (req, res) => {
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
-  const adminUser = process.env.ADMIN_USERNAME || "admin";
-  const adminPass = process.env.ADMIN_PASSWORD || "adminpass";
+  // ✅ Secure admin credentials (no insecure defaults in production)
+  const adminUser = process.env.ADMIN_USERNAME || (process.env.NODE_ENV === 'production' ? null : "admin");
+  const adminPass = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? null : "adminpass");
+
+  if (!adminUser || !adminPass) {
+    console.error("❌ Missing admin credentials");
+    return res.status(500).json({ error: "Server configuration error" });
+  }
 
   console.log(`🔐 Login attempt: ${username}`);
 
@@ -181,10 +201,11 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("✅ Justice server running at http://localhost:3000");
-  console.log("📁 Upload endpoint (v2): http://localhost:3000/upload");
-  console.log("📁 Upload endpoint (v1): http://localhost:3000/api/summarize");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Justice server running at http://localhost:${PORT}`);
+  console.log(`📁 Upload endpoint (v2): http://localhost:${PORT}/upload`);
+  console.log(`📁 Upload endpoint (v1): http://localhost:${PORT}/api/summarize`);
   console.log("🔑 Environment variables loaded:", {
     JWT_SECRET: process.env.JWT_SECRET ? "✅ Set" : "❌ Missing",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY ? "✅ Set" : "❌ Missing",
