@@ -11,5 +11,11 @@ module.exports = defineConfig({
     proxy: {
       '/api': 'http://localhost:3000'
     }
+  },
+  optimizeDeps: {
+    exclude: ['canvas']
+  },
+  define: {
+    global: 'globalThis'
   }
 });
