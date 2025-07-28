@@ -738,6 +738,11 @@ const DashboardAuth = {
   },
 };
 
+// Make DashboardAuth globally available immediately
+window.DashboardAuth = DashboardAuth;
+console.log("✅ DashboardAuth attached to window object");
+console.log("✅ checkAuth method exists:", typeof DashboardAuth.checkAuth === 'function');
+
 /********** Dashboard Statistics Functions **********/
 function updateDashboardStats() {
   // Get all tracker rows to calculate statistics
@@ -1174,11 +1179,6 @@ function initializeJusticeDashboard() {
         DashboardAuth.renderLoginForm();
       }
     });
-
-    // Make DashboardAuth globally available
-    window.DashboardAuth = DashboardAuth;
-    console.log("✅ DashboardAuth attached to window object");
-    console.log("✅ checkAuth method exists:", typeof DashboardAuth.checkAuth === 'function');
 
     // Make showLoginForm globally available
     window.showLoginForm = DashboardAuth.showLoginForm.bind(DashboardAuth);
