@@ -11,7 +11,26 @@ const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 
 // Load environment variables from the correct location
-require("dotenv").config({ path: path.join(__dirname, '.env') });
+// Try multiple potential paths to ensure .env is found regardless of working directory
+const envPaths = [
+  path.join(__dirname, '.env'),                    // justice-server/.env (when run from justice-server/)
+  path.join(process.cwd(), 'justice-server', '.env'), // ./justice-server/.env (when run from root)
+  path.join(__dirname, '..', 'justice-server', '.env') // ../justice-server/.env (fallback)
+];
+
+let envLoaded = false;
+for (const envPath of envPaths) {
+  if (require('fs').existsSync(envPath)) {
+    require("dotenv").config({ path: envPath });
+    console.log(`📄 Loaded environment from: ${envPath}`);
+    envLoaded = true;
+    break;
+  }
+}
+
+if (!envLoaded) {
+  console.warn('⚠️  No .env file found. Checking for environment variables...');
+}
 
 const app = express();
 
