@@ -1,4 +1,4 @@
-🚀 Justice Dashboard - Quick Start Guide
+# Justice Dashboard - Quick Start Guide
 
 ✅ Prerequisites Verified
 
@@ -20,7 +20,7 @@ This starts both frontend (port 5174) and backend (port 3000)
 Option B: Backend Only
 
 npm run dev:backend
-# OR
+OR
 node server.js
 
 Option C: Frontend Only (if backend is already running)
@@ -35,19 +35,19 @@ Password: adminpass
 
 🗋️ URLs
 
-Frontend: http://localhost:5174
+Frontend: [http://localhost:5174](http://localhost:5174)
 
-Backend API: http://localhost:3000
+Backend API: [http://localhost:3000](http://localhost:3000)
 
-Health Check: http://localhost:3000/api/health
+Health Check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
 🧪 Validation & Testing
 
-# Validate environment setup
+Validate environment setup
 npm run validate
 
-# Test login endpoint
-Invoke-RestMethod -Uri "http://localhost:3000/api/login" -Method POST -ContentType "application/json" -Body '{"username":"admin","password":"adminpass"}'
+Test login endpoint
+Invoke-RestMethod -Uri "[http://localhost:3000/api/login](http://localhost:3000/api/login)" -Method POST -ContentType "application/json" -Body '{"username":"admin","password":"adminpass"}'
 
 🛠️ Troubleshooting
 
@@ -69,10 +69,10 @@ Verify CORS settings in server.js
 
 If ports are in use:
 
-# Kill all Node processes
+Kill all Node processes
 taskkill /F /IM node.exe
 
-# Restart
+Restart
 npm run dev
 
 📁 Project Structure
@@ -92,7 +92,7 @@ justice-dashboard/
 
 When everything is working, you should see:
 
-✅ Server logs: "Justice server running at http://localhost:3000"
+✅ Server logs: "Justice server running at [http://localhost:3000](http://localhost:3000)"
 
 ✅ Frontend loads without errors
 
