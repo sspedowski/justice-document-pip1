@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
       upload_v1: "/api/summarize",
       upload_v2: "/upload"
     },
-    frontend: "http://localhost:5174"
+    frontend: "http://localhost:5175"
   });
 });
 
