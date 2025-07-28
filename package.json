@@ -5,7 +5,7 @@
     "setup": "bash scripts/setup.sh",
     "setup:win": "scripts\\setup.bat",
     "validate": "node scripts/validate-env.js",
-    "build": "npm run install:all && echo '✅ Build complete'",
+    "build": "echo '🚀 Installing all dependencies...' && npm install && echo '📦 Installing backend...' && cd justice-server && npm install && echo '📦 Installing frontend...' && cd ../justice-dashboard && npm install && echo '✅ Build complete!'",
     "install:all": "npm install && cd justice-server && npm install && cd ../justice-dashboard && npm install",
     "test:build": "bash scripts/test-build.sh",
     "start": "node server.js",

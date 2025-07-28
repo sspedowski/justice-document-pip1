@@ -3,14 +3,7 @@ services:
     name: justice-dashboard
     env: node
     plan: free
-    buildCommand: |
-      echo "🚀 Installing Justice Dashboard dependencies..."
-      npm install
-      echo "📦 Installing backend dependencies..."
-      cd justice-server && npm install
-      echo "📦 Installing frontend dependencies..."
-      cd ../justice-dashboard && npm install
-      echo "✅ Build complete!"
+    buildCommand: bash build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -21,6 +14,8 @@ services:
         generateValue: true
       - key: ADMIN_USERNAME
         value: admin
+      - key: ADMIN_PASSWORD
+        value: adminpass
       - key: PORT
         value: 3000
     healthCheckPath: /api/health
