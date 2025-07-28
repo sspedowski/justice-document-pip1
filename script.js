@@ -959,6 +959,54 @@ function clearOldData() {
   console.log("Justice tracker data cleared");
 }
 
+/********** Add Case to Tracker Function **********/
+function addCaseToTracker(caseData) {
+  const trackerBody = document.getElementById("trackerTableBody");
+  if (!trackerBody) {
+    console.error("Tracker table body not found");
+    return;
+  }
+
+  const row = document.createElement("tr");
+  row.className = "border-b border-gray-200 hover:bg-gray-50";
+  
+  const viewPDFLink = caseData.fileURL 
+    ? `<a href="${caseData.fileURL}" target="_blank" class="text-blue-600 underline text-sm hover:text-blue-800 mr-3">View PDF</a>`
+    : '<span class="text-gray-400 text-sm">No PDF</span>';
+
+  row.innerHTML = `
+    <td class="p-3">${caseData.caseId}</td>
+    <td class="p-3">${caseData.title}</td>
+    <td class="p-3">
+      <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">${caseData.status}</span>
+    </td>
+    <td class="p-3">${caseData.date}</td>
+    <td class="p-3">${caseData.fileName}</td>
+    <td class="p-3">
+      ${viewPDFLink}
+      <button onclick="this.closest('tr').remove(); saveTable();" class="text-red-600 text-sm hover:text-red-800">🗑️ Delete</button>
+    </td>
+  `;
+  
+  trackerBody.appendChild(row);
+  
+  // Save to localStorage
+  saveTable();
+  
+  // Update dashboard stats
+  updateDashboardStats();
+  
+  console.log("✅ Case added to tracker:", caseData.caseId);
+}
+
+/********** Save Table Function **********/
+function saveTable() {
+  const trackerBody = document.getElementById("trackerTableBody");
+  if (trackerBody) {
+    localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
+  }
+}
+
 /********** Upload and Analyze File Function **********/
 async function uploadAndAnalyzeFile(file) {
   try {
@@ -974,8 +1022,17 @@ async function uploadAndAnalyzeFile(file) {
     const result = await response.json();
     console.log("✅ File uploaded & summarized:", result);
     
-    // Optionally append result to case tracker UI
-    // You can add code here to update the case tracker table with the new file
+    // Add the result to the case tracker table
+    addCaseToTracker({
+      caseId: `CASE-${Date.now()}`,
+      title: result.fileName || file.name,
+      status: "active",
+      date: new Date().toLocaleDateString(),
+      fileName: result.fileName || file.name,
+      fileURL: result.fileURL,
+      summary: result.summary || "PDF processed successfully"
+    });
+    
     return result;
   } catch (err) {
     console.error("❌ Error uploading file:", err);
@@ -1001,6 +1058,7 @@ function initializeJusticeDashboard() {
   // DOM Elements
   const fileInput = document.getElementById("fileInput");
   const docInput = document.getElementById("docInput");
+  const processBtn = document.getElementById("processBtn");
   const summarizeBtn = document.getElementById("generateBtn");
   const exportBtn = document.getElementById("exportBtn");
   const askBtn = document.getElementById("askWolfram");
@@ -1017,6 +1075,39 @@ function initializeJusticeDashboard() {
   if (!trackerBody) {
     console.error("Could not find tracker table body");
     return;
+  }
+
+  // Add event handler for the Process Document button
+  if (processBtn && fileInput) {
+    processBtn.addEventListener("click", async () => {
+      const files = fileInput.files;
+      if (files.length === 0) {
+        alert("Please select a file first!");
+        return;
+      }
+
+      console.log(`📁 Processing ${files.length} file(s)...`);
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log(`📄 Processing file: ${file.name}`);
+        
+        try {
+          await uploadAndAnalyzeFile(file);
+          console.log(`✅ Successfully processed: ${file.name}`);
+        } catch (error) {
+          console.error(`❌ Failed to process ${file.name}:`, error);
+          alert(`Failed to process ${file.name}: ${error.message}`);
+        }
+      }
+      
+      // Clear the file input after processing
+      fileInput.value = '';
+      console.log("🔄 File input cleared");
+    });
+    console.log("✅ Process Document button event handler attached");
+  } else {
+    console.warn("❌ Process Document button or file input not found");
   }
 
   // Dashboard elements
