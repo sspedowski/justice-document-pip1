@@ -10,7 +10,7 @@
     "build:verbose": "echo '🚀 Installing all dependencies...' && npm install && echo '📦 Installing backend...' && cd justice-server && npm install && echo '📦 Installing frontend...' && cd ../justice-dashboard && npm install && echo '✅ Build complete!'",
     "install:all": "npm install && cd justice-server && npm install && cd ../justice-dashboard && npm install",
     "test:build": "bash scripts/test-build.sh",
-    "start": "node server.js",
+    "start": "cd justice-server && node server.js",
     "start:prod": "bash scripts/start-production.sh",
     "dev": "cd justice-dashboard && npm run dev",
     "dev:backend": "node server.js",

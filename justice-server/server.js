@@ -66,6 +66,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use("/files", express.static(path.join(__dirname, "public")));
 
+// ✅ Serve frontend static files (from Vite build)
+app.use(express.static(path.join(__dirname, "public")));
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "UP", message: "Justice Dashboard backend is running." });
@@ -199,6 +202,11 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
     console.error("❌ Error:", error);
     res.status(500).json({ error: "Failed to summarize file." });
   }
+});
+
+// ✅ SPA catch-all route (serve frontend for any non-API routes)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;

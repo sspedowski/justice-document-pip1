@@ -38,7 +38,7 @@ function getApiBaseUrl() {
   // Return appropriate base URL
   return isLocal
     ? "http://localhost:3000"
-    : "https://justice-dashboard.onrender.com";
+    : window.location.origin;
 }
 
 // Use dynamic API base URL (will use window.API_BASE_URL when available)
@@ -1013,7 +1013,7 @@ async function uploadAndAnalyzeFile(file) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("http://localhost:3000/api/summarize", {
+    const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/summarize`, {
       method: "POST",
       body: formData
     });
