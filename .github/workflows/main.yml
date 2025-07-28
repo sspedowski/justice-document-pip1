@@ -10,6 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      # Set environment variables for CI
+      JWT_SECRET: ci-test-jwt-secret-key-32-chars-minimum-length-required
+      SESSION_SECRET: ci-test-session-secret-key-32-chars-minimum-length-required  
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: testpass
+      NODE_ENV: test
+      PORT: 3000
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v2
@@ -27,8 +36,28 @@ jobs:
           cd justice-server
           npm install
 
-      - name: 🚀 Run server (backend)
-        run: node server.js
+      - name: 🧪 Validate environment setup
+        run: node scripts/validate-env.js
+
+      - name: 🚀 Test server startup
+        run: |
+          # Start server in background
+          node server.js &
+          SERVER_PID=$!
+          
+          # Wait for server to start
+          sleep 5
+          
+          # Test health endpoint
+          curl -f http://localhost:3000/api/health || exit 1
+          
+          # Test login endpoint
+          curl -X POST -H "Content-Type: application/json" \
+               -d '{"username":"admin","password":"testpass"}' \
+               http://localhost:3000/api/login || exit 1
+          
+          # Stop server
+          kill $SERVER_PID
 
       - name: 🧪 Run tests
         run: npm test
