@@ -138,6 +138,66 @@ const DashboardAuth = {
     }
   },
 
+  // Show login form
+  showLoginForm() {
+    const app = document.getElementById("app");
+    if (app) {
+      // You can customize this login form HTML as needed
+      app.innerHTML = `
+        <div class="min-h-screen flex items-center justify-center bg-gray-50">
+          <div class="max-w-md w-full space-y-8">
+            <div>
+              <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign in to Justice Dashboard
+              </h2>
+            </div>
+            <form class="mt-8 space-y-6" id="loginForm">
+              <div>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Username"
+                />
+              </div>
+              <div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Password"
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Sign in
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      // Bind login form
+      const loginForm = document.getElementById("loginForm");
+      if (loginForm) {
+        loginForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+          this.authenticate(username, password);
+        });
+      }
+    }
+  },
+
   // Logout user
   async logout() {
     try {
@@ -892,8 +952,42 @@ function clearOldData() {
   console.log("Justice tracker data cleared");
 }
 
+/********** Upload and Analyze File Function **********/
+async function uploadAndAnalyzeFile(file) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("http://localhost:3000/api/summarize", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) throw new Error("Upload failed");
+    const result = await response.json();
+    console.log("✅ File uploaded & summarized:", result);
+    
+    // Optionally append result to case tracker UI
+    // You can add code here to update the case tracker table with the new file
+    return result;
+  } catch (err) {
+    console.error("❌ Error uploading file:", err);
+    alert("Upload failed: " + err.message);
+    throw err;
+  }
+}
+
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
+  const trackerTableBody = document.getElementById("caseTableBody");
+  if (!trackerTableBody) {
+    console.warn("Could not find tracker table body – retrying...");
+    setTimeout(initializeJusticeDashboard, 150); // Retry after 150ms
+    return;
+  }
+
+  console.log("✅ Tracker table found. Initializing upload system...");
+
   // Timeout variable for optimized saving
   // let saveTimeout; // FIXED: Using declaration from function start
 
@@ -906,7 +1000,10 @@ function initializeJusticeDashboard() {
   const summaryBox = document.getElementById("summaryBox");
   let trackerBody = document.querySelector("#results");
 
-  // Fallback for trackerBody
+  // Fallback for trackerBody - use the confirmed table we found
+  if (!trackerBody) {
+    trackerBody = trackerTableBody;
+  }
   if (!trackerBody) {
     trackerBody = document.querySelector("#trackerTable tbody");
   }
@@ -1082,6 +1179,9 @@ function initializeJusticeDashboard() {
     window.DashboardAuth = DashboardAuth;
     console.log("✅ DashboardAuth attached to window object");
     console.log("✅ checkAuth method exists:", typeof DashboardAuth.checkAuth === 'function');
+
+    // Make showLoginForm globally available
+    window.showLoginForm = DashboardAuth.showLoginForm.bind(DashboardAuth);
 
     // Initialize authentication on load
     try {

@@ -1,58 +1,26 @@
 // Dashboard Initialization - Safe and CSP Compliant
-window.addEventListener("DOMContentLoaded", function () {
-  console.log("Dashboard initializing...");
-  console.log("App div exists?", !!document.getElementById("app"));
+document.addEventListener("DOMContentLoaded", () => {
+  console.debug("Dashboard initializing...");
 
-  // Wait a moment for all scripts to load
-  setTimeout(function () {
-    console.log("Checking for DashboardAuth...");
-    console.log("DashboardAuth exists?", typeof DashboardAuth !== "undefined");
-    console.log(
-      "checkAuth method exists?",
-      typeof DashboardAuth !== "undefined" &&
-        typeof DashboardAuth.checkAuth === "function",
-    );
+  const app = document.getElementById("app");
+  console.debug("App div exists?", !!app);
 
-    if (typeof DashboardAuth !== "undefined" && DashboardAuth.checkAuth) {
-      console.log("DashboardAuth loaded, checking authentication...");
+  // Ensure window.DashboardAuth is available and functional
+  if (window.DashboardAuth && typeof window.DashboardAuth.checkAuth === "function") {
+    console.debug("DashboardAuth exists:", true);
+    console.debug("checkAuth method exists:", true);
 
-      try {
-        if (DashboardAuth.checkAuth()) {
-          console.log("User authenticated, loading dashboard...");
-          DashboardAuth.loadDashboard();
-        } else {
-          console.log("User not authenticated, showing login form...");
-          DashboardAuth.showLoginForm();
-        }
-      } catch (error) {
-        console.error("Error during authentication check:", error);
-        // Fallback: show login form
-        console.log("Fallback: attempting to show login form...");
-        if (
-          typeof DashboardAuth !== "undefined" &&
-          DashboardAuth.showLoginForm
-        ) {
-          DashboardAuth.showLoginForm();
-        }
-      }
+    const isAuthenticated = window.DashboardAuth.checkAuth();
+    if (isAuthenticated) {
+      console.debug("DashboardAuth loaded, checking authentication...");
+      initializeJusticeDashboard();
     } else {
-      console.error("DashboardAuth not loaded or missing checkAuth method");
-      console.log("App div still exists?", !!document.getElementById("app"));
-
-      // Show a basic error message
-      const appDiv = document.getElementById("app");
-      if (appDiv) {
-        appDiv.innerHTML = `
-          <div class="min-h-screen flex items-center justify-center">
-            <div class="text-center">
-              <h1 class="text-2xl font-bold text-red-600 mb-4">Loading Error</h1>
-              <p class="text-gray-600">DashboardAuth not loaded. Please refresh the page</p>
-            </div>
-          </div>
-        `;
-      } else {
-        console.error("App div not found in fallback error handler!");
-      }
+      console.debug("User not authenticated, showing login form...");
+      showLoginForm();
     }
-  }, 100);
+  } else {
+    console.warn("DashboardAuth not loaded or missing checkAuth method");
+  }
+
+  console.debug("App div still exists?", !!app);
 });
