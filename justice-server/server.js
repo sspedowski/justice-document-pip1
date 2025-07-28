@@ -63,6 +63,31 @@ app.post("/api/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
+// ✅ UPLOAD ROUTE (Alternative endpoint)
+app.post("/upload", upload.single("file"), async (req, res) => {
+  console.log("📁 Upload endpoint (v2): /upload");
+  const tempPath = req.file.path;
+  const originalName = req.file.originalname;
+  const sanitized = originalName.replace(/[^a-z0-9.\-]/gi, "_");
+  const finalPath = path.join(__dirname, "public", sanitized);
+
+  try {
+    fs.renameSync(tempPath, finalPath);
+    console.log("📥 File received:", originalName);
+    console.log("📂 Saved at:", finalPath);
+
+    res.json({
+      success: true,
+      message: "File uploaded successfully",
+      fileURL: `/files/${sanitized}`,
+      fileName: originalName,
+    });
+  } catch (error) {
+    console.error("❌ Upload error:", error);
+    res.status(500).json({ error: "Failed to upload file." });
+  }
+});
+
 app.post("/api/summarize", upload.single("file"), async (req, res) => {
   const tempPath = req.file.path;
   const originalName = req.file.originalname;
@@ -121,4 +146,11 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
 
 app.listen(3000, () => {
   console.log("✅ Justice server running at http://localhost:3000");
+  console.log("📁 Upload endpoint (v2): http://localhost:3000/upload");
+  console.log("📁 Upload endpoint (v1): http://localhost:3000/api/summarize");
+  console.log("🔑 Environment variables loaded:", {
+    JWT_SECRET: process.env.JWT_SECRET ? "✅ Set" : "❌ Missing",
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY ? "✅ Set" : "❌ Missing",
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME || "admin",
+  });
 });
