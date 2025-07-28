@@ -979,7 +979,7 @@ async function uploadAndAnalyzeFile(file) {
 
 /********** Main Dashboard Initialization **********/
 function initializeJusticeDashboard() {
-  const trackerTableBody = document.getElementById("caseTableBody");
+  const trackerTableBody = document.getElementById("trackerTableBody");
   if (!trackerTableBody) {
     console.warn("Could not find tracker table body – retrying...");
     setTimeout(initializeJusticeDashboard, 150); // Retry after 150ms
