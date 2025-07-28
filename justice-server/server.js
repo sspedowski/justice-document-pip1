@@ -36,6 +36,22 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "UP", message: "Justice Dashboard backend is running." });
 });
 
+// Friendly root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "✅ Justice Dashboard Backend is Running",
+    status: "active",
+    endpoints: {
+      health: "/api/health",
+      login: "/api/login",
+      logout: "/api/logout", 
+      upload_v1: "/api/summarize",
+      upload_v2: "/upload"
+    },
+    frontend: "http://localhost:5175"
+  });
+});
+
 // ✅ LOGIN ROUTE
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
