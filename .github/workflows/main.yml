@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
 name: CI
 
 on:
@@ -86,8 +88,30 @@ jobs:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
           if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            echo "🚀 Triggering Render deployment..."
             curl -X POST "$RENDER_DEPLOY_HOOK"
             echo "✅ Deployed to Render"
           else
-            echo "⚠️  RENDER_DEPLOY_HOOK not set, skipping deployment"
+            echo "⚠️  RENDER_DEPLOY_HOOK not configured, skipping Render deployment"
           fi
+
+      - name: Deploy to Vercel
+        if: success()
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "🚀 Deploying to Vercel..."
+            npx vercel --token "$VERCEL_TOKEN" --prod --yes
+            echo "✅ Deployed to Vercel"
+          else
+            echo "⚠️  VERCEL_TOKEN not configured, skipping Vercel deployment"
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "📋 Deployment Summary:"
+          echo "✅ Build completed successfully"
+          echo "📝 To enable auto-deploy, add GitHub Secrets:"
+          echo "   - RENDER_DEPLOY_HOOK (for Render)"
+          echo "   - VERCEL_TOKEN (for Vercel)"
