@@ -1,26 +1,29 @@
 // Dashboard Initialization - Safe and CSP Compliant
-document.addEventListener("DOMContentLoaded", () => {
-  console.debug("Dashboard initializing...");
-
-  const app = document.getElementById("app");
-  console.debug("App div exists?", !!app);
-
-  // Ensure window.DashboardAuth is available and functional
+function waitForDashboardAuth(attempts = 10) {
   if (window.DashboardAuth && typeof window.DashboardAuth.checkAuth === "function") {
-    console.debug("DashboardAuth exists:", true);
-    console.debug("checkAuth method exists:", true);
-
-    const isAuthenticated = window.DashboardAuth.checkAuth();
-    if (isAuthenticated) {
-      console.debug("DashboardAuth loaded, checking authentication...");
-      initializeJusticeDashboard();
-    } else {
-      console.debug("User not authenticated, showing login form...");
-      showLoginForm();
-    }
+    console.debug("✅ DashboardAuth available – proceeding");
+    initializeDashboard();
+  } else if (attempts > 0) {
+    console.warn("⏳ Waiting for DashboardAuth...");
+    setTimeout(() => waitForDashboardAuth(attempts - 1), 200);
   } else {
-    console.warn("DashboardAuth not loaded or missing checkAuth method");
+    console.error("❌ DashboardAuth not loaded after multiple attempts.");
   }
+}
 
-  console.debug("App div still exists?", !!app);
+function initializeDashboard() {
+  console.debug("📦 Dashboard initializing...");
+
+  const isAuthenticated = window.DashboardAuth.checkAuth();
+  if (isAuthenticated) {
+    console.debug("🔓 User authenticated – loading dashboard...");
+    initializeJusticeDashboard();
+  } else {
+    console.debug("🔐 User not authenticated – showing login form...");
+    showLoginForm();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  waitForDashboardAuth();
 });
