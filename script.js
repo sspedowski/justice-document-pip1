@@ -1042,10 +1042,19 @@ async function uploadAndAnalyzeFile(file) {
 }
 
 /********** Main Dashboard Initialization **********/
+let dashboardInitialized = false;
+
 function initializeJusticeDashboard() {
+  if (dashboardInitialized) {
+    console.warn("🛑 Dashboard already initialized. Skipping...");
+    return;
+  }
+  dashboardInitialized = true;
+
   const trackerTableBody = document.getElementById("trackerTableBody");
   if (!trackerTableBody) {
     console.warn("Could not find tracker table body – retrying...");
+    dashboardInitialized = false; // Reset flag if DOM not ready
     setTimeout(initializeJusticeDashboard, 150); // Retry after 150ms
     return;
   }
@@ -1632,10 +1641,7 @@ function initializeJusticeDashboard() {
   }
 } // End of initializeJusticeDashboard function
 
-// Initialize the dashboard when DOM is loaded
-document.addEventListener("DOMContentLoaded", initializeJusticeDashboard);
-
-// Also initialize if DOM is already loaded (in case script loads late)
+// Initialize the dashboard when DOM is loaded (only once)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeJusticeDashboard);
 } else {
