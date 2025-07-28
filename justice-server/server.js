@@ -9,7 +9,9 @@ const Tesseract = require("tesseract.js");
 const helmet = require("helmet");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-require("dotenv").config();
+
+// Load environment variables from the correct location
+require("dotenv").config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
