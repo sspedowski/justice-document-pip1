@@ -740,8 +740,10 @@ const DashboardAuth = {
 
 // Make DashboardAuth globally available immediately
 window.DashboardAuth = DashboardAuth;
+window.showLoginForm = DashboardAuth.showLoginForm.bind(DashboardAuth);
 console.log("✅ DashboardAuth attached to window object");
 console.log("✅ checkAuth method exists:", typeof DashboardAuth.checkAuth === 'function');
+console.log("✅ showLoginForm method exists:", typeof window.showLoginForm === 'function');
 
 /********** Dashboard Statistics Functions **********/
 function updateDashboardStats() {
@@ -1179,9 +1181,6 @@ function initializeJusticeDashboard() {
         DashboardAuth.renderLoginForm();
       }
     });
-
-    // Make showLoginForm globally available
-    window.showLoginForm = DashboardAuth.showLoginForm.bind(DashboardAuth);
 
     // Initialize authentication on load
     try {
