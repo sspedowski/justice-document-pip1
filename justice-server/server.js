@@ -188,6 +188,19 @@ app.listen(3000, () => {
   console.log("🔑 Environment variables loaded:", {
     JWT_SECRET: process.env.JWT_SECRET ? "✅ Set" : "❌ Missing",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY ? "✅ Set" : "❌ Missing",
+    SESSION_SECRET: process.env.SESSION_SECRET ? "✅ Set" : "❌ Missing",
     ADMIN_USERNAME: process.env.ADMIN_USERNAME || "admin",
   });
+  
+  // Debug: Show environment loading status
+  if (!process.env.JWT_SECRET || !process.env.OPENAI_API_KEY) {
+    console.warn("⚠️  CRITICAL: Missing environment variables!");
+    console.warn("📂 Current working directory:", process.cwd());
+    console.warn("📂 Server file directory:", __dirname);
+    console.warn("🔍 Checking .env file locations:");
+    envPaths.forEach(envPath => {
+      const exists = require('fs').existsSync(envPath);
+      console.warn(`   ${exists ? '✅' : '❌'} ${envPath}`);
+    });
+  }
 });
