@@ -748,7 +748,7 @@ console.log("✅ showLoginForm method exists:", typeof window.showLoginForm === 
 /********** Dashboard Statistics Functions **********/
 function updateDashboardStats() {
   // Get all tracker rows to calculate statistics
-  const trackerBody = document.querySelector("#results");
+  const trackerBody = document.getElementById("trackerTableBody");
   const rows = trackerBody ? trackerBody.querySelectorAll("tr") : [];
 
   // Calculate total cases
@@ -1077,8 +1077,8 @@ function initializeJusticeDashboard() {
     return;
   }
 
-  // Add event handler for the Process Document button
-  if (processBtn && fileInput) {
+  // Add event handler for the Process Document button (only once)
+  if (processBtn && fileInput && !processBtn.hasAttribute('data-handler-attached')) {
     processBtn.addEventListener("click", async () => {
       const files = fileInput.files;
       if (files.length === 0) {
@@ -1087,6 +1087,10 @@ function initializeJusticeDashboard() {
       }
 
       console.log(`📁 Processing ${files.length} file(s)...`);
+      
+      // Disable button during processing
+      processBtn.disabled = true;
+      processBtn.textContent = "Processing...";
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -1101,11 +1105,17 @@ function initializeJusticeDashboard() {
         }
       }
       
-      // Clear the file input after processing
+      // Re-enable button and clear input
+      processBtn.disabled = false;
+      processBtn.textContent = "📄 Process Document";
       fileInput.value = '';
       console.log("🔄 File input cleared");
     });
+    
+    processBtn.setAttribute('data-handler-attached', 'true');
     console.log("✅ Process Document button event handler attached");
+  } else if (processBtn && processBtn.hasAttribute('data-handler-attached')) {
+    console.log("ℹ️ Process Document button handler already attached");
   } else {
     console.warn("❌ Process Document button or file input not found");
   }
