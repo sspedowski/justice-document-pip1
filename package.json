@@ -4,8 +4,11 @@
   "scripts": {
     "setup": "bash scripts/setup.sh",
     "setup:win": "scripts\\setup.bat",
+    "validate": "node scripts/validate-env.js",
     "start": "node server.js",
     "dev": "cd justice-dashboard && npm run dev",
+    "dev:backend": "node server.js",
+    "dev:frontend": "cd justice-dashboard && npm run dev:client",
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "cd justice-server && npm test",
     "test:frontend": "cd justice-dashboard && npm test"
