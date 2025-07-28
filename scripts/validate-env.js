@@ -14,7 +14,9 @@ if (!fs.existsSync(envPath)) {
 }
 
 // Load environment variables
-require('dotenv').config({ path: envPath });
+const dotenvPath = path.join(__dirname, '..', 'justice-server', 'node_modules', 'dotenv');
+const dotenv = require(dotenvPath);
+dotenv.config({ path: envPath });
 
 const checks = [
   { name: 'JWT_SECRET', required: true, minLength: 32 },
