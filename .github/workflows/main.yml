@@ -2,25 +2,33 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Node.js
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v2
+
+      - name: 🟢 Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
-      - name: Install dependencies
+          node-version: "18"
+
+      - name: 📦 Install root dependencies
         run: npm install
-      - name: Run server
-        run: npm start
-      - name: Run tests
+
+      - name: 📦 Install backend dependencies
+        run: |
+          cd justice-server
+          npm install
+
+      - name: 🚀 Run server (backend)
+        run: node server.js
+
+      - name: 🧪 Run tests
         run: npm test
