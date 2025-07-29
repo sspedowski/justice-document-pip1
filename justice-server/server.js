@@ -211,11 +211,13 @@ app.get("*", (req, res) => {
 
 // ✅ Dynamic port binding for Render
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Justice Dashboard server running on port ${PORT}`);
-  console.log(`📁 Upload endpoint (v2): http://localhost:${PORT}/upload`);
-  console.log(`📁 Upload endpoint (v1): http://localhost:${PORT}/api/summarize`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Justice Dashboard server running on ${HOST}:${PORT}`);
+  console.log(`🏥 Health check: http://${HOST}:${PORT}/api/health`);
+  console.log(`📁 Upload endpoints available`);
+  console.log(`� Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log("🔑 Environment status:", {
     NODE_ENV: process.env.NODE_ENV || 'development',
     JWT_SECRET: process.env.JWT_SECRET ? "✅ Set" : "❌ Missing",
