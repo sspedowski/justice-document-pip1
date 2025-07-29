@@ -1,5 +1,5 @@
 import React from 'react';
-import UploadDashboard from './components/UploadDashboard';
+import UploadDashboard from './components/UploadDashboard.jsx'; // Explicit extension just in case
 
 export default function App() {
   return (
