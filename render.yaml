@@ -4,10 +4,17 @@ services:
     env: node
     plan: free
     buildCommand: |
+      echo "🚀 Starting Justice Dashboard build process..."
+      echo "📦 Installing root dependencies..."
       npm install
+      echo "📦 Installing backend dependencies..."
       cd justice-server && npm install
+      echo "📦 Installing frontend dependencies and building..."
       cd ../justice-dashboard && npm install && npm run build
+      echo "📂 Copying frontend build to backend public directory..."
+      mkdir -p ../justice-server/public
       cp -r dist/* ../justice-server/public/
+      echo "✅ Build process complete!"
     startCommand: cd justice-server && node server.js
     envVars:
       - key: NODE_ENV
@@ -20,4 +27,6 @@ services:
         value: admin
       - key: ADMIN_PASSWORD
         generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
     healthCheckPath: /api/health
