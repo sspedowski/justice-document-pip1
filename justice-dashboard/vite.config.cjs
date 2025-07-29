@@ -1,15 +1,18 @@
 const { defineConfig } = require('vite');
+const react = require('@vitejs/plugin-react');
 const path = require('path');
 
 module.exports = defineConfig({
-  root: path.resolve(__dirname, '..'),
+  plugins: [react()],
+  root: __dirname,
   build: {
-    outDir: 'justice-dashboard/dist'
+    outDir: 'dist'
   },
   server: {
     port: 5174,
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': 'http://localhost:3000',
+      '/upload': 'http://localhost:3000'
     }
   },
   optimizeDeps: {
