@@ -58,11 +58,13 @@ const app = express();
 const upload = multer({ dest: "uploads/" });
 
 // Security & Middleware
-app.use(helmet()); // Default helmet protections
+app.use(helmet()); // Apply all default protections
 app.use(cors());
 app.use(bodyParser.json());
+
+// Serve frontend static files (from Vite build)
 app.use("/files", express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname, "public"))); // Serve frontend
+app.use(express.static(path.join(__dirname, "public")));
 
 // ==========================
 // Health & Status
