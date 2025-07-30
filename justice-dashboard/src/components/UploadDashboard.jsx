@@ -16,20 +16,27 @@ export default function UploadDashboard() {
     formData.append('file', selectedFile);
 
     try {
-      // Use dynamic API URL for both local and production
-      const apiBase = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
-      
-      const res = await fetch(`${apiBase}/upload`, {
+      // Pick correct API base dynamically
+      const apiBase =
+        import.meta.env.MODE === "development"
+          ? "http://localhost:3000" // Local backend
+          : window.location.origin; // Production backend
+
+      const res = await fetch(`${apiBase}/api/summarize`, {
         method: 'POST',
         body: formData,
       });
+
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`);
+      }
+
       const data = await res.json();
+      console.log("✅ Upload success:", data);
       setSummary(data.summary || 'No summary available');
       setTags(data.tags || []);
-    } catch (err) {
-      console.error('Upload error:', err);
+    } catch (error) {
+      console.error('❌ Upload error:', error);
       alert('Error uploading file');
     }
   };
