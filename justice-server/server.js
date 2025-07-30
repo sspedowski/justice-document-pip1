@@ -205,7 +205,7 @@ app.post("/api/summarize", upload.single("file"), async (req, res) => {
 });
 
 // ✅ SPA catch-all route (serve frontend for any non-API routes)
-app.get("*", (req, res) => {
+app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
