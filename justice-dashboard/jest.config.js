@@ -2,8 +2,8 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.js'],
   collectCoverageFrom: [
-    'backend/**/*.js',
-    '!backend/node_modules/**',
+    'justice-server/**/*.js',
+    '!justice-server/node_modules/**',
     '!**/node_modules/**'
   ],
   coverageDirectory: 'coverage',

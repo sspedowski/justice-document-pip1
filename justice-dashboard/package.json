@@ -25,7 +25,6 @@
     "test": "jest --env=jsdom --config jest.config.js && cypress run",
     "test:watch": "jest --env=jsdom --config jest.config.js --watch",
     "test:coverage": "jest --env=jsdom --config jest.config.js --coverage",
-    "extract-env": "node extract-env.js",
     "cleanup": "bash cleanup-and-structure.sh",
     "cleanup:windows": "powershell -ExecutionPolicy Bypass -File cleanup-and-structure.ps1",
     "test-pdf": "python test_pdf_processing.py",

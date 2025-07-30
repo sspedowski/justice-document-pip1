@@ -95,8 +95,13 @@ app.post("/api/login", (req, res) => {
   const adminUser = process.env.ADMIN_USERNAME;
   const adminPass = process.env.ADMIN_PASSWORD;
 
+  if (!process.env.JWT_SECRET) {
+    console.error("\u274c CRITICAL: Missing JWT_SECRET. Set it in your environment.");
+    process.exit(1);
+  }
+
   if (username === adminUser && password === adminPass) {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: "1h" });
     return res.status(200).json({ success: true, token, user: username });
   } else {
     return res.status(401).json({ success: false, message: "Invalid credentials" });
