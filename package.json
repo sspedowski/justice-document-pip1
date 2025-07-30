@@ -17,6 +17,7 @@
     "dev:frontend": "cd justice-dashboard && npm run dev:client",
     "test": "echo '✅ All tests passed!'",
     "test:backend": "echo '✅ Backend tests passed!'",
-    "test:frontend": "echo '✅ Frontend tests passed!'"
+    "test:frontend": "echo '✅ Frontend tests passed!'",
+    "deploy": "cd justice-server && railway up"
   }
 }
