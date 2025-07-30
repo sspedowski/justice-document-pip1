@@ -1,3 +1,8 @@
+// ==========================
+// Justice Dashboard Server
+// Render Production Build
+// ==========================
+
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -10,71 +15,62 @@ const helmet = require("helmet");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 
-// Load environment variables from the correct location
-// Try multiple potential paths to ensure .env is found regardless of working directory
+// ==========================
+// Load Environment Variables
+// ==========================
 const envPaths = [
-  path.join(__dirname, '.env'),                    // justice-server/.env (when run from justice-server/)
-  path.join(process.cwd(), 'justice-server', '.env'), // ./justice-server/.env (when run from root)
-  path.join(__dirname, '..', 'justice-server', '.env') // ../justice-server/.env (fallback)
+  path.join(__dirname, '.env'),
+  path.join(process.cwd(), 'justice-server', '.env'),
+  path.join(__dirname, '..', 'justice-server', '.env')
 ];
 
 let envLoaded = false;
 for (const envPath of envPaths) {
-  if (require('fs').existsSync(envPath)) {
+  if (fs.existsSync(envPath)) {
     require("dotenv").config({ path: envPath });
     console.log(`📄 Loaded environment from: ${envPath}`);
     envLoaded = true;
     break;
   }
 }
-
 if (!envLoaded) {
-  console.warn('⚠️  No .env file found. Checking for environment variables...');
+  console.warn('⚠️  No .env file found. Using Render environment variables...');
 }
 
-// ✅ Security Check: Enforce production-ready admin credentials
+// ==========================
+// Security Checks
+// ==========================
 if (process.env.NODE_ENV === 'production') {
   if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
-    console.error("❌ CRITICAL: Missing admin credentials for production deployment.");
-    console.error("Set ADMIN_USERNAME and ADMIN_PASSWORD in Render environment variables.");
+    console.error("❌ CRITICAL: Missing admin credentials.");
     process.exit(1);
   }
-  if (process.env.ADMIN_PASSWORD === 'adminpass' || process.env.ADMIN_PASSWORD.length < 8) {
-    console.error("❌ CRITICAL: Insecure admin password detected in production.");
-    console.error("Use a strong password (8+ characters) for ADMIN_PASSWORD.");
+  if (process.env.ADMIN_PASSWORD.length < 8) {
+    console.error("❌ CRITICAL: Insecure admin password. Use 8+ characters.");
     process.exit(1);
   }
 }
 
+// ==========================
+// Express App Setup
+// ==========================
 const app = express();
-
-// Unified Content Security Policy
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "http://localhost:3000"],
-      styleSrc: ["'self'", "http://localhost:3000"],
-      frameSrc: ["'none'"],
-      // Add other directives as needed
-    },
-  }),
-);
 const upload = multer({ dest: "uploads/" });
 
+// Security & Middleware
+app.use(helmet()); // Default helmet protections
 app.use(cors());
 app.use(bodyParser.json());
 app.use("/files", express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"))); // Serve frontend
 
-// ✅ Serve frontend static files (from Vite build)
-app.use(express.static(path.join(__dirname, "public")));
-
-// Health check endpoint
+// ==========================
+// Health & Status
+// ==========================
 app.get("/api/health", (req, res) => {
   res.json({ status: "UP", message: "Justice Dashboard backend is running." });
 });
 
-// Friendly root route
 app.get("/", (req, res) => {
   res.json({
     message: "✅ Justice Dashboard Backend is Running",
@@ -82,148 +78,103 @@ app.get("/", (req, res) => {
     endpoints: {
       health: "/api/health",
       login: "/api/login",
-      logout: "/api/logout", 
+      logout: "/api/logout",
       upload_v1: "/api/summarize",
       upload_v2: "/upload"
-    },
-    frontend: "http://localhost:5174"
+    }
   });
 });
 
-// ✅ LOGIN ROUTE
+// ==========================
+// Authentication
+// ==========================
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
-
-  // ✅ Secure admin credentials (no insecure defaults in production)
-  const adminUser = process.env.ADMIN_USERNAME || (process.env.NODE_ENV === 'production' ? null : "admin");
-  const adminPass = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? null : "adminpass");
-
-  if (!adminUser || !adminPass) {
-    console.error("❌ Missing admin credentials");
-    return res.status(500).json({ error: "Server configuration error" });
-  }
-
-  console.log(`🔐 Login attempt: ${username}`);
+  const adminUser = process.env.ADMIN_USERNAME;
+  const adminPass = process.env.ADMIN_PASSWORD;
 
   if (username === adminUser && password === adminPass) {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET || "secret", {
-      expiresIn: "1h",
-    });
-    console.log("✅ Login successful");
+    const token = jwt.sign({ username }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
     return res.status(200).json({ success: true, token, user: username });
   } else {
-    console.log("❌ Login failed");
     return res.status(401).json({ success: false, message: "Invalid credentials" });
   }
 });
 
-// ✅ LOGOUT ROUTE
 app.post("/api/logout", (req, res) => {
-  console.log("👋 Logout requested");
   res.json({ success: true, message: "Logged out successfully" });
 });
 
-// ✅ UPLOAD ROUTE (Alternative endpoint)
+// ==========================
+// File Upload & Summarization
+// ==========================
 app.post("/upload", upload.single("file"), async (req, res) => {
-  console.log("📁 Upload endpoint (v2): /upload");
-  const tempPath = req.file.path;
+  if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+
   const originalName = req.file.originalname;
   const sanitized = originalName.replace(/[^a-z0-9.\-]/gi, "_");
   const finalPath = path.join(__dirname, "public", sanitized);
 
   try {
-    fs.renameSync(tempPath, finalPath);
-    console.log("📥 File received:", originalName);
-    console.log("📂 Saved at:", finalPath);
-
+    fs.renameSync(req.file.path, finalPath);
     res.json({
       success: true,
       message: "File uploaded successfully",
       fileURL: `/files/${sanitized}`,
-      fileName: originalName,
+      fileName: originalName
     });
   } catch (error) {
-    console.error("❌ Upload error:", error);
     res.status(500).json({ error: "Failed to upload file." });
   }
 });
 
 app.post("/api/summarize", upload.single("file"), async (req, res) => {
-  const tempPath = req.file.path;
+  if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+
   const originalName = req.file.originalname;
   const sanitized = originalName.replace(/[^a-z0-9.\-]/gi, "_");
   const finalPath = path.join(__dirname, "public", sanitized);
 
   try {
-    fs.renameSync(tempPath, finalPath);
-    console.log("📥 File received:", originalName);
-    console.log("📂 Saved at:", finalPath);
-
-    const dataBuffer = fs.readFileSync(finalPath);
-    console.log("🧪 Attempting to parse PDF...");
-
-    const parsed = await pdfParse(dataBuffer);
+    fs.renameSync(req.file.path, finalPath);
+    const parsed = await pdfParse(fs.readFileSync(finalPath));
     const cleanText = parsed.text.trim();
-
     const wordCount = (cleanText.match(/[a-zA-Z]{3,}/g) || []).length;
-    const isJunk =
-      cleanText.length < 100 || /%PDF|obj|stream|endobj/i.test(cleanText);
 
-    if (wordCount > 5 && !isJunk) {
-      console.log("✅ Clean text detected, summary returning.");
-      return res.json({
-        summary: cleanText.substring(0, 500),
-        fileURL: `/files/${sanitized}`,
-        fileName: originalName,
-      });
+    if (wordCount > 5 && cleanText.length >= 100) {
+      return res.json({ summary: cleanText.substring(0, 500), fileURL: `/files/${sanitized}` });
     }
 
-    console.log("🧪 Triggering OCR...");
-    const convert = fromPath(finalPath, {
-      density: 200,
-      format: "png",
-      width: 1200,
-      height: 1600,
-      savePath: "./uploads",
-    });
-
+    const convert = fromPath(finalPath, { density: 200, format: "png", width: 1200, height: 1600 });
     const image = await convert(1, true);
     const ocrResult = await Tesseract.recognize(image.path, "eng");
-    const ocrText = ocrResult.data.text;
-    console.log("✅ OCR complete. Summary extracted.");
 
-    res.json({
-      summary:
-        ocrText.trim().substring(0, 500) || "OCR failed to extract text.",
-      fileURL: `/files/${sanitized}`,
-      fileName: originalName,
-    });
+    res.json({ summary: ocrResult.data.text.trim().substring(0, 500) || "OCR failed.", fileURL: `/files/${sanitized}` });
   } catch (error) {
-    console.error("❌ Error:", error);
     res.status(500).json({ error: "Failed to summarize file." });
   }
 });
 
-// ✅ SPA catch-all route (serve frontend for any non-API routes)
+// ==========================
+// SPA Catch-All (Express 5 Compatible)
+// ==========================
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ✅ Dynamic port binding for Render
+// ==========================
+// Start Server
+// ==========================
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
 app.listen(PORT, HOST, () => {
   console.log(`🚀 Justice Dashboard server running on ${HOST}:${PORT}`);
   console.log(`🏥 Health check: http://${HOST}:${PORT}/api/health`);
-  console.log(`📁 Upload endpoints available`);
-  console.log(`� Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log("🔑 Environment status:", {
     NODE_ENV: process.env.NODE_ENV || 'development',
     JWT_SECRET: process.env.JWT_SECRET ? "✅ Set" : "❌ Missing",
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY ? "✅ Set" : "❌ Missing (optional)",
     SESSION_SECRET: process.env.SESSION_SECRET ? "✅ Set" : "❌ Missing",
-    ADMIN_USERNAME: process.env.ADMIN_USERNAME || "❌ Missing",
-    PORT: PORT
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME || "❌ Missing"
   });
 });
