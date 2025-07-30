@@ -1,5 +1,35 @@
 # Justice Dashboard
 
+---
+
+## 🚀 Railway Deployment Automation
+
+Justice Dashboard is fully automated for Railway deployment. To build, bundle, and deploy live:
+
+```
+npm run deploy
+```
+
+This will:
+- Build the frontend
+- Copy the build to the backend public folder
+- Deploy the backend to Railway
+- Bind ports automatically
+
+### Environment Variables (set in Railway dashboard):
+- `NODE_ENV=production`
+- `ADMIN_USERNAME=<secure>`
+- `ADMIN_PASSWORD=<secure>`
+- `JWT_SECRET=<generated>`
+- `SESSION_SECRET=<generated>`
+
+After deploy, your app will be live at:
+```
+https://<your-project>.up.railway.app
+```
+
+---
+
 [![E2E Tests](https://github.com/sspedowski/justice-dashboard/actions/workflows/cypress.yml/badge.svg)](https://github.com/sspedowski/justice-dashboard/actions/workflows/cypress.yml)
 
 ## Testing
