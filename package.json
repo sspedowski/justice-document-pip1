@@ -19,5 +19,8 @@
     "test:backend": "echo '✅ Backend tests passed!'",
     "test:frontend": "echo '✅ Frontend tests passed!'",
     "deploy": "cd justice-server && railway up"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
   }
 }
