@@ -17,10 +17,9 @@ export default function UploadDashboard() {
 
     try {
       // Pick correct API base dynamically
-      const apiBase =
-        import.meta.env.MODE === "development"
-          ? "http://localhost:3000" // Local backend
-          : window.location.origin; // Production backend
+
+      // Use VITE_API_URL if set, fallback to localhost
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
       const res = await fetch(`${apiBase}/api/summarize`, {
         method: 'POST',
