@@ -4,6 +4,9 @@ export default [
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: { jsx: true }
+      }
     },
     ignores: [
       "pdf.min.js",
