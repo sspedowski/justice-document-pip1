@@ -1,24 +1,29 @@
 module.exports = {
   env: {
-    browser: true,    // <-- add browser for React apps
+    browser: true,
     node: true,
     es2021: true,
   },
   extends: [
     "eslint:recommended",
-    "plugin:react/recommended"   // <-- add React plugin
+    "plugin:react/recommended"
   ],
-  plugins: ["react"],            // <-- add React plugin
+  plugins: ["react"],
+  parser: "@babel/eslint-parser",
   parserOptions: {
+    requireConfigFile: false,
+    babelOptions: {
+      presets: ["@babel/preset-react"]
+    },
     ecmaVersion: 12,
     sourceType: "module",
     ecmaFeatures: {
-      jsx: true                 // <-- enable JSX parsing
+      jsx: true
     }
   },
   settings: {
     react: {
-      version: "detect"         // <-- auto-detect React version
+      version: "detect"
     }
   },
   rules: {},
