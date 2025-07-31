@@ -135,18 +135,26 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
+// === Colored log helpers ===
+const color = {
+  green: (msg) => `\x1b[32m${msg}\x1b[0m`,
+  yellow: (msg) => `\x1b[33m${msg}\x1b[0m`,
+  red: (msg) => `\x1b[31m${msg}\x1b[0m`,
+  cyan: (msg) => `\x1b[36m${msg}\x1b[0m`,
+};
+
 app.post('/api/summarize', upload.single('file'), async (req, res) => {
-  console.log('📂 Received file upload to /api/summarize');
+  console.log(color.green('📂 Received file upload to /api/summarize'));
 
   // Check if file is attached
   if (!req.file) {
-    console.error('❌ No file uploaded');
+    console.error(color.yellow('⚠️  No file uploaded'));
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
   // Check environment variables
   if (!process.env.OPENAI_API_KEY) {
-    console.error('❌ OPENAI_API_KEY missing in environment');
+    console.error(color.red('❌ OPENAI_API_KEY missing in environment'));
     return res.status(500).json({ error: 'Server missing OpenAI API key' });
   }
 
@@ -157,14 +165,14 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
   try {
     fs.renameSync(req.file.path, finalPath);
     // Parse PDF
-    console.log('📄 Parsing PDF...');
+    console.log(color.cyan('📄 Parsing PDF...'));
     const parsed = await pdfParse(fs.readFileSync(finalPath));
     let extractedText = parsed.text.trim();
-    console.log(`✅ PDF parsed, length: ${extractedText.length}`);
+    console.log(color.green(`✅ PDF parsed, length: ${extractedText.length}`));
 
     // If PDF is empty, try OCR
     if (!extractedText) {
-      console.warn('⚠️ PDF text empty — running OCR fallback...');
+      console.log(color.yellow('⚠️ PDF text empty — running OCR fallback...'));
       try {
         const options = { density: 100, saveFilename: 'ocr', savePath: './temp', format: 'png', width: 600, height: 800 };
         const storeAsImage = fromPath(finalPath, options);
@@ -172,15 +180,15 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
         const image = await storeAsImage(pageToConvertAsImage);
         const ocrResult = await Tesseract.recognize(image.path, 'eng');
         extractedText = ocrResult.data.text;
-        console.log(`✅ OCR extracted text length: ${extractedText.length}`);
+        console.log(color.green(`✅ OCR extracted text length: ${extractedText.length}`));
       } catch (ocrError) {
-        console.error('❌ OCR fallback failed:', ocrError);
+        console.error(color.red('❌ OCR fallback failed:'), ocrError);
         return res.status(500).json({ error: 'OCR fallback failed', details: ocrError.message });
       }
     }
 
     // Summarize with OpenAI
-    console.log('🧠 Sending text to OpenAI for summarization...');
+    console.log(color.cyan('🧠 Sending text to OpenAI for summarization...'));
     const summaryPrompt = `Summarize the following legal document:\n\n${extractedText}`;
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -196,18 +204,18 @@ app.post('/api/summarize', upload.single('file'), async (req, res) => {
 
     if (!openaiResponse.ok) {
       const errText = await openaiResponse.text();
-      console.error('❌ OpenAI API request failed:', errText);
+      console.error(color.red('❌ OpenAI API request failed:'), errText);
       return res.status(500).json({ error: 'OpenAI API request failed', details: errText });
     }
 
     const openaiData = await openaiResponse.json();
     const summary = openaiData.choices?.[0]?.message?.content || 'No summary generated';
-    console.log('✅ Summary generated successfully');
+    console.log(color.green('✅ Summary generated successfully'));
 
     res.json({ summary });
 
   } catch (err) {
-    console.error('❌ Unexpected error in /api/summarize:', err);
+    console.error(color.red('❌ Unexpected error in /api/summarize:'), err);
     res.status(500).json({ error: 'Unexpected error', details: err.message });
   }
 });
