@@ -26,7 +26,7 @@ let envLoaded = false;
 for (const envPath of envPaths) {
   if (fs.existsSync(envPath)) {
     require("dotenv").config({ path: envPath });
-    console.log(chalk.magenta(`📄 Loaded environment from: ${envPath}`));
+    console.log(chalk.cyan(`📄 Loaded environment from: ${envPath}`));
     envLoaded = true;
     break;
   }
