@@ -8,6 +8,7 @@ tests/**
 cypress/
 cypress/**
 cypress.config.js
+eslint.config.js
 *.min.js
 *.map
 **/pdf*.js
