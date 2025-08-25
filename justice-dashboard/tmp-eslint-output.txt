@@ -1,0 +1,38 @@
+RESULTS_COUNT 13
+
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress.config.js[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\dashboard.cy.js[24m[0m
+[0m  [2m3:46[22m  [31merror[39m  Parsing error: Unexpected token )[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\file-upload.cy.js[24m[0m
+[0m  [2m3:59[22m  [31merror[39m  Parsing error: Unexpected token )[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\login.cy.js[24m[0m
+[0m  [2m3:32[22m  [31merror[39m  Parsing error: Unexpected token )[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\navigation.cy.js[24m[0m
+[0m  [2m3:57[22m  [31merror[39m  Parsing error: Unexpected token )[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\dist\assets\index-CsrXQcpk.js[24m[0m
+[0m  [2m1:13[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\tests\api.test.js[24m[0m
+[0m  [2m2:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\tests\auth-api.test.js[24m[0m
+[0m  [2m3:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\tests\document-api.test.js[24m[0m
+[0m  [2m3:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\tests\setup.js[24m[0m
+[0m  [2m11:3[22m  [31merror[39m  Parsing error: Unexpected token .[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\tests\ui.test.js[24m[0m
+[0m  [2m2:1[22m  [31merror[39m  Parsing error: The keyword 'import' is reserved[0m
+[0m[0m
+[0m[31m[1m✖ 11 problems (11 errors, 0 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
