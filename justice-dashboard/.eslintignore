@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist/**
+build/
+coverage/
+tests/
+tests/**
+cypress/
+cypress/**
+cypress.config.js
+*.min.js
+*.map
+**/pdf*.js
