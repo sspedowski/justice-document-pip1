@@ -405,37 +405,26 @@ function detectCategory(text, fileName) {
   return "General";
 }
 
-// Child name detector (enhanced)
+// Compiled once to avoid recreating regexes on every call
+const _reJace = /\b(?:jace|jace's|child\s*1)\b/i;
+// Avoid matching "joshua" while allowing "josh" / "josh's"
+const _reJosh = /\b(?:josh(?!ua)|josh's|child\s*2)\b/i;
+
+/**
+ * Robustly infer which child is referenced in a piece of text.
+ * Returns: "Jace" | "Josh" | "Both" | "Unknown"
+ */
 function detectChild(text) {
-  if (!text || typeof text !== "string") {
+  if (typeof text !== "string" || !text.trim()) {
+    console.warn("detectChild: invalid input", text);
     return "Unknown";
   }
-
-  // More flexible patterns to catch variations
-  const jacePatterns = [
-    /\bjace\b/i, // Standard word boundary
-    /jace[\s,\.]/i, // Jace followed by space, comma, or period
-    /[\s,\.]jace/i, // Jace preceded by space, comma, or period
-    /^jace[\s,\.]/i, // Jace at start of text
-    /[\s,\.]jace$/i, // Jace at end of text
-    /jace/i, // Simple match as fallback
-  ];
-
-  const joshPatterns = [
-    /\bjosh\b/i, // Standard word boundary
-    /josh[\s,\.]/i, // Josh followed by space, comma, or period
-    /[\s,\.]josh/i, // Josh preceded by space, comma, or period
-    /^josh[\s,\.]/i, // Josh at start of text
-    /[\s,\.]josh$/i, // Josh at end of text
-    /josh/i, // Simple match as fallback
-  ];
-
-  const jaceFound = jacePatterns.some((pattern) => pattern.test(text));
-  const joshFound = joshPatterns.some((pattern) => pattern.test(text));
-
-  if (jaceFound && joshFound) return "Both";
-  if (jaceFound) return "Jace";
-  if (joshFound) return "Josh";
+  const t = text.toLowerCase();
+  const jace = _reJace.test(t);
+  const josh = _reJosh.test(t);
+  if (jace && josh) return "Both";
+  if (jace) return "Jace";
+  if (josh) return "Josh";
   return "Unknown";
 }
 
@@ -864,30 +853,61 @@ Only respond with the exact misconduct type, no explanation.`;
 
 // AI service integration (replace with your preferred service)
 async function callAIService(prompt) {
-  try {
-    // Option 1: Using a simple AI API endpoint
-    const response = await fetch("/api/ai-analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        max_tokens: 50,
-        temperature: 0.3,
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.result || data.response || data.text;
-    }
-  } catch (error) {
-    console.log("AI service not available, using fallback logic");
+  // Helper: fetch with AbortController-based timeout
+  function fetchWithTimeout(resource, options = {}, ms = 30000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    const opts = { ...options, signal: controller.signal };
+    return fetch(resource, opts).finally(() => clearTimeout(timer));
   }
 
-  // Fallback: Simple keyword-based detection
-  return detectMisconductFallback(prompt);
+  function generateRequestId() {
+    return `req_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  function logError(type, error, extra = {}) {
+    try {
+      console.error(`[${type}]`, { message: String(error?.message ?? error), extra });
+    } catch (_) {}
+  }
+
+  function _fallbackAnalyze(p) {
+    try {
+      if (typeof detectMisconductFallback === "function") return detectMisconductFallback(p);
+    } catch (_) {}
+    return "Review Needed";
+  }
+
+  if (typeof prompt !== "string" || !prompt.trim()) return _fallbackAnalyze(prompt);
+
+  try {
+    const res = await fetchWithTimeout(
+      "/api/ai-analyze",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Request-ID": generateRequestId(),
+        },
+        body: JSON.stringify({ prompt, max_tokens: 50, temperature: 0.3 }),
+      },
+      30000,
+    );
+
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")) {
+      const data = await res.json();
+      return data.result ?? data.response ?? data.text ?? "";
+    }
+    return await res.text();
+  } catch (err) {
+    const isAbort = err?.name === "AbortError";
+    if (isAbort) console.warn("callAIService: request timed out");
+    logError("AI_SERVICE_ERROR", err, { promptLen: prompt?.length ?? 0, timedOut: isAbort });
+    return _fallbackAnalyze(prompt);
+  }
 }
 
 // Fallback misconduct detection using keywords (more precise)

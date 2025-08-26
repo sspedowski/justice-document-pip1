@@ -1,56 +1,90 @@
-const path = require('path');
-let resolvedParser = null;
-try {
-  // prefer parser from frontend node_modules, fall back to repo root
-  resolvedParser = require.resolve(path.join(__dirname, 'node_modules', '@babel', 'eslint-parser'));
-} catch (e) {
-  try {
-    resolvedParser = require.resolve(path.join(__dirname, '..', 'node_modules', '@babel', 'eslint-parser'));
-  } catch (e2) {
-    // leave null — ESLint will fall back and may error if parser missing
-    resolvedParser = null;
-  }
-}
+// eslint.config.js — ESLint v9+ (flat config)
+import js from "@eslint/js";
+import babelParser from "@babel/eslint-parser";
+import react from "eslint-plugin-react";
+import hooks from "eslint-plugin-react-hooks";
+import a11y from "eslint-plugin-jsx-a11y";
+import importPlugin from "eslint-plugin-import";
 
-module.exports = [
+export default [
+  // Equivalent to "eslint:recommended"
+  js.configs.recommended,
+
+  // Equivalent to "plugin:react/recommended"
+  react.configs.recommended,
+
+  // App source files
   {
-    // Apply to all JS/JSX/TS/TSX files in the frontend package
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    extends: [
-      'eslint:recommended',
-      'plugin:react/recommended',
-    ],
+    files: ["**/*.{js,jsx,mjs,cjs}"],
+    ignores: ["node_modules/", "dist/", "build/"],
     languageOptions: {
-      parser: resolvedParser || '@babel/eslint-parser',
-      ecmaVersion: 2021,
+      ecmaVersion: 2023,
       sourceType: "module",
+      parser: babelParser,
       parserOptions: {
         requireConfigFile: false,
-        ecmaVersion: 2021,
-        sourceType: "module",
-        ecmaFeatures: { jsx: true },
         babelOptions: {
-          presets: [
-            ["@babel/preset-env", { targets: { node: 'current' } }],
-            "@babel/preset-react"
-          ]
-        }
-      }
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        },
+      },
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
+      },
     },
-  plugins: { react: require('eslint-plugin-react') },
-    ignores: [
-      "dist/**",
-      "node_modules/**",
-      "pdf.min.js",
-      "pdf.worker.min.js",
-      "web/wasm/openjpeg_nowasm_fallback.js",
-      "justice-dashboard/frontend/components/ErrorModal.jsx",
-    ],
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
+    plugins: {
+      react,
+      "react-hooks": hooks,
+      "jsx-a11y": a11y,
+      import: importPlugin,
     },
+    settings: { react: { version: "detect" } },
     rules: {
-      // Add your custom rules here
+      // Core
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+
+      // React + Hooks
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-uses-react": "off",
+      "react/prop-types": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+
+      // A11y
+      "jsx-a11y/alt-text": "warn",
+      "jsx-a11y/no-autofocus": "warn",
+
+      // Imports
+      "import/order": ["warn", {
+        groups: [["builtin", "external", "internal"], ["parent", "sibling", "index"]],
+        "newlines-between": "always",
+        alphabetize: { order: "asc", caseInsensitive: true },
+      }],
+      "import/no-duplicates": "warn",
     },
+  },
+
+  // (Optional) Cypress tests
+  {
+    files: ["cypress/**/*.js", "cypress.config.*"],
+    languageOptions: {
+      // If your config is ESM, keep sourceType: "module"
+      sourceType: "module",
+      globals: { cy: "readonly", Cypress: "readonly" },
+    },
+    rules: {},
+  },
+
+  // (Optional) Project config files (eslint/vite/etc.)
+  {
+    files: ["eslint.config.js", "*.config.{js,cjs,mjs}"],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: "module",
+      globals: { require: "readonly", module: "readonly", __dirname: "readonly" },
+    },
+    rules: {},
   },
 ];
