@@ -16,6 +16,10 @@ module.exports = [
   {
     // Apply to all JS/JSX/TS/TSX files in the frontend package
     files: ["**/*.{js,jsx,ts,tsx}"],
+    extends: [
+      'eslint:recommended',
+      'plugin:react/recommended',
+    ],
     languageOptions: {
       parser: resolvedParser || '@babel/eslint-parser',
       ecmaVersion: 2021,
@@ -33,6 +37,7 @@ module.exports = [
         }
       }
     },
+  plugins: { react: require('eslint-plugin-react') },
     ignores: [
       "dist/**",
       "node_modules/**",

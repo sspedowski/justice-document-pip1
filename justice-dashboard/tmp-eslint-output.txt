@@ -1,3 +1,11 @@
-RESULTS_COUNT 1
+RESULTS_COUNT 3
 
-NO_ISSUES
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\cypress.config.js[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[4mC:\Users\ssped\justice-dashboard\justice-dashboard\eslint.config.js[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Parsing error: The keyword 'const' is reserved[0m
+[0m[0m
+[0m[31m[1m✖ 2 problems (2 errors, 0 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
