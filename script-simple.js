@@ -221,23 +221,37 @@ const JusticeDashboard = (function () {
   // Child Detector
   // -----------------------------
   const ChildDetector = (function () {
+    // Compile regex patterns once for better performance
     const reJace = /\b(?:jace|jace's|child\s*1)\b/i;
-    // allow "josh" / "josh's" but not "joshua"
     const reJosh = /\b(?:josh(?!ua)|josh's|child\s*2)\b/i;
 
     function detectChild(text, fallbackName) {
-      if (typeof text !== "string" || !text.trim()) {
-        if (typeof fallbackName === "string") return detectChild(fallbackName);
-        console.warn("detectChild: invalid input", text);
+      // Early return for invalid input
+      if (!text && !fallbackName) {
+        console.warn("detectChild: no valid input provided");
         return "Unknown";
       }
-      const t = text.toLowerCase();
-      const jace = reJace.test(t);
-      const josh = reJosh.test(t);
-      if (jace && josh) return "Both";
-      if (jace) return "Jace";
-      if (josh) return "Josh";
-      return "Unknown";
+
+      // Try fallback if primary text is invalid
+      if (!text || typeof text !== "string") {
+        return fallbackName && typeof fallbackName === "string"
+          ? detectChild(fallbackName)
+          : "Unknown";
+      }
+
+      try {
+        const t = text.trim().toLowerCase();
+        const jace = reJace.test(t);
+        const josh = reJosh.test(t);
+
+        return jace && josh ? "Both"
+             : jace ? "Jace"
+             : josh ? "Josh"
+             : "Unknown";
+      } catch (err) {
+        console.error("detectChild: regex error", err);
+        return "Unknown";
+      }
     }
 
     return { detectChild };
@@ -352,12 +366,25 @@ const JusticeDashboard = (function () {
   // -----------------------------
   const AIAnalyzer = {
     async callAIService(prompt) {
-      const config = { maxRetries: 3, timeout: 30000, backoffFactor: 1.6 };
+      // Input validation
+      if (!prompt?.trim()) {
+        throw new Error("Invalid prompt: must be non-empty string");
+      }
 
-      async function attempt(attemptNo = 1) {
+      const config = {
+        maxRetries: 3,
+        timeout: 30000,
+        backoffFactor: 1.6,
+        endpoints: {
+          primary: "/api/ai-analyze",
+          fallback: "/api/analyze-fallback",
+        },
+      };
+
+      async function attempt(attemptNo = 1, endpoint = config.endpoints.primary) {
         try {
           const res = await fetchWithTimeout(
-            "/api/ai-analyze",
+            endpoint,
             {
               method: "POST",
               headers: {
@@ -370,27 +397,33 @@ const JusticeDashboard = (function () {
             config.timeout
           );
 
-          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-          const ct = (res.headers.get("content-type") || "").toLowerCase();
-          const payload = ct.includes("application/json") ? await res.json() : await res.text();
-          return payload?.result ?? payload?.response ?? payload?.text ?? payload ?? "";
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status} ${res.statusText}`);
+          }
+
+          const data = await res.json();
+          return data?.result || data?.response || data?.text || "";
         } catch (err) {
           if (attemptNo < config.maxRetries) {
-            const delay = Math.min(1000 * Math.pow(config.backoffFactor, attemptNo), 5000);
+            const delay = Math.min(
+              1000 * Math.pow(config.backoffFactor, attemptNo),
+              5000
+            );
             await new Promise((r) => setTimeout(r, delay));
-            return attempt(attemptNo + 1);
+            return attempt(attemptNo + 1, endpoint);
           }
-          console.warn("AI call failed after retries:", err);
-          return (typeof detectMisconductFallback === "function")
-            ? detectMisconductFallback(prompt)
-            : "Unable to analyze at this time.";
+
+          // Try fallback endpoint if primary fails
+          if (endpoint === config.endpoints.primary) {
+            return attempt(1, config.endpoints.fallback);
+          }
+
+          logError("AI_SERVICE_ERROR", err, { prompt, attemptNo });
+          return this._fallbackAnalyze(prompt);
         }
       }
 
-      if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-        return "Invalid prompt.";
-      }
-      return attempt();
+      return attempt(1, config.endpoints.primary);
     },
     _fallbackAnalyze(prompt) {
       try {

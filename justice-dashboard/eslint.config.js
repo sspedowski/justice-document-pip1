@@ -1,4 +1,28 @@
-// eslint.config.js — ESLint v9+ (flat config)
+import js from "@eslint/js";
+import react from "eslint-plugin-react";
+import hooks from "eslint-plugin-react-hooks";
+
+export default [
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    ignores: ["dist/**", "node_modules/**", "build/**"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: { jsx: true }
+      }
+    },
+    plugins: { react, "react-hooks": hooks },
+    rules: {
+      ...js.configs.recommended.rules,
+      // react plugin recommended rules
+      ...(react && react.configs && react.configs.recommended ? react.configs.recommended.rules : {}),
+      ...(hooks && hooks.configs && hooks.configs.recommended ? hooks.configs.recommended.rules : {})
+    },
+    settings: { react: { version: "detect" } }
+  }
+];
 import js from "@eslint/js";
 import babelParser from "@babel/eslint-parser";
 import react from "eslint-plugin-react";
