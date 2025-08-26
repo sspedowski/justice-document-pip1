@@ -22,7 +22,8 @@ function StatCard({ title, value, color = "blue" }) {
 
 export default function JusticeDashboard() {
   const fileInputRef = useRef(null);
-  const timersRef = useRef({ intervals: [], timeouts: [] });
+  // Track requestAnimationFrame IDs for cleanup on unmount
+  const timersRef = useRef({ rafIds: new Set() });
   const [queue, setQueue] = useState([]);
 
   useEffect(() => {
@@ -38,9 +39,11 @@ export default function JusticeDashboard() {
     }
 
     return () => {
-      // cleanup timers
-      timersRef.current.intervals.forEach(clearInterval);
-      timersRef.current.timeouts.forEach(clearTimeout);
+      // cleanup RAF ids
+      if (timersRef.current?.rafIds) {
+        timersRef.current.rafIds.forEach((id) => cancelAnimationFrame(id));
+        timersRef.current.rafIds.clear();
+      }
     };
   }, []);
 
@@ -51,12 +54,40 @@ export default function JusticeDashboard() {
     setQueue((q) => [...q, ...files.map((f) => ({ name: f.name, size: f.size }))]);
   }
 
-  function startFakeUpload() {
-    if (!queue.length) return;
-    const t = setInterval(() => {
+  // Smooth progress animation using requestAnimationFrame.
+  // durationMs: animation time in ms; onStep receives pct 0..100
+  function animateProgress(durationMs, onStep) {
+    return new Promise((resolve) => {
+      const start = performance.now();
+      const tick = (now) => {
+        const elapsed = Math.max(0, now - start);
+        const pct = Math.min(100, (elapsed / durationMs) * 100);
+        try { onStep(pct); } catch (e) {}
+        if (pct < 100) {
+          const id = requestAnimationFrame(tick);
+          timersRef.current.rafIds.add(id);
+        } else {
+          resolve();
+        }
+      };
+      const id = requestAnimationFrame(tick);
+      timersRef.current.rafIds.add(id);
+    });
+  }
+
+  async function startFakeUpload() {
+    // process queue sequentially with smooth animations
+    while (true) {
+      const next = queue[0];
+      if (!next) break;
+      const duration = 1200 + Math.random() * 800; // 1.2s - 2.0s
+      await animateProgress(duration, () => {});
+      // remove first item
       setQueue((q) => q.slice(1));
-    }, 1200);
-    timersRef.current.intervals.push(t);
+      // small pause between files
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 150));
+    }
   }
 
   return (
