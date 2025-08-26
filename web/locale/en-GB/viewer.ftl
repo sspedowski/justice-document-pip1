@@ -267,11 +267,11 @@ pdfjs-page-landmark =
 
 ## Loading indicator messages
 
-pdfjs-loading-error = An error occurred while loading the PDF.
-pdfjs-invalid-file-error = Invalid or corrupted PDF file.
-pdfjs-missing-file-error = Missing PDF file.
-pdfjs-unexpected-response-error = Unexpected server response.
-pdfjs-rendering-error = An error occurred while rendering the page.
+pdfjs-loading-error = An error occurred while loading the PDF. Please try again.
+pdfjs-invalid-file-error = The PDF file is invalid or corrupted. Please verify the file.
+pdfjs-missing-file-error = The PDF file could not be found. Please check the file location.
+pdfjs-unexpected-response-error = The server returned an unexpected response. Please try again.
+pdfjs-rendering-error = An error occurred while displaying the page. Please refresh.
 
 ## Annotations
 
@@ -410,31 +410,33 @@ pdfjs-editor-alt-text-button =
 
 ## Editor resizers
 ## This is used in an aria label to help to understand the role of the resizer.
+## These labels are essential for screen reader users to understand the purpose of each control
 
-pdfjs-editor-resizer-label-top-left = Top left corner — resize
-pdfjs-editor-resizer-label-top-middle = Top middle — resize
-pdfjs-editor-resizer-label-top-right = Top right corner — resize
-pdfjs-editor-resizer-label-middle-right = Middle right — resize
-pdfjs-editor-resizer-label-bottom-right = Bottom right corner — resize
-pdfjs-editor-resizer-label-bottom-middle = Bottom middle — resize
-pdfjs-editor-resizer-label-bottom-left = Bottom left corner — resize
-pdfjs-editor-resizer-label-middle-left = Middle left — resize
+# Documentation for accessibility features
+pdfjs-editor-resizer-label-top-left = Top left corner — resize control for adjusting size
+pdfjs-editor-resizer-label-top-middle = Top middle — resize control for adjusting height
+pdfjs-editor-resizer-label-top-right = Top right corner — resize control for adjusting size
+pdfjs-editor-resizer-label-middle-right = Middle right — resize control for adjusting width
+pdfjs-editor-resizer-label-bottom-right = Bottom right corner — resize control for adjusting size
+pdfjs-editor-resizer-label-bottom-middle = Bottom middle — resize control for adjusting height
+pdfjs-editor-resizer-label-bottom-left = Bottom left corner — resize control for adjusting size
+pdfjs-editor-resizer-label-middle-left = Middle left — resize control for adjusting width
 pdfjs-editor-resizer-top-left =
-    .aria-label = Top left corner — resize
+    .aria-label = Top left corner — resize control for adjusting size
 pdfjs-editor-resizer-top-middle =
-    .aria-label = Top middle — resize
+    .aria-label = Top middle — resize control for adjusting height
 pdfjs-editor-resizer-top-right =
-    .aria-label = Top right corner — resize
+    .aria-label = Top right corner — resize control for adjusting size
 pdfjs-editor-resizer-middle-right =
-    .aria-label = Middle right — resize
+    .aria-label = Middle right — resize control for adjusting width
 pdfjs-editor-resizer-bottom-right =
-    .aria-label = Bottom right corner — resize
+    .aria-label = Bottom right corner — resize control for adjusting size
 pdfjs-editor-resizer-bottom-middle =
-    .aria-label = Bottom middle — resize
+    .aria-label = Bottom middle — resize control for adjusting height
 pdfjs-editor-resizer-bottom-left =
-    .aria-label = Bottom left corner — resize
+    .aria-label = Bottom left corner — resize control for adjusting size
 pdfjs-editor-resizer-middle-left =
-    .aria-label = Middle left — resize
+    .aria-label = Middle left — resize control for adjusting width
 
 ## Color picker
 
