@@ -19,7 +19,7 @@
     "deploy:check:win": "set NODE_ENV=production && node deployment-check.js",
     "security:check": "npm audit && npm run lint",
   "lint": "eslint .",
-  "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+  "lint:fix": "eslint . --fix",
   "lint:report": "eslint . -f stylish -o tmp-eslint-output.txt",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
