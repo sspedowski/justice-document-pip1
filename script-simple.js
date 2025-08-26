@@ -14,6 +14,9 @@ const JusticeDashboard = (function () {
     summaryCache: new Set(),
   };
 
+  // synonym used by incremental patches
+  const dashboardState = state;
+
   // -----------------------------
   // DOM Elements
   // -----------------------------
@@ -346,27 +349,8 @@ const JusticeDashboard = (function () {
   // -----------------------------
   const DocumentProcessor = {
     async processSingleFile(file) {
-      try {
-        const text = await PDFProcessor.pdfToText(file);
-        const summary = TextProcessor.quickSummary(text);
-        const fileURL = URL.createObjectURL(file);
-
-        if (DOMElements.get("summaryBox")) {
-          DOMElements.get("summaryBox").textContent = summary;
-        }
-
-        const dupeCheck = this.isDuplicate(file.name, summary);
-        if (dupeCheck.isDupe) {
-          const ok = await UIManager.confirmDuplicate(dupeCheck.reason);
-          if (!ok) return;
-        }
-
-        const metadata = await this.extractMetadata(text, file);
-        await this.addDocumentToTracker({ file, fileURL, summary, ...metadata });
-        UIManager.showSuccess("Document processed successfully!");
-      } catch (error) {
-        UIManager.showError(`Error processing ${file?.name || ""}`, error);
-      }
+      // delegate to the hardened implementation below
+      return await processSingleFileInner(file);
     },
 
     async extractMetadata(text, file) {
