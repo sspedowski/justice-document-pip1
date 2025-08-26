@@ -1,2 +1,3 @@
 output/PRINTABLE_Index.pdf -filter -diff -merge text
 output/PRINTABLE_Index.pdf !text !filter !merge !diff
+*.pdf -filter -diff -merge text
