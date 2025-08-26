@@ -14,6 +14,119 @@ const JusticeDashboard = (function () {
     summaryCache: new Set(),
   };
 
+  // ------------------------------------------------------------------
+  // Hardened processing helpers (added by agent)
+  // ------------------------------------------------------------------
+  async function processSingleFileInner(file) {
+    try {
+      if (!file) throw new Error("No file provided");
+      const text = await PDFProcessor.pdfToText(file);
+      if (!text) throw new Error("Failed to extract text from PDF");
+
+      const summary = TextProcessor.quickSummary(text);
+      if (!summary || summary.length < 10) {
+        throw new Error("Invalid/too short summary");
+      }
+
+      const summaryBox = DOMElements.get("summaryBox");
+      if (summaryBox) summaryBox.textContent = summary;
+
+      const dupe = DocumentProcessor.isDuplicate(file.name, summary);
+      if (dupe?.isDupe) {
+        const ok = await showConfirmDialog(`⚠️ Potential duplicate detected!\n\nReason: ${dupe.reason}\n\nAdd anyway?`);
+        if (!ok) {
+          const err = new Error("Duplicate not added");
+          err.isDuplicate = true;
+          throw err;
+        }
+      }
+
+      const metadata = await DocumentProcessor.extractMetadata(text, file);
+      await DocumentProcessor.addDocumentToTracker({ file, fileURL: URL.createObjectURL(file), summary, ...metadata });
+      UIManager.showSuccess("Document processed successfully!");
+      return true;
+    } catch (error) {
+      console.error("Error processing file:", error);
+      UIManager.showError(`Error processing ${file?.name || "file"}`, error);
+      throw error;
+    }
+  }
+
+  async function processBulkFiles(files, skipDuplicates = false) {
+    try {
+      const list = Array.from(files || []);
+      if (!list.length) throw new Error("No files to process.");
+
+      dashboardState.isProcessingBulk = true;
+      dashboardState.bulkTotal = list.length;
+      dashboardState.bulkProgress = 0;
+      updateProgressUI(true);
+
+      const BATCH_SIZE = 5;
+      const results = { processed: 0, duplicates: 0, errors: 0 };
+
+      for (let i = 0; i < list.length; i += BATCH_SIZE) {
+        const batch = list.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (file) => {
+            try {
+              await processFileWithRetry(file, skipDuplicates);
+              results.processed++;
+            } catch (e) {
+              if (e?.isDuplicate) results.duplicates++;
+              else results.errors++;
+            } finally {
+              dashboardState.bulkProgress++;
+              updateProgressUI();
+            }
+          })
+        );
+      }
+
+      dashboardState.isProcessingBulk = false;
+      updateProgressUI(false);
+      showBulkResults(results);
+    } catch (err) {
+      dashboardState.isProcessingBulk = false;
+      console.error("Bulk processing failed:", err);
+      UIManager.showError("Bulk processing failed. Please try again.");
+    }
+  }
+
+  async function processFileWithRetry(file, skipDuplicates) {
+    const key = `${file.name}|${file.size}`;
+    if (skipDuplicates && dashboardState.summaryCache.has(key)) {
+      const err = new Error("Duplicate skipped");
+      err.isDuplicate = true;
+      throw err;
+    }
+    await processSingleFileInner(file);
+    dashboardState.summaryCache.add(key);
+  }
+
+  function updateProgressUI(show = true) {
+    const { bulkProgress, bulkTotal } = dashboardState;
+    const progressDiv = dashboardState.elements.bulkProgress || document.getElementById("bulkProgress");
+    const bar = document.getElementById("progressBar");
+    const text = document.getElementById("progressText");
+    if (!progressDiv) return;
+    progressDiv.style.display = show ? "block" : "none";
+    const pct = bulkTotal ? (bulkProgress / bulkTotal) * 100 : 0;
+    if (bar) bar.style.width = `${pct.toFixed(1)}%`;
+    if (text) text.textContent = show ? `Processing ${bulkProgress}/${bulkTotal}…` : "Done.";
+  }
+
+  function showBulkResults({ processed, duplicates, errors }) {
+    const msg =
+      `Bulk complete.\nProcessed: ${processed}\n` +
+      `Duplicates skipped: ${duplicates}\nErrors: ${errors}`;
+    alert(msg);
+  }
+
+  async function showConfirmDialog(message) {
+    return Promise.resolve(confirm(message));
+  }
+
   // synonym used by incremental patches
   const dashboardState = state;
 
@@ -239,39 +352,45 @@ const JusticeDashboard = (function () {
   // -----------------------------
   const AIAnalyzer = {
     async callAIService(prompt) {
-      if (typeof prompt !== "string" || !prompt.trim()) {
-        return this._fallbackAnalyze(prompt);
-      }
-      try {
-        const res = await fetchWithTimeout(
-          "/api/ai-analyze",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Request-ID": generateRequestId(),
+      const config = { maxRetries: 3, timeout: 30000, backoffFactor: 1.6 };
+
+      async function attempt(attemptNo = 1) {
+        try {
+          const res = await fetchWithTimeout(
+            "/api/ai-analyze",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Request-ID": generateRequestId(),
+                "X-Retry-Attempt": attemptNo,
+              },
+              body: JSON.stringify({ prompt, max_tokens: 50, temperature: 0.3 }),
             },
-            body: JSON.stringify({
-              prompt,
-              max_tokens: 50,
-              temperature: 0.3,
-            }),
-          },
-          30000
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        const ct = (res.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) {
-          const data = await res.json();
-          return data.result ?? data.response ?? data.text ?? "";
+            config.timeout
+          );
+
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+          const ct = (res.headers.get("content-type") || "").toLowerCase();
+          const payload = ct.includes("application/json") ? await res.json() : await res.text();
+          return payload?.result ?? payload?.response ?? payload?.text ?? payload ?? "";
+        } catch (err) {
+          if (attemptNo < config.maxRetries) {
+            const delay = Math.min(1000 * Math.pow(config.backoffFactor, attemptNo), 5000);
+            await new Promise((r) => setTimeout(r, delay));
+            return attempt(attemptNo + 1);
+          }
+          console.warn("AI call failed after retries:", err);
+          return (typeof detectMisconductFallback === "function")
+            ? detectMisconductFallback(prompt)
+            : "Unable to analyze at this time.";
         }
-        return await res.text();
-      } catch (err) {
-        const isAbort = err?.name === "AbortError";
-        if (isAbort) console.warn("AI request timed out.");
-        logError("AI_SERVICE_ERROR", err, { promptLen: prompt?.length ?? 0, timedOut: isAbort });
-        return this._fallbackAnalyze(prompt);
       }
+
+      if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+        return "Invalid prompt.";
+      }
+      return attempt();
     },
     _fallbackAnalyze(prompt) {
       try {
