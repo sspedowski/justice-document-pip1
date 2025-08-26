@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Restore & Download Documents</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    input[type="search"] { padding: 8px; min-width: 260px; }
+    button { padding: 8px 12px; cursor: pointer; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f9fafb; position: sticky; top: 0; }
+    .muted { color: #6b7280; font-size: 12px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+  <h1>Restore & Download Your Documents</h1>
+  <p class="muted">This page lists files found in your repo (e.g., <code>input/</code>, <code>output/</code>, <code>app/data/uploads</code>, <code>docs</code>, <code>pdfs</code>) and lets you download originals or bundle selected files as a ZIP.</p>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Filter by name or extension (.pdf, .docx, ...)" />
+    <button id="selectAll">Select all</button>
+    <button id="clearSel">Clear</button>
+    <button id="zipBtn">Download selected as ZIP</button>
+    <span id="counts" class="muted"></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="master" title="Select all on page"/></th>
+        <th>File</th>
+        <th>Size</th>
+        <th>Updated</th>
+        <th>Open</th>
+        <th>Direct</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script>
+    const fmtBytes = n => { const u = ["B","KB","MB","GB"]; let i = 0; while (n >= 1024 && i < u.length-1) { n /= 1024; i++; } return `${n.toFixed((i===0)?0:1)} ${u[i]}`; };
+    const state = { all: [], filtered: [], selected: new Set() };
+    async function load() {
+      const res = await fetch("./docs-manifest.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("No docs-manifest.json found. Run: npm run gen:manifest");
+      const data = await res.json(); state.all = data.files ?? []; render();
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      state.filtered = state.all.filter(f => f.path.toLowerCase().includes(q) || (f.ext||"").includes(q));
+      const tbody = document.getElementById("rows"); tbody.innerHTML = "";
+      for (const f of state.filtered) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" data-k="${f.raw_url}" ${state.selected.has(f.raw_url)?"checked":""}></td>
+          <td><div>${f.path}</div><div class="muted">${f.sha256.slice(0,12)}…</div></td>
+          <td>${fmtBytes(f.size)}</td>
+          <td>${new Date(f.updated).toLocaleString()}</td>
+          <td><a href="${f.web_url}" target="_blank">View</a></td>
+          <td><a href="${f.raw_url}" download>Download</a></td>`;
+        tbody.appendChild(tr);
+      }
+      document.getElementById("counts").textContent = `${state.filtered.length} shown • ${state.selected.size} selected`;
+      tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener("change", e => {
+          const k = e.target.getAttribute("data-k");
+          if (e.target.checked) state.selected.add(k); else state.selected.delete(k);
+          document.getElementById("counts").textContent = `${state.filtered.length} shown • ${state.selected.size} selected`;
+        });
+      });
+    }
+    document.getElementById("q").addEventListener("input", render);
+    document.getElementById("selectAll").addEventListener("click", () => { state.filtered.forEach(f => state.selected.add(f.raw_url)); render(); });
+    document.getElementById("clearSel").addEventListener("click", () => { state.selected.clear(); render(); });
+    document.getElementById("master").addEventListener("change", e => { if (e.target.checked) state.filtered.forEach(f => state.selected.add(f.raw_url)); else state.selected.clear(); render(); });
+    async function downloadAsZip() {
+      const urls = Array.from(state.selected); if (!urls.length) { alert("Select at least one file."); return; }
+      const zip = new JSZip();
+      for (const url of urls) {
+        const name = decodeURIComponent(url.split("/").slice(7).join("/"));
+        const res = await fetch(url); if (!res.ok) continue;
+        const blob = await res.blob(); zip.file(name.split("/").slice(1).join("/"), blob);
+      }
+      const content = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(content);
+      a.download = "documents.zip"; a.click(); URL.revokeObjectURL(a.href);
+    }
+    document.getElementById("zipBtn").addEventListener("click", downloadAsZip);
+    load().catch(err => { document.body.insertAdjacentHTML("beforeend", `<p style="color:#b91c1c">Error: ${err.message}</p>`); });
+  </script>
+</body>
+</html>
