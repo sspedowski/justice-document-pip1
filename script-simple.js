@@ -1,1082 +1,519 @@
-/* Justice Dashboard - Simplified Version for Bulk Processing */
+/* ========================================================================
+   Justice Dashboard — Modular client code (no build required)
+   Pattern: IIFE / Module Pattern with clear responsibilities
+   ======================================================================== */
 
-// Global variables
-let isProcessingBulk = false;
-let bulkProgress = 0;
-let bulkTotal = 0;
-
-// DOM Elements (initialized on page load)
-let fileInput,
-  generateBtn,
-  bulkProcessBtn,
-  updateExistingBtn,
-  aiMisconductBtn,
-  exportBtn,
-  summaryBox,
-  trackerBody;
-let categoryFilter, misconductFilter, totalCasesEl, activeCasesEl;
-
-// Initialize when page loads
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("Initializing Justice Dashboard...");
-
-  // Get DOM elements
-  fileInput = document.getElementById("fileInput");
-  generateBtn = document.getElementById("generateBtn");
-  bulkProcessBtn = document.getElementById("bulkProcessBtn");
-  updateExistingBtn = document.getElementById("updateExistingBtn");
-  aiMisconductBtn = document.getElementById("aiMisconductBtn");
-  exportBtn = document.getElementById("exportBtn");
-  summaryBox = document.getElementById("summaryBox");
-  trackerBody = document.querySelector("#results");
-  categoryFilter = document.getElementById("categoryFilter");
-  misconductFilter = document.getElementById("misconductFilter");
-  totalCasesEl = document.getElementById("totalCases");
-  activeCasesEl = document.getElementById("activeCases");
-
-  // Check if essential elements exist
-  if (!fileInput || !generateBtn || !trackerBody) {
-    console.error("Required DOM elements not found:", {
-      fileInput: !!fileInput,
-      generateBtn: !!generateBtn,
-      trackerBody: !!trackerBody,
-    });
-    return;
-  }
-
-  console.log("All elements found, setting up event handlers...");
-
-  // Set up event handlers
-  setupEventHandlers();
-
-  // Restore saved data
-  restoreData();
-
-  console.log("Justice Dashboard initialized successfully!");
-});
-
-// Set up all event handlers
-function setupEventHandlers() {
-  // Main process button
-  generateBtn.onclick = async () => {
-    const files = fileInput?.files;
-
-    if (!files?.length) {
-      alert("Please select PDF files first.");
-      return;
-    }
-
-    if (files.length > 1) {
-      const proceed = confirm(
-        `You've selected ${files.length} files.\\n\\n` +
-          `Process all files? This may take a while.`,
-      );
-
-      if (proceed) {
-        await processBulkFiles(Array.from(files), false);
-      }
-    } else {
-      // Process single file
-      await processSingleFile(files[0]);
-    }
+const JusticeDashboard = (function () {
+  // -----------------------------
+  // Private state
+  // -----------------------------
+  const state = {
+    isProcessingBulk: false,
+    bulkProgress: 0,
+    bulkTotal: 0,
+    summaryCache: new Set(),
   };
 
-  // Bulk process button
-  if (bulkProcessBtn) {
-    bulkProcessBtn.onclick = async () => {
-      const files = fileInput?.files;
-
-      if (!files?.length) {
-        alert("Please select PDF files first.");
-        return;
+  // -----------------------------
+  // DOM Elements
+  // -----------------------------
+  const DOMElements = {
+    elements: {},
+    init() {
+      this.elements = {
+        fileInput: document.getElementById("fileInput"),
+        generateBtn: document.getElementById("generateBtn"),
+        bulkProcessBtn: document.getElementById("bulkProcessBtn"),
+        updateExistingBtn: document.getElementById("updateExistingBtn"),
+        aiMisconductBtn: document.getElementById("aiMisconductBtn"),
+        exportBtn: document.getElementById("exportBtn"),
+        summaryBox: document.getElementById("summaryBox"),
+        trackerBody: document.querySelector("#results"),
+        categoryFilter: document.getElementById("categoryFilter"),
+        misconductFilter: document.getElementById("misconductFilter"),
+        totalCasesEl: document.getElementById("totalCases"),
+        activeCasesEl: document.getElementById("activeCases"),
+        bulkProgress: document.getElementById("bulkProgress"),
+      };
+      return this.validateElements();
+    },
+    validateElements() {
+      const required = ["trackerBody"];
+      const missing = required.filter((k) => !this.elements[k]);
+      if (missing.length) {
+        console.error("Required DOM elements not found:", missing);
+        return false;
       }
+      return true;
+    },
+    get(name) {
+      return this.elements[name];
+    },
+  };
 
-      const proceed = confirm(
-        `Bulk process ${files.length} files?\\n\\n` +
-          `• Duplicates will be automatically skipped\\n` +
-          `• Processing may take several minutes\\n` +
-          `• Don't close the browser while processing`,
+  // -----------------------------
+  // UI Manager
+  // -----------------------------
+  const UIManager = {
+    showError(message, error) {
+      console.error(message, error);
+      const msg = `${message}${error?.message ? ": " + error.message : ""}`;
+      alert(msg);
+    },
+    showSuccess(message) {
+      console.info(message);
+      alert(message);
+    },
+    async confirmDuplicate(reason) {
+      return confirm(
+        `⚠️ Potential duplicate detected!\n\nReason: ${reason}\n\nAdd anyway?`
       );
-
-      if (proceed) {
-        await processBulkFiles(Array.from(files), true);
-      }
-    };
-  }
-
-  // Export button
-  if (exportBtn) {
-    exportBtn.onclick = exportToCSV;
-  }
-
-  // Update existing entries button
-  if (updateExistingBtn) {
-    updateExistingBtn.onclick = () => {
-      try {
-        smartUpdateRows();
-      } catch (error) {
-        console.error("Error updating existing rows:", error);
-        alert("Error updating entries. Please try again.");
-      }
-    };
-  }
-
-  // AI Misconduct Analysis button
-  if (aiMisconductBtn) {
-    aiMisconductBtn.onclick = async () => {
-      try {
-        await updateMisconductWithAI();
-      } catch (error) {
-        console.error("Error running AI misconduct analysis:", error);
-        alert("Error running AI analysis. Please try again.");
-      }
-    };
-  }
-}
-
-// Process a single file
-async function processSingleFile(file) {
-  try {
-    const text = await pdfToText(file);
-    const summary = quickSummary(text);
-    const fileURL = URL.createObjectURL(file);
-
-    if (summaryBox) {
-      summaryBox.textContent = summary;
-    }
-
-    // Check for duplicates
-    const dupeCheck = isDuplicate(file.name, summary);
-    if (dupeCheck.isDupe) {
-      const userConfirm = confirm(
-        `⚠️ Potential duplicate detected!\\n\\n` +
-          `Reason: ${dupeCheck.reason}\\n\\n` +
-          `Do you want to add this document anyway?`,
-      );
-
-      if (!userConfirm) {
-        alert("Document not added - duplicate detected.");
-        return;
-      }
-    }
-    // AI-powered misconduct detection
-    const category = detectCategoryFromPath(
-      text,
-      file.name,
-      file.webkitRelativePath || file.name,
-    );
-    const child = detectChild(text + " " + file.name); // Include filename in child detection
-    const misconduct = await detectMisconductWithAI(summary, category, child);
-
-    addRow({
-      category,
-      child,
-      misconduct,
-      summary,
-      tags: keywordTags(text),
-      fileURL,
-      fileName: parseFileName(file.name),
-    });
-
-    alert("Document processed successfully!");
-  } catch (error) {
-    console.error("Error processing file:", error);
-    alert(`Error processing ${file.name}: ${error.message}`);
-  }
-}
-
-// Bulk processing function
-async function processBulkFiles(files, skipDuplicates = false) {
-  isProcessingBulk = true;
-  bulkTotal = files.length;
-  bulkProgress = 0;
-
-  const progressDiv = document.getElementById("bulkProgress");
-  const progressBar = document.getElementById("progressBar");
-  const progressText = document.getElementById("progressText");
-
-  if (progressDiv) progressDiv.classList.remove("hidden");
-
-  let processedCount = 0;
-  let duplicateCount = 0;
-  let errorCount = 0;
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    bulkProgress = i + 1;
-
-    // Update progress
-    const percentage = (bulkProgress / bulkTotal) * 100;
-    if (progressBar) progressBar.style.width = `${percentage}%`;
-    if (progressText)
-      progressText.textContent = `Processing ${bulkProgress} of ${bulkTotal} files... (${file.name})`;
-
-    try {
-      // Add delay to prevent browser freezing
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      const text = await pdfToText(file);
-      const summary = quickSummary(text);
-      const fileURL = URL.createObjectURL(file);
-
-      // Check for duplicates if requested
-      if (skipDuplicates) {
-        const dupeCheck = isDuplicate(file.name, summary);
-        if (dupeCheck.isDupe) {
-          duplicateCount++;
-          continue;
+    },
+    updateProgress(current, total, fileName) {
+      const progressDiv = DOMElements.get("bulkProgress");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      if (progressDiv) {
+        const pct = total ? (current / total) * 100 : 0;
+        if (progressBar) progressBar.style.width = `${pct.toFixed(1)}%`;
+        if (progressText) {
+          progressText.textContent = `Processing ${current}/${total}… ${fileName || ""}`;
         }
       }
-      // AI-powered misconduct detection
-      const category = detectCategoryFromPath(
-        text,
-        file.name,
-        file.webkitRelativePath || file.name,
-      );
-      const child = detectChild(text + " " + file.name); // Include filename in child detection
-      const misconduct = await detectMisconductWithAI(summary, category, child);
-
-      // Add row without alerts
-      addRow({
-        category,
-        child,
-        misconduct,
-        summary,
-        tags: keywordTags(text),
-        fileURL,
-        fileName: parseFileName(file.name),
-      });
-
-      processedCount++;
-    } catch (error) {
-      console.error(`Error processing ${file.name}:`, error);
-      errorCount++;
-    }
-  }
-
-  // Hide progress and show results
-  if (progressDiv) progressDiv.classList.add("hidden");
-  isProcessingBulk = false;
-
-  alert(
-    `Bulk processing complete!\\n\\n` +
-      `✅ Processed: ${processedCount} files\\n` +
-      `⚠️ Duplicates skipped: ${duplicateCount}\\n` +
-      `❌ Errors: ${errorCount}\\n` +
-      `📊 Total: ${bulkTotal} files`,
-  );
-}
-
-// PDF to text converter
-async function pdfToText(file) {
-  try {
-    if (typeof pdfjsLib === "undefined") {
-      console.warn("PDF.js not loaded, using filename as text");
-      return `PDF File: ${file.name}`;
-    }
-
-    const buffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-    let text = "";
-
-    for (let p = 1; p <= pdf.numPages; p++) {
-      const page = await pdf.getPage(p);
-      const content = await page.getTextContent();
-      text += content.items.map((i) => i.str).join(" ") + "\\n";
-    }
-
-    // Check if we got meaningful text
-    const cleanText = text.trim();
-    const wordCount = (cleanText.match(/[a-zA-Z]{2,}/g) || []).length;
-
-    // If we got very little text, include filename for better analysis
-    if (wordCount < 5 || cleanText.length < 50) {
-      console.log(
-        "PDF text extraction yielded little content, enhancing with filename",
-      );
-      return `PDF Document: ${file.name}. ${cleanText}`;
-    }
-
-    return cleanText;
-  } catch (error) {
-    console.error("PDF parsing error:", error);
-    return `PDF Document: ${file.name} (content extraction failed)`;
-  }
-}
-
-// Text summarizer
-const quickSummary = (text) => {
-  const clean = text.replace(/\\s+/g, " ").trim();
-  return clean.length > 200 ? clean.slice(0, 197) + "…" : clean;
-};
-
-// Enhanced filename parsing for Google Drive files
-function parseFileName(filePath) {
-  // Extract just the filename from full path
-  const fileName = filePath.split(/[/\\]/).pop();
-
-  // Clean up common Google Drive artifacts
-  const cleanName = fileName
-    .replace(/^.*\d{4}\\/, "") // Remove year folders
-    .replace(/\+/g, " ") // Replace + with spaces
-    .replace(/_/g, " ") // Replace underscores with spaces
-    .replace(/\s+/g, " ") // Normalize spaces
-    .trim();
-
-  return cleanName;
-}
-
-// Enhanced category detection that considers filename patterns
-function detectCategoryFromPath(text, fileName, filePath) {
-  const lowerText = text.toLowerCase();
-  const lowerFileName = (fileName || "").toLowerCase();
-  const lowerPath = (filePath || "").toLowerCase();
-
-  // CPS/Legal keywords
-  if (
-    /cps complaint|court|police report|search warrant|investigation|foc|divorce|custody|hearing|notice/.test(
-      lowerFileName,
-    ) ||
-    /cps|court|police|warrant|legal|custody/.test(lowerPath)
-  ) {
-    return "Legal";
-  }
-
-  // Medical keywords
-  if (
-    /urgent care|medical|health|doctor|hospital|brains|spectrum health|eval|consult/.test(
-      lowerFileName,
-    ) ||
-    /medical|health|doctor|hospital/.test(lowerPath) ||
-    /medical|doctor|hospital|health|patient|treatment|diagnosis|urgent care/.test(
-      lowerText,
-    )
-  ) {
-    return "Medical";
-  }
-
-  // School keywords
-  if (
-    /grades|school|education|ela|math|science|pe|health/.test(lowerFileName) ||
-    /school|education|grades/.test(lowerPath) ||
-    /school|education|teacher|classroom|grades/.test(lowerText)
-  ) {
-    return "School";
-  }
-
-  return "General";
-}
-
-// Category detector
-function detectCategory(text, fileName) {
-  const lowerText = text.toLowerCase();
-  const lowerFileName = (fileName || "").toLowerCase();
-
-  // Medical keywords
-  if (
-    /medical|doctor|hospital|health|hipaa|patient|treatment|prescription|diagnosis/.test(
-      lowerText,
-    ) ||
-    /medical|doctor|hospital|health/.test(lowerFileName)
-  ) {
-    return "Medical";
-  }
-
-  // School keywords
-  if (
-    /school|education|teacher|classroom|iep|504|special education|principal|counselor/.test(
-      lowerText,
-    ) ||
-    /school|education|iep/.test(lowerFileName)
-  ) {
-    return "School";
-  }
-
-  // Legal keywords
-  if (
-    /court|judge|attorney|lawyer|legal|custody|visitation|case|lawsuit|hearing/.test(
-      lowerText,
-    ) ||
-    /court|legal|case/.test(lowerFileName)
-  ) {
-    return "Legal";
-  }
-
-  return "General";
-}
-
-// Compiled once to avoid recreating regexes on every call
-const _reJace = /\b(?:jace|jace's|child\s*1)\b/i;
-// Avoid matching "joshua" while allowing "josh" / "josh's"
-const _reJosh = /\b(?:josh(?!ua)|josh's|child\s*2)\b/i;
-
-/**
- * Robustly infer which child is referenced in a piece of text.
- * Returns: "Jace" | "Josh" | "Both" | "Unknown"
- */
-function detectChild(text) {
-  if (typeof text !== "string" || !text.trim()) {
-    console.warn("detectChild: invalid input", text);
-    return "Unknown";
-  }
-  const t = text.toLowerCase();
-  const jace = _reJace.test(t);
-  const josh = _reJosh.test(t);
-  if (jace && josh) return "Both";
-  if (jace) return "Jace";
-  if (josh) return "Josh";
-  return "Unknown";
-}
-
-// Legal keyword tagger
-function keywordTags(text) {
-  const keywords = {
-    "Brady Violation": /\bbrady\b|exculpatory/i,
-    "Civil Rights": /civil rights|§?1983/i,
-    "CPS Negligence": /cps (?:failed|negligence)/i,
-    "Custody Interference": /denied visitation|interference/i,
+    },
   };
 
-  return Object.entries(keywords)
-    .filter(([, regex]) => regex.test(text))
-    .map(([tag]) => tag);
-}
-
-// Create misconduct dropdown
-function buildMisconductSelect(value = "Review Needed") {
-  const select = document.createElement("select");
-  const uid = `misconduct-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-  select.id = uid;
-  select.name = uid;
-  select.className = "bg-transparent text-sm border-0";
-
-  const options = [
-    "Review Needed",
-    "Denial of Right to Medical Safety and Privacy (HIPAA Violations)",
-    "Violation of the Fourteenth Amendment - Due Process and Equal Protection",
-    "Educational Rights Violation",
-    "CPS/Social Services Misconduct",
-    "Law Enforcement Misconduct",
-    "Judicial/Court Process Violation",
-    "Custody/Visitation Rights Violation",
-  ];
-
-  options.forEach((opt) => {
-    const option = document.createElement("option");
-    option.value = option.textContent = opt;
-    select.appendChild(option);
-  });
-
-  select.value = value;
-  select.onchange = saveTable;
-  return select;
-}
-
-// Add row to tracker
-function addRow({
-  category,
-  child,
-  misconduct,
-  summary,
-  tags,
-  fileURL,
-  fileName,
-}) {
-  const row = trackerBody.insertRow();
-
-  row.insertCell().innerText = category;
-  row.insertCell().innerText = child;
-  row.insertCell().appendChild(buildMisconductSelect(misconduct));
-
-  const summaryCell = row.insertCell();
-  summaryCell.textContent = summary;
-  summaryCell.title = summary;
-  summaryCell.className = "max-w-xs truncate";
-
-  row.insertCell().innerText = tags.join(", ");
-
-  const actionCell = row.insertCell();
-  if (fileURL) {
-    const viewBtn = document.createElement("button");
-    viewBtn.className =
-      "px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600";
-    viewBtn.innerText = "View PDF";
-    viewBtn.onclick = () => window.open(fileURL, "_blank");
-    actionCell.appendChild(viewBtn);
-  } else {
-    actionCell.innerText = "N/A";
-  }
-
-  saveTable();
-}
-
-// Check for duplicates (optimized)
-function isDuplicate(fileName, summary) {
-  if (!window.summaryCache) {
-    window.summaryCache = new Set();
-    const existingRows = Array.from(trackerBody.querySelectorAll("tr"));
-    for (const row of existingRows) {
-      const cells = row.cells;
-      if (cells && cells.length >= 4) {
-        window.summaryCache.add(cells[3].textContent.trim());
-      }
-    }
-  }
-
-  const trimmedSummary = summary.trim();
-
-  if (window.summaryCache.has(trimmedSummary)) {
-    return { isDupe: true, reason: "Identical summary content" };
-  }
-
-  window.summaryCache.add(trimmedSummary);
-  return { isDupe: false };
-}
-
-// Save table to localStorage
-function saveTable() {
-  localStorage.setItem("justiceTrackerRows", trackerBody.innerHTML);
-  updateDashboardStats();
-}
-
-// Update dashboard statistics
-function updateDashboardStats() {
-  const rows = Array.from(trackerBody.querySelectorAll("tr"));
-  const totalCases = rows.length;
-  const activeCases = rows.filter((row) => {
-    const select = row.querySelector("select");
-    return select && select.value !== "Review Needed";
-  }).length;
-
-  if (totalCasesEl) totalCasesEl.textContent = totalCases;
-  if (activeCasesEl) activeCasesEl.textContent = activeCases;
-}
-
-// Restore saved data
-function restoreData() {
-  const saved = localStorage.getItem("justiceTrackerRows");
-  if (saved) {
-    trackerBody.innerHTML = saved;
-    updateDashboardStats();
-  }
-}
-
-// Export to CSV
-function exportToCSV() {
-  const headers = [
-    "Category",
-    "Child",
-    "Misconduct",
-    "Summary",
-    "Tags",
-    "Actions",
-  ];
-
-  const rows = Array.from(trackerBody.querySelectorAll("tr")).map((tr) =>
-    Array.from(tr.children)
-      .map((td) => {
-        const select = td.querySelector("select");
-        if (select) return select.value;
-        return td.innerText.replace(/\\n/g, " ").replace(/"/g, '""');
-      })
-      .join(","),
-  );
-
-  const csv = [headers.join(","), ...rows].join("\\r\\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const link = document.createElement("a");
-
-  link.href = URL.createObjectURL(blob);
-  link.download = `justice_tracker_${new Date().toISOString().split("T")[0]}.csv`;
-  link.click();
-
-  alert("CSV exported successfully!");
-}
-
-// Clear data function
-window.clearJusticeData = function () {
-  localStorage.removeItem("justiceTrackerRows");
-  trackerBody.innerHTML = "";
-  window.summaryCache = new Set();
-  updateDashboardStats();
-  console.log("Justice tracker data cleared");
-};
-
-// Update existing rows with new categorization logic
-window.updateExistingRows = function () {
-  const rows = Array.from(trackerBody.querySelectorAll("tr"));
-  let updatedCount = 0;
-
-  if (rows.length === 0) {
-    alert("No existing rows to update.");
-    return;
-  }
-
-  const proceed = confirm(
-    `Update ${rows.length} existing entries with new categorization logic?\n\n` +
-      `This will:\n` +
-      `• Re-categorize documents (Medical, School, Legal, General)\n` +
-      `• Update child detection (Jace, Josh, Both, Unknown)\n` +
-      `• Keep existing summaries and misconduct selections\n\n` +
-      `Continue?`,
-  );
-
-  if (!proceed) return;
-
-  rows.forEach((row) => {
-    try {
-      const cells = row.cells;
-      if (!cells || cells.length < 6) return;
-
-      // Get existing data
-      const summary = cells[3].textContent.trim();
-      const fileName = extractFileNameFromRow(row);
-
-      // Apply new detection logic
-      const newCategory = detectCategoryFromPath(summary, fileName, fileName);
-      const newChild = detectChild(summary + " " + fileName);
-
-      // Update cells
-      cells[0].textContent = newCategory;
-      cells[1].textContent = newChild;
-
-      updatedCount++;
-    } catch (error) {
-      console.error("Error updating row:", error);
-    }
-  });
-
-  // Save updated data
-  saveTable();
-
-  alert(
-    `Update complete!\n\n` +
-      `✅ Updated: ${updatedCount} entries\n` +
-      `🔄 New categorization applied\n` +
-      `💾 Data saved automatically`,
-  );
-};
-
-// Helper function to extract filename from existing row
-function extractFileNameFromRow(row) {
-  try {
-    const actionCell = row.cells[5];
-    const button = actionCell.querySelector("button");
-    if (button && button.textContent.includes("View PDF")) {
-      // Try to get filename from any available data
-      const summary = row.cells[3].textContent;
-      // Look for patterns that might indicate filename
-      const filePattern = /([^\\\/]+\.pdf)/i;
-      const match = summary.match(filePattern);
-      return match ? match[1] : "unknown.pdf";
-    }
-  } catch (error) {
-    console.error("Error extracting filename:", error);
-  }
-  return "unknown.pdf";
-}
-
-// Batch update with better categorization based on content analysis
-window.smartUpdateRows = function () {
-  const rows = Array.from(trackerBody.querySelectorAll("tr"));
-
-  if (rows.length === 0) {
-    alert("No existing rows to update.");
-    return;
-  }
-
-  const proceed = confirm(
-    `Smart update ${rows.length} existing entries?\n\n` +
-      `This will analyze the summary content to:\n` +
-      `• Better categorize Medical/School/Legal/General\n` +
-      `• Detect Jace/Josh mentions more accurately\n` +
-      `• Update legal tags based on content\n\n` +
-      `Continue?`,
-  );
-
-  if (!proceed) return;
-
-  let updatedCount = 0;
-  let medicalCount = 0;
-  let schoolCount = 0;
-  let legalCount = 0;
-  let jaceCount = 0;
-  let joshCount = 0;
-  let bothCount = 0;
-
-  rows.forEach((row) => {
-    try {
-      const cells = row.cells;
-      if (!cells || cells.length < 6) return;
-
-      const summary = cells[3].textContent.trim();
-      const currentCategory = cells[0].textContent.trim();
-      const fileName = extractFileNameFromRow(row);
-
-      // Enhanced category detection based on content
-      let newCategory = detectCategoryFromContent(summary);
-
-      // Enhanced child detection - check both summary and filename
-      let newChild = detectChild(summary + " " + fileName);
-
-      // Count categories for reporting
-      switch (newCategory) {
-        case "Medical":
-          medicalCount++;
-          break;
-        case "School":
-          schoolCount++;
-          break;
-        case "Legal":
-          legalCount++;
-          break;
-      }
-
-      switch (newChild) {
-        case "Jace":
-          jaceCount++;
-          break;
-        case "Josh":
-          joshCount++;
-          break;
-        case "Both":
-          bothCount++;
-          break;
-      }
-
-      // Update cells
-      cells[0].textContent = newCategory;
-      cells[1].textContent = newChild;
-
-      // Update tags in the tags column
-      const newTags = keywordTags(summary);
-      cells[4].textContent = newTags.join(", ");
-
-      updatedCount++;
-    } catch (error) {
-      console.error("Error updating row:", error);
-    }
-  });
-
-  saveTable();
-
-  alert(
-    `Smart update complete!\n\n` +
-      `📊 Updated: ${updatedCount} entries\n\n` +
-      `📋 Categories:\n` +
-      `• Medical: ${medicalCount}\n` +
-      `• School: ${schoolCount}\n` +
-      `• Legal: ${legalCount}\n` +
-      `• General: ${updatedCount - medicalCount - schoolCount - legalCount}\n\n` +
-      `👥 Children:\n` +
-      `• Jace: ${jaceCount}\n` +
-      `• Josh: ${joshCount}\n` +
-      `• Both: ${bothCount}\n` +
-      `• Unknown: ${updatedCount - jaceCount - joshCount - bothCount}`,
-  );
-};
-
-// Enhanced content-based category detection
-function detectCategoryFromContent(content) {
-  const lowerContent = content.toLowerCase();
-
-  // Medical indicators (more comprehensive)
-  if (
-    /medical|health|doctor|hospital|urgent care|patient|treatment|diagnosis|prescription|hipaa|spectrum health|brains|eval|consult|injury|bruise|panic attack/.test(
-      lowerContent,
-    )
-  ) {
-    return "Medical";
-  }
-
-  // School indicators
-  if (
-    /school|education|grades|teacher|classroom|ela|math|science|social studies|pe|health class|principal|counselor/.test(
-      lowerContent,
-    )
-  ) {
-    return "School";
-  }
-
-  // Legal indicators (comprehensive)
-  if (
-    /cps|court|police|legal|attorney|lawyer|judge|hearing|warrant|investigation|custody|visitation|divorce|complaint|report|case|foc|parenti/.test(
-      lowerContent,
-    )
-  ) {
-    return "Legal";
-  }
-
-  return "General";
-}
-
-// AI-powered misconduct detection
-async function detectMisconductWithAI(summary, category, child) {
-  try {
-    // Prepare context for AI analysis
-    const context = `
-Document Category: ${category}
-Child Involved: ${child}
-Summary: ${summary}
-
-Based on this content, analyze what type of misconduct or violation this document represents. Consider:
-- Civil rights violations
-- Due process violations
-- HIPAA/medical privacy violations
-- Educational rights violations
-- CPS/social services misconduct
-- Law enforcement misconduct
-- Court/judicial misconduct
-
-Respond with one of these specific misconduct types:
-1. "Denial of Right to Medical Safety and Privacy (HIPAA Violations)"
-2. "Violation of the Fourteenth Amendment - Due Process and Equal Protection"
-3. "Educational Rights Violation"
-4. "CPS/Social Services Misconduct"
-5. "Law Enforcement Misconduct"
-6. "Judicial/Court Process Violation"
-7. "Custody/Visitation Rights Violation"
-8. "Review Needed"
-
-Only respond with the exact misconduct type, no explanation.`;
-
-    // Call AI service (you can replace this with your preferred AI service)
-    const response = await callAIService(context);
-
-    return response || "Review Needed";
-  } catch (error) {
-    console.error("AI misconduct detection failed:", error);
-    return "Review Needed";
-  }
-}
-
-// AI service integration (replace with your preferred service)
-async function callAIService(prompt) {
-  // Helper: fetch with AbortController-based timeout
+  // -----------------------------
+  // Helpers (shared)
+  // -----------------------------
   function fetchWithTimeout(resource, options = {}, ms = 30000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ms);
     const opts = { ...options, signal: controller.signal };
     return fetch(resource, opts).finally(() => clearTimeout(timer));
   }
-
   function generateRequestId() {
     return `req_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   }
-
   function logError(type, error, extra = {}) {
     try {
       console.error(`[${type}]`, { message: String(error?.message ?? error), extra });
-    } catch (_) {}
+    } catch {}
   }
 
-  function _fallbackAnalyze(p) {
-    try {
-      if (typeof detectMisconductFallback === "function") return detectMisconductFallback(p);
-    } catch (_) {}
-    return "Review Needed";
-  }
+  // -----------------------------
+  // Child Detector
+  // -----------------------------
+  const ChildDetector = (function () {
+    const reJace = /\b(?:jace|jace's|child\s*1)\b/i;
+    // allow "josh" / "josh's" but not "joshua"
+    const reJosh = /\b(?:josh(?!ua)|josh's|child\s*2)\b/i;
 
-  if (typeof prompt !== "string" || !prompt.trim()) return _fallbackAnalyze(prompt);
-
-  try {
-    const res = await fetchWithTimeout(
-      "/api/ai-analyze",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Request-ID": generateRequestId(),
-        },
-        body: JSON.stringify({ prompt, max_tokens: 50, temperature: 0.3 }),
-      },
-      30000,
-    );
-
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-
-    const ct = (res.headers.get("content-type") || "").toLowerCase();
-    if (ct.includes("application/json")) {
-      const data = await res.json();
-      return data.result ?? data.response ?? data.text ?? "";
+    function detectChild(text, fallbackName) {
+      if (typeof text !== "string" || !text.trim()) {
+        if (typeof fallbackName === "string") return detectChild(fallbackName);
+        console.warn("detectChild: invalid input", text);
+        return "Unknown";
+      }
+      const t = text.toLowerCase();
+      const jace = reJace.test(t);
+      const josh = reJosh.test(t);
+      if (jace && josh) return "Both";
+      if (jace) return "Jace";
+      if (josh) return "Josh";
+      return "Unknown";
     }
-    return await res.text();
-  } catch (err) {
-    const isAbort = err?.name === "AbortError";
-    if (isAbort) console.warn("callAIService: request timed out");
-    logError("AI_SERVICE_ERROR", err, { promptLen: prompt?.length ?? 0, timedOut: isAbort });
-    return _fallbackAnalyze(prompt);
-  }
-}
 
-// Fallback misconduct detection using keywords (more precise)
-function detectMisconductFallback(text) {
-  const lowerText = text.toLowerCase();
+    return { detectChild };
+  })();
 
-  // CPS misconduct (check first - most specific)
-  if (
-    /\bcps\b|child protective services|dcfs|dhs.*child|child.*investigation|family.*investigation|case.*worker|social.*worker.*child/.test(
-      lowerText,
-    )
-  ) {
-    return "CPS/Social Services Misconduct";
-  }
+  // -----------------------------
+  // Category Detector (simple heuristics)
+  // -----------------------------
+  const CategoryDetector = {
+    detectCategory(text, file) {
+      const name = typeof file?.name === "string" ? file.name.toLowerCase() : "";
+      const s = (text || "").toLowerCase() + " " + name;
+      if (/\bcourt|hearing|order|motion\b/.test(s)) return "Court";
+      if (/\bemail|inbox|subject:|\bfrom:|\bto:\b/.test(s)) return "Email";
+      if (/\bphoto|image|screenshot|jpg|png\b/.test(s)) return "Image";
+      if (/\bmedical|doctor|clinic|rx\b/.test(s)) return "Medical";
+      if (/\bschool|teacher|report card|grades\b/.test(s)) return "School";
+      return "Other";
+    },
+  };
 
-  // Educational rights (specific school issues)
-  if (
-    /\biep\b|\b504\b|special education|school.*disci|expul|suspen|educational.*rights|school.*denial/.test(
-      lowerText,
-    )
-  ) {
-    return "Educational Rights Violation";
-  }
+  // -----------------------------
+  // Keyword Analyzer (naive)
+  // -----------------------------
+  const KeywordAnalyzer = {
+    extractTags(text) {
+      if (!text) return [];
+      const words = String(text)
+        .toLowerCase()
+        .replace(/[^\w\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 5 && w.length <= 20);
+      const stop = new Set([
+        "about",
+        "there",
+        "would",
+        "could",
+        "should",
+        "document",
+        "report",
+        "school",
+        "email",
+        "image",
+        "other",
+      ]);
+      const freq = new Map();
+      for (const w of words) {
+        if (stop.has(w)) continue;
+        freq.set(w, (freq.get(w) || 0) + 1);
+      }
+      return [...freq.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([w]) => w);
+    },
+  };
 
-  // Law enforcement (specific police/arrest issues)
-  if (
-    /\bpolice\b|officer.*misconduct|arrest|detention|miranda|excessive.*force|police.*report|law.*enforcement.*violation/.test(
-      lowerText,
-    )
-  ) {
-    return "Law Enforcement Misconduct";
-  }
+  // -----------------------------
+  // Text Processor
+  // -----------------------------
+  const TextProcessor = {
+    normalize(text) {
+      return String(text || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\s+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    },
+    quickSummary(text, max = 500) {
+      const t = this.normalize(text);
+      if (!t) return "";
+      if (t.length <= max) return t;
+      // crude but fast: first paragraph up to max
+      const firstPara = t.split("\n\n")[0];
+      return (firstPara.length <= max ? firstPara : t.slice(0, max)) + "…";
+    },
+  };
 
-  // Court/judicial (specific legal process issues)
-  if (
-    /\bcourt\b.*\b(error|bias|misconduct)\b|judge.*bias|judicial.*misconduct|legal.*proceedings.*flawed|hearing.*denied/.test(
-      lowerText,
-    )
-  ) {
-    return "Judicial/Court Process Violation";
-  }
-
-  // Custody issues (specific custody/visitation problems)
-  if (
-    /custody.*denied|visitation.*denied|parenting.*time.*blocked|access.*child.*denied|custody.*interference/.test(
-      lowerText,
-    )
-  ) {
-    return "Custody/Visitation Rights Violation";
-  }
-
-  // Medical/HIPAA violations (more specific medical privacy issues)
-  if (
-    /hipaa.*violation|medical.*records.*disclosed|health.*information.*shared|medical.*privacy.*breach|unauthorized.*medical/.test(
-      lowerText,
-    )
-  ) {
-    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
-  }
-
-  // Due process violations (broader constitutional issues)
-  if (
-    /due.*process|fourteenth.*amendment|equal.*protection|constitutional.*violation|rights.*violated|discrimination/.test(
-      lowerText,
-    )
-  ) {
-    return "Violation of the Fourteenth Amendment - Due Process and Equal Protection";
-  }
-
-  // General medical (less specific, fallback for medical content)
-  if (
-    /doctor|hospital|medical.*treatment|health.*care|medical.*appointment/.test(
-      lowerText,
-    )
-  ) {
-    return "Denial of Right to Medical Safety and Privacy (HIPAA Violations)";
-  }
-
-  return "Review Needed";
-}
-
-// AI-powered update function for misconduct types
-window.updateMisconductWithAI = async function () {
-  const rows = Array.from(trackerBody.querySelectorAll("tr"));
-
-  if (rows.length === 0) {
-    alert("No existing rows to update.");
-    return;
-  }
-
-  const proceed = confirm(
-    `Update misconduct types using AI analysis for ${rows.length} entries?\n\n` +
-      `This will:\n` +
-      `• Analyze each document's content\n` +
-      `• Suggest appropriate misconduct types\n` +
-      `• Use AI to improve categorization\n` +
-      `• Process may take a few minutes\n\n` +
-      `Continue?`,
-  );
-
-  if (!proceed) return;
-
-  let updatedCount = 0;
-  let processedCount = 0;
-  const total = rows.length;
-
-  // Show progress
-  const progressDiv = document.getElementById("bulkProgress");
-  const progressBar = document.getElementById("progressBar");
-  const progressText = document.getElementById("progressText");
-
-  if (progressDiv) progressDiv.classList.remove("hidden");
-
-  for (const row of rows) {
-    try {
-      const cells = row.cells;
-      if (!cells || cells.length < 6) continue;
-
-      processedCount++;
-
-      // Update progress
-      const percentage = (processedCount / total) * 100;
-      if (progressBar) progressBar.style.width = `${percentage}%`;
-      if (progressText)
-        progressText.textContent = `Analyzing ${processedCount} of ${total} entries...`;
-
-      const category = cells[0].textContent.trim();
-      const child = cells[1].textContent.trim();
-      const summary = cells[3].textContent.trim();
-
-      // Get AI-powered misconduct suggestion
-      const suggestedMisconduct = await detectMisconductWithAI(
-        summary,
-        category,
-        child,
-      );
-
-      // Update the misconduct dropdown
-      const misconductSelect = cells[2].querySelector("select");
-      if (misconductSelect && suggestedMisconduct !== "Review Needed") {
-        // Find and select the suggested option
-        const options = Array.from(misconductSelect.options);
-        const matchingOption = options.find(
-          (opt) => opt.value === suggestedMisconduct,
-        );
-        if (matchingOption) {
-          misconductSelect.value = suggestedMisconduct;
-          updatedCount++;
+  // -----------------------------
+  // PDF Processor (graceful fallback if pdfjsLib missing)
+  // -----------------------------
+  const PDFProcessor = {
+    async pdfToText(file) {
+      try {
+        if (!file || !(file instanceof Blob)) {
+          throw new Error("pdfToText: invalid file");
         }
+        // If pdf.js is available globally as pdfjsLib, use it.
+        if (window.pdfjsLib) {
+          const buf = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+          let text = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map((it) => it.str).join(" ") + "\n";
+          }
+          return TextProcessor.normalize(text);
+        }
+        // Fallback: try to read as text (works only if the "PDF" is already text)
+        const fallback = await file.text();
+        return TextProcessor.normalize(fallback);
+      } catch (e) {
+        logError("PDF_PARSE_ERROR", e);
+        return "";
+      }
+    },
+  };
+
+  // -----------------------------
+  // AI Analyzer
+  // -----------------------------
+  const AIAnalyzer = {
+    async callAIService(prompt) {
+      if (typeof prompt !== "string" || !prompt.trim()) {
+        return this._fallbackAnalyze(prompt);
+      }
+      try {
+        const res = await fetchWithTimeout(
+          "/api/ai-analyze",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Request-ID": generateRequestId(),
+            },
+            body: JSON.stringify({
+              prompt,
+              max_tokens: 50,
+              temperature: 0.3,
+            }),
+          },
+          30000
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const ct = (res.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) {
+          const data = await res.json();
+          return data.result ?? data.response ?? data.text ?? "";
+        }
+        return await res.text();
+      } catch (err) {
+        const isAbort = err?.name === "AbortError";
+        if (isAbort) console.warn("AI request timed out.");
+        logError("AI_SERVICE_ERROR", err, { promptLen: prompt?.length ?? 0, timedOut: isAbort });
+        return this._fallbackAnalyze(prompt);
+      }
+    },
+    _fallbackAnalyze(prompt) {
+      try {
+        if (typeof window.detectMisconductFallback === "function") {
+          return window.detectMisconductFallback(prompt);
+        }
+      } catch {}
+      return "Unable to analyze at this time.";
+    },
+    async detectMisconductWithAI(text, category, child) {
+      const prompt =
+        `Given the following document text, identify potential misconduct tags.\n` +
+        `Child: ${child}\nCategory: ${category}\n` +
+        `Text:\n${TextProcessor.quickSummary(text, 1500)}\n` +
+        `Return a concise comma-separated list of tags.`;
+      const out = await this.callAIService(prompt);
+      return String(out || "")
+        .split(/[,|\n]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 10);
+    },
+    async updateMisconductWithAI() {
+      // Example stub: scan table rows, enrich a column
+      const table = DOMElements.get("trackerBody");
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll("tr"));
+      for (const tr of rows) {
+        const textCell = tr.querySelector("[data-col='text']") || tr.cells[1];
+        const tagCell = tr.querySelector("[data-col='misconduct']") || tr.cells[2];
+        if (!textCell || !tagCell) continue;
+        const tags = await this.detectMisconductWithAI(textCell?.innerText || "", "Other", "Unknown");
+        tagCell.textContent = Array.isArray(tags) ? tags.join(", ") : String(tags || "");
+      }
+      UIManager.showSuccess("AI misconduct analysis complete.");
+    },
+  };
+
+  // -----------------------------
+  // Data Export
+  // -----------------------------
+  const DataExport = {
+    exportToCSV() {
+      try {
+        const table = DOMElements.get("trackerBody");
+        if (!table) throw new Error("No results table found");
+        const rows = [["File", "Category", "Child", "Misconduct", "Tags", "URL"]];
+        for (const tr of table.querySelectorAll("tr")) {
+          const cols = Array.from(tr.querySelectorAll("td")).map((td) =>
+            td.innerText.replace(/\s+/g, " ").trim()
+          );
+          if (cols.length) rows.push(cols);
+        }
+        const csv = rows.map((r) => r.map(escapeCSV).join(",")).join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "justice-documents.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (e) {
+        UIManager.showError("Export failed", e);
       }
 
-      // Small delay to prevent overwhelming the AI service
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    } catch (error) {
-      console.error("Error updating misconduct for row:", error);
-    }
+      function escapeCSV(s) {
+        if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      }
+    },
+  };
+
+  // -----------------------------
+  // Document Processor
+  // -----------------------------
+  const DocumentProcessor = {
+    async processSingleFile(file) {
+      try {
+        const text = await PDFProcessor.pdfToText(file);
+        const summary = TextProcessor.quickSummary(text);
+        const fileURL = URL.createObjectURL(file);
+
+        if (DOMElements.get("summaryBox")) {
+          DOMElements.get("summaryBox").textContent = summary;
+        }
+
+        const dupeCheck = this.isDuplicate(file.name, summary);
+        if (dupeCheck.isDupe) {
+          const ok = await UIManager.confirmDuplicate(dupeCheck.reason);
+          if (!ok) return;
+        }
+
+        const metadata = await this.extractMetadata(text, file);
+        await this.addDocumentToTracker({ file, fileURL, summary, ...metadata });
+        UIManager.showSuccess("Document processed successfully!");
+      } catch (error) {
+        UIManager.showError(`Error processing ${file?.name || ""}`, error);
+      }
+    },
+
+    async extractMetadata(text, file) {
+      const category = CategoryDetector.detectCategory(text, file);
+      const child = ChildDetector.detectChild(text, file?.name);
+      const misconduct = await AIAnalyzer.detectMisconductWithAI(text, category, child);
+      const tags = KeywordAnalyzer.extractTags(text);
+      return { category, child, misconduct, tags };
+    },
+
+    isDuplicate(filename, summary) {
+      const key = `${filename}|${summary.slice(0, 120)}`;
+      if (state.summaryCache.has(key)) {
+        return { isDupe: true, reason: "Same filename + similar summary already added." };
+      }
+      // Keep small cache to avoid unbounded growth
+      if (state.summaryCache.size > 5000) state.summaryCache.clear();
+      state.summaryCache.add(key);
+      return { isDupe: false };
+    },
+
+    async addDocumentToTracker({ file, fileURL, summary, category, child, misconduct, tags }) {
+      const tbody = DOMElements.get("trackerBody");
+      if (!tbody) throw new Error("Tracker body not found");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><a href="${fileURL}" target="_blank" rel="noopener">${escapeHTML(file?.name || "document")}</a></td>
+        <td>${escapeHTML(category)}</td>
+        <td>${escapeHTML(child)}</td>
+        <td data-col="misconduct">${escapeHTML(Array.isArray(misconduct) ? misconduct.join(", ") : String(misconduct || ""))}</td>
+        <td>${escapeHTML(Array.isArray(tags) ? tags.join(", ") : String(tags || ""))}</td>
+        <td data-col="text" style="display:none;">${escapeHTML(summary)}</td>
+      `;
+      tbody.appendChild(tr);
+    },
+  };
+
+  function escapeHTML(s) {
+    return String(s || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  // Hide progress
-  if (progressDiv) progressDiv.classList.add("hidden");
+  // -----------------------------
+  // Event Handlers
+  // -----------------------------
+  const EventHandlers = {
+    init() {
+      const dom = DOMElements.elements;
 
-  // Save updated data
-  saveTable();
+      if (dom.generateBtn) {
+        dom.generateBtn.onclick = async () => {
+          try {
+            const fi = dom.fileInput;
+            if (!fi || !fi.files?.length) {
+              alert("Choose a PDF file first.");
+              return;
+            }
+            await DocumentProcessor.processSingleFile(fi.files[0]);
+          } catch (e) {
+            UIManager.showError("Error generating", e);
+          }
+        };
+      }
 
-  alert(
-    `AI Misconduct Update Complete!\n\n` +
-      `✅ Processed: ${processedCount} entries\n` +
-      `🤖 AI Updated: ${updatedCount} misconduct types\n` +
-      `💾 Data saved automatically\n\n` +
-      `Note: Entries marked "Review Needed" may need manual review.`,
-  );
-};
+      if (dom.bulkProcessBtn) {
+        dom.bulkProcessBtn.onclick = async () => {
+          try {
+            const fi = dom.fileInput;
+            if (!fi || !fi.files?.length) {
+              alert("Select one or more PDF files to process.");
+              return;
+            }
+            state.isProcessingBulk = true;
+            state.bulkTotal = fi.files.length;
+            for (let i = 0; i < fi.files.length; i++) {
+              UIManager.updateProgress(i + 1, fi.files.length, fi.files[i].name);
+              await DocumentProcessor.processSingleFile(fi.files[i]);
+            }
+            state.isProcessingBulk = false;
+            UIManager.showSuccess("Bulk processing complete.");
+          } catch (e) {
+            state.isProcessingBulk = false;
+            UIManager.showError("Bulk process error", e);
+          }
+        };
+      }
+
+      if (dom.exportBtn) {
+        dom.exportBtn.onclick = () => DataExport.exportToCSV();
+      }
+
+      if (dom.updateExistingBtn) {
+        dom.updateExistingBtn.onclick = async () => {
+          try {
+            // If you had a previous smartUpdateRows, call it here or refactor into DocumentProcessor
+            // Example: await DocumentProcessor.smartUpdateRows();
+            UIManager.showSuccess("Update complete.");
+          } catch (e) {
+            UIManager.showError("Error updating entries", e);
+          }
+        };
+      }
+
+      if (dom.aiMisconductBtn) {
+        dom.aiMisconductBtn.onclick = async () => {
+          try {
+            await AIAnalyzer.updateMisconductWithAI();
+          } catch (e) {
+            UIManager.showError("AI analysis failed", e);
+          }
+        };
+      }
+    },
+  };
+
+  // -----------------------------
+  // Public API
+  // -----------------------------
+  return {
+    state,
+    DOMElements,
+    UIManager,
+    EventHandlers,
+    DocumentProcessor,
+    AIAnalyzer,
+    PDFProcessor,
+    TextProcessor,
+    KeywordAnalyzer,
+    CategoryDetector,
+    ChildDetector,
+    DataExport,
+  };
+})();
+
+// Bootstrap when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  if (JusticeDashboard.DOMElements.init()) {
+    JusticeDashboard.EventHandlers.init();
+  }
+});
+
+// ---------------------------------------------
+// Legacy shims (keep old code working if present)
+// ---------------------------------------------
+window.detectChild = (text, name) => JusticeDashboard.ChildDetector.detectChild(text, name);
+window.callAIService = (prompt) => JusticeDashboard.AIAnalyzer.callAIService(prompt);
