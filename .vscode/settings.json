@@ -1,10 +1,12 @@
 {
-  "emeraldwalk.runonsave": {
-    "commands": [
-      {
-        "match": ".*",
-        "cmd": "workbench.action.tasks.runTask Start Server"
-      }
-    ]
-  }
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "javascript": true
+  },
+  "editor.inlineSuggest.enabled": true,
+  "chat.promptFiles": true,
+  "chat.promptFilesLocations": { ".github/prompts": true },
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true
 }

@@ -1,3 +1,34 @@
+# Copilot Project Instructions (Workspace)
+
+Use these guidelines to keep Copilot suggestions aligned with our standards:
+
+- **Code style:** Prefer functional components, hooks, and small modules.
+- **Security:** Do not include secrets or keys; never suggest plaintext credentials.
+- **Testing:** Favor small, focused tests; mock network/IO.
+- **Docs:** Add JSDoc for public functions; keep README snippets runnable.
+- **i18n:** Keep Fluent `.ftl` message IDs/variables intact (e.g., `{ $filename }`).
+
+**Prompts:** Reusable prompts live in `.github/prompts/`. In VS Code, Copilot Chat will surface these because the workspace settings enable prompt files.
+
+## Examples
+
+### Refactor request
+> Refactor this component into smaller hooks; extract data fetching and memoize derived values; add error boundaries.
+
+### Test request
+> Generate a minimal unit test for `formatCaseId()`, covering common inputs and edge cases.
+
+### Accessibility
+> Ensure new UI controls have proper aria- attributes, keyboard navigation, and focus management.
+
+## Exclusions
+Exclude tests, dist, and secrets from Copilot context via GitHub → Repo → Settings → Copilot → **Content exclusion**:
+```
+/dist/**
+**/*.test.*
+**/__snapshots__/**
+secrets.json
+```
 # Justice Dashboard: AI Coding Agent Instructions
 
 ## Project Overview
