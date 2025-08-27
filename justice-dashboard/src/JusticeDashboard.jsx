@@ -62,7 +62,14 @@ export default function JusticeDashboard() {
       const tick = (now) => {
         const elapsed = Math.max(0, now - start);
         const pct = Math.min(100, (elapsed / durationMs) * 100);
-        try { onStep(pct); } catch (e) {}
+        // Safely call onStep with error handling
+        if (typeof onStep === 'function') {
+          try { 
+            onStep(pct); 
+          } catch (e) {
+            console.warn('Animation step error:', e);
+          }
+        }
         if (pct < 100) {
           const id = requestAnimationFrame(tick);
           timersRef.current.rafIds.add(id);

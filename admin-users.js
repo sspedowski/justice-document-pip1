@@ -105,7 +105,7 @@ function initializeUsers() {
       {
         id: 1,
         username: "admin",
-        password: bcrypt.hashSync("justice2025", 10),
+        password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || "justice2025", 10),
         role: "admin",
         fullName: "System Administrator",
         createdAt: new Date().toISOString(),
@@ -113,7 +113,7 @@ function initializeUsers() {
       {
         id: 2,
         username: "stephanie",
-        password: bcrypt.hashSync("spedowski2024", 10),
+        password: bcrypt.hashSync(process.env.STEPHANIE_PASSWORD || "spedowski2024", 10),
         role: "user",
         fullName: "Stephanie Spedowski",
         createdAt: new Date().toISOString(),
@@ -121,7 +121,7 @@ function initializeUsers() {
       {
         id: 3,
         username: "legal",
-        password: bcrypt.hashSync("legal123", 10),
+        password: bcrypt.hashSync(process.env.LEGAL_PASSWORD || "legal123", 10),
         role: "user",
         fullName: "Legal Team",
         createdAt: new Date().toISOString(),
@@ -130,9 +130,9 @@ function initializeUsers() {
 
     saveUsers(initialUsers);
     console.log("✅ Initial users created:");
-    console.log("   - admin / justice2025 (Administrator)");
-    console.log("   - stephanie / spedowski2024 (User)");
-    console.log("   - legal / legal123 (User)");
+    console.log("   - admin / [password from env] (Administrator)");
+    console.log("   - stephanie / [password from env] (User)");
+    console.log("   - legal / [password from env] (User)");
   }
 }
 

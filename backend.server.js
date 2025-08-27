@@ -134,12 +134,16 @@ const DashboardUI = {
   renderDashboard() {
     const app = document.getElementById("app");
     if (!app) return;
+    
+    // Sanitize user data to prevent XSS
+    const userName = this.escapeHtml(DashboardAuth.currentUser.fullName || DashboardAuth.currentUser.username);
+    
     app.innerHTML = `
       <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 class="text-xl font-bold text-gray-900">Justice Dashboard</h1>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">Welcome, ${DashboardAuth.currentUser.fullName || DashboardAuth.currentUser.username}</span>
+            <span class="text-sm text-gray-600">Welcome, ${userName}</span>
             <button id="logoutBtn" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Logout</button>
           </div>
         </div>
@@ -190,15 +194,30 @@ const DashboardUI = {
   addTrackerRow(row) {
     const tbody = document.getElementById("results");
     const tr = document.createElement("tr");
+    
+    // Sanitize all user inputs to prevent XSS
+    const category = this.escapeHtml(row.category);
+    const child = this.escapeHtml(row.child);
+    const misconduct = this.escapeHtml(row.misconduct);
+    const summary = this.escapeHtml(row.summary);
+    const fileURL = row.fileURL ? this.escapeHtml(row.fileURL) : null;
+    
     tr.innerHTML = `
-      <td>${row.category}</td>
-      <td>${row.child}</td>
-      <td>${row.misconduct}</td>
-      <td>${row.summary}</td>
-      <td>${row.fileURL ? `<a href="${row.fileURL}" target="_blank" class="text-blue-600 underline">View PDF</a>` : "No PDF"}</td>
+      <td>${category}</td>
+      <td>${child}</td>
+      <td>${misconduct}</td>
+      <td>${summary}</td>
+      <td>${fileURL ? `<a href="${fileURL}" target="_blank" class="text-blue-600 underline">View PDF</a>` : "No PDF"}</td>
       <td><button class="text-red-600" onclick="this.parentElement.parentElement.remove()">Delete</button></td>
     `;
     tbody.appendChild(tr);
+  },
+
+  // XSS prevention helper
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 };
 

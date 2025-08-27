@@ -542,7 +542,7 @@ const DashboardAuth = {
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 class="text-xl font-bold text-gray-900">Justice Dashboard</h1>
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">Welcome, ${this.currentUser.fullName || this.currentUser.username}</span>
+            <span class="text-sm text-gray-600">Welcome, ${this.escapeHtml(this.currentUser.fullName || this.currentUser.username)}</span>
             <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${this.currentUser.role}</span>
             <button id="logoutBtn" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
               Logout
@@ -735,6 +735,14 @@ const DashboardAuth = {
       this.initCounters();
       this.initButtonAnimations();
     }, 500);
+  },
+
+  // XSS prevention helper
+  escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   },
 };
 
