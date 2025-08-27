@@ -1,9 +1,9 @@
-import js from "@eslint/js";
 import babelParser from "@babel/eslint-parser";
+import js from "@eslint/js";
+import importPlugin from "eslint-plugin-import";
+import a11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import hooks from "eslint-plugin-react-hooks";
-import a11y from "eslint-plugin-jsx-a11y";
-import importPlugin from "eslint-plugin-import";
 
 export default [
   js.configs.recommended,

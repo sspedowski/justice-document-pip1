@@ -1,7 +1,8 @@
 // UI smoke test using @testing-library/react and Jest
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import App from '../frontend/App';
 
 describe('Justice Dashboard UI', () => {

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
 import { Cloud, Upload } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Full React dashboard (converted from Claude component)
 
@@ -33,7 +33,7 @@ export default function JusticeDashboard() {
         window.JusticeDashboard.DOMElements.init?.();
         window.JusticeDashboard.EventHandlers.init?.();
       } catch (e) {
-        // eslint-disable-next-line no-console
+         
         console.warn("Legacy init failed:", e);
       }
     }
@@ -92,7 +92,7 @@ export default function JusticeDashboard() {
       // remove first item
       setQueue((q) => q.slice(1));
       // small pause between files
-      // eslint-disable-next-line no-await-in-loop
+       
       await new Promise((r) => setTimeout(r, 150));
     }
   }

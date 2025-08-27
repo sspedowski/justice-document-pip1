@@ -1,5 +1,6 @@
 // API integration test using supertest and Jest
 const request = require('supertest');
+
 const app = require('../../justice-server/server');
 
 describe('API Authentication', () => {

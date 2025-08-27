@@ -1,7 +1,7 @@
 // Backend API tests for authentication endpoints
 
-const request = require('supertest');
 const path = require('path');
+const request = require('supertest');
 
 // Import your server app
 const app = require('../../justice-server/server');
