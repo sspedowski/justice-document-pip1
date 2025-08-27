@@ -1,23 +1,19 @@
 {
-    "name": "justice-server",
-    "version": "1.0.0",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js",
-        "postinstall": "cd ../justice-dashboard && npm install && npm run build && cd ../justice-server && npx cpx \"../justice-dashboard/dist/**/*\" ./public/"
-    },
-    "dependencies": {
-        "body-parser": "^2.2.0",
-        "chalk": "^4.1.2",
-        "cors": "^2.8.5",
-        "dotenv": "^17.2.1",
-        "express": "^5.1.0",
-        "fs-extra": "^11.3.0",
-        "helmet": "^8.1.0",
-        "jsonwebtoken": "^9.0.2",
-        "multer": "^2.0.2",
-        "pdf-parse": "^1.1.1",
-        "pdf2pic": "^3.2.0",
-        "tesseract.js": "^6.0.1"
-    }
+  "name": "justice-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node ../server.js",
+    "start:direct": "node server.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1"
+  }
 }
