@@ -109,7 +109,7 @@ const DashboardUI = {
             <h1 class="text-3xl font-bold text-gray-800">Justice Dashboard</h1>
             <p class="text-gray-600">Secure Legal Document Management</p>
           </div>
-          <div id="loginError" class="text-red-600 text-sm mb-2 ${errorMsg ? "" : "hidden"} bg-red-50 p-3 rounded">${errorMsg || ""}</div>
+          <div id="loginError" class="text-red-600 text-sm mb-2 ${errorMsg ? "" : "hidden"} bg-red-50 p-3 rounded"></div>
           <form id="loginForm" class="space-y-4">
             <input id="loginUsername" type="text" placeholder="Username" required class="w-full px-3 py-2 border rounded" autofocus />
             <input id="loginPassword" type="password" placeholder="Password" required class="w-full px-3 py-2 border rounded" />
@@ -118,7 +118,15 @@ const DashboardUI = {
         </div>
       </div>
     `;
-    document.getElementById("loginForm").onsubmit = async (e) => {
+    const loginForm = document.getElementById("loginForm");
+    const errorDiv = document.getElementById("loginError");
+    
+    if (errorMsg) {
+      errorDiv.textContent = errorMsg;
+      errorDiv.classList.remove('hidden');
+    }
+    
+    loginForm.onsubmit = async (e) => {
       e.preventDefault();
       const username = document.getElementById("loginUsername").value.trim();
       const password = document.getElementById("loginPassword").value;
@@ -126,7 +134,8 @@ const DashboardUI = {
       if (result.success) {
         this.renderDashboard();
       } else {
-        this.renderLogin(result.error || "Invalid credentials. Try again.");
+        errorDiv.textContent = result.error || "Invalid credentials. Try again.";
+        errorDiv.classList.remove('hidden');
       }
     };
   },
@@ -193,23 +202,49 @@ const DashboardUI = {
 
   addTrackerRow(row) {
     const tbody = document.getElementById("results");
+    if (!tbody) return;
+    
     const tr = document.createElement("tr");
     
-    // Sanitize all user inputs to prevent XSS
-    const category = this.escapeHtml(row.category);
-    const child = this.escapeHtml(row.child);
-    const misconduct = this.escapeHtml(row.misconduct);
-    const summary = this.escapeHtml(row.summary);
-    const fileURL = row.fileURL ? this.escapeHtml(row.fileURL) : null;
+    // Create cells safely without innerHTML
+    const categoryCell = document.createElement('td');
+    categoryCell.textContent = row.category || '';
     
-    tr.innerHTML = `
-      <td>${category}</td>
-      <td>${child}</td>
-      <td>${misconduct}</td>
-      <td>${summary}</td>
-      <td>${fileURL ? `<a href="${fileURL}" target="_blank" class="text-blue-600 underline">View PDF</a>` : "No PDF"}</td>
-      <td><button class="text-red-600" onclick="this.parentElement.parentElement.remove()">Delete</button></td>
-    `;
+    const childCell = document.createElement('td');
+    childCell.textContent = row.child || '';
+    
+    const misconductCell = document.createElement('td');
+    misconductCell.textContent = row.misconduct || '';
+    
+    const summaryCell = document.createElement('td');
+    summaryCell.textContent = row.summary || '';
+    
+    const fileCell = document.createElement('td');
+    if (row.fileURL) {
+      const link = document.createElement('a');
+      link.href = row.fileURL;
+      link.target = '_blank';
+      link.className = 'text-blue-600 underline';
+      link.textContent = 'View PDF';
+      fileCell.appendChild(link);
+    } else {
+      fileCell.textContent = 'No PDF';
+    }
+    
+    const actionCell = document.createElement('td');
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'text-red-600';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => tr.remove();
+    actionCell.appendChild(deleteBtn);
+    
+    tr.appendChild(categoryCell);
+    tr.appendChild(childCell);
+    tr.appendChild(misconductCell);
+    tr.appendChild(summaryCell);
+    tr.appendChild(fileCell);
+    tr.appendChild(actionCell);
+    
     tbody.appendChild(tr);
   },
 

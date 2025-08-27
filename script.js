@@ -1501,39 +1501,71 @@ function initializeJusticeDashboard() {
       modal.className =
         "bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden";
 
-      modal.innerHTML = `
-    <div class="flex items-center justify-between p-6 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">🧠 Wolfram Alpha Response</h3>
-      <button id="closeWolframModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-    
-    <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-      <div class="mb-4">
-        <h4 class="font-medium text-gray-700 mb-2">Query:</h4>
-        <p class="bg-gray-50 p-3 rounded border text-sm">${query}</p>
-      </div>
+      // Create modal content safely without innerHTML
+      const header = document.createElement('div');
+      header.className = 'flex items-center justify-between p-6 border-b border-gray-200';
       
-      <div>
-        <h4 class="font-medium text-gray-700 mb-2">Response:</h4>
-        <div class="bg-blue-50 p-4 rounded border">
-          <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono">${JSON.stringify(result, null, 2)}</pre>
-        </div>
-      </div>
-    </div>
-    
-    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
-      <button id="copyWolframResult" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-        📋 Copy Result
-      </button>
-      <button id="closeWolframModalBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">
-        Close
-      </button>
-    </div>
-  `;
+      const title = document.createElement('h3');
+      title.className = 'text-lg font-semibold text-gray-900';
+      title.textContent = '🧠 Wolfram Alpha Response';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.id = 'closeWolframModal';
+      closeBtn.className = 'text-gray-400 hover:text-gray-600 transition-colors';
+      closeBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+      
+      header.appendChild(title);
+      header.appendChild(closeBtn);
+      
+      const content = document.createElement('div');
+      content.className = 'p-6 overflow-y-auto max-h-[calc(90vh-120px)]';
+      
+      const querySection = document.createElement('div');
+      querySection.className = 'mb-4';
+      const queryLabel = document.createElement('h4');
+      queryLabel.className = 'font-medium text-gray-700 mb-2';
+      queryLabel.textContent = 'Query:';
+      const queryText = document.createElement('p');
+      queryText.className = 'bg-gray-50 p-3 rounded border text-sm';
+      queryText.textContent = query; // Safe text content
+      querySection.appendChild(queryLabel);
+      querySection.appendChild(queryText);
+      
+      const responseSection = document.createElement('div');
+      const responseLabel = document.createElement('h4');
+      responseLabel.className = 'font-medium text-gray-700 mb-2';
+      responseLabel.textContent = 'Response:';
+      const responseDiv = document.createElement('div');
+      responseDiv.className = 'bg-blue-50 p-4 rounded border';
+      const responsePre = document.createElement('pre');
+      responsePre.className = 'whitespace-pre-wrap text-sm text-gray-800 font-mono';
+      responsePre.textContent = JSON.stringify(result, null, 2); // Safe text content
+      responseDiv.appendChild(responsePre);
+      responseSection.appendChild(responseLabel);
+      responseSection.appendChild(responseDiv);
+      
+      content.appendChild(querySection);
+      content.appendChild(responseSection);
+      
+      const footer = document.createElement('div');
+      footer.className = 'flex justify-end gap-3 p-6 border-t border-gray-200';
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.id = 'copyWolframResult';
+      copyBtn.className = 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors';
+      copyBtn.textContent = '📋 Copy Result';
+      
+      const closeModalBtn = document.createElement('button');
+      closeModalBtn.id = 'closeWolframModalBtn';
+      closeModalBtn.className = 'px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors';
+      closeModalBtn.textContent = 'Close';
+      
+      footer.appendChild(copyBtn);
+      footer.appendChild(closeModalBtn);
+      
+      modal.appendChild(header);
+      modal.appendChild(content);
+      modal.appendChild(footer);
 
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
@@ -1578,25 +1610,29 @@ function initializeJusticeDashboard() {
 
     // Justice Dashboard Script - ChatGPT Version
 
-    // Add a new row to the tracker
+    // Add a new row to the tracker (secure version)
     function addToTracker(summary) {
       const tableBody = document.querySelector("#trackerTable tbody");
+      if (!tableBody) return;
+      
       const newRow = tableBody.insertRow();
 
-      newRow.insertCell().innerText = summary.category;
-      newRow.insertCell().innerText = summary.child;
-      newRow.insertCell().innerText = summary.misconduct;
-      newRow.insertCell().innerText = summary.summary;
+      // Safely add cells with sanitized content
+      newRow.insertCell().textContent = summary.category || '';
+      newRow.insertCell().textContent = summary.child || '';
+      newRow.insertCell().textContent = summary.misconduct || '';
+      newRow.insertCell().textContent = summary.summary || '';
 
       const viewCell = newRow.insertCell();
       if (summary.fileURL) {
         const viewLink = document.createElement("a");
-        viewLink.innerText = "View PDF";
+        viewLink.textContent = "View PDF";
         viewLink.href = summary.fileURL;
         viewLink.target = "_blank";
+        viewLink.className = "text-blue-600 underline";
         viewCell.appendChild(viewLink);
       } else {
-        viewCell.innerText = "No PDF";
+        viewCell.textContent = "No PDF";
       }
     }
 
