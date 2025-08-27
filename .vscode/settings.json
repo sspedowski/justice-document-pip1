@@ -5,6 +5,8 @@
     "markdown": true,
     "javascript": true
   },
+  "amazonQ.telemetry": false,
+  "amazonQ.shareContent": false,
   "editor.inlineSuggest.enabled": true,
   "chat.promptFiles": true,
   "chat.promptFilesLocations": { ".github/prompts": true },
