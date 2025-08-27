@@ -10,5 +10,13 @@
   "editor.inlineSuggest.enabled": true,
   "chat.promptFiles": true,
   "chat.promptFilesLocations": { ".github/prompts": true },
-  "github.copilot.chat.codeGeneration.useInstructionFiles": true
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+
+  "chatgpt.config": {
+    "api_base": "https://api.openai.com/v1",
+    "api_key": "${env:OPENAI_API_KEY}",
+    "timeout_ms": 60000
+  },
+  "chatgpt.model": "gpt-5",
+  "chatgpt.openOnStartup": true
 }
