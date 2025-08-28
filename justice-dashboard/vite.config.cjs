@@ -10,13 +10,16 @@ module.exports = defineConfig({
   },
   server: {
     port: 5174,
+    strictPort: true,
+    hmr: { overlay: false },
     proxy: {
       '/api': 'http://localhost:3000',
       '/upload': 'http://localhost:3000'
     }
   },
   optimizeDeps: {
-    exclude: ['canvas']
+    exclude: ['canvas'],
+    force: true
   },
   define: {
     global: 'globalThis'
