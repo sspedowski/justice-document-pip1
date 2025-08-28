@@ -51,7 +51,7 @@ foreach ($f in $files) {
 
       # Optionally add import for authFetch
       if ($AutoImport -and $authPath) {
-        $needsImport = ($new -notmatch 'import\s*\{\s*authFetch\s*\}\s*from\s*[\'\"].*auth-fetch(\.js)?[\'\"]').
+    $needsImport = ($new -notmatch 'import\s*\{\s*authFetch\s*\}\s*from\s*[\'\"].*auth-fetch(\.js)?[\'\"]')
         if ($needsImport) {
           $rel = Get-RelativeImportPath -fromFile $f.FullName -toFile $authPath
           if ($rel) {
