@@ -6,6 +6,8 @@ const path = require("path");
 const multer = require("multer");
 const helmet = require("helmet");
 const jwt = require("jsonwebtoken");
+const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
 
 // Load environment variables (prefer local .env if present)
 const dotenvPath = [
@@ -29,6 +31,9 @@ app.disable("x-powered-by");
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+// Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
+app.use(cookieParser());
+app.use(csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: false } }));
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
@@ -51,6 +56,15 @@ const upload = multer({
 // Health check
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
+});
+
+// CSRF token endpoint (client can call to fetch token if needed)
+app.get('/api/csrf-token', (req, res) => {
+  try {
+    return res.json({ csrfToken: req.csrfToken() });
+  } catch (e) {
+    return res.status(500).json({ error: 'Unable to generate CSRF token' });
+  }
 });
 
 // Auth: login to get a JWT
