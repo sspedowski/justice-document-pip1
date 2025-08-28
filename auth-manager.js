@@ -5,29 +5,47 @@
 
 class AuthManager {
   constructor() {
-    this.token = localStorage.getItem("justice_token");
+    // For security, do NOT persist JWTs in localStorage. Prefer HttpOnly secure cookies
+    // set by the server or keep tokens in-memory. We keep minimal user info in sessionStorage
+    // (cleared when the tab/window closes) to reduce exposure to XSS.
+    this.token = null; // in-memory only by default
     this.refreshTimer = null;
-    this.tokenExpiry = localStorage.getItem("justice_token_expiry");
+    this.tokenExpiry = null;
     this.user = this.getStoredUser();
 
-    // Start token refresh timer if we have a valid token
+    // Start token refresh timer if a token and expiry are available (e.g., after login)
     if (this.token && this.tokenExpiry) {
       this.startRefreshTimer();
     }
   }
 
   getStoredUser() {
-    const userData = localStorage.getItem("justice_user");
-    return userData ? JSON.parse(userData) : null;
+    // Use sessionStorage for non-sensitive user metadata to limit persistence.
+    try {
+      const userData = sessionStorage.getItem("justice_user");
+      return userData ? JSON.parse(userData) : null;
+    } catch (e) {
+      console.warn("Failed to parse stored user data", e);
+      return null;
+    }
   }
 
   setStoredUser(user) {
-    localStorage.setItem("justice_user", JSON.stringify(user));
-    this.user = user;
+    // Store only minimal, non-sensitive user fields in sessionStorage.
+    const safeUser = {
+      username: user && user.username,
+      role: user && user.role,
+    };
+    try {
+      sessionStorage.setItem("justice_user", JSON.stringify(safeUser));
+    } catch (e) {
+      console.warn("Failed to store user in sessionStorage", e);
+    }
+    this.user = safeUser;
   }
 
   clearStoredUser() {
-    localStorage.removeItem("justice_user");
+    sessionStorage.removeItem("justice_user");
     this.user = null;
   }
 
@@ -50,19 +68,20 @@ class AuthManager {
       const data = await response.json();
 
       if (data.success) {
-        this.token = data.token;
-        localStorage.setItem("justice_token", this.token);
+  // Keep token in-memory. If you need persistence across tabs, implement a
+  // server-side HttpOnly secure cookie (endpoint /api/set-token-cookie) and
+  // call it from here. Avoid storing JWTs in localStorage to reduce XSS impact.
+  this.setToken(data.token);
 
-        // Calculate token expiry (23.5 hours from now, refresh before expiry)
-        const expiryTime = Date.now() + 23.5 * 60 * 60 * 1000;
-        this.tokenExpiry = expiryTime;
-        localStorage.setItem("justice_token_expiry", expiryTime.toString());
+  // Calculate and store expiry in memory
+  const expiryTime = Date.now() + 23.5 * 60 * 60 * 1000;
+  this.tokenExpiry = expiryTime;
 
-        // Fetch and store user profile
-        await this.fetchUserProfile();
+  // Fetch and store minimal user profile (session-only)
+  await this.fetchUserProfile();
 
-        // Start refresh timer
-        this.startRefreshTimer();
+  // Start refresh timer
+  this.startRefreshTimer();
 
         return { success: true, user: this.user };
       } else {
@@ -90,11 +109,9 @@ class AuthManager {
   }
 
   clearSession() {
-    this.token = null;
-    this.tokenExpiry = null;
-    this.clearStoredUser();
-    localStorage.removeItem("justice_token");
-    localStorage.removeItem("justice_token_expiry");
+  this.clearTokenStorage();
+  this.tokenExpiry = null;
+  this.clearStoredUser();
 
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
@@ -132,13 +149,10 @@ class AuthManager {
       const data = await response.json();
 
       if (data.success) {
-        this.token = data.token;
-        localStorage.setItem("justice_token", this.token);
-
-        // Update expiry time
+        // Replace in-memory token and update expiry
+        this.setToken(data.token);
         const expiryTime = Date.now() + 23.5 * 60 * 60 * 1000;
         this.tokenExpiry = expiryTime;
-        localStorage.setItem("justice_token_expiry", expiryTime.toString());
 
         console.log("✅ Token refreshed successfully");
         this.startRefreshTimer();
@@ -152,6 +166,41 @@ class AuthManager {
       console.error("Token refresh error:", error);
       this.clearSession();
       return false;
+    }
+  }
+
+  // Store token in-memory and optionally to sessionStorage (non-persistent across browser restarts).
+  // Prefer server-set HttpOnly cookie for cross-tab persistence and XSS protection.
+  setToken(token, { persist = false } = {}) {
+    this.token = token;
+    if (persist) {
+      try {
+        sessionStorage.setItem("justice_token", token);
+        // Storing tokens in sessionStorage is less persistent than localStorage but still
+        // accessible to JS. For best security, implement a server endpoint to set
+        // an HttpOnly secure cookie instead and call it here (e.g. POST /api/set-token-cookie).
+      } catch (e) {
+        console.warn("Failed to persist token to sessionStorage", e);
+      }
+    }
+  }
+
+  clearTokenStorage() {
+    this.token = null;
+    try {
+      sessionStorage.removeItem("justice_token");
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  // Helper: include CSRF token for state-changing requests when available
+  getCsrfToken() {
+    try {
+      const el = document.querySelector('meta[name="csrf-token"]');
+      return el ? el.getAttribute('content') : null;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -269,6 +318,19 @@ class AuthManager {
 
 // Global auth manager instance
 window.authManager = new AuthManager();
+
+// Named exports for module consumers (ESM-friendly). Keep globals for legacy scripts.
+export function getToken() {
+  return window.authManager.token;
+}
+
+export function refreshToken() {
+  return window.authManager.refreshToken();
+}
+
+export function getCsrfToken() {
+  return window.authManager.getCsrfToken();
+}
 
 // Auto-redirect if not authenticated (for protected pages)
 function requireAuth() {

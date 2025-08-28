@@ -151,3 +151,5 @@ justice-dashboard/uploads/
 justice-server/.env
 justice-dashboard/.env
 
+
+tmp-eslint-output.txt

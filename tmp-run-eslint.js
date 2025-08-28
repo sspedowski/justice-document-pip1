@@ -18,8 +18,11 @@
     const formatter = await eslint.loadFormatter('stylish');
     const output = formatter.format(results);
     out.push(output || 'NO_ISSUES');
-    fs.writeFileSync('tmp-eslint-output.txt', out.join('\n\n'), 'utf8');
-    console.log('WROTE tmp-eslint-output.txt');
+    const text = out.join('\n\n');
+    fs.writeFileSync('tmp-eslint-output.txt', text, 'utf8');
+    // Also print to stdout so you don't need to open the file
+    console.log(text);
+    console.log('\nWROTE tmp-eslint-output.txt');
   } catch (e) {
     console.error('ERROR', e && e.stack ? e.stack : e);
     process.exit(2);
