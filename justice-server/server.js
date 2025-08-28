@@ -6,6 +6,7 @@ const path = require("path");
 const multer = require("multer");
 const helmet = require("helmet");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
 
@@ -56,6 +57,12 @@ const upload = multer({
 // Health check
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
+});
+
+// Simple CSRF token endpoint (stateless demo)
+app.get("/api/csrf-token", (_req, res) => {
+  const csrfToken = crypto.randomBytes(16).toString("hex");
+  res.json({ csrfToken });
 });
 
 // CSRF token endpoint (client can call to fetch token if needed)
