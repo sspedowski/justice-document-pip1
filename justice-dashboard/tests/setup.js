@@ -1,5 +1,8 @@
 // Jest test setup file
 
+// Extend Jest with DOM matchers
+require('@testing-library/jest-dom');
+
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only';
