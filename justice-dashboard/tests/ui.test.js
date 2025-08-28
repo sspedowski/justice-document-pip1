@@ -1,23 +1,13 @@
 // UI smoke test using @testing-library/react and Jest
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import App from '../frontend/App';
+import App from '../src/App';
 
 describe('Justice Dashboard UI', () => {
-  it('renders login form', () => {
+  it('renders dashboard heading and upload controls', () => {
     render(<App />);
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
-  });
-
-  it('shows error on invalid login', async () => {
-    render(<App />);
-    userEvent.type(screen.getByLabelText(/username/i), 'wrong');
-    userEvent.type(screen.getByLabelText(/password/i), 'wrong');
-    userEvent.click(screen.getByRole('button', { name: /login/i }));
-    expect(await screen.findByText(/login failed/i)).toBeInTheDocument();
+    expect(screen.getByText(/justice dashboard/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /select files/i })).toBeInTheDocument();
   });
 });

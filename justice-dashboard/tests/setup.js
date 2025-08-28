@@ -22,6 +22,13 @@ global.console = {
 // Global test timeout
 jest.setTimeout(10000);
 
+// Polyfill TextEncoder/TextDecoder for libraries that expect them in Node
+try {
+  const { TextEncoder, TextDecoder } = require('util');
+  if (!global.TextEncoder) global.TextEncoder = TextEncoder;
+  if (!global.TextDecoder) global.TextDecoder = TextDecoder;
+} catch {}
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
