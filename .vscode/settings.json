@@ -5,8 +5,7 @@
     "markdown": true,
     "javascript": true
   },
-  "amazonQ.telemetry": false,
-  "amazonQ.shareContent": false,
+  // Amazon Q settings removed at user's request
   "editor.inlineSuggest.enabled": true,
   "chat.promptFiles": true,
   "chat.promptFilesLocations": { ".github/prompts": true },
