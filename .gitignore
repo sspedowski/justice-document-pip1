@@ -143,3 +143,11 @@ dist
 
 # Local Netlify folder
 .netlify
+
+# Server/client uploads
+justice-server/uploads/
+justice-dashboard/uploads/
+# Env files in packages
+justice-server/.env
+justice-dashboard/.env
+
