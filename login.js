@@ -72,6 +72,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       try {
+        // Ensure authFetch/getToken helpers are available for server calls
+        if (typeof authFetch === 'undefined') {
+          // dynamic import so non-module pages still work
+          const mod = await import('./src/lib/auth-fetch.js');
+          window.authFetch = mod.authFetch;
+        }
+
         const result = await window.authManager.login(username, password);
         if (result.success) {
           window.location.href = "/secure-dashboard.html";

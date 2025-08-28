@@ -5,7 +5,11 @@ form.onsubmit = async (e) => {
   const username = document.getElementById("user").value.trim();
   const password = document.getElementById("pass").value;
   try {
-    const res = await fetch("/api/login", {
+    if (typeof authFetch === 'undefined') {
+      const mod = await import('./src/lib/auth-fetch.js');
+      window.authFetch = mod.authFetch;
+    }
+    const res = await authFetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
