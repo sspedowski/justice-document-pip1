@@ -58,9 +58,9 @@ app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     const token = jwt.sign({ sub: username, role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
-    return res.json({ success: true, user: { username }, token });
+    return res.json({ success: true, user: { username, role: "admin" }, token });
   }
-  return res.status(401).json({ success: false, message: "Invalid credentials" });
+  return res.status(401).json({ success: false, error: "Invalid credentials" });
 });
 
 // Auth: logout (stateless JWT, so just acknowledge)
@@ -91,6 +91,16 @@ app.post("/api/summarize", requireAuth, upload.single("file"), async (req, res) 
   return res.status(201).json({ summary, fileURL });
 });
 
+// Global error handler (normalize Multer/file errors to 400)
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  const message = err && (err.message || err.toString());
+  if (message && (message.includes("Only PDF files are allowed") || message.includes("File too large") || err.name === 'MulterError')) {
+    return res.status(400).json({ error: message });
+  }
+  return res.status(500).json({ error: message || "Internal Server Error" });
+});
+
 // If run directly, start listening; when imported (tests), export app only
 if (require.main === module) {
   app.listen(PORT, () => {
@@ -99,4 +109,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
