@@ -229,7 +229,7 @@ const DashboardAuth = {
     try {
       // Call server logout endpoint if token exists
       if (this.authToken) {
-        await fetch(`${DYNAMIC_API_BASE_URL}/api/logout`, {
+  await authFetch(`${DYNAMIC_API_BASE_URL}/api/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${this.authToken}`,
@@ -310,7 +310,7 @@ const DashboardAuth = {
       ...(csrfToken && { "X-CSRF-Token": csrfToken }),
     };
     try {
-      const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, {
+  const response = await authFetch(`${DYNAMIC_API_BASE_URL}${url}`, {
         ...options,
         headers,
         credentials: "same-origin"
@@ -1050,7 +1050,7 @@ async function uploadAndAnalyzeFile(file) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/summarize`, {
+  const response = await authFetch(`${DYNAMIC_API_BASE_URL}/api/summarize`, {
       method: "POST",
       body: formData
     });
@@ -1419,7 +1419,7 @@ function initializeJusticeDashboard() {
         }
 
         try {
-          const response = await fetch(
+          const response = await authFetch(
             `${DYNAMIC_API_BASE_URL}${url}`,
             defaultOptions,
           );
@@ -1495,7 +1495,7 @@ function initializeJusticeDashboard() {
         throw new Error("Authentication required to use Wolfram Alpha");
       }
 
-      const response = await fetch("/api/wolfram", {
+  const response = await authFetch("/api/wolfram", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
