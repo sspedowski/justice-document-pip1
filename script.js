@@ -1,10 +1,21 @@
 // Ensure Upload and Lawyer buttons always work, even if added dynamically
 document.addEventListener("click", function (event) {
+  // Check authorization before allowing upload or lawyer actions
   if (event.target && event.target.id === "uploadBtn") {
-    alert("Upload button (delegated)");
+    if (window.DashboardAuth && window.DashboardAuth.isAuthenticated) {
+      alert("Upload button (delegated)");
+    } else {
+      alert("Unauthorized: Please log in to upload documents.");
+      if (window.showLoginForm) window.showLoginForm();
+    }
   }
   if (event.target && event.target.id === "lawyerBtn") {
-    alert("Lawyer button (delegated)");
+    if (window.DashboardAuth && window.DashboardAuth.isAuthenticated) {
+      alert("Lawyer button (delegated)");
+    } else {
+      alert("Unauthorized: Please log in to access lawyer features.");
+      if (window.showLoginForm) window.showLoginForm();
+    }
   }
 });
 // Justice Dashboard - Authentication & Main App
@@ -97,13 +108,19 @@ const DashboardAuth = {
     return false;
   },
 
-  // Authenticate user with server
+  // Authenticate user with server (CSRF protection)
   async authenticate(username, password) {
     try {
+      // Retrieve CSRF token from meta tag or cookie
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || localStorage.getItem('justiceCsrfToken');
       const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        },
         body: JSON.stringify({ username, password }),
+        credentials: "same-origin"
       });
 
       if (!response.ok) {
@@ -127,6 +144,11 @@ const DashboardAuth = {
             timestamp: Date.now(),
           }),
         );
+
+        // Store CSRF token if provided
+        if (data.csrfToken) {
+          localStorage.setItem('justiceCsrfToken', data.csrfToken);
+        }
 
         return { success: true, user: this.currentUser };
       }
@@ -269,35 +291,38 @@ const DashboardAuth = {
             
             <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
               Sign In
-            </button>
-          </form>
-          
-          <div class="text-center text-sm text-gray-500">
-            <p>Secure access to legal case management</p>
-          </div>
-        </div>
-      </div>
-    `;
-  },
-
-  // Helper function to make authenticated requests
+  // Helper function to make authenticated requests (CSRF protection)
   async makeAuthenticatedRequest(url, options = {}) {
     if (!DashboardAuth.isAuthenticated) {
       console.error("User not authenticated");
       DashboardAuth.showLoginForm();
       return null;
     }
+    const csrfToken = localStorage.getItem('justiceCsrfToken');
     const headers = {
       ...options.headers,
       Authorization: `Bearer ${DashboardAuth.authToken}`,
       "Content-Type": "application/json",
+      ...(csrfToken && { "X-CSRF-Token": csrfToken }),
     };
     try {
       const response = await fetch(`${DYNAMIC_API_BASE_URL}${url}`, {
         ...options,
         headers,
+        credentials: "same-origin"
       });
       if (response.status === 401) {
+        // Token expired or invalid
+        DashboardAuth.clearAuth();
+        DashboardAuth.showLoginForm();
+        return null;
+      }
+      return response;
+    } catch (error) {
+      console.error("API request error:", error);
+      return null;
+    }
+  },
         // Token expired or invalid
         DashboardAuth.clearAuth();
         DashboardAuth.showLoginForm();
