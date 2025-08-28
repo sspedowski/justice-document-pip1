@@ -1,0 +1,16 @@
+Title: JUSTICE — Deep Review & File Sanity
+
+Do:
+1) Build a file map; move misplaced files into /frontend, /backend, /shared; update imports
+2) Detect/merge duplicate scripts; normalize package.json scripts; update CI/docs.
+3) Run: depcheck, knip -s, eslint --fix, tsc --noEmit, vitest -u, vite build --debug.
+4) If any step fails, open a Linear issue with stderr + repro; else commit “agent: structure+fixes”.
+
+Allowlist:
+npm ci | npm run dev | npm run build | npx depcheck | npx knip -s | npx eslint . --fix | npx tsc --noEmit | npx vitest -u | npx vite build --debug | git mv | git commit -m | git push
+
+description:
+globs:
+alwaysApply: true
+---
+(Background Agents → Linear = Ask First.)
