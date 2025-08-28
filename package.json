@@ -1,32 +1,32 @@
-{
-  "name": "justice-dashboard-root",
-  "private": true,
-  "scripts": {
-    "setup": "bash scripts/setup.sh",
-    "setup:win": "scripts\\setup.bat",
-    "validate": "node scripts/validate-env.js",
-    "build": "node build.js",
-    "build:bash": "bash build.sh",
-    "build:verbose": "echo '🚀 Installing all dependencies...' && npm install && echo '📦 Installing backend...' && cd justice-server && npm install && echo '📦 Installing frontend...' && cd ../justice-dashboard && npm install && echo '✅ Build complete!'",
-    "install:all": "npm install && cd justice-server && npm install && cd ../justice-dashboard && npm install",
-    "test:build": "bash scripts/test-build.sh",
-    "start": "cd justice-server && node server.js",
-    "start:prod": "bash scripts/start-production.sh",
-    "dev": "cd justice-dashboard && npm run dev",
-    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node start-local.js",
-    "dev:backend": "node server.js",
-    "dev:frontend": "cd justice-dashboard && npm run dev:client",
-    "test": "echo '✅ All tests passed!'",
-    "test:backend": "echo '✅ Backend tests passed!'",
-    "test:frontend": "echo '✅ Frontend tests passed!'",
-    "deploy": "cd justice-server && railway up"
-  },
-  "dependencies": {
-    "chalk": "^4.1.2"
-  },
-  "devDependencies": {
-    "@babel/eslint-parser": "^7.28.0",
-    "babel-eslint": "^10.1.0",
-    "eslint-plugin-react": "^7.37.5"
-  }
+﻿{
+    "name":  "justice-dashboard-root",
+    "private":  true,
+    "scripts":  {
+                    "setup":  "bash scripts/setup.sh",
+                    "setup:win":  "scripts\\setup.bat",
+                    "validate":  "node scripts/validate-env.js",
+                    "build":  "node build.js",
+                    "build:bash":  "bash build.sh",
+                    "build:verbose":  "echo \u0027ðŸš€ Installing all dependencies...\u0027 \u0026\u0026 npm install \u0026\u0026 echo \u0027ðŸ“¦ Installing backend...\u0027 \u0026\u0026 cd justice-server \u0026\u0026 npm install \u0026\u0026 echo \u0027ðŸ“¦ Installing frontend...\u0027 \u0026\u0026 cd ../justice-dashboard \u0026\u0026 npm install \u0026\u0026 echo \u0027âœ… Build complete!\u0027",
+                    "install:all":  "npm install \u0026\u0026 cd justice-server \u0026\u0026 npm install \u0026\u0026 cd ../justice-dashboard \u0026\u0026 npm install",
+                    "test:build":  "bash scripts/test-build.sh",
+                    "start":  "cd justice-server \u0026\u0026 node server.js",
+                    "start:prod":  "bash scripts/start-production.sh",
+                    "dev":  "cd justice-dashboard \u0026\u0026 npm run dev",
+                    "dev:win":  "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node start-local.js",
+                    "dev:backend":  "node server.js",
+                    "dev:frontend":  "cd justice-dashboard \u0026\u0026 npm run dev:client",
+                    "test":  "echo \u0027âœ… All tests passed!\u0027",
+                    "test:backend":  "echo \u0027âœ… Backend tests passed!\u0027",
+                    "test:frontend":  "echo \u0027âœ… Frontend tests passed!\u0027",
+                    "deploy":  "cd justice-server \u0026\u0026 railway up"
+                },
+    "dependencies":  {
+                         "chalk":  "^4.1.2"
+                     },
+    "devDependencies":  {
+                            "@babel/eslint-parser":  "^7.28.0",
+                            "babel-eslint":  "^10.1.0",
+                            "eslint-plugin-react":  "^7.37.5"
+                        }
 }
