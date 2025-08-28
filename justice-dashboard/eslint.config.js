@@ -1,24 +1,31 @@
-import babelParser from "@babel/eslint-parser";
 import js from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import a11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import hooks from "eslint-plugin-react-hooks";
+import globals from "globals";
 
 export default [
   js.configs.recommended,
   {
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
-    ignores: ["node_modules/**", "dist/**", "build/**"],
+    files: ["src/**/*.{js,jsx,ts,tsx}", "tests/**/*.js", "frontend/**/*.js"],
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "*.config.{js,cjs,mjs}",
+      "vite.config.*",
+      "jest.config.*",
+      "postcss.config.*",
+      "babel.config.*",
+      "eslint.config.*",
+      "cypress.config.*",
+    ],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: "module",
-      parser: babelParser,
-      parserOptions: {
-        requireConfigFile: false,
-        babelOptions: { presets: ["@babel/preset-env", "@babel/preset-react"] },
-      },
-      globals: { window: "readonly", document: "readonly", navigator: "readonly" },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { ...globals.browser },
     },
     plugins: { react, "react-hooks": hooks, "jsx-a11y": a11y, import: importPlugin },
     settings: { react: { version: "detect" } },
@@ -50,9 +57,20 @@ export default [
       "import/no-duplicates": "warn",
     },
   },
-  // Cypress or test files (if present)
+  // Cypress e2e tests
   {
-    files: ["cypress/**/*.js", "cypress.config.*"],
-    languageOptions: { sourceType: "module", globals: { cy: "readonly", Cypress: "readonly" } },
+    files: ["cypress/**/*.js"],
+    languageOptions: {
+      sourceType: "module",
+      globals: { ...globals.browser, ...globals.mocha, cy: "readonly", Cypress: "readonly" },
+    },
+  },
+  // Cypress config (Node)
+  {
+    files: ["cypress.config.*"],
+    languageOptions: {
+      sourceType: "script",
+      globals: { ...globals.node },
+    },
   },
 ];
