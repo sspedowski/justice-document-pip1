@@ -1,15 +1,23 @@
 module.exports = {
-  testEnvironment: 'node',
-  // Focus tests on API/server behavior (exclude UI/JSX tests that require Babel)
-  testMatch: ['**/tests/*api*.test.js'],
+  testEnvironment: 'jsdom',
+  testMatch: ['**/tests/**/*.test.js'],
+  transform: {
+    '^.+\\.(js|jsx)$': 'babel-jest',
+  },
+  moduleFileExtensions: ['js', 'jsx', 'json'],
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': 'jest-transform-stub',
+  },
   collectCoverageFrom: [
     'justice-server/**/*.js',
-    '!justice-server/node_modules/**',
-    '!**/node_modules/**'
+    'src/**/*.{js,jsx}',
+    '!**/node_modules/**',
+    '!**/dist/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   testTimeout: 10000,
-  verbose: true
+  verbose: true,
 };
