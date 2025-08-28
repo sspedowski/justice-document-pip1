@@ -116,7 +116,7 @@ app.post("/api/summarize", requireAuth, upload.single("file"), async (req, res) 
 });
 
 // Global error handler (normalize Multer/file errors to 400)
-// eslint-disable-next-line no-unused-vars
+ 
 app.use((err, _req, res, _next) => {
   const message = err && (err.message || err.toString());
   if (message && (message.includes("Only PDF files are allowed") || message.includes("File too large") || err.name === 'MulterError')) {
