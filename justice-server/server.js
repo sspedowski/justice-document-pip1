@@ -56,6 +56,9 @@ app.get("/api/health", (_req, res) => {
 // Auth: login to get a JWT
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: "Username and password required" });
+  }
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     const token = jwt.sign({ sub: username, role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
     return res.json({ success: true, user: { username, role: "admin" }, token });
