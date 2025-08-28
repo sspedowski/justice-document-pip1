@@ -73,4 +73,15 @@ export default [
       globals: { ...globals.node },
     },
   },
+  // Jest tests (Node + Jest globals)
+  {
+    files: ["tests/**/*.js"],
+    languageOptions: {
+      sourceType: "module",
+      globals: { ...globals.node, ...globals.jest },
+    },
+    rules: {
+      'no-undef': 'off',
+    }
+  },
 ];
