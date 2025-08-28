@@ -113,14 +113,18 @@ const DashboardAuth = {
     try {
       // Retrieve CSRF token from meta tag or cookie
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || localStorage.getItem('justiceCsrfToken');
-      const response = await fetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
+      if (typeof authFetch === 'undefined') {
+        const mod = await import('../justice-dashboard/src/lib/auth-fetch.js');
+        window.authFetch = mod.authFetch;
+      }
+      const response = await authFetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           ...(csrfToken && { "X-CSRF-Token": csrfToken }),
         },
         body: JSON.stringify({ username, password }),
-        credentials: "same-origin"
+        credentials: "include"
       });
 
       if (!response.ok) {
