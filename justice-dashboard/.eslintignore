@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 dist/
 dist/**
 build/
@@ -12,3 +12,6 @@ eslint.config.js
 *.min.js
 *.map
 **/pdf*.js
+
+**/*.test.*
+**/__tests__/**
