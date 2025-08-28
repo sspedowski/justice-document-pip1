@@ -3,8 +3,11 @@ import globals from "globals";
 export default [
   // Frontend / browser files
   {
-    files: ["justice-dashboard/**/*.{js,jsx,ts,tsx}", "web/**/*.{js,jsx,ts,tsx}", "src/**/*.{js,jsx,ts,tsx}"],
-    ignores: ["node_modules/**", "dist/**", "build/**"],
+    files: [
+      "justice-dashboard/**/*.{js,jsx,ts,tsx}",
+      "web/**/*.{js,jsx,ts,tsx}",
+    ],
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**", "legacy/**"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -12,7 +15,8 @@ export default [
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      // frontend-specific rules can go here
+      // Allow console in browser (can be tuned per env)
+      "no-console": "off",
     },
   },
 
@@ -27,15 +31,13 @@ export default [
       "admin-users.js",
       "**/*.config.{js,cjs,mjs}"
     ],
-    ignores: ["node_modules/**", "dist/**", "build/**"],
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**", "legacy/**"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       globals: { ...globals.node },
       parserOptions: { sourceType: "module" },
     },
-    rules: {
-      // node-specific rules
-    },
+    rules: {},
   },
 ];

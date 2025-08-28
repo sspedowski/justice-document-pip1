@@ -1,0 +1,382 @@
+RESULTS_COUNT 21
+
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\babel.config.cjs
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\cypress.config.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\dashboard.cy.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\file-upload.cy.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\login.cy.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\cypress\e2e\navigation.cy.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\eslint.config.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\frontend\App.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\jest.config.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\postcss.config.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\src\App.jsx
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\src\JusticeDashboard.jsx
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\src\components\UploadDashboard.jsx
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\src\main.jsx
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tailwind.config.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tests\api.test.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tests\auth-api.test.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tests\document-api.test.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tests\setup.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\tests\ui.test.js
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+C:\Users\ssped\justice-dashboard\justice-dashboard\vite.config.cjs
+  0:0  error  Parsing error: Cannot find module '@babel/preset-env'
+Require stack:
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\plugins.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\config\files\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\core\lib\index.js
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\babel-core.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\worker\handle-message.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\client.cjs
+- C:\Users\ssped\justice-dashboard\justice-dashboard\node_modules\@babel\eslint-parser\lib\index.cjs
+
+Make sure that all the Babel plugins and presets you are using
+are defined as dependencies or devDependencies in your package.json
+file. It's possible that the missing plugin is loaded by a preset
+you are using that forgot to add the plugin to its dependencies: you
+can workaround this problem by explicitly adding the missing package
+to your top-level package.json
+
+✖ 21 problems (21 errors, 0 warnings)
