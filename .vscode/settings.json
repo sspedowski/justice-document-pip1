@@ -6,6 +6,10 @@
     "javascript": true
   },
   // Amazon Q settings removed at user's request
+  "aws.amazonq.enableCodeScanning": false,
+  "aws.amazonq.enableCodeSuggestions": false,
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": false,
   "editor.inlineSuggest.enabled": true,
   "chat.promptFiles": true,
   "chat.promptFilesLocations": { ".github/prompts": true },

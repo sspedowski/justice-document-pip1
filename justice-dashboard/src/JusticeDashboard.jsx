@@ -1,5 +1,6 @@
+/* eslint-env browser */
 import { Upload } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const STAT_COLORS = {
   blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
@@ -29,14 +30,16 @@ export default function JusticeDashboard() {
         window.JusticeDashboard.DOMElements?.init?.();
         window.JusticeDashboard.EventHandlers?.init?.();
       } catch (e) {
-        console.warn('Legacy init failed:', e);
+        if (typeof console !== 'undefined') console.warn('Legacy init failed:', e);
       }
     }
 
+    // Capture the current Set reference to avoid ref churn issues in cleanup
+    const ids = timersRef.current?.rafIds;
     return () => {
-      if (timersRef.current?.rafIds) {
-        timersRef.current.rafIds.forEach((id) => cancelAnimationFrame(id));
-        timersRef.current.rafIds.clear();
+      if (ids) {
+        ids.forEach((id) => globalThis.cancelAnimationFrame?.(id));
+        ids.clear();
       }
     };
   }, []);
@@ -52,23 +55,24 @@ export default function JusticeDashboard() {
 
   function animateProgress(durationMs, onStep) {
     return new Promise((resolve) => {
-      const start = performance.now();
+      const nowFn = () => (globalThis.performance?.now ? globalThis.performance.now() : Date.now());
+      const start = nowFn();
       const tick = (now) => {
         const elapsed = Math.max(0, now - start);
         const pct = Math.min(100, (elapsed / durationMs) * 100);
         try {
           if (typeof onStep === 'function') onStep(pct);
         } catch (e) {
-          console.warn('Animation step error:', e);
+          if (typeof console !== 'undefined') console.warn('Animation step error:', e);
         }
         if (pct < 100) {
-          const id = requestAnimationFrame(tick);
+          const id = (globalThis.requestAnimationFrame || ((cb) => setTimeout(() => cb(nowFn()), 16)))(tick);
           timersRef.current.rafIds.add(id);
         } else {
           resolve();
         }
       };
-      const id = requestAnimationFrame(tick);
+      const id = (globalThis.requestAnimationFrame || ((cb) => setTimeout(() => cb(nowFn()), 16)))(tick);
       timersRef.current.rafIds.add(id);
     });
   }
@@ -80,7 +84,7 @@ export default function JusticeDashboard() {
       const duration = 1200 + Math.random() * 800;
       await animateProgress(duration, () => {});
       setQueue((q) => q.slice(1));
-      await new Promise((r) => setTimeout(r, 150));
+      await new Promise((r) => globalThis.setTimeout(r, 150));
     }
   }
 
@@ -129,4 +133,3 @@ export default function JusticeDashboard() {
     </div>
   );
 }
-
