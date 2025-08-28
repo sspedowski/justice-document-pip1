@@ -31,8 +31,18 @@ export default [
     settings: { react: { version: "detect" } },
     rules: {
       // Core
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
+      // Ensure JSX identifiers mark variables as used
+      "react/jsx-uses-vars": "warn",
 
       // React + Hooks
       "react/react-in-jsx-scope": "off",
@@ -82,6 +92,15 @@ export default [
     },
     rules: {
       'no-undef': 'off',
+      'no-unused-vars': [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     }
   },
 ];
