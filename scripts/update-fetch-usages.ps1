@@ -1,70 +1,50 @@
-param([switch]$Apply)
-$ErrorActionPreference="Stop"
+param(
+  [switch]$Apply,
+  [string[]]$Roots = @('justice-dashboard\src')
+)
 
-# Locate src and helper
-$repo = (git rev-parse --show-toplevel 2>$null) -as [string]; if(!$repo){ $repo=(Get-Location).Path }
-$src = @("justice-dashboard\src","src") | ForEach-Object { Join-Path $repo $_ } | Where-Object { Test-Path $_ } | Select-Object -First 1
-if(!$src){ throw "Could not find a src folder (tried justice-dashboard\src and src from $repo)" }
-$auth = Join-Path $src "lib\auth-fetch.js"; if(!(Test-Path $auth)){ throw "Missing helper: $auth" }
+Write-Host "Scanning for raw fetch() usages..." -ForegroundColor Cyan
 
-# Gather candidate files
-$files = Get-ChildItem $src -Recurse -File -Include *.js,*.jsx,*.ts,*.tsx |
-  Where-Object {
-    $_.FullName -notmatch '\\(node_modules|dist|build|coverage|\.vite)\\' -and
-    $_.FullName -notmatch '\\src\\lib\\' -and
-    $_.Name -notmatch '\.test\.(js|jsx|ts|tsx)$'
+$files = @()
+foreach ($root in $Roots) {
+  if (-not (Test-Path $root)) { continue }
+  $files += Get-ChildItem -Path $root -Recurse -Include *.js,*.jsx,*.ts,*.tsx |
+    Where-Object {
+      $_.FullName -notmatch "legacy\\" -and $_.FullName -notmatch "node_modules" -and $_.FullName -notmatch "lib\\auth-fetch\.js$"
+    }
+}
+
+$changed = @()
+foreach ($f in $files) {
+  $text = Get-Content -Raw -Path $f.FullName
+  if ($text -notmatch "\bfetch\("
+      -or $text -match "\bauthFetch\(") { continue }
+
+  # naive guard: skip common words ending with fetch (e.g., authFetch)
+  $new = $text -replace "(?<![A-Za-z0-9_])fetch\(", 'authFetch('
+  if ($new -ne $text) {
+    $changed += [pscustomobject]@{ File=$f.FullName; Replaced=$((Select-String -InputObject $text -Pattern "(?<![A-Za-z0-9_])fetch\(" -AllMatches).Matches.Count) }
+    if ($Apply) {
+      # write .bak once
+      $bak = "$($f.FullName).bak"
+      if (-not (Test-Path $bak)) { Set-Content -Path $bak -Value $text -Encoding UTF8 }
+      Set-Content -Path $f.FullName -Value $new -Encoding UTF8
+    }
   }
+}
 
-# Regex for raw fetch (exclude authFetch / obj.fetch)
-$pattern = '(?<![\w$.])(?:window\.)?fetch\s*\('
-$hits = foreach($f in $files){ Select-String -Path $f.FullName -Pattern $pattern -SimpleMatch:$false }
-
-if(!$Apply){
-  if(!$hits){ Write-Host "No fetch() usages found under $src"; exit 0 }
-  $hits | ForEach-Object {
-    "{0}:{1}: {2}" -f (Resolve-Path $_.Path -Relative), $_.LineNumber, ($_.Line.Trim())
-  }
-  Write-Host "`nRun with -Apply to rewrite and add imports."
+if ($changed.Count -eq 0) {
+  Write-Host "No raw fetch() usages found that need changes." -ForegroundColor Green
   exit 0
 }
 
-# Helper to compute relative import from file to auth-fetch.js (JS style path)
-function Get-ImportPath([string]$fromFile,[string]$toFile){
-  $fromDir = (Split-Path $fromFile -Parent)
-  $uFrom = New-Object Uri(($fromDir.TrimEnd('\')+'\\'))
-  $uTo   = New-Object Uri($toFile)
-  $rel = $uFrom.MakeRelativeUri($uTo).ToString().Replace('%5C','/').Replace('\\','/').Replace('%2E','.')
-  $rel = $rel -replace '\.js$',''
-  if($rel -notmatch '^\.' ){ $rel = './' + $rel }
-  return $rel
+$changed | ForEach-Object { Write-Host ("{0} -> replaced {1}" -f $_.File, $_.Replaced) }
+
+if (-not $Apply) {
+  Write-Host "\nDry run. Re-run with -Apply to write changes." -ForegroundColor Yellow
+  Write-Host "Note: Ensure you import { authFetch } from the appropriate path in files you modify." -ForegroundColor Yellow
+} else {
+  Write-Host "\nApplied replacements. You may need to add imports for authFetch:" -ForegroundColor Green
+  Write-Host "  import { authFetch } from '../lib/auth-fetch.js'  (adjust the relative path per file)"
 }
 
-$changed=@()
-foreach($g in ($hits | Group-Object Path)){
-  $file = $g.Name
-  $text = Get-Content $file -Raw
-
-  # Insert import if missing
-  $importRe = 'from\s+["''].*?/auth-fetch["'']'
-  if($text -notmatch $importRe){
-    $imp = "import { authFetch } from '" + (Get-ImportPath $file $auth) + "';"
-    # Put import at top (after shebang/comments if any)
-    if($text -match '^(?:/\*[\s\S]*?\*/\s*|//.*\r?\n\s*)*'){
-      $idx = $matches[0].Length
-      $text = $text.Insert($idx, "$imp`r`n")
-    } else {
-      $text = "$imp`r`n$text"
-    }
-  }
-
-  # Replace fetch calls with authFetch(
-  $new = [regex]::Replace($text, $pattern, { param($m) "authFetch(" })
-
-  if($new -ne $text){
-    $new | Set-Content -Encoding UTF8 $file
-    $changed += $file
-  }
-}
-
-if($changed.Count){ & git add -- $changed }
-Write-Host "Updated files: $($changed.Count)"; $changed | ForEach-Object { Write-Host (" - " + (Resolve-Path $_ -Relative)) }

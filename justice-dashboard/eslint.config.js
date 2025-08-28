@@ -41,6 +41,11 @@ export default [
         },
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
+      // Prefer authFetch wrapper over raw fetch in app code
+      "no-restricted-globals": [
+        "error",
+        { name: "fetch", message: "Use authFetch from src/lib/auth-fetch.js" },
+      ],
       // Ensure JSX identifiers mark variables as used
       "react/jsx-uses-vars": "warn",
 
@@ -65,6 +70,13 @@ export default [
         },
       ],
       "import/no-duplicates": "warn",
+    },
+  },
+  // Allow raw fetch in the fetch wrapper itself
+  {
+    files: ["src/lib/auth-fetch.js"],
+    rules: {
+      "no-restricted-globals": "off",
     },
   },
   // Cypress e2e tests
