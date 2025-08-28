@@ -130,7 +130,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Server status
   async function checkServerStatus() {
     try {
-      const response = await fetch("/api/health");
+      if (typeof authFetch === 'undefined') {
+        const mod = await import('./src/lib/auth-fetch.js');
+        window.authFetch = mod.authFetch;
+      }
+      const response = await authFetch("/api/health");
       const data = await response.json();
       if (data.status === "online") {
         if (serverIndicator)
@@ -157,7 +161,11 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("guestLoginBtn")
     .addEventListener("click", async function () {
-      const response = await fetch("/api/login", {
+      if (typeof authFetch === 'undefined') {
+        const mod = await import('./src/lib/auth-fetch.js');
+        window.authFetch = mod.authFetch;
+      }
+      const response = await authFetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
