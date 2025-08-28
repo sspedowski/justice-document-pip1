@@ -5,14 +5,17 @@
     const fs = require('fs');
     const frontendDir = path.resolve(__dirname, 'justice-dashboard');
     const { ESLint } = require(path.join(frontendDir, 'node_modules', 'eslint'));
-    const eslint = new ESLint({ cwd: frontendDir, fix: true });
+    const wantFix = process.argv.includes('--fix');
+    const eslint = new ESLint({ cwd: frontendDir, fix: wantFix });
     // Limit to app code and tests; skip config files
     const results = await eslint.lintFiles([
       'src/**/*.{js,jsx,ts,tsx}',
       'tests/**/*.js',
       'cypress/**/*.js',
     ]);
-    await ESLint.outputFixes(results);
+    if (wantFix) {
+      await ESLint.outputFixes(results);
+    }
     const out = [];
     out.push('RESULTS_COUNT ' + results.length);
     const formatter = await eslint.loadFormatter('stylish');
