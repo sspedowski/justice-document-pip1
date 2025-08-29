@@ -4,6 +4,11 @@
   "workspaces": [
     "frontend",
     "backend"
-  ]
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm --prefix backend start",
+    "dev:client": "npm --prefix frontend run dev",
+    "lint": "eslint ."
+  }
 }
-
