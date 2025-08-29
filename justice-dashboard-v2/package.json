@@ -1,0 +1,9 @@
+{
+  "name": "justice-dashboard-v2",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
+
