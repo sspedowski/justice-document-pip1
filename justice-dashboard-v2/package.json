@@ -10,5 +10,8 @@
     "dev:server": "npm --prefix backend start",
     "dev:client": "npm --prefix frontend run dev",
     "lint": "eslint ."
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

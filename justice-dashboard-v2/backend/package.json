@@ -6,6 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "*",
+    "cors": "*",
+    "dotenv": "*",
+    "express": "*",
+    "jsonwebtoken": "*"
   }
 }
-
