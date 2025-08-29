@@ -1,5 +1,0 @@
-node_modules/
-dist/
-legacy/
-*.min.js
-*.worker.js
