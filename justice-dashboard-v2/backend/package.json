@@ -9,10 +9,12 @@
   },
   "dependencies": {
     "bcryptjs": "*",
-    "cors": "*",
     "cookie-parser": "*",
+    "cors": "*",
     "dotenv": "*",
     "express": "*",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "*"
   }
 }
