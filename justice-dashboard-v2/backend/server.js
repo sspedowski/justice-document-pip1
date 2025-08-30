@@ -28,6 +28,11 @@ function requireAuth(req, _res, next) {
 // Always return guest for /api/me
 app.get("/api/me", (_req, res) => res.json(GUEST));
 
+// Simple ping endpoint to test wiring
+app.get("/api/ping", requireAuth, (req, res) => {
+  res.json({ ok: true, user: req.user });
+});
+
 // Optional: you may keep or remove login/logout/refresh routes for pure guest mode
 
 app.listen(3001, () => console.log("api on 3001"));
