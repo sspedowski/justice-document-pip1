@@ -295,49 +295,7 @@ const DashboardAuth = {
             
             <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
               Sign In
-  // Helper function to make authenticated requests (CSRF protection)
-  async makeAuthenticatedRequest(url, options = {}) {
-    if (!DashboardAuth.isAuthenticated) {
-      console.error("User not authenticated");
-      DashboardAuth.showLoginForm();
-      return null;
-    }
-    const csrfToken = localStorage.getItem('justiceCsrfToken');
-    const headers = {
-      ...options.headers,
-      Authorization: `Bearer ${DashboardAuth.authToken}`,
-      "Content-Type": "application/json",
-      ...(csrfToken && { "X-CSRF-Token": csrfToken }),
-    };
-    try {
-  const response = await authFetch(`${DYNAMIC_API_BASE_URL}${url}`, {
-        ...options,
-        headers,
-        credentials: "same-origin"
-      });
-      if (response.status === 401) {
-        // Token expired or invalid
-        DashboardAuth.clearAuth();
-        DashboardAuth.showLoginForm();
-        return null;
-      }
-      return response;
-    } catch (error) {
-      console.error("API request error:", error);
-      return null;
-    }
-  },
-        // Token expired or invalid
-        DashboardAuth.clearAuth();
-        DashboardAuth.showLoginForm();
-        return null;
-      }
-      return response;
-    } catch (error) {
-      console.error("API request error:", error);
-      return null;
-    }
-  },
+            </button>
 
   // Initialize login form event listeners
   initializeLoginForm() {
@@ -355,6 +313,34 @@ const DashboardAuth = {
           this.handleLogin(e);
         }
       });
+    }
+  },
+
+  // Helper function to make authenticated requests (CSRF protection)
+  async makeAuthenticatedRequest(url, options = {}) {
+    if (!this.isAuthenticated) {
+      console.error("User not authenticated");
+      this.showLoginForm();
+      return null;
+    }
+    const csrfToken = localStorage.getItem('justiceCsrfToken');
+    const headers = Object.assign({}, options.headers || {}, {
+      Authorization: 'Bearer ' + this.authToken,
+      "Content-Type": "application/json",
+    });
+    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+    try {
+  const response = await authFetch(DYNAMIC_API_BASE_URL + url, Object.assign({}, options, { headers, credentials: 'same-origin' }));
+      if (response.status === 401) {
+        // Token expired or invalid
+        this.clearAuth();
+        this.showLoginForm();
+        return null;
+      }
+      return response;
+    } catch (error) {
+      console.error("API request error:", error);
+      return null;
     }
   },
 
