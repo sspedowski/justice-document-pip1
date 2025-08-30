@@ -15,21 +15,18 @@ app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
 
 const S = process.env.JWT_SECRET || "dev";
+const GUEST = { id: "guest", role: "guest", name: "Guest" };
 
 app.get("/health", (_, res) => res.json({ ok: true }));
 
-// Guest-friendly /api/me: returns verified JWT payload if present, else guest
-app.get("/api/me", (req, res) => {
-  const token = req.cookies?.token || (req.headers.authorization || "").split(" ")[1];
-  if (token) {
-    try {
-      return res.json(jwt.verify(token, S));
-    } catch (e) {
-      // fall through to guest
-    }
-  }
-  return res.json({ id: "guest", role: "guest", name: "Guest" });
-});
+// Force guest identity for all protected routes
+function requireAuth(req, _res, next) {
+  req.user = GUEST;
+  next();
+}
+
+// Always return guest for /api/me
+app.get("/api/me", (_req, res) => res.json(GUEST));
 
 // Optional: you may keep or remove login/logout/refresh routes for pure guest mode
 
