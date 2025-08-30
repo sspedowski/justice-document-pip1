@@ -29,8 +29,9 @@ form.addEventListener("submit", async (e) => {
   catch (err) { ui("error", err.message || "Login failed"); }
 });
 
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("token"); ui("anon");
+logoutBtn.addEventListener("click", async () => {
+  try { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); } catch {}
+  ui("anon");
 });
 
 loadMe();
