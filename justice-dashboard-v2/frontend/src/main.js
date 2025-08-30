@@ -25,4 +25,18 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     f.reset();
   });
+
+  // Dev-only ping button (unobtrusive). Will work when Vite proxies /api to backend.
+  const pingBtn = document.getElementById('pingBtn');
+  if (pingBtn) {
+    pingBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/_ping', { credentials: 'include' });
+        const json = await res.json();
+        document.getElementById('pingOut').textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        document.getElementById('pingOut').textContent = String(err);
+      }
+    });
+  }
 });
