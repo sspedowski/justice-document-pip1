@@ -6,11 +6,11 @@ const out = (msg) => { const el = document.getElementById('result'); if (el) el.
 async function boot() {
   try {
     const me = await (await authFetch('/api/me')).json();
-    const who = document.getElementById('who');
+    const who = document.getElementById('who') || document.getElementById('user');
     if (who) who.textContent = me?.user?.name || 'Guest';
   } catch { /* ignore */ }
 
-  const form = document.getElementById('msg-form');
+  const form = document.getElementById('msg-form') || document.getElementById('guest-form');
   if (!form) return;
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
