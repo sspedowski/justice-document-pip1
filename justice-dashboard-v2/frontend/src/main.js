@@ -1,6 +1,6 @@
 import "./main.css";
 import { login } from "./login.js";
-import { authFetch } from "./lib/auth-fetch.js";
+import { authFetch, startRefreshLoop, stopRefreshLoop } from "./lib/auth-fetch.js";
 
 const sel = (id) => document.getElementById(id);
 const form = sel("login-form");
@@ -19,18 +19,19 @@ function ui(state, data) {
 
 async function loadMe() {
   const r = await authFetch("/api/me");
-  if (r.ok) { const d = await r.json(); ui("auth", d); }
+  if (r.ok) { const d = await r.json(); ui("auth", d); startRefreshLoop(); }
   else { ui("anon"); }
 }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  try { await login(email.value, password.value); await loadMe(); }
+  try { await login(email.value, password.value); startRefreshLoop(); await loadMe(); }
   catch (err) { ui("error", err.message || "Login failed"); }
 });
 
 logoutBtn.addEventListener("click", async () => {
   try { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); } catch {}
+  stopRefreshLoop();
   ui("anon");
 });
 
