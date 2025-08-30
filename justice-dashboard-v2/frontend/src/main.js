@@ -1,42 +1,26 @@
-import "./main.css";
-import { authFetch } from "./lib/auth-fetch.js";
+import './main.css';
+import { authFetch } from './lib/auth-fetch';
 
-async function loadMe() {
-  const r = await authFetch("/api/me");
-  const { user } = await r.json();
-  document.getElementById("user").textContent = user?.name ?? "Guest";
-}
+const out = (msg) => { const el = document.getElementById('result'); if (el) el.textContent = msg; };
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadMe();
-  const f = document.getElementById("guest-form");
-  f.addEventListener("submit", async (e) => {
+async function boot() {
+  try {
+    const me = await (await authFetch('/api/me')).json();
+    const who = document.getElementById('who');
+    if (who) who.textContent = me?.user?.name || 'Guest';
+  } catch { /* ignore */ }
+
+  const form = document.getElementById('msg-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const message = new FormData(f).get("message");
-    const r = await authFetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
-    });
-    document.getElementById("result").textContent = JSON.stringify(
-      await r.json(),
-      null,
-      2
-    );
-    f.reset();
+    const message = new FormData(form).get('message') || '';
+    const res = await (await authFetch('/api/submit', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message })
+    })).json();
+    out(JSON.stringify(res, null, 2));
   });
-
-  // Dev-only ping button (unobtrusive). Will work when Vite proxies /api to backend.
-  const pingBtn = document.getElementById('pingBtn');
-  if (pingBtn) {
-    pingBtn.addEventListener('click', async () => {
-      try {
-        const res = await fetch('/api/_ping', { credentials: 'include' });
-        const json = await res.json();
-        document.getElementById('pingOut').textContent = JSON.stringify(json, null, 2);
-      } catch (err) {
-        document.getElementById('pingOut').textContent = String(err);
-      }
-    });
-  }
-});
+}
+boot();
