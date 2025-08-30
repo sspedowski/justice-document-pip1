@@ -21,7 +21,7 @@ if (dotenvPath) {
 }
 
 // Config
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
@@ -54,10 +54,20 @@ const upload = multer({
   },
 });
 
-// Health check
+// Simple always-on health endpoint (non-namespaced)
+app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Namespaced API health (kept for compatibility)
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+// Dev-only ping endpoint (authenticated) — useful for quick DevTools checks
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/_ping', requireAuth, (req, res) => {
+    res.json({ ok: true, user: req.user, ts: Date.now() });
+  });
+}
 
 // Simple CSRF token endpoint (stateless demo)
 app.get("/api/csrf-token", (_req, res) => {
