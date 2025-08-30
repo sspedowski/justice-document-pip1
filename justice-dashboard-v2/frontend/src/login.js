@@ -3,10 +3,9 @@ export async function login(email, password) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
+    credentials: "include",
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || "Login failed");
-  localStorage.setItem("token", d.token);
-  return d;
+  return d; // cookie set by server
 }
-
