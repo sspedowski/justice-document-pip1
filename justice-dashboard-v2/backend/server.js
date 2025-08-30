@@ -14,10 +14,12 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
 
+const PORT = process.env.PORT ?? 3001;
 const S = process.env.JWT_SECRET || "dev";
 const GUEST = { id: "guest", role: "guest", name: "Guest" };
 
 app.get("/health", (_, res) => res.json({ ok: true }));
+app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 // Force guest identity for all protected routes
 function requireAuth(req, _res, next) {
@@ -33,6 +35,13 @@ app.get("/api/ping", requireAuth, (req, res) => {
   res.json({ ok: true, user: req.user });
 });
 
+// Dev-only ping endpoint
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/_ping', requireAuth, (req, res) => {
+    res.json({ ok: true, user: req.user });
+  });
+}
+
 // Sample submit endpoint
 app.post("/api/submit", requireAuth, (req, res) => {
   const { message } = req.body || {};
@@ -41,4 +50,4 @@ app.post("/api/submit", requireAuth, (req, res) => {
 
 // Optional: you may keep or remove login/logout/refresh routes for pure guest mode
 
-app.listen(3001, () => console.log("api on 3001"));
+app.listen(PORT, () => console.log(`api on ${PORT}`));
