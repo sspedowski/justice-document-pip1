@@ -2,7 +2,19 @@
  * Enhanced Authentication Manager for Justice Dashboard
  * Handles JWT tokens, automatic refresh, and user session management
  */
-import { authFetch } from "./lib/authFetch";
+
+// Note: Avoid importing a separate authFetch helper here to prevent cycles.
+// Instead, attach auth + CSRF headers directly when making requests.
+function withAuthAndCsrf(init = {}, getAuthHeadersFn, getCsrfTokenFn) {
+  const csrf = typeof getCsrfTokenFn === 'function' ? getCsrfTokenFn() : null;
+  const base = typeof getAuthHeadersFn === 'function' ? getAuthHeadersFn() : {};
+  const headers = {
+    ...base,
+    ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
+    ...(init.headers || {}),
+  };
+  return { ...init, headers, credentials: init.credentials || 'include' };
+}
 
 class AuthManager {
   constructor() {
@@ -60,11 +72,18 @@ class AuthManager {
 
   async login(username, password) {
     try {
-      const response = await authFetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        "/api/login",
+        withAuthAndCsrf(
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          },
+          this.getAuthHeaders.bind(this),
+          this.getCsrfToken.bind(this)
+        )
+      );
 
       const data = await response.json();
 
@@ -97,10 +116,16 @@ class AuthManager {
   async logout() {
     try {
       // Call server logout endpoint
-      await authFetch("/api/logout", {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-      });
+      await fetch(
+        "/api/logout",
+        withAuthAndCsrf(
+          {
+            method: "POST",
+          },
+          this.getAuthHeaders.bind(this),
+          this.getCsrfToken.bind(this)
+        )
+      );
     } catch (error) {
       console.warn("Logout request failed:", error);
     } finally {
@@ -122,9 +147,14 @@ class AuthManager {
 
   async fetchUserProfile() {
     try {
-      const response = await authFetch("/api/profile", {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await fetch(
+        "/api/profile",
+        withAuthAndCsrf(
+          {},
+          this.getAuthHeaders.bind(this),
+          this.getCsrfToken.bind(this)
+        )
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -142,10 +172,14 @@ class AuthManager {
 
   async refreshToken() {
     try {
-      const response = await authFetch("/api/refresh-token", {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-      });
+      const response = await fetch(
+        "/api/refresh-token",
+        withAuthAndCsrf(
+          { method: "POST" },
+          this.getAuthHeaders.bind(this),
+          this.getCsrfToken.bind(this)
+        )
+      );
 
       const data = await response.json();
 
@@ -233,16 +267,14 @@ class AuthManager {
   }
 
   async makeAuthenticatedRequest(url, options = {}) {
-    const authOptions = {
-      ...options,
-      headers: {
-        ...options.headers,
-        ...this.getAuthHeaders(),
-      },
-    };
+    const authOptions = withAuthAndCsrf(
+      options,
+      this.getAuthHeaders.bind(this),
+      this.getCsrfToken.bind(this)
+    );
 
     try {
-      const response = await authFetch(url, authOptions);
+      const response = await fetch(url, authOptions);
 
       // Handle token expiry
       if (response.status === 401) {
@@ -255,7 +287,11 @@ class AuthManager {
               ...authOptions.headers,
               ...this.getAuthHeaders(),
             };
-            return authFetch(url, authOptions);
+            return fetch(url, withAuthAndCsrf(
+              authOptions,
+              this.getAuthHeaders.bind(this),
+              this.getCsrfToken.bind(this)
+            ));
           }
         }
         // If refresh failed or other 401 error, clear session
@@ -273,9 +309,14 @@ class AuthManager {
   // Utility method for checking authentication status
   async checkAuthStatus() {
     try {
-      const response = await authFetch("/api/health", {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await fetch(
+        "/api/health",
+        withAuthAndCsrf(
+          {},
+          this.getAuthHeaders.bind(this),
+          this.getCsrfToken.bind(this)
+        )
+      );
 
       const data = await response.json();
       return data.authentication === "authenticated";

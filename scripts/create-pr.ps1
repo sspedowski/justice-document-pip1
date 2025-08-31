@@ -19,12 +19,14 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
     gh pr comment $PR -b "/copilot review`nFocus: build/run (npm run dev:win @ 5174/3000); ESLint/TS config; Vite/Tailwind/PostCSS; Express security (helmet/cors/rate-limit); GH Pages.`nOutput: checklist + unified diff patch sets."
     gh pr view $PR -w
   } catch {
-    $slug = (git remote get-url origin) -replace '.*github.com:/(?:.git)?$','$1'
+    $remoteUrl = (git remote get-url origin)
+    $slug = $remoteUrl -replace '.*github.com[:/](.+?)(?:\.git)?$','$1'
     Write-Host "gh failed: $($_.Exception.Message)"
     Write-Host "Open manually: https://github.com/$slug/compare/$BASE...$BR?expand=1"
   }
 } else {
-  $slug = (git remote get-url origin) -replace '.*github.com:/(?:.git)?$','$1'
+  $remoteUrl = (git remote get-url origin)
+  $slug = $remoteUrl -replace '.*github.com[:/](.+?)(?:\.git)?$','$1'
   Write-Host 'GitHub CLI not found. Install via: winget install GitHub.cli'
   Write-Host "Open to create PR: https://github.com/$slug/compare/$BASE...$BR?expand=1"
 }

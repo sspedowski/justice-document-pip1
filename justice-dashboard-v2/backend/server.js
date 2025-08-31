@@ -17,4 +17,13 @@ app.post('/api/submit', requireAuth, (req, res) => {
   res.json({ ok: true, received: req.body?.message || '', user: req.user });
 });
 
+// Minimal login route to match v2 frontend calls
+app.post('/api/login', (req, res) => {
+  const { email, password, username } = req.body || {};
+  const name = email || username;
+  if (!name) return res.status(400).json({ ok: false, error: 'Missing username/email' });
+  // Note: plug into real auth as needed; this is a stub
+  res.json({ ok: true, user: { id: 'guest', role: 'guest', name } });
+});
+
 app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));

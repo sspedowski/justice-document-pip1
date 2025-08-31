@@ -5,6 +5,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// Default import path for auth-fetch helper (kebab-case)
+const DEFAULT_IMPORT = './lib/auth-fetch';
+
 function usage() {
   console.log('Usage: node scripts/migrate-fetch.js --root <path> [--dry] [--apply] [--exclude <comma,separated>]');
   process.exit(1);
@@ -75,7 +78,7 @@ function isESM(src) {
 function isCJS(src) {
   return /(^|\n)\s*module\.exports\s*=/.test(src) || /(^|\n)\s*exports\./.test(src) || /(^|\n)\s*const\s+\w+\s*=\s*require\(['"][^'"]+['"]\)/.test(src);
 }
-function ensureImportAuto(src, importSpec = './lib/authFetch') {
+function ensureImportAuto(src, importSpec = DEFAULT_IMPORT) {
   // already has an authFetch import/require?
   if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/.test(src)) return src;
   if (/const\s*\{\s*authFetch\s*\}\s*=\s*require\(['"][^'"]+['"]\)/.test(src)) return src;
@@ -149,7 +152,7 @@ for (const r of report) {
 
   let newContent = rewriteFetchCalls(content);
   if (newContent !== content) {
-  newContent = ensureImportAuto(newContent, './lib/authFetch');
+  newContent = ensureImportAuto(newContent, DEFAULT_IMPORT);
     const bak = r.file + '.bak';
     if (!fs.existsSync(bak)) fs.writeFileSync(bak, content, 'utf8');
     fs.writeFileSync(r.file, newContent, 'utf8');
