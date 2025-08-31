@@ -1158,7 +1158,7 @@ function initializeJusticeDashboard() {
       if (DashboardAuth.init()) {
         // User is authenticated - show dashboard
         console.log("User authenticated, loading dashboard...");
-        DashboardAuth.renderDashboard();
+        DashboardAuth.loadDashboard();
 
         // Initialize counters after dashboard is rendered
         setTimeout(() => {
