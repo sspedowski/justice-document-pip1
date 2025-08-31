@@ -1,4 +1,3 @@
-import { authFetch } from "./lib/authFetch";
 import React, { useState } from 'react';
 
 export default function UploadDashboard() {
@@ -22,7 +21,7 @@ export default function UploadDashboard() {
       // Use VITE_API_URL if set, fallback to localhost
       const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-      const res = await authFetch(`${apiBase}/api/summarize`, {
+      const res = await fetch(`${apiBase}/api/summarize`, {
         method: 'POST',
         body: formData,
       });
