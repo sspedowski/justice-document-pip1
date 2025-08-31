@@ -7,8 +7,14 @@ export default [
       "dist/**",
       "build/**",
       "web/**",
+      // Vendor modules
+      "**/node_modules/**",
       "**/public/**",
       "**/*.min.js",
+      "**/*min*.js",
+      // WebAssembly and compiled assets
+      "**/wasm/**",
+      "web/wasm/**",
       "**/vendor/**",
       // App-specific public/upload directories
       "frontend/public/**",
