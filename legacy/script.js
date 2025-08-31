@@ -395,33 +395,7 @@ const DashboardAuth = {
     }
   },
 
-  // Render main dashboard
-  renderDashboard() {
-    const app = document.getElementById("app");
-    if (!app) {
-      console.error("App container not found");
-      return;
-    }
-
-    // Show the dashboard content that's already in the HTML
-    const loadingScreen = document.getElementById("loadingScreen");
-    const dashboardContent = document.getElementById("dashboardContent");
-
-    if (loadingScreen) {
-      loadingScreen.classList.add("hidden");
-    }
-
-    if (dashboardContent) {
-      dashboardContent.classList.remove("hidden");
-
-      // Initialize dashboard functionality only after content is visible
-      setTimeout(() => {
-        initializeJusticeDashboard();
-      }, 50);
-    } else {
-      console.error("Dashboard content container not found");
-    }
-  },
+  // renderDashboard was deprecated in favor of loadDashboard()
 
   // showLoginForm is defined earlier as an alias; remove duplicate implementation
 
