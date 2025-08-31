@@ -39,6 +39,27 @@ export default [
       }
     }
   },
+  // Legacy plain browser scripts: declare common browser globals and authFetch as readonly
+  {
+    files: ["legacy/**/*.{js,jsx}"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "script",
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        localStorage: "readonly",
+        console: "readonly",
+        alert: "readonly",
+        FormData: "readonly",
+        pdfjsLib: "readonly",
+        authFetch: "readonly"
+      }
+    },
+    rules: {
+      "no-undef": "off"
+    }
+  },
   {
     files: ["backend/**/*.{js,ts}", "justice-server/**/*.js", "scripts/**/*.js"],
     languageOptions: {
