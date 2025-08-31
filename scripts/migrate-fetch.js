@@ -45,7 +45,8 @@ function walk(dir) {
 function previewReplacements(content) {
   // match fetch( not preceded by a word char (to avoid authFetch) or dot (obj.fetch)
   // Use a regex that finds fetch( with optional whitespace
-  const regex = /(?<![A-Za-z0-9_\.$])fetch\s*\(/g;
+  // Avoid look-behind for Node compatibility. Match a boundary (start or non-word/dot) then fetch(
+  const regex = /(^|[^A-Za-z0-9_\.$])fetch\s*\(/g;
   let m;
   const replacements = [];
   while ((m = regex.exec(content)) !== null) {
@@ -56,6 +57,29 @@ function previewReplacements(content) {
     replacements.push({ index: idx, line });
   }
   return replacements;
+}
+
+// Helpers: rewrite fetch calls without look-behind, ensure import, and skip files
+function rewriteFetchCalls(src) {
+  return src.replace(/(^|[^A-Za-z0-9_\.$])fetch\s*\(/g, (_, prefix) => `${prefix}authFetch(`);
+}
+
+function ensureImport(src, importSpec = './lib/authFetch') {
+  if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/m.test(src)) return src;
+  const lines = src.split(/\r?\n/);
+  let insertAt = 0;
+  while (insertAt < lines.length && /^\s*(\/\/|\/\*|\*|#!)/.test(lines[insertAt])) insertAt++;
+  lines.splice(insertAt, 0, `import { authFetch } from "${importSpec}";`);
+  return lines.join('\n');
+}
+
+function shouldSkipFileForNativeFetch(filePath, src) {
+  const lower = filePath.toLowerCase();
+  if (/(^|\/)sw\.?js$/.test(lower)) return true;
+  if (/(^|\/)(serviceworker|worker)\.?js$/.test(lower)) return true;
+  if (/auth[-_]fetch\.?m?js$/.test(lower)) return true;
+  if (/\bself\s*\.\s*addEventListener\s*\(\s*['"]fetch['"]/.test(src)) return true;
+  return false;
 }
 
 if (!fs.existsSync(root)) {
