@@ -14,7 +14,7 @@
     "start:prod": "bash scripts/start-production.sh",
     "dev": "cd justice-dashboard && npm run dev",
     "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node frontend/start-local.js",
-    "dev:backend": "node server.js",
+    "dev:backend": "node justice-server/server.js",
     "dev:frontend": "cd justice-dashboard && npm run dev:client",
     "test": "echo '✅ All tests passed!'",
     "test:backend": "echo '✅ Backend tests passed!'",
@@ -22,9 +22,7 @@
     "deploy": "cd justice-server && railway up"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
-    "cookie-parser": "^1.4.7",
-    "csurf": "^1.2.2"
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",
