@@ -259,11 +259,13 @@
 
     <!-- Scripts (must come after #app and modals for CSP) - DEBUG ENABLED -->
     <script src="script.js"></script>
-    <script type="module" src="debug-tracer.js"></script>
-    <script type="module" src="/assets/auth-manager.js"></script>
-    <script type="module" src="dark-mode.js"></script>
-    <script type="module" src="/frontend/pdf-config.js"></script>
-    <script type="module" src="/frontend/pdf.min.js"></script>
-    <script type="module" src="/frontend/dashboard-init.js"></script>
+    <script src="debug-tracer.js"></script>
+    <!-- auth-manager is imported by /frontend/auth-fetch.js when needed -->
+    <!-- <script type="module" src="/assets/auth-manager.js"></script> -->
+    <script src="dark-mode.js"></script>
+    <!-- Load PDF core first to expose global pdfjsLib, then configure -->
+    <script src="/frontend/pdf.min.js"></script>
+    <script src="/frontend/pdf-config.js"></script>
+    <script src="/frontend/dashboard-init.js"></script>
   </body>
 </html>
