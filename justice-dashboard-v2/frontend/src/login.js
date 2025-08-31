@@ -1,11 +1,12 @@
+import { authFetch } from './lib/auth-fetch';
+
 export async function login(email, password) {
-  const r = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  const r = await authFetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
-    credentials: "include",
   });
   const d = await r.json();
-  if (!r.ok) throw new Error(d.error || "Login failed");
+  if (!r.ok) throw new Error(d.error || 'Login failed');
   return d; // cookie set by server
 }
