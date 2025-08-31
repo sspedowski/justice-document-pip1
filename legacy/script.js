@@ -931,9 +931,10 @@ function initializeJusticeDashboard() {
   }
   dashboardInitialized = true;
 
-  const trackerTableBody = document.getElementById("trackerTableBody");
+  // Support both legacy (#trackerTableBody) and new (#results) table bodies
+  const trackerTableBody = document.getElementById("trackerTableBody") || document.getElementById("results");
   if (!trackerTableBody) {
-    console.warn("Could not find tracker table body – retrying...");
+    console.warn("Could not find tracker table body (#trackerTableBody/#results) – retrying...");
     dashboardInitialized = false; // Reset flag if DOM not ready
     setTimeout(initializeJusticeDashboard, 150); // Retry after 150ms
     return;
@@ -952,7 +953,7 @@ function initializeJusticeDashboard() {
   const exportBtn = document.getElementById("exportBtn");
   const askBtn = document.getElementById("askWolfram");
   const summaryBox = document.getElementById("summaryBox");
-  let trackerBody = document.querySelector("#results");
+  let trackerBody = document.querySelector("#results") || trackerTableBody;
 
   // Fallback for trackerBody - use the confirmed table we found
   if (!trackerBody) {
