@@ -41,7 +41,8 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir, { fallthrough: true }));
 
 // Serve legacy and frontend assets directly for the legacy dashboard page
-const repoRoot = process.cwd();
+// Resolve repo root robustly relative to this server file
+const repoRoot = path.resolve(__dirname, '..');
 const legacyDir = path.join(repoRoot, "legacy");
 if (fs.existsSync(legacyDir)) {
   app.use("/legacy", express.static(legacyDir, { fallthrough: true }));
