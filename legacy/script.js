@@ -1,7 +1,9 @@
 // Ensure Upload and Lawyer buttons always work, even if added dynamically
 document.addEventListener("click", function (event) {
-  // Check authorization before allowing upload or lawyer actions
-  if (event.target && event.target.id === "uploadBtn") {
+  // Check authorization before allowing upload or lawyer actions (robust delegation)
+  const isUpload = event.target && (event.target.id === "uploadBtn" || (event.target.closest && event.target.closest('#uploadBtn')));
+  const isLawyer = event.target && (event.target.id === "lawyerBtn" || (event.target.closest && event.target.closest('#lawyerBtn')));
+  if (isUpload) {
     if (window.DashboardAuth && window.DashboardAuth.isAuthenticated) {
       alert("Upload button (delegated)");
     } else {
@@ -9,7 +11,7 @@ document.addEventListener("click", function (event) {
       if (window.showLoginForm) window.showLoginForm();
     }
   }
-  if (event.target && event.target.id === "lawyerBtn") {
+  if (isLawyer) {
     if (window.DashboardAuth && window.DashboardAuth.isAuthenticated) {
       alert("Lawyer button (delegated)");
     } else {
@@ -48,7 +50,7 @@ function getApiBaseUrl() {
 
   // Return appropriate base URL
   return isLocal
-    ? "http://localhost:3000"
+    ? "http://localhost:3001"
     : window.location.origin;
 }
 
@@ -296,6 +298,22 @@ const DashboardAuth = {
             <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
               Sign In
             </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    // Bind login form (basic handler)
+    const loginFormEl = document.getElementById("loginForm");
+    if (loginFormEl) {
+      loginFormEl.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = document.getElementById("loginUsername")?.value?.trim() || "";
+        const password = document.getElementById("loginPassword")?.value || "";
+        this.authenticate(username, password);
+      });
+    }
+  },
 
   // Initialize login form event listeners
   initializeLoginForm() {
