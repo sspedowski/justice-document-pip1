@@ -37,11 +37,31 @@ export default [
     languageOptions: {
       parserOptions: { ecmaVersion: "latest", sourceType: "module" },
       globals: {
-        window: "readonly", document: "readonly", console: "readonly", setTimeout: "readonly",
+        // Browser globals
+        window: "readonly", document: "readonly", console: "readonly",
+        setTimeout: "readonly", clearTimeout: "readonly", setInterval: "readonly", clearInterval: "readonly",
+        fetch: "readonly", Headers: "readonly", Request: "readonly", Response: "readonly",
         OffscreenCanvas: "readonly", ImageData: "readonly", Blob: "readonly", createImageBitmap: "readonly",
-        CompressionStream: "readonly", ReadableStream: "readonly", atob: "readonly", URL: "readonly", crypto: "readonly"
+        CompressionStream: "readonly", ReadableStream: "readonly", TextDecoder: "readonly",
+        atob: "readonly", URL: "readonly", crypto: "readonly", alert: "readonly",
+        // Legacy globals used by PDF config and auth shim
+        pdfjsLib: "readonly", authFetch: "readonly"
       }
     }
+  },
+  {
+    // Node/CommonJS scripts living under frontend/
+    files: [
+      "frontend/build.js",
+      "frontend/check-files.js",
+      "frontend/hash-password.js",
+      "frontend/start-local.js",
+      "frontend/uploads-dir.js",
+      "frontend/cypress.config.js"
+    ],
+    languageOptions: { parserOptions: { ecmaVersion: "latest", sourceType: "commonjs" },
+      globals: { require: "readonly", module: "readonly", __dirname: "readonly", process: "readonly" } },
+    rules: { "@typescript-eslint/no-require-imports": "off", "no-undef": "off" }
   },
   // Legacy plain browser scripts: declare common browser globals and authFetch as readonly
   {
@@ -75,6 +95,12 @@ export default [
       }
     },
     rules: { "@typescript-eslint/no-require-imports": "off", "no-undef": "off" }
+  },
+  {
+    // Ignore generated public assets under nested dashboard build outputs
+    ignores: [
+      "justice-dashboard/justice-server/public/**",
+    ]
   },
   {
     files: ["**/*.cjs", "**/*config.cjs"],
