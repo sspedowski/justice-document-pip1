@@ -1,4 +1,5 @@
 /* eslint-env browser */
+import React from 'react';
 import { Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
