@@ -19,10 +19,18 @@ function initializeDashboard() {
     const isAuthenticated = window.DashboardAuth.checkAuth();
     if (isAuthenticated) {
       console.debug("🔓 User authenticated – loading dashboard...");
-      initializeJusticeDashboard();
+      if (typeof window.initializeJusticeDashboard === 'function') {
+        window.initializeJusticeDashboard();
+      } else {
+        console.error('initializeJusticeDashboard() not available on window');
+      }
     } else {
       console.debug("🔐 User not authenticated – showing login form...");
-      showLoginForm();
+      if (typeof window.showLoginForm === 'function') {
+        window.showLoginForm();
+      } else {
+        console.error('showLoginForm() not available on window');
+      }
     }
   } catch (error) {
     console.error("❌ Dashboard initialization error:", error);
