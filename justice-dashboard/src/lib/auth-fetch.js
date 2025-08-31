@@ -1,23 +1,24 @@
-// drop-in secure fetch helper
-import { getToken, refreshToken, getCsrfToken } from '../../../auth-manager.js';
+// Local, self-contained authFetch for the React app.
+// No imports outside the app root (Vite-safe).
 
 export async function authFetch(input, init = {}) {
   const headers = new Headers(init.headers || {});
-  const token = getToken();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  const csrf = typeof getCsrfToken === 'function' ? getCsrfToken() : null;
-  if (csrf) headers.set('X-CSRF-Token', csrf);
 
-  const res = await fetch(input, { ...init, headers, credentials: 'include' });
-  if (res.status !== 401) return res;
-
-  // 401 → try one silent refresh, then retry once
+  // Optional: Attach CSRF token from cookie if present
   try {
-    await refreshToken();
-  } catch (e) {
-    // ignore
-  }
-  const newTok = getToken();
-  if (newTok) headers.set('Authorization', `Bearer ${newTok}`);
-  return fetch(input, { ...init, headers, credentials: 'include' });
+    const m = typeof document !== 'undefined' && document.cookie
+      ? document.cookie.match(/(?:^|;\s*)csrfToken=([^;]+)/)
+      : null;
+    if (m && !headers.has('X-CSRF-Token')) headers.set('X-CSRF-Token', decodeURIComponent(m[1]));
+  } catch {}
+
+  // Optional: Attach Bearer token from sessionStorage or other store
+  // const token = sessionStorage.getItem('accessToken');
+  // if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+
+  return fetch(input, {
+    ...init,
+    headers,
+    credentials: init.credentials || 'include'
+  });
 }
