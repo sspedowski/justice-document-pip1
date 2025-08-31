@@ -1,1 +1,1 @@
-web: node server.js
+web: cd justice-server && node server.js

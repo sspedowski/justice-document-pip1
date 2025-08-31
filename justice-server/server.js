@@ -30,7 +30,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
 const app = express();
 app.disable("x-powered-by");
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
 app.use(cookieParser());
@@ -68,12 +68,6 @@ if (process.env.NODE_ENV !== 'production') {
     res.json({ ok: true, user: req.user, ts: Date.now() });
   });
 }
-
-// Simple CSRF token endpoint (stateless demo)
-app.get("/api/csrf-token", (_req, res) => {
-  const csrfToken = crypto.randomBytes(16).toString("hex");
-  res.json({ csrfToken });
-});
 
 // CSRF token endpoint (client can call to fetch token if needed)
 app.get('/api/csrf-token', (req, res) => {

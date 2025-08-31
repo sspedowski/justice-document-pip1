@@ -13,7 +13,7 @@
     "start": "cd justice-server && node server.js",
     "start:prod": "bash scripts/start-production.sh",
     "dev": "cd justice-dashboard && npm run dev",
-    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node start-local.js",
+    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node frontend/start-local.js",
     "dev:backend": "node server.js",
     "dev:frontend": "cd justice-dashboard && npm run dev:client",
     "test": "echo '✅ All tests passed!'",

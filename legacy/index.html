@@ -10,7 +10,7 @@
         script-src 'self';
         style-src 'self';
         img-src 'self' data:;
-        connect-src 'self' http://localhost:3000;
+        connect-src 'self' http://localhost:3001;
       "
     />
     <title>Justice Dashboard</title>
@@ -260,10 +260,10 @@
     <!-- Scripts (must come after #app and modals for CSP) - DEBUG ENABLED -->
     <script src="script.js"></script>
     <script type="module" src="debug-tracer.js"></script>
-    <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="../backend/auth-manager.js"></script>
     <script type="module" src="dark-mode.js"></script>
-    <script type="module" src="pdf-config.js"></script>
-    <script type="module" src="pdf.min.js"></script>
-    <script type="module" src="dashboard-init.js"></script>
+    <script type="module" src="../frontend/pdf-config.js"></script>
+    <script type="module" src="../frontend/pdf.min.js"></script>
+    <script type="module" src="../frontend/dashboard-init.js"></script>
   </body>
 </html>
