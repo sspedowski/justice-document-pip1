@@ -7,6 +7,7 @@ export default [
       "dist/**",
       "build/**",
       "web/**",
+      "**/public/**",
       "**/*.min.js",
       "**/vendor/**",
       // App-specific public/upload directories
@@ -22,6 +23,7 @@ export default [
     rules: {
       "no-case-declarations": "off",
       "no-fallthrough": "off",
+      "no-empty": ["error", { "allowEmptyCatch": true }],
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_", ignoreRestSiblings: true }
