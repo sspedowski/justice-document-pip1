@@ -16,6 +16,11 @@ const root = path.resolve(argv.root);
 const dry = !!argv.dry || !argv.apply;
 const apply = !!argv.apply;
 const exclude = (argv.exclude || '').split(',').map(s => s.trim()).filter(Boolean);
+// support --ignore as an alias for --exclude
+if (argv.ignore) {
+  const extra = (argv.ignore || '').split(',').map(s => s.trim()).filter(Boolean);
+  for (const e of extra) if (!exclude.includes(e)) exclude.push(e);
+}
 
 const exts = ['.js','.jsx','.ts','.tsx'];
 
@@ -64,21 +69,34 @@ function rewriteFetchCalls(src) {
   return src.replace(/(^|[^A-Za-z0-9_.$])fetch\s*\(/g, (_, prefix) => `${prefix}authFetch(`);
 }
 
-function ensureImport(src, importSpec = './lib/authFetch') {
-  if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/m.test(src)) return src;
-  // Detect if this file looks like an ES module (simple heuristic: contains top-level import/export)
-  const isEsModule = /(^|\n)\s*(import\s.+|export\s+(default|\{))/m.test(src);
+function isESM(src) {
+  return /(^|\n)\s*import\s.+from\s+['"][^'"]+['"]/.test(src) || /(^|\n)\s*export\s+/.test(src);
+}
+function isCJS(src) {
+  return /(^|\n)\s*module\.exports\s*=/.test(src) || /(^|\n)\s*exports\./.test(src) || /(^|\n)\s*const\s+\w+\s*=\s*require\(['"][^'"]+['"]\)/.test(src);
+}
+function ensureImportAuto(src, importSpec = './lib/authFetch') {
+  // already has an authFetch import/require?
+  if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/.test(src)) return src;
+  if (/const\s*\{\s*authFetch\s*\}\s*=\s*require\(['"][^'"]+['"]\)/.test(src)) return src;
+
   const lines = src.split(/\r?\n/);
-  let insertAt = 0;
-  while (insertAt < lines.length && /^\s*(\/\/|\/\*|\*|#!)/.test(lines[insertAt])) insertAt++;
-  if (isEsModule) {
-    lines.splice(insertAt, 0, `import { authFetch } from "${importSpec}";`);
-  } else {
-    // Non-module scripts may be loaded via <script>; inserting an import would break them.
-    // Add a short TODO comment so maintainers know to wire authFetch (global or module) manually.
-    lines.splice(insertAt, 0, `// TODO: ensure authFetch is available (global or convert to module to import from ${importSpec})`);
+  let i = 0; while (i < lines.length && /^\s*(\/\/|\/\*|\*|#!)/.test(lines[i])) i++;
+
+  if (isESM(src)) {
+    lines.splice(i, 0, `import { authFetch } from "${importSpec}";`);
+    return lines.join('\n');
   }
-  return lines.join('\n');
+  if (isCJS(src)) {
+    lines.splice(i, 0, `const { authFetch } = require("${importSpec}");`);
+    return lines.join('\n');
+  }
+  // Plain browser script: do NOT insert; add a TODO comment to remind the maintainer
+  if (!/window\.authFetch/.test(src)) {
+    lines.splice(i, 0, `// TODO: ensure window.authFetch is defined on this page before this script runs`);
+    return lines.join('\n');
+  }
+  return src;
 }
 
 function shouldSkipFileForNativeFetch(filePath, src) {
@@ -131,7 +149,7 @@ for (const r of report) {
 
   let newContent = rewriteFetchCalls(content);
   if (newContent !== content) {
-    newContent = ensureImport(newContent, './lib/authFetch');
+  newContent = ensureImportAuto(newContent, './lib/authFetch');
     const bak = r.file + '.bak';
     if (!fs.existsSync(bak)) fs.writeFileSync(bak, content, 'utf8');
     fs.writeFileSync(r.file, newContent, 'utf8');
