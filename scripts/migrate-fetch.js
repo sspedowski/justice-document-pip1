@@ -46,7 +46,7 @@ function previewReplacements(content) {
   // match fetch( not preceded by a word char (to avoid authFetch) or dot (obj.fetch)
   // Use a regex that finds fetch( with optional whitespace
   // Avoid look-behind for Node compatibility. Match a boundary (start or non-word/dot) then fetch(
-  const regex = /(^|[^A-Za-z0-9_\.$])fetch\s*\(/g;
+  const regex = /(^|[^A-Za-z0-9_.$])fetch\s*\(/g;
   let m;
   const replacements = [];
   while ((m = regex.exec(content)) !== null) {
@@ -61,7 +61,7 @@ function previewReplacements(content) {
 
 // Helpers: rewrite fetch calls without look-behind, ensure import, and skip files
 function rewriteFetchCalls(src) {
-  return src.replace(/(^|[^A-Za-z0-9_\.$])fetch\s*\(/g, (_, prefix) => `${prefix}authFetch(`);
+  return src.replace(/(^|[^A-Za-z0-9_.$])fetch\s*\(/g, (_, prefix) => `${prefix}authFetch(`);
 }
 
 function ensureImport(src, importSpec = './lib/authFetch') {
@@ -114,11 +114,23 @@ for (const r of report) {
   if (dry) continue;
   // perform replacement and optionally backup
   const content = fs.readFileSync(r.file, 'utf8');
-  const newContent = content.replace(/(?<![A-Za-z0-9_\.$])fetch\s*\(/g, 'authFetch(');
-  const bak = r.file + '.bak';
-  if (!fs.existsSync(bak)) fs.writeFileSync(bak, content, 'utf8');
-  fs.writeFileSync(r.file, newContent, 'utf8');
-  console.log('WROTE:', r.file, 'bak->', bak);
+
+  // optional skip for files that must keep native fetch
+  if (shouldSkipFileForNativeFetch(r.file, content)) {
+    console.log('SKIP(native):', r.file);
+    continue;
+  }
+
+  let newContent = rewriteFetchCalls(content);
+  if (newContent !== content) {
+    newContent = ensureImport(newContent, './lib/authFetch');
+    const bak = r.file + '.bak';
+    if (!fs.existsSync(bak)) fs.writeFileSync(bak, content, 'utf8');
+    fs.writeFileSync(r.file, newContent, 'utf8');
+    console.log('WROTE:', r.file, 'bak->', bak);
+  } else {
+    console.log('NO-CHANGE(after rewrite):', r.file);
+  }
 }
 
 console.log('Done.');
