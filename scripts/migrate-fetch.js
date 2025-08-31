@@ -43,13 +43,14 @@ function walk(dir) {
 }
 
 function previewReplacements(content) {
-  // Deprecated: replaced by safer, compatibility-minded helpers below.
-  // Keep for backward-compat but delegate to transform helpers.
-  const regex = /(^|[^A-Za-z0-9_.$])fetch\s*\(/g;
+  // match fetch( not preceded by a word char (to avoid authFetch) or dot (obj.fetch)
+  // Use a regex that finds fetch( with optional whitespace
+  const regex = /(?<![A-Za-z0-9_\.$])fetch\s*\(/g;
   let m;
   const replacements = [];
   while ((m = regex.exec(content)) !== null) {
-    const idx = m.index + (m[1] ? m[1].length : 0);
+    const idx = m.index;
+    // capture the line number
     const before = content.slice(0, idx);
     const line = before.split('\n').length;
     replacements.push({ index: idx, line });
@@ -63,82 +64,16 @@ if (!fs.existsSync(root)) {
 }
 
 const files = walk(root).filter(f => !isExcluded(f));
-
-// CLI option to control where import is inserted (relative path used by default)
-const importSpec = argv.import || './lib/authFetch';
-
-function ensureImport(src, importSpecLocal = importSpec) {
-  if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/m.test(src)) return src;
-
-  const IMPORT_LINE = `import { authFetch } from "${importSpecLocal}";`;
-  const lines = src.split(/\r?\n/);
-  let insertAt = 0;
-  while (insertAt < lines.length && /^\s*(\/\/|\/\*|\*|#!)/.test(lines[insertAt])) insertAt++;
-  lines.splice(insertAt, 0, IMPORT_LINE);
-  return lines.join('\n');
-}
-
-function shouldSkipFileForNativeFetch(filePath, src) {
-  const lower = filePath.toLowerCase();
-  if (/(^|\/)sw(\.|-)?.*js$/.test(lower)) return true;
-  if (/serviceworker\.m?js$/.test(lower)) return true;
-  if (/worker\.m?js$/.test(lower)) return true;
-  if (/auth[-_]fetch\.m?js$/.test(lower)) return true;
-  if (/fetch[-_]?polyfill/i.test(lower)) return true;
-  if (/\/node_modules\//.test(lower)) return true;
-  if (/\bself\s*\.\s*addEventListener\s*\(\s*['"]fetch['"]/.test(src)) return true;
-  return false;
-}
-
-function rewriteFetchCalls(src) {
-  // Safe alternative that doesn't rely on lookbehind
-  return src.replace(/(^|[^A-Za-z0-9_.$])fetch\s*\(/g, (m, p1) => `${p1}authFetch(`);
-}
-
-function findFetchLines(src) {
-  const regex = /(^|[^A-Za-z0-9_.$])fetch\s*\(/g;
-  const lines = [];
-  let m;
-  while ((m = regex.exec(src)) !== null) {
-    const idx = m.index + (m[1] ? m[1].length : 0);
-    const before = src.slice(0, idx);
-    lines.push(before.split('\n').length);
-  }
-  return lines;
-}
-
-function transformFileSource(filePath, src, importSpecLocal = importSpec) {
-  if (shouldSkipFileForNativeFetch(filePath, src)) return { changed: false, out: src, reason: 'skip-native-fetch-file' };
-  if (!/\bfetch\s*\(/.test(src)) return { changed: false, out: src, reason: 'no-fetch' };
-  if (/authFetch\s*\(/.test(src)) return { changed: false, out: src, reason: 'already-authfetch' };
-
-  const out = rewriteFetchCalls(src);
-  if (out === src) return { changed: false, out: src, reason: 'no-change' };
-
-  const withImport = ensureImport(out, importSpecLocal);
-  return { changed: withImport !== src, out: withImport, reason: 'rewritten' };
-}
-
 let totalMatches = 0;
 const report = [];
 for (const f of files) {
   const txt = fs.readFileSync(f, 'utf8');
-  const lines = findFetchLines(txt);
-  if (lines.length === 0) continue;
-  const { changed, out, reason } = transformFileSource(f, txt, importSpec);
-  if (!changed) {
-    // report but skip writing
-    report.push({ file: f, count: lines.length, lines, reason });
-    totalMatches += lines.length;
-    continue;
-  }
-  totalMatches += lines.length;
-  report.push({ file: f, count: lines.length, lines, reason });
-  if (dry) continue;
-  const bak = f + '.bak';
-  if (!fs.existsSync(bak)) fs.writeFileSync(bak, txt, 'utf8');
-  fs.writeFileSync(f, out, 'utf8');
-  console.log('WROTE:', f, 'bak->', bak);
+  if (!txt.includes('fetch(') && !/\bfetch\s*\(/.test(txt)) continue;
+  if (txt.includes('authFetch(')) continue; // skip files that already use authFetch
+  const replacements = previewReplacements(txt);
+  if (replacements.length === 0) continue;
+  totalMatches += replacements.length;
+  report.push({ file: f, count: replacements.length, lines: replacements.map(r=>r.line) });
 }
 
 if (report.length === 0) {
@@ -151,7 +86,15 @@ console.log('Files to change:', report.length, 'Total fetch() matches:', totalMa
 for (const r of report) {
   console.log('-'.repeat(60));
   console.log(r.file);
-  console.log('Matches:', r.count, 'Lines:', r.lines.join(', '), 'Reason:', r.reason || 'n/a');
+  console.log('Matches:', r.count, 'Lines:', r.lines.join(', '));
+  if (dry) continue;
+  // perform replacement and optionally backup
+  const content = fs.readFileSync(r.file, 'utf8');
+  const newContent = content.replace(/(?<![A-Za-z0-9_\.$])fetch\s*\(/g, 'authFetch(');
+  const bak = r.file + '.bak';
+  if (!fs.existsSync(bak)) fs.writeFileSync(bak, content, 'utf8');
+  fs.writeFileSync(r.file, newContent, 'utf8');
+  console.log('WROTE:', r.file, 'bak->', bak);
 }
 
 console.log('Done.');
