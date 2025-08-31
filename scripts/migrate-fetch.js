@@ -66,10 +66,18 @@ function rewriteFetchCalls(src) {
 
 function ensureImport(src, importSpec = './lib/authFetch') {
   if (/import\s*\{\s*authFetch\s*\}\s*from\s*['"][^'"]+['"]/m.test(src)) return src;
+  // Detect if this file looks like an ES module (simple heuristic: contains top-level import/export)
+  const isEsModule = /(^|\n)\s*(import\s.+|export\s+(default|\{))/m.test(src);
   const lines = src.split(/\r?\n/);
   let insertAt = 0;
   while (insertAt < lines.length && /^\s*(\/\/|\/\*|\*|#!)/.test(lines[insertAt])) insertAt++;
-  lines.splice(insertAt, 0, `import { authFetch } from "${importSpec}";`);
+  if (isEsModule) {
+    lines.splice(insertAt, 0, `import { authFetch } from "${importSpec}";`);
+  } else {
+    // Non-module scripts may be loaded via <script>; inserting an import would break them.
+    // Add a short TODO comment so maintainers know to wire authFetch (global or module) manually.
+    lines.splice(insertAt, 0, `// TODO: ensure authFetch is available (global or convert to module to import from ${importSpec})`);
+  }
   return lines.join('\n');
 }
 
