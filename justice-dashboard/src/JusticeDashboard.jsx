@@ -24,6 +24,8 @@ export default function JusticeDashboard() {
   const fileInputRef = useRef(null);
   const timersRef = useRef({ rafIds: new Set() });
   const [queue, setQueue] = useState([]);
+  const [progressPct, setProgressPct] = useState(0);
+  const [currentFile, setCurrentFile] = useState(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.JusticeDashboard) {
@@ -46,12 +48,12 @@ export default function JusticeDashboard() {
   }, []);
 
   function onSelectFiles(e) {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target?.files || []);
     if (!files.length) return;
-    setQueue((q) => [
+    setQueue((q) => ([
       ...q,
       ...files.map((f) => ({ name: f.name, size: f.size })),
-    ]);
+    ]));
   }
 
   function animateProgress(durationMs, onStep) {
@@ -79,14 +81,20 @@ export default function JusticeDashboard() {
   }
 
   async function startFakeUpload() {
-    while (true) {
-      const next = queue[0];
-      if (!next) break;
-      const duration = 1200 + Math.random() * 800;
-      await animateProgress(duration, () => {});
-      setQueue((q) => q.slice(1));
-      await new Promise((r) => globalThis.setTimeout(r, 150));
+    // Work on a snapshot of the queue at click time to avoid stale closures
+    let remaining = [...queue];
+    while (remaining.length > 0) {
+      const next = remaining[0];
+      setCurrentFile(next);
+      setProgressPct(0);
+      const duration = 1000 + Math.random() * 800;
+      await animateProgress(duration, (pct) => setProgressPct(pct));
+      remaining = remaining.slice(1);
+      setQueue(remaining);
+      await new Promise((r) => globalThis.setTimeout(r, 120));
     }
+    setCurrentFile(null);
+    setProgressPct(0);
   }
 
   return (
@@ -112,15 +120,24 @@ export default function JusticeDashboard() {
             id="file-upload"
             type="file"
             className="hidden"
+            style={{ display: 'none' }}
             multiple
             onChange={onSelectFiles}
           />
-          <button type="button" onClick={startFakeUpload} className="px-3 py-2 border rounded">
+          <button type="button" disabled={queue.length === 0} onClick={startFakeUpload} className="px-3 py-2 border rounded disabled:opacity-50">
             Start
           </button>
         </div>
 
         <div className="mt-4">
+          {currentFile && (
+            <div className="mb-3">
+              <div className="text-sm mb-1">Processing: {currentFile.name}</div>
+              <div className="w-full h-2 bg-gray-200 rounded">
+                <div className="h-2 bg-blue-600 rounded" style={{ width: `${Math.round(progressPct)}%`, transition: 'width 80ms linear' }} />
+              </div>
+            </div>
+          )}
           <h3 className="font-medium mb-2">Upload Queue</h3>
           <ul>
             {queue.map((item, i) => (
