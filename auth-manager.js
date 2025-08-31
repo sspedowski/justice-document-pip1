@@ -1,11 +1,11 @@
+/* eslint-env browser */
 // Lightweight browser bridge used by frontend auth-fetch
 // Delegates to window.authManager if present; otherwise returns safe defaults.
 
 export function getToken() {
   try {
-    return typeof window !== 'undefined' && window.authManager
-      ? (window.authManager.token || null)
-      : null;
+    const gm = typeof globalThis !== 'undefined' ? globalThis : undefined;
+    return gm && gm.authManager ? (gm.authManager.token || null) : null;
   } catch {
     return null;
   }
@@ -13,8 +13,9 @@ export function getToken() {
 
 export function refreshToken() {
   try {
-    if (typeof window !== 'undefined' && window.authManager && typeof window.authManager.refreshToken === 'function') {
-      return window.authManager.refreshToken();
+    const gm = typeof globalThis !== 'undefined' ? globalThis : undefined;
+    if (gm && gm.authManager && typeof gm.authManager.refreshToken === 'function') {
+      return gm.authManager.refreshToken();
     }
   } catch {
     // ignore
@@ -24,10 +25,12 @@ export function refreshToken() {
 
 export function getCsrfToken() {
   try {
-    if (typeof window !== 'undefined' && window.authManager && typeof window.authManager.getCsrfToken === 'function') {
-      return window.authManager.getCsrfToken();
+    const gm = typeof globalThis !== 'undefined' ? globalThis : undefined;
+    if (gm && gm.authManager && typeof gm.authManager.getCsrfToken === 'function') {
+      return gm.authManager.getCsrfToken();
     }
-    const meta = typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]') : null;
+    const d = gm && gm.document ? gm.document : undefined;
+    const meta = d ? d.querySelector('meta[name="csrf-token"]') : null;
     return meta ? meta.getAttribute('content') : null;
   } catch {
     return null;
