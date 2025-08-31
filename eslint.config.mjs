@@ -3,12 +3,16 @@ import ts from "typescript-eslint";
 
 export default [
   { ignores: [
+      // Generated/build artifacts and vendor bundles
       "dist/**",
-      "legacy/**",
+      "build/**",
+      "web/**",
       "**/*.min.js",
       "**/vendor/**",
+      // App-specific public/upload directories
       "frontend/public/**",
       "frontend/uploads/**",
+      // Temporary files
       "**/tmp-*.js"
     ]
   },
