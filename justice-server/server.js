@@ -40,6 +40,23 @@ const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir, { fallthrough: true }));
 
+// Serve legacy and frontend assets directly for the legacy dashboard page
+const repoRoot = process.cwd();
+const legacyDir = path.join(repoRoot, "legacy");
+if (fs.existsSync(legacyDir)) {
+  app.use("/legacy", express.static(legacyDir, { fallthrough: true }));
+}
+const frontendDir = path.join(repoRoot, "frontend");
+if (fs.existsSync(frontendDir)) {
+  app.use("/frontend", express.static(frontendDir, { fallthrough: true }));
+}
+// Expose only the browser-side auth manager under a safe path
+app.get('/assets/auth-manager.js', (_req, res) => {
+  const authFile = path.join(repoRoot, 'backend', 'auth-manager.js');
+  if (fs.existsSync(authFile)) return res.sendFile(authFile);
+  return res.status(404).end();
+});
+
 // Multer setup for PDF uploads
 const upload = multer({
   dest: uploadsDir,
