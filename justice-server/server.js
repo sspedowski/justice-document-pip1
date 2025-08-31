@@ -6,7 +6,6 @@ const path = require("path");
 const multer = require("multer");
 const helmet = require("helmet");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
 
@@ -73,7 +72,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.get('/api/csrf-token', (req, res) => {
   try {
     return res.json({ csrfToken: req.csrfToken() });
-  } catch (e) {
+  } catch {
     return res.status(500).json({ error: 'Unable to generate CSRF token' });
   }
 });
