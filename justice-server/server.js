@@ -57,6 +57,11 @@ app.get('/assets/auth-manager.js', (_req, res) => {
   return res.status(404).end();
 });
 
+// Root redirect → legacy dashboard for convenience
+app.get('/', (_req, res) => {
+  return res.redirect('/legacy/index.html');
+});
+
 // Multer setup for PDF uploads
 const upload = multer({
   dest: uploadsDir,
