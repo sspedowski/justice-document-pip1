@@ -93,6 +93,17 @@ export default [
     }
   },
   {
+    files: ["justice-dashboard/**/*.{js,jsx,ts,tsx}"],
+    languageOptions: {
+      parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+      globals: {
+        window: "readonly", document: "readonly", console: "readonly",
+        setTimeout: "readonly", clearTimeout: "readonly", setInterval: "readonly", clearInterval: "readonly",
+        fetch: "readonly", Headers: "readonly", Request: "readonly", Response: "readonly"
+      }
+    }
+  },
+  {
     files: ["backend/**/*.{js,ts}", "justice-server/**/*.js", "scripts/**/*.js"],
     languageOptions: {
       parserOptions: { ecmaVersion: "latest", sourceType: "commonjs" },
