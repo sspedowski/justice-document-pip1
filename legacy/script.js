@@ -126,7 +126,7 @@ const DashboardAuth = {
         } catch {}
       }
       if (typeof authFetch === 'undefined') {
-        const mod = await import('../justice-dashboard/src/lib/auth-fetch.js');
+        const mod = await import('/frontend/auth-fetch.js');
         window.authFetch = mod.authFetch;
       }
       const response = await authFetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
