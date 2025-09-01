@@ -4,7 +4,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-const helmet = require("helmet");
+// const helmet = require("helmet"); // no longer used; server applies CSP header manually
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
@@ -28,19 +28,25 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
 // App
 const app = express();
 app.disable("x-powered-by");
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-  connectSrc: ["'self'", "http://localhost:3000"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'"],
-        imgSrc: ["'self'", "data:"],
-      },
-    },
-  })
-);
+// Single CSP header applied by the server. Remove any <meta http-equiv="Content-Security-Policy"> tags in HTML.
+// Frontend should call /api (same origin via Vite proxy); allow Vite dev server & websocket for HMR.
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "connect-src 'self' http://localhost:5173 ws://localhost:5173",
+      "script-src 'self' 'unsafe-inline' http://localhost:5173",
+      "style-src 'self' 'unsafe-inline' http://localhost:5173",
+      "img-src 'self' blob: data:",
+      "font-src 'self' data:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+    ].join('; ')
+  );
+  next();
+});
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
