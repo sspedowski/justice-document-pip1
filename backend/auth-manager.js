@@ -37,8 +37,8 @@ class AuthManager {
     try {
       const userData = sessionStorage.getItem("justice_user");
       return userData ? JSON.parse(userData) : null;
-    } catch (e) {
-      console.warn("Failed to parse stored user data", e);
+    } catch (_e) {
+      console.warn("Failed to parse stored user data", _e);
       return null;
     }
   }
@@ -51,8 +51,8 @@ class AuthManager {
     };
     try {
       sessionStorage.setItem("justice_user", JSON.stringify(safeUser));
-    } catch (e) {
-      console.warn("Failed to store user in sessionStorage", e);
+    } catch (_e) {
+      console.warn("Failed to store user in sessionStorage", _e);
     }
     this.user = safeUser;
   }
@@ -214,8 +214,8 @@ class AuthManager {
         // Storing tokens in sessionStorage is less persistent than localStorage but still
         // accessible to JS. For best security, implement a server endpoint to set
         // an HttpOnly secure cookie instead and call it here (e.g. POST /api/set-token-cookie).
-      } catch (e) {
-        console.warn("Failed to persist token to sessionStorage", e);
+      } catch {
+        console.warn("Failed to persist token to sessionStorage");
       }
     }
   }
@@ -224,7 +224,7 @@ class AuthManager {
     this.token = null;
     try {
       sessionStorage.removeItem("justice_token");
-    } catch (e) {
+    } catch {
       /* ignore */
     }
   }
@@ -234,7 +234,7 @@ class AuthManager {
     try {
       const el = document.querySelector('meta[name="csrf-token"]');
       return el ? el.getAttribute('content') : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -375,7 +375,7 @@ export function getCsrfToken() {
 }
 
 // Auto-redirect if not authenticated (for protected pages)
-function requireAuth() {
+export function requireAuth() {
   if (!window.authManager.isAuthenticated()) {
     window.location.href = "/login.html";
     return false;

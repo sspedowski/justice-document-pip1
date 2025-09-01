@@ -1,7 +1,7 @@
 /* eslint-env browser */
-import React from 'react';
 import { Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+
 import { authFetch } from './lib/auth-fetch.js';
 
 const STAT_COLORS = {
@@ -31,13 +31,25 @@ export default function JusticeDashboard() {
   const API_BASE = (function () {
     try {
       // Prefer Vite env, then global override, then localhost fallback
-      const fromEnv = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : null;
+      // Avoid using `typeof import` in JSX files since some parsers choke on it.
+      let fromEnv = null;
+      try {
+        /* eslint-disable no-undef */
+        if (typeof importMeta !== 'undefined' && importMeta && importMeta.env && importMeta.env.VITE_API_URL) {
+          fromEnv = importMeta.env.VITE_API_URL;
+        }
+        /* eslint-enable no-undef */
+      } catch {
+        // importMeta may not be available in some bundlers; fall back silently
+      }
       if (fromEnv) return fromEnv;
       if (globalThis.API_BASE_URL) return globalThis.API_BASE_URL;
       const host = globalThis.location?.hostname;
       const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
       return isLocal ? 'http://localhost:3000' : '';
-    } catch { return ''; }
+    } catch {
+      return '';
+    }
   })();
 
   useEffect(() => {
@@ -104,7 +116,7 @@ export default function JusticeDashboard() {
       const duration = 1000 + Math.random() * 800;
 
       // Prepare upload
-      const form = new FormData();
+  const form = new (globalThis.FormData)();
       form.append('file', next);
       const uploadPromise = authFetch(`${API_BASE}/api/summarize`, {
         method: 'POST',
