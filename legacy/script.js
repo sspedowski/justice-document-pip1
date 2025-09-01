@@ -57,6 +57,9 @@ function getApiBaseUrl() {
 // Use dynamic API base URL (will use window.API_BASE_URL when available)
 const DYNAMIC_API_BASE_URL = getApiBaseUrl();
 
+// Helper to call proxied API path (uses same-origin /api so Vite proxy or server handles backend)
+function api(p) { return `/api${p.startsWith('/') ? p : `/${p}`}`; }
+
 // Global variables for bulk processing
 let isProcessingBulk = false;
 let bulkTotal = 0;
@@ -117,7 +120,7 @@ const DashboardAuth = {
       let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || localStorage.getItem('justiceCsrfToken');
       if (!csrfToken) {
         try {
-          const tRes = await fetch(`${DYNAMIC_API_BASE_URL}/api/csrf-token`, { credentials: 'include' });
+          const tRes = await fetch(api('/csrf-token'), { credentials: 'include' });
           const tData = await tRes.json().catch(() => ({}));
           if (tData && tData.csrfToken) {
             csrfToken = tData.csrfToken;
@@ -129,7 +132,7 @@ const DashboardAuth = {
         const mod = await import('/frontend/auth-fetch.js');
         window.authFetch = mod.authFetch;
       }
-      const response = await authFetch(`${DYNAMIC_API_BASE_URL}/api/login`, {
+  const response = await authFetch(api('/login'), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -186,7 +189,7 @@ const DashboardAuth = {
     try {
       // Call server logout endpoint if token exists
       if (this.authToken) {
-  await authFetch(`${DYNAMIC_API_BASE_URL}/api/logout`, {
+  await authFetch(api('/logout'), {
           method: "POST",
           headers: {
             Authorization: `Bearer ${this.authToken}`,
