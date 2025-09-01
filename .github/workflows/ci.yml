@@ -36,6 +36,10 @@ jobs:
         run: |
           if [ -f package.json ]; then npm ci; fi
         shell: bash
+      - name: Install backend deps (if justice-server/package.json exists)
+        run: |
+          if [ -f justice-server/package.json ]; then npm ci --prefix justice-server; fi
+        shell: bash
       - name: Test (if scripts.test exists)
         run: |
           if [ -f package.json ] && jq -er '.scripts.test' package.json > /dev/null 2>&1; then npm test -- --ci; fi
