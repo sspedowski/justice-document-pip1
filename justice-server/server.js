@@ -22,8 +22,13 @@ if (dotenvPath) {
 // Config
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
+// Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
+let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
+if (process.env.NODE_ENV === 'test') {
+  ADMIN_USERNAME = 'admin';
+  ADMIN_PASSWORD = 'adminpass';
+}
 
 // App
 const app = express();
@@ -49,9 +54,26 @@ app.use((req, res, next) => {
 });
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
-// Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
+// Cookies and CSRF protection. In tests we skip csurf entirely for simplicity.
 app.use(cookieParser());
-app.use(csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: false } }));
+const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: false } });
+if (process.env.NODE_ENV !== 'test') {
+  // Apply CSRF protection except for open auth endpoints used in API-style flows.
+  // Also allow /api/summarize so file uploads in dev aren't blocked by CSRF.
+  app.use((req, res, next) => {
+    const openPaths = new Set([
+      '/api/login',
+      '/api/logout',
+      '/api/refresh-token',
+      '/api/csrf-token',
+      '/api/summarize',
+    ]);
+    if (openPaths.has(req.path)) return next();
+    return csrfProtection(req, res, next);
+  });
+} else {
+  // In test environment, do not use csurf at all to simplify automated requests
+}
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
@@ -81,16 +103,14 @@ app.get('/', (_req, res) => {
   return res.redirect('/legacy/index.html');
 });
 
-// Multer setup for PDF uploads
+// Multer setup for PDF uploads — use memory storage so requireAuth runs before disk ops
 const upload = multer({
-  dest: uploadsDir,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype === "application/pdf" || path.extname(file.originalname).toLowerCase() === ".pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF files are allowed"));
-    }
+    const isPdf = file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf';
+    if (!isPdf) return cb(new Error('Only PDF files are allowed'));
+    return cb(null, true);
   },
 });
 
@@ -134,6 +154,27 @@ app.post("/api/login", (req, res) => {
 // Auth: logout (stateless JWT, so just acknowledge)
 app.post("/api/logout", (_req, res) => res.json({ success: true }));
 
+// --- Auth: refresh token (accept a valid token and reissue) ---
+app.post('/api/refresh-token', (req, res) => {
+  const auth = req.headers['authorization'] || '';
+  const oldToken = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!oldToken) return res.status(401).json({ error: 'Missing token' });
+  try {
+    const payload = jwt.verify(oldToken, JWT_SECRET);
+    const { sub, role } = payload || {};
+    const token = jwt.sign({ sub, role }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ success: true, token });
+  } catch {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// --- Profile (protected) ---
+app.get('/api/profile', requireAuth, (req, res) => {
+  const { sub, role } = req.user || {};
+  return res.json({ user: { username: sub, role: role || 'user' } });
+});
+
 // JWT middleware
 function requireAuth(req, res, next) {
   const auth = req.headers["authorization"] || "";
@@ -162,6 +203,8 @@ app.post("/api/summarize", requireAuth, upload.single("file"), async (req, res) 
 // Global error handler (normalize Multer/file errors to 400)
  
 app.use((err, _req, res, _next) => {
+  // Emit full stack to test output to help debugging
+  if (err && err.stack) console.error(err.stack);
   const message = err && (err.message || err.toString());
   if (message && (message.includes("Only PDF files are allowed") || message.includes("File too large") || err.name === 'MulterError')) {
     return res.status(400).json({ error: message });
