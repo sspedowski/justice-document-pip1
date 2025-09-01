@@ -50,10 +50,10 @@ export default function JusticeDashboard() {
   function onSelectFiles(e) {
     const files = Array.from(e.target?.files || []);
     if (!files.length) return;
-    setQueue((q) => ([
-      ...q,
-      ...files.map((f) => ({ name: f.name, size: f.size })),
-    ]));
+    // Keep File objects in state so metadata (lastModified, type) is preserved
+    setQueue((q) => [...q, ...files]);
+    // Clear native input to allow selecting the same file again
+    try { if (e.target) e.target.value = ""; } catch {}
   }
 
   function animateProgress(durationMs, onStep) {
@@ -141,7 +141,7 @@ export default function JusticeDashboard() {
           <h3 className="font-medium mb-2">Upload Queue</h3>
           <ul>
             {queue.map((item, i) => (
-              <li key={`${item.name}-${i}`} className="py-1">
+              <li key={`${item.name}-${item.size}-${item.lastModified ?? i}`} className="py-1">
                 {item.name} - {item.size} bytes
               </li>
             ))}
