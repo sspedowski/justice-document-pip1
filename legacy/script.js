@@ -56,6 +56,8 @@ function getApiBaseUrl() {
 
 // Use dynamic API base URL (will use window.API_BASE_URL when available)
 const DYNAMIC_API_BASE_URL = getApiBaseUrl();
+// Use centralized api helper for same-origin /api paths
+import { api as proxiedApi } from '../justice-dashboard/src/utils/api.js';
 
 // Helper to call proxied API path (uses same-origin /api so Vite proxy or server handles backend)
 function api(p) { return `/api${p.startsWith('/') ? p : `/${p}`}`; }
@@ -315,7 +317,7 @@ const DashboardAuth = {
     });
     if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
     try {
-  const response = await authFetch(DYNAMIC_API_BASE_URL + url, Object.assign({}, options, { headers, credentials: 'same-origin' }));
+  const response = await authFetch(proxiedApi(url.replace(/^\/api\/?/, '/')), Object.assign({}, options, { headers, credentials: 'same-origin' }));
       if (response.status === 401) {
         // Token expired or invalid
         this.clearAuth();
@@ -896,7 +898,7 @@ async function uploadAndAnalyzeFile(file) {
     const formData = new FormData();
     formData.append("file", file);
 
-  const response = await authFetch(`${DYNAMIC_API_BASE_URL}/api/summarize`, {
+  const response = await authFetch(proxiedApi('/summarize'), {
       method: "POST",
       body: formData
     });
@@ -1274,7 +1276,7 @@ function initializeJusticeDashboard() {
 
         try {
           const response = await authFetch(
-            `${DYNAMIC_API_BASE_URL}${url}`,
+            proxiedApi(url.replace(/^\/api\/?/, '/')),
             defaultOptions,
           );
 
