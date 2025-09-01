@@ -50,7 +50,7 @@ function getApiBaseUrl() {
 
   // Return appropriate base URL
   return isLocal
-    ? "http://localhost:3001"
+  ? "http://localhost:3000"
     : window.location.origin;
 }
 
