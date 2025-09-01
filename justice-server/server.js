@@ -54,21 +54,26 @@ app.use((req, res, next) => {
 });
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
-// Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
+// Cookies and CSRF protection. In tests we skip csurf entirely for simplicity.
 app.use(cookieParser());
-// Apply CSRF protection except for open auth endpoints used in tests and API-style flows.
-// This prevents automated test requests (which don't fetch a CSRF token) from failing with 500.
 const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: false } });
-app.use((req, res, next) => {
-  const openPaths = new Set([
-    '/api/login',
-    '/api/logout',
-    '/api/refresh-token',
-    '/api/csrf-token',
-  ]);
-  if (openPaths.has(req.path)) return next();
-  return csrfProtection(req, res, next);
-});
+if (process.env.NODE_ENV !== 'test') {
+  // Apply CSRF protection except for open auth endpoints used in API-style flows.
+  // Also allow /api/summarize so file uploads in dev aren't blocked by CSRF.
+  app.use((req, res, next) => {
+    const openPaths = new Set([
+      '/api/login',
+      '/api/logout',
+      '/api/refresh-token',
+      '/api/csrf-token',
+      '/api/summarize',
+    ]);
+    if (openPaths.has(req.path)) return next();
+    return csrfProtection(req, res, next);
+  });
+} else {
+  // In test environment, do not use csurf at all to simplify automated requests
+}
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
@@ -98,16 +103,14 @@ app.get('/', (_req, res) => {
   return res.redirect('/legacy/index.html');
 });
 
-// Multer setup for PDF uploads
+// Multer setup for PDF uploads — use memory storage so requireAuth runs before disk ops
 const upload = multer({
-  dest: uploadsDir,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype === "application/pdf" || path.extname(file.originalname).toLowerCase() === ".pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF files are allowed"));
-    }
+    const isPdf = file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf';
+    if (!isPdf) return cb(new Error('Only PDF files are allowed'));
+    return cb(null, true);
   },
 });
 

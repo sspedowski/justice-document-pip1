@@ -11,7 +11,8 @@ if (typeof global.TextEncoder === 'undefined') {
 
 // Register DOM matchers for testing-library
 try {
-  require('@testing-library/jest-dom/extend-expect');
+  // importing the package registers jest-dom matchers globally
+  require('@testing-library/jest-dom');
 } catch (e) {
   // If the package isn't installed yet, tests will fail later; keep this file safe to require
 }
