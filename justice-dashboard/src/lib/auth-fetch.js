@@ -37,12 +37,12 @@ function getAuthToken() {
     if (fromSession) return fromSession;
     const raw = globalThis.localStorage?.getItem('justiceAuth');
     if (raw) {
-      try { const j = JSON.parse(raw); if (j && j.token) return j.token; } catch {}
+  try { const j = JSON.parse(raw); if (j && j.token) return j.token; } catch { /* ignore parse error */ }
     }
     // Fallback: global auth manager (if legacy auth is present)
     const gm = typeof globalThis !== 'undefined' ? globalThis : undefined;
     if (gm && gm.authManager && gm.authManager.token) return gm.authManager.token;
-  } catch {}
+  } catch { /* ignore storage error */ }
   return null;
 }
 
