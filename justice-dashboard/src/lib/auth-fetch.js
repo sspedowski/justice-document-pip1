@@ -30,6 +30,22 @@ async function ensureCsrfToken() {
   return null;
 }
 
+function getAuthToken() {
+  try {
+    // Prefer explicit session/local storage keys
+    const fromSession = globalThis.sessionStorage?.getItem('accessToken') || globalThis.sessionStorage?.getItem('justice_token');
+    if (fromSession) return fromSession;
+    const raw = globalThis.localStorage?.getItem('justiceAuth');
+    if (raw) {
+      try { const j = JSON.parse(raw); if (j && j.token) return j.token; } catch {}
+    }
+    // Fallback: global auth manager (if legacy auth is present)
+    const gm = typeof globalThis !== 'undefined' ? globalThis : undefined;
+    if (gm && gm.authManager && gm.authManager.token) return gm.authManager.token;
+  } catch {}
+  return null;
+}
+
 export async function authFetch(input, init = {}) {
   const method = (init.method || 'GET').toUpperCase();
   const headers = new Headers(init.headers || {});
@@ -37,8 +53,10 @@ export async function authFetch(input, init = {}) {
     const t = await ensureCsrfToken();
     if (t) headers.set('X-CSRF-Token', t);
   }
-  // Optional auth header (uncomment if you store a token)
-  // const token = sessionStorage.getItem('accessToken');
-  // if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+  // Opportunistically add Authorization if available and not already provided
+  if (!headers.has('Authorization')) {
+    const token = getAuthToken();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+  }
   return fetch(input, { ...init, headers, credentials: init.credentials || 'include' });
 }
