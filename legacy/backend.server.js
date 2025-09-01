@@ -1,5 +1,6 @@
 // Justice Dashboard Frontend - Clean Refactor v2025.07
 // Handles login, authentication, tracker, upload/lawyer buttons, filters, stats, and persistent storage
+// TODO: ensure window.authFetch is defined on this page before this script runs
 
 // 1. Utility: Dynamic API URL (works local & deployed)
 function getApiBaseUrl() {
@@ -55,7 +56,7 @@ const DashboardAuth = {
 
   async authenticate(username, password) {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/login`, {
+      const res = await authFetch(`${API_BASE_URL}/api/login`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
       });
@@ -79,7 +80,7 @@ const DashboardAuth = {
   async logout() {
     try {
       if (this.authToken) {
-        await fetch(`${API_BASE_URL}/api/logout`, {
+        await authFetch(`${API_BASE_URL}/api/logout`, {
           method: "POST",
           headers: { Authorization: `Bearer ${this.authToken}` }
         });

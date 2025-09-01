@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  frontend:
+    name: Frontend (justice-dashboard)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: justice-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: justice-dashboard/package-lock.json
+      - run: npm ci
+      - run: npm test --if-present -- --ci --watchAll=false
+      - run: npm run build --if-present
+
+  backend:
+    name: Backend (repo root if present)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install (if package.json exists)
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+        shell: bash
+      - name: Test (if scripts.test exists)
+        run: |
+          if [ -f package.json ] && jq -er '.scripts.test' package.json > /dev/null 2>&1; then npm test -- --ci; fi
+        shell: bash
+

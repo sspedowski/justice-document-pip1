@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Justice Dashboard - Legal Case Management</title>
+    <link rel="stylesheet" href="output.css" />
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen"
+  >
+    <!-- Global API Configuration -->
+    <script src="config.js"></script>
+
+    <div id="app">
+      <!-- Main dashboard content container -->
+      <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Loading state (will be hidden once dashboard loads) -->
+        <div id="loadingState" class="text-center py-20">
+          <div class="flex flex-col items-center">
+            <div
+              class="animate-spin inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mb-6"
+              role="status"
+            ></div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">
+              Loading Justice Dashboard
+            </h2>
+            <p class="text-gray-600">
+              Initializing secure case management system...
+            </p>
+          </div>
+        </div>
+
+        <!-- Dashboard content (will be shown once authenticated) -->
+        <div id="dashboardContent" class="hidden">
+          <!-- Dashboard header with modern design -->
+          <div class="mb-8 text-center">
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+              <h1
+                class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3"
+              >
+                Justice Dashboard
+              </h1>
+              <p class="text-xl text-gray-600 mb-4">
+                Legal Case Tracking & AI-Powered Analysis
+              </p>
+              <div class="flex justify-center space-x-6 text-sm text-gray-500">
+                <span class="flex items-center">
+                  <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  System Secure
+                </span>
+                <span class="flex items-center">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                  CSP Compliant
+                </span>
+                <span class="flex items-center">
+                  <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                  AI Ready
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Controls - Modern Card Design -->
+          <div
+            class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100"
+          >
+            <h2
+              class="text-2xl font-semibold text-gray-800 mb-6 flex items-center"
+            >
+              <div
+                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3"
+              >
+                <svg
+                  class="w-5 h-5 text-blue-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"></path>
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+              Document Processing Center
+            </h2>
+
+            <div
+              class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8"
+            >
+              <!-- File Upload Section -->
+              <div class="space-y-3">
+                <label
+                  for="fileInput"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  📄 Upload Legal Document
+                </label>
+                <div class="relative">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    accept=".pdf"
+                    class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-200 rounded-lg cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <!-- Document Input Section -->
+              <div class="space-y-3">
+                <label
+                  for="docInput"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  📝 Document Text
+                </label>
+                <textarea
+                  id="docInput"
+                  placeholder="Paste legal document text here..."
+                  class="w-full h-24 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                ></textarea>
+              </div>
+
+              <!-- Action Buttons Section -->
+              <div class="space-y-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  ⚡ Quick Actions
+                </label>
+                <div class="space-y-2">
+                  <button
+                    id="generateBtn"
+                    class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm"
+                  >
+                    🤖 Generate AI Summary
+                  </button>
+                  <button
+                    id="exportBtn"
+                    class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm"
+                  >
+                    📊 Export to CSV
+                  </button>
+                  <button
+                    id="askLawGpt"
+                    class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium text-sm"
+                  >
+                    ⚖️ Ask LawGPT
+                  </button>
+                </div>
+              </div>
+
+              <!-- AI Summary Display -->
+              <div class="space-y-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  🧠 AI Analysis
+                </label>
+                <div
+                  id="summaryBox"
+                  class="w-full h-24 px-4 py-3 border border-gray-200 rounded-lg bg-gradient-to-br from-gray-50 to-blue-50 text-sm text-gray-700 overflow-y-auto"
+                >
+                  <span class="text-gray-500 italic"
+                    >AI summary will appear here after document
+                    processing...</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="border-t border-gray-100 pt-6">
+              <h3
+                class="text-lg font-semibold text-gray-800 mb-4 flex items-center"
+              >
+                <div
+                  class="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center mr-2"
+                >
+                  <svg
+                    class="w-4 h-4 text-purple-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </div>
+                Smart Filters
+              </h3>
+              <div class="flex flex-wrap gap-4">
+                <div class="min-w-0 flex-1">
+                  <label
+                    for="categoryFilter"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >Filter by Category</label
+                  >
+                  <select
+                    id="categoryFilter"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">All Categories</option>
+                    <option value="CPS">CPS Cases</option>
+                    <option value="Court">Court Proceedings</option>
+                    <option value="Legal">Legal Documents</option>
+                  </select>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <label
+                    for="misconductFilter"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >Filter by Issue Type</label
+                  >
+                  <select
+                    id="misconductFilter"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">All Types</option>
+                    <option value="Due Process">Due Process Violations</option>
+                    <option value="Constitutional">
+                      Constitutional Issues
+                    </option>
+                    <option value="Procedural">Procedural Violations</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Case Tracker Table - Premium Design -->
+          <div
+            class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8"
+          >
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+              <h2 class="text-2xl font-bold text-white flex items-center">
+                <svg
+                  class="w-8 h-8 mr-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                Case Tracker & Analysis
+              </h2>
+              <p class="text-blue-100 mt-2">
+                Comprehensive legal case management and tracking system
+              </p>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table
+                id="trackerTable"
+                class="min-w-full divide-y divide-gray-200"
+              >
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>📁</span>
+                        <span>Category</span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>👤</span>
+                        <span>Individual</span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>⚠️</span>
+                        <span>Issue Type</span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>📝</span>
+                        <span>Summary</span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>🏷️</span>
+                        <span>Tags</span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <span>⚡</span>
+                        <span>Actions</span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                  <!-- JavaScript will populate rows here -->
+                  <tr class="text-center">
+                    <td colspan="6" class="px-6 py-12 text-gray-500">
+                      <div class="flex flex-col items-center">
+                        <svg
+                          class="w-16 h-16 text-gray-300 mb-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1V8z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <p class="text-lg font-medium text-gray-600 mb-2">
+                          No cases found
+                        </p>
+                        <p class="text-sm text-gray-500">
+                          Upload a document or paste text to begin case analysis
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Additional dashboard sections can be added here -->
+          <div class="mt-6">
+            <!-- Statistics Dashboard - Enhanced Design -->
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            >
+              <!-- Total Cases Card -->
+              <div
+                class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-blue-600 mb-1">
+                      Total Cases
+                    </p>
+                    <p id="totalCases" class="text-3xl font-bold text-blue-900">
+                      0
+                    </p>
+                    <p class="text-xs text-blue-600 mt-1 flex items-center">
+                      <svg
+                        class="w-3 h-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                      Active tracking
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 3a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Cases Card -->
+              <div
+                class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-green-600 mb-1">
+                      Active Cases
+                    </p>
+                    <p
+                      id="activeCases"
+                      class="text-3xl font-bold text-green-900"
+                    >
+                      0
+                    </p>
+                    <p class="text-xs text-green-600 mt-1 flex items-center">
+                      <svg
+                        class="w-3 h-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                      In progress
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Processing Status Card -->
+              <div
+                class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-purple-600 mb-1">
+                      Processing
+                    </p>
+                    <p
+                      id="processingStatus"
+                      class="text-3xl font-bold text-purple-900"
+                    >
+                      Ready
+                    </p>
+                    <p class="text-xs text-purple-600 mt-1 flex items-center">
+                      <svg
+                        class="w-3 h-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                      System online
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Analysis Results Card -->
+              <div
+                class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-orange-600 mb-1">
+                      Analysis
+                    </p>
+                    <p
+                      id="analysisResults"
+                      class="text-3xl font-bold text-orange-900"
+                    >
+                      0
+                    </p>
+                    <p class="text-xs text-orange-600 mt-1 flex items-center">
+                      <svg
+                        class="w-3 h-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      Reports generated
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCAL JAVASCRIPT ONLY - No CDN, No Inline Scripts -->
+    <script src="script.js"></script>
+  </body>
+</html>

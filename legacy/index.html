@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSP moved to server header; removed inline meta to avoid duplication -->
+    <title>Justice Dashboard</title>
+    <link href="/frontend/output.css" rel="stylesheet" />
+<link rel="stylesheet" href="/frontend/custom.css">
+<link rel="stylesheet" href="/frontend/justice-theme.css">
+  </head>
+  <body class="p-4 min-h-screen bg-slate-100">
+    <!-- MAIN APP CONTAINER (must exist before scripts) -->
+    <div id="app">
+      <div class="container mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+          <div class="flex items-center justify-center mb-4">
+            <h1 class="text-4xl font-extrabold text-blue-900 tracking-tight">
+              Justice Dashboard
+            </h1>
+          </div>
+          <p class="text-lg text-slate-600 mb-2">
+            Modern Legal Case Management & Analysis
+          </p>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div
+            class="rounded-xl shadow-lg bg-white p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200"
+          >
+            <div class="text-3xl font-bold text-blue-700 mb-2" id="totalCases">
+              0
+            </div>
+            <div class="text-sm text-gray-600">Total Cases</div>
+          </div>
+          <div
+            class="rounded-xl shadow-lg bg-white p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200"
+          >
+            <div class="text-3xl font-bold text-blue-700 mb-2" id="activeCases">
+              0
+            </div>
+            <div class="text-sm text-gray-600">Active Cases</div>
+          </div>
+          <div
+            class="rounded-xl shadow-lg bg-white p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200"
+          >
+            <div
+              class="text-3xl font-bold text-blue-700 mb-2"
+              id="completedCases"
+            >
+              0
+            </div>
+            <div class="text-sm text-gray-600">Completed</div>
+          </div>
+          <div
+            class="rounded-xl shadow-lg bg-white p-6 flex flex-col items-center hover:scale-105 transition-transform duration-200"
+          >
+            <div
+              class="text-3xl font-bold text-blue-700 mb-2"
+              id="documentsProcessed"
+            >
+              0
+            </div>
+            <div class="text-sm text-gray-600">Documents</div>
+          </div>
+        </div>
+
+        <!-- Document Processing Section -->
+        <div class="rounded-xl shadow-lg bg-white mb-8 mb-8">
+          <div class="p-6">
+            <h2 class="text-2xl font-bold text-blue-700 mb-6 text-center">
+              Document Processing Center
+            </h2>
+
+            <!-- File Upload -->
+            <div class="mb-6">
+              <label
+                for="fileInput"
+                class="block mb-2 font-semibold text-blue-700"
+                >Upload Document</label
+              >
+              <input
+                type="file"
+                id="fileInput"
+                accept=".pdf,.doc,.docx,.txt"
+                title="Select a document to upload"
+                placeholder="Choose a file..."
+                class="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mb-6 justify-center flex-wrap">
+              <button
+                id="processBtn"
+                class="bg-blue-600 text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-blue-700 transition-all"
+              >
+                📄 Process Document
+              </button>
+              <button
+                id="exportBtn"
+                class="bg-blue-700 text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-indigo-700 transition-all"
+              >
+                📊 Export Report
+              </button>
+              <button
+                id="uploadBtn"
+                class="bg-yellow-500 text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-yellow-600 transition-all"
+              >
+                Upload
+              </button>
+              <button
+                id="lawyerBtn"
+                class="bg-indigo-500 text-white font-bold px-6 py-3 rounded-full card-shadow hover:bg-indigo-600 transition-all"
+              >
+                Lawyer
+              </button>
+            </div>
+
+            <!-- Text Input Area -->
+            <div class="mb-6">
+              <textarea
+                id="textInput"
+                placeholder="Paste legal document text here for immediate analysis..."
+                class="w-full h-32 p-4 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              ></textarea>
+            </div>
+
+            <!-- Latest Summary Output -->
+            <div class="mb-6">
+              <label for="summaryBox" class="block mb-2 font-semibold text-blue-700">Latest Summary</label>
+              <div
+                id="summaryBox"
+                class="w-full p-4 border-2 border-blue-200 rounded-lg bg-blue-50 text-gray-800 min-h-[3rem]"
+                aria-live="polite"
+              ></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="flex gap-3 justify-center flex-wrap">
+              <button
+                id="addCaseBtn"
+                class="bg-green-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-green-600 transition"
+              >
+                ➕ Add Case
+              </button>
+              <button
+                id="smartFilterBtn"
+                class="bg-purple-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-purple-600 transition"
+              >
+                🔍 Smart Filter
+              </button>
+              <button
+                id="updateDocsBtn"
+                class="bg-blue-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-blue-600 transition"
+              >
+                🔗 Update PDF Links
+              </button>
+              <button
+                id="clearBtn"
+                class="bg-red-500 text-white font-bold px-5 py-2 rounded-full card-shadow hover:bg-red-600 transition"
+              >
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case Tracker Table -->
+        <div class="rounded-xl shadow-lg bg-white mb-8">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-blue-700">Case Tracker</h2>
+              <div class="flex items-center gap-4">
+                <select
+                  id="statusFilter"
+                  title="Filter cases by status"
+                  class="rounded-full border border-blue-600 px-4 py-2 bg-white text-gray-700 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                </select>
+                <button
+                  id="clearFiltersBtn"
+                  class="bg-blue-600 text-white px-5 py-2 rounded-full font-bold card-shadow hover:bg-blue-700 transition"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table id="trackerTable" class="w-full">
+                <thead>
+                  <tr class="bg-blue-600 text-white">
+                    <th class="p-3 text-left">Case ID</th>
+                    <th class="p-3 text-left">Title</th>
+                    <th class="p-3 text-left">Status</th>
+                    <th class="p-3 text-left">Date</th>
+                    <th class="p-3 text-left">File Name</th>
+                    <th class="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="trackerTableBody">
+                  <!-- Cases will be populated here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Faith-Based Footer -->
+        <footer class="faith-footer text-center mt-8">
+          <p class="hidden mb-2">
+            Trust in the Lord with all your heart and lean not on your own understanding.
+            - Proverbs 3:5
+          </p>
+          <p>
+            &copy; 2024 Justice Dashboard | Victory by Faith | All Rights
+            Reserved
+          </p>
+          <p class="text-xs mt-2">
+            Built with faith, dedication, and excellence in mind
+          </p>
+        </footer>
+      </div>
+      <!-- End container -->
+    </div>
+    <!-- End app -->
+
+    <!-- Dark Mode Toggle Button (Required by dark-mode.js) -->
+    <button
+      id="darkModeToggle"
+      class="fixed top-4 left-4 bg-blue-600 text-white p-2 rounded-full shadow-lg z-50 hover:bg-blue-700 transition"
+    >
+      🌙
+    </button>
+    <!-- Notification System -->
+    <div id="notifications" class="fixed top-4 right-4 z-50"></div>
+    <!-- PDF Preview Modal -->
+    <div id="pdfModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
+          <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-bold">Document Preview</h3>
+            <button
+              id="closePdfModal"
+              class="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <div id="pdfContent" class="p-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts (must come after #app and modals for CSP) - DEBUG ENABLED -->
+    <script src="script.js"></script>
+    <script src="debug-tracer.js"></script>
+    <!-- auth-manager is imported by /frontend/auth-fetch.js when needed -->
+    <!-- <script type="module" src="/assets/auth-manager.js"></script> -->
+    <script src="dark-mode.js"></script>
+    <!-- Load PDF core first to expose global pdfjsLib, then configure -->
+    <script src="/frontend/pdf.min.js"></script>
+    <script src="/frontend/pdf-config.js"></script>
+    <script src="/frontend/dashboard-init.js"></script>
+  </body>
+</html>

@@ -31,8 +31,23 @@ export default [
     settings: { react: { version: "detect" } },
     rules: {
       // Core
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
+      // Prefer authFetch wrapper over raw fetch in app code
+      "no-restricted-globals": [
+        "error",
+        { name: "fetch", message: "Use authFetch from src/lib/auth-fetch.js" },
+      ],
+      // Ensure JSX identifiers mark variables as used
+      "react/jsx-uses-vars": "warn",
 
       // React + Hooks
       "react/react-in-jsx-scope": "off",
@@ -57,6 +72,13 @@ export default [
       "import/no-duplicates": "warn",
     },
   },
+  // Allow raw fetch in the fetch wrapper itself
+  {
+    files: ["src/lib/auth-fetch.js"],
+    rules: {
+      "no-restricted-globals": "off",
+    },
+  },
   // Cypress e2e tests
   {
     files: ["cypress/**/*.js"],
@@ -72,5 +94,25 @@ export default [
       sourceType: "script",
       globals: { ...globals.node },
     },
+  },
+  // Jest tests (Node + Jest globals)
+  {
+    files: ["tests/**/*.js"],
+    languageOptions: {
+      sourceType: "module",
+      globals: { ...globals.node, ...globals.jest },
+    },
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    }
   },
 ];

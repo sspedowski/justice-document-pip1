@@ -27,9 +27,12 @@ try {
   const { TextEncoder, TextDecoder } = require('util');
   if (!global.TextEncoder) global.TextEncoder = TextEncoder;
   if (!global.TextDecoder) global.TextDecoder = TextDecoder;
-} catch {}
+} catch (_e) {
+  // ignore polyfill errors in environments that already provide them
+}
 
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
 });
+

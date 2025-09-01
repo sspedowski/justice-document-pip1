@@ -27,7 +27,7 @@
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --config jest.config.js --coverage",
     "test:e2e": "cypress run",
-    "cleanup": "bash cleanup-and-structure.sh",
+    "cleanup": "pwsh -NoProfile -File ../cleanup-and-structure.ps1",
     "cleanup:windows": "powershell -ExecutionPolicy Bypass -File cleanup-and-structure.ps1",
     "test-pdf": "python test_pdf_processing.py",
     "update-pdf": "python update_pdf_links.py",

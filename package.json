@@ -1,32 +1,50 @@
 {
   "name": "justice-dashboard-root",
+  "type": "module",
   "private": true,
   "scripts": {
     "setup": "bash scripts/setup.sh",
     "setup:win": "scripts\\setup.bat",
     "validate": "node scripts/validate-env.js",
-    "build": "node build.js",
+    "build": "bash build.sh",
     "build:bash": "bash build.sh",
-    "build:verbose": "echo '🚀 Installing all dependencies...' && npm install && echo '📦 Installing backend...' && cd justice-server && npm install && echo '📦 Installing frontend...' && cd ../justice-dashboard && npm install && echo '✅ Build complete!'",
+    "build:verbose": "echo '🚀 Installing all dependencies...' && npm install && echo '🔧 Installing backend...' && cd justice-server && npm install && echo '🔧 Installing frontend...' && cd ../justice-dashboard && npm install && echo '✅ Build complete!'",
     "install:all": "npm install && cd justice-server && npm install && cd ../justice-dashboard && npm install",
     "test:build": "bash scripts/test-build.sh",
     "start": "cd justice-server && node server.js",
     "start:prod": "bash scripts/start-production.sh",
     "dev": "cd justice-dashboard && npm run dev",
-    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node start-local.js",
-    "dev:backend": "node server.js",
+    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts\\kill-stale.ps1; node frontend/start-local.js",
+    "dev:backend": "node justice-server/server.js",
     "dev:frontend": "cd justice-dashboard && npm run dev:client",
     "test": "echo '✅ All tests passed!'",
     "test:backend": "echo '✅ Backend tests passed!'",
     "test:frontend": "echo '✅ Frontend tests passed!'",
-    "deploy": "cd justice-server && railway up"
+    "deploy": "cd justice-server && railway up",
+    "lint": "eslint --no-ignore \"justice-dashboard/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
+    "lint:fix": "eslint --no-ignore \"justice-dashboard/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
+  },
+  "prepare": "husky install",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --no-ignore --fix",
+      "git add"
+    ]
   },
   "dependencies": {
     "chalk": "^4.1.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",
+    "@eslint/js": "^9.34.0",
     "babel-eslint": "^10.1.0",
-    "eslint-plugin-react": "^7.37.5"
+    "eslint": "^9.34.0",
+    "eslint-formatter-unix": "^8.40.0",
+    "eslint-plugin-react": "^7.37.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "minimist": "^1.2.8",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
   }
 }

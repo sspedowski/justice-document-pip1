@@ -1,0 +1,1 @@
+{"ignore":["legacy/**","dist/**","**/vendor/**","**/*.min.*","frontend/public/**","frontend/uploads/**","**/tmp-*.js"]}
