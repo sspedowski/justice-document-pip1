@@ -3,8 +3,21 @@ name: Lint
 on:
   push:
     branches: ["**"]
+    paths:
+      - "frontend/**/*.{js,jsx,ts,tsx}"
+      - "justice-dashboard/src/**/*.{js,jsx,ts,tsx}"
+      - "eslint.config.js"
+      - "package.json"
+      - "package-lock.json"
   pull_request:
     branches: ["**"]
+    paths:
+      - "frontend/**/*.{js,jsx,ts,tsx}"
+      - "justice-dashboard/src/**/*.{js,jsx,ts,tsx}"
+      - "eslint.config.js"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -22,6 +35,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - name: Restore ESLint cache
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ github.ref_name }}-${{ hashFiles('eslint.config.js', 'package.json', 'package-lock.json') }}
+          restore-keys: |
+            eslint-${{ github.ref_name }}-
+            eslint-
       - run: npm ci
       - name: ESLint (annotated)
-        run: npx eslint --no-ignore "justice-dashboard/src/**/*.{js,jsx,ts,tsx}" "frontend/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0
+        run: npx eslint --no-ignore "justice-dashboard/src/**/*.{js,jsx,ts,tsx}" "frontend/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0 --cache --cache-location .eslintcache
