@@ -34,11 +34,17 @@ export default function JusticeDashboard() {
       // Avoid using `typeof import` in JSX files since some parsers choke on it.
       let fromEnv = null;
       try {
-        /* eslint-disable no-undef */
-        if (typeof importMeta !== 'undefined' && importMeta && importMeta.env && importMeta.env.VITE_API_URL) {
-          fromEnv = importMeta.env.VITE_API_URL;
+        // importMeta may not be available in some bundlers; check defensively
+        // Vite exposes `import.meta.env`. Some runtimes don't define `importMeta` or `import.meta`.
+        // Use a defensive access via globalThis to avoid a reference error in non-Vite environments.
+        try {
+          const im = (globalThis.import && globalThis.import.meta) ? globalThis.import.meta : (globalThis.importMeta || undefined);
+          if (im && im.env && im.env.VITE_API_URL) {
+            fromEnv = im.env.VITE_API_URL;
+          }
+        } catch {
+          // ignore
         }
-        /* eslint-enable no-undef */
       } catch {
         // importMeta may not be available in some bundlers; fall back silently
       }
