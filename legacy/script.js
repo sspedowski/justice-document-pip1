@@ -901,6 +901,13 @@ async function uploadAndAnalyzeFile(file) {
     if (!response.ok) throw new Error("Upload failed");
     const result = await response.json();
     console.log("✅ File uploaded & summarized:", result);
+    // Display latest summary if container is present
+    try {
+      const box = document.getElementById('summaryBox');
+      if (box) {
+        box.textContent = (result && result.summary) ? String(result.summary) : 'PDF processed successfully';
+      }
+    } catch (e) { /* ignore */ }
     
     // Add the result to the case tracker table
     addCaseToTracker({
