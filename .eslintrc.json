@@ -15,6 +15,39 @@
     "*.map",
     "legacy/**"
   ],
+  "globals": {
+    "window": "readonly",
+    "document": "readonly",
+    "navigator": "readonly",
+    "localStorage": "readonly",
+    "sessionStorage": "readonly",
+    "FormData": "readonly",
+    "pdfjsLib": "readonly",
+    "PDFViewerApplication": "readonly"
+  },
+  "overrides": [
+    {
+      "files": [
+        "frontend/**/*.{js,jsx,ts,tsx}",
+        "justice-dashboard/src/**/*.{js,jsx,ts,tsx}"
+      ],
+      "env": { "browser": true },
+      "globals": {
+        "window": "readonly",
+        "document": "readonly",
+        "navigator": "readonly",
+        "localStorage": "readonly",
+        "sessionStorage": "readonly",
+        "FormData": "readonly",
+        "pdfjsLib": "readonly",
+        "PDFViewerApplication": "readonly"
+      }
+    },
+    {
+      "files": ["backend/**/*.js", "scripts/**/*.js"],
+      "env": { "node": true }
+    }
+  ],
   "rules": {
     "no-unused-vars": ["error", {
       "args": "after-used",
