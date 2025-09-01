@@ -1,0 +1,9 @@
+dist/
+build/
+public/assets/
+public/vendor/
+web/
+*.min.js
+*.map
+legacy/
+node_modules/

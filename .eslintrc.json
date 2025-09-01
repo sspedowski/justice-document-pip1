@@ -1,0 +1,27 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "build/**",
+    "public/assets/**",
+    "public/vendor/**",
+    "web/**",
+    "*.min.js",
+    "*.map",
+    "legacy/**"
+  ],
+  "rules": {
+    "no-unused-vars": ["error", {
+      "args": "after-used",
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^(_|ignore|unused)$",
+      "caughtErrors": "none"
+    }],
+    "no-console": ["warn", { "allow": ["info", "warn", "error", "debug"] }]
+  }
+}
