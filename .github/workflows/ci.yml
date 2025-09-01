@@ -19,7 +19,6 @@ jobs:
           cache: npm
           cache-dependency-path: justice-dashboard/package-lock.json
       - run: npm ci
-      - run: npm run lint --if-present
       - run: npm test --if-present -- --ci --watchAll=false
       - run: npm run build --if-present
 

@@ -1,5 +1,6 @@
 {
   "name": "justice-dashboard-root",
+  "type": "module",
   "private": true,
   "scripts": {
     "setup": "bash scripts/setup.sh",
@@ -20,8 +21,8 @@
     "test:backend": "echo '✅ Backend tests passed!'",
     "test:frontend": "echo '✅ Frontend tests passed!'",
     "deploy": "cd justice-server && railway up",
-    "lint": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
-    "lint:fix": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
+    "lint": "eslint --no-ignore \"justice-dashboard/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
+    "lint:fix": "eslint --no-ignore \"justice-dashboard/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
   },
   "prepare": "husky install",
   "lint-staged": {
@@ -38,6 +39,7 @@
     "@eslint/js": "^9.34.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^9.34.0",
+    "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
