@@ -4,7 +4,8 @@
 let __csrfCache = null;
 function readCookie(name) {
   try {
-    const pattern = new RegExp('(?:^|;\\s*)' + name.replace(/[-.\/\\^$*+?()[\]{}|]/g, '\\$&') + '=([^;]+)');
+    // Escape special regex chars in the cookie name (no need to escape '/')
+    const pattern = new RegExp('(?:^|;\\s*)' + name.replace(/[-.\\^$*+?()[\]{}|]/g, '\\$&') + '=([^;]+)');
     const m = typeof document !== 'undefined' && document.cookie ? document.cookie.match(pattern) : null;
     return m ? decodeURIComponent(m[1]) : null;
   } catch {
@@ -23,7 +24,9 @@ async function ensureCsrfToken() {
       const t = j.csrfToken || j._csrf || j.token;
       if (t) return (__csrfCache = t);
     }
-  } catch {}
+  } catch (e) {
+    if (typeof console !== 'undefined') console.warn('CSRF token fetch failed', e);
+  }
   return null;
 }
 

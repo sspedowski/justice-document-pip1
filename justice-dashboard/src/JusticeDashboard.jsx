@@ -53,7 +53,8 @@ export default function JusticeDashboard() {
     // Keep File objects in state so metadata (lastModified, type) is preserved
     setQueue((q) => [...q, ...files]);
     // Clear native input to allow selecting the same file again
-    try { if (e.target) e.target.value = ""; } catch {}
+    try { if (e.target) e.target.value = ""; }
+    catch (err) { if (typeof console !== 'undefined') console.warn('Failed to reset file input', err); }
   }
 
   function animateProgress(durationMs, onStep) {
