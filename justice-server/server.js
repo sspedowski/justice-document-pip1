@@ -200,6 +200,8 @@ app.post("/api/summarize", requireAuth, upload.single("file"), async (req, res) 
 // Global error handler (normalize Multer/file errors to 400)
  
 app.use((err, _req, res, _next) => {
+  // Emit full stack to test output to help debugging
+  if (err && err.stack) console.error(err.stack);
   const message = err && (err.message || err.toString());
   if (message && (message.includes("Only PDF files are allowed") || message.includes("File too large") || err.name === 'MulterError')) {
     return res.status(400).json({ error: message });
