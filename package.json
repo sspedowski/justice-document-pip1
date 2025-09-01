@@ -19,8 +19,7 @@
     "test": "echo '✅ All tests passed!'",
     "test:backend": "echo '✅ Backend tests passed!'",
     "test:frontend": "echo '✅ Frontend tests passed!'",
-    "deploy": "cd justice-server && railway up"
-  ,
+  "deploy": "cd justice-server && railway up",
   "lint": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
   "lint:fix": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
   },
