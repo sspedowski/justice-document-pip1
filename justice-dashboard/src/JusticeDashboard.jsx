@@ -2,6 +2,7 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { authFetch } from './lib/auth-fetch.js';
 
 const STAT_COLORS = {
   blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
@@ -26,6 +27,15 @@ export default function JusticeDashboard() {
   const [queue, setQueue] = useState([]);
   const [progressPct, setProgressPct] = useState(0);
   const [currentFile, setCurrentFile] = useState(null);
+  const [results, setResults] = useState([]);
+  const API_BASE = (function () {
+    try {
+      if (globalThis.API_BASE_URL) return globalThis.API_BASE_URL;
+      const host = globalThis.location?.hostname;
+      const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+      return isLocal ? 'http://localhost:3001' : '';
+    } catch { return ''; }
+  })();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.JusticeDashboard) {
@@ -89,7 +99,50 @@ export default function JusticeDashboard() {
       setCurrentFile(next);
       setProgressPct(0);
       const duration = 1000 + Math.random() * 800;
-      await animateProgress(duration, (pct) => setProgressPct(pct));
+
+      // Prepare upload
+      const form = new FormData();
+      form.append('file', next);
+      const uploadPromise = authFetch(`${API_BASE}/api/summarize`, {
+        method: 'POST',
+        body: form,
+      });
+
+      // Animate while upload runs
+      const res = await Promise.race([
+        uploadPromise,
+        (async () => { await animateProgress(duration, (pct) => setProgressPct(pct)); return null; })(),
+      ]).catch(() => null);
+
+      // If animation finished first, wait for upload
+      const finalRes = res === null ? await uploadPromise.catch((e) => e) : res;
+
+      try {
+        if (finalRes && typeof finalRes.ok === 'boolean') {
+          const data = await finalRes.json().catch(() => ({}));
+          const fileURL = typeof data.fileURL === 'string'
+            ? (data.fileURL.startsWith('http') ? data.fileURL : `${API_BASE}${data.fileURL}`)
+            : '';
+          setResults((r) => [
+            { name: next.name, ok: finalRes.ok, summary: data.summary || '', fileURL, error: data.error || '' },
+            ...r,
+          ]);
+        } else {
+          setResults((r) => [
+            { name: next.name, ok: false, summary: '', fileURL: '', error: 'Network error' },
+            ...r,
+          ]);
+        }
+      } catch (e) {
+        setResults((r) => [
+          { name: next.name, ok: false, summary: '', fileURL: '', error: (e && e.message) || 'Upload failed' },
+          ...r,
+        ]);
+      }
+
+      // Ensure progress bar completes
+      await animateProgress(Math.max(200, 100), (pct) => setProgressPct(pct));
+
       remaining = remaining.slice(1);
       setQueue(remaining);
       await new Promise((r) => globalThis.setTimeout(r, 120));
@@ -147,6 +200,29 @@ export default function JusticeDashboard() {
               </li>
             ))}
           </ul>
+
+          {results.length > 0 && (
+            <div className="mt-6">
+              <h3 className="font-medium mb-2">Results</h3>
+              <ul className="space-y-2">
+                {results.map((r, i) => (
+                  <li key={`${r.name}-${i}`} className="p-3 border rounded bg-gray-50">
+                    <div className="text-sm font-semibold">{r.name}</div>
+                    {r.ok ? (
+                      <>
+                        <div className="text-sm text-gray-700">{r.summary || 'No summary provided'}</div>
+                        {r.fileURL && (
+                          <a className="text-blue-600 text-sm underline" href={r.fileURL} target="_blank" rel="noreferrer">View PDF</a>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-sm text-red-600">{r.error || 'Upload failed'}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
