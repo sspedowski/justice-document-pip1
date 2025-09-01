@@ -22,8 +22,13 @@ if (dotenvPath) {
 // Config
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
+// Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
+let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
+if (process.env.NODE_ENV === 'test') {
+  ADMIN_USERNAME = 'admin';
+  ADMIN_PASSWORD = 'adminpass';
+}
 
 // App
 const app = express();
