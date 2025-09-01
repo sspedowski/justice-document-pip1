@@ -28,7 +28,19 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
 // App
 const app = express();
 app.disable("x-powered-by");
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", "http://localhost:3001"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+      },
+    },
+  })
+);
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection (dev: secure false). In prod, set secure:true and proper sameSite.
