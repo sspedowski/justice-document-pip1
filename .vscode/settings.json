@@ -1,25 +1,31 @@
-{
-  "github.copilot.enable": {
-    "*": true,
-    "plaintext": true,
-    "markdown": true,
-    "javascript": true
-  },
-  // Amazon Q settings removed at user's request
-  "aws.amazonq.enableCodeScanning": false,
-  "aws.amazonq.enableCodeSuggestions": false,
-  "javascript.validate.enable": false,
-  "typescript.validate.enable": false,
-  "editor.inlineSuggest.enabled": true,
-  "chat.promptFiles": true,
-  "chat.promptFilesLocations": { ".github/prompts": true },
-  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
 
-  "chatgpt.config": {
-    "api_base": "https://api.openai.com/v1",
-    "api_key": "${env:OPENAI_API_KEY}",
-    "timeout_ms": 60000
-  },
-  "chatgpt.model": "gpt-5",
-  "chatgpt.openOnStartup": true
+{
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }]
 }
+  "github.copilot.enable": {
+    {
+      "eslint.useFlatConfig": true,
+      "eslint.workingDirectories": [{ "mode": "auto" }],
+      "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": true,
+        "javascript": true
+      },
+      "aws.amazonq.enableCodeScanning": false,
+      "aws.amazonq.enableCodeSuggestions": false,
+      "javascript.validate.enable": false,
+      "typescript.validate.enable": false,
+      "editor.inlineSuggest.enabled": true,
+      "chat.promptFiles": true,
+      "chat.promptFilesLocations": { ".github/prompts": true },
+      "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+      "chatgpt.config": {
+        "api_base": "https://api.openai.com/v1",
+        "api_key": "${env:OPENAI_API_KEY}",
+        "timeout_ms": 60000
+      },
+      "chatgpt.model": "gpt-5",
+      "chatgpt.openOnStartup": true
+    }
