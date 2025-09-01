@@ -19,9 +19,16 @@
     "test": "echo '✅ All tests passed!'",
     "test:backend": "echo '✅ Backend tests passed!'",
     "test:frontend": "echo '✅ Frontend tests passed!'",
-  "deploy": "cd justice-server && railway up",
-  "lint": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
-  "lint:fix": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
+    "deploy": "cd justice-server && railway up",
+    "lint": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
+    "lint:fix": "eslint --no-ignore \"justice-dashboard/src/**/*.{js,jsx,ts,tsx}\" \"frontend/**/*.{js,jsx,ts,tsx}\" --fix"
+  },
+  "prepare": "husky install",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --no-ignore --fix",
+      "git add"
+    ]
   },
   "dependencies": {
     "chalk": "^4.1.2"
@@ -32,6 +39,8 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^9.34.0",
     "eslint-plugin-react": "^7.37.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "minimist": "^1.2.8",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0"

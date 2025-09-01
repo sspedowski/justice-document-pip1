@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+. "$GIT_DIR/hooks/huskypre"
+
+npx lint-staged
