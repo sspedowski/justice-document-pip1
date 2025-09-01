@@ -30,10 +30,13 @@ export default function JusticeDashboard() {
   const [results, setResults] = useState([]);
   const API_BASE = (function () {
     try {
+      // Prefer Vite env, then global override, then localhost fallback
+      const fromEnv = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : null;
+      if (fromEnv) return fromEnv;
       if (globalThis.API_BASE_URL) return globalThis.API_BASE_URL;
       const host = globalThis.location?.hostname;
       const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
-      return isLocal ? 'http://localhost:3001' : '';
+      return isLocal ? 'http://localhost:3000' : '';
     } catch { return ''; }
   })();
 
