@@ -1,0 +1,18 @@
+This PR locks in reliable, fast, and readable linting.
+
+What's included
+- Workflow triggers: path filters + manual workflow_dispatch
+- Concurrency: cancel in-progress runs per branch
+- Speed: ESLint cache via actions/cache (.eslintcache)
+- Annotations: problem matcher + Unix formatter (-f unix)
+- Flat-config alignment: uses eslint --no-ignore targeting frontend/src
+
+Why
+- Fewer noisy CI runs (only when JS/TS or lint config changes)
+- Faster repeated runs with caching
+- Inline PR annotations for quick fixes
+- Consistent flat-config behavior locally and in CI
+
+How to verify
+- Actions  Lint should start on this PR (or trigger manually)
+- Push a commit with an intentional lint error to see annotations
