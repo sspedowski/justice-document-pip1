@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   eslint:
     runs-on: ubuntu-latest
@@ -19,4 +23,5 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run lint
+      - name: ESLint (annotated)
+        run: npx eslint --no-ignore "justice-dashboard/src/**/*.{js,jsx,ts,tsx}" "frontend/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0
