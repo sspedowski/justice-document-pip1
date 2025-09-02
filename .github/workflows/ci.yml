@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
@@ -34,20 +35,39 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             justice-server/package-lock.json
-      - name: Install (if package.json exists)
-        run: |
-          if [ -f package.json ]; then npm ci; fi
-        shell: bash
-      - name: Install backend deps (if justice-server/package.json exists)
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Install backend deps
         working-directory: justice-server
         run: |
-          if [ -f package.json ]; then npm ci; else npm install; fi
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
         shell: bash
 
-      - name: Test (if scripts.test exists)
+      - name: Start backend (background) with health check
         env:
+          PORT: 3000
           NODE_ENV: test
         run: |
-          if [ -f package.json ] && jq -er '.scripts.test' package.json > /dev/null 2>&1; then npm test -- --ci; fi
+          node justice-server/server.js &
+          pid=$!
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/health >/dev/null 2>&1; then
+              echo "Backend healthy."
+              break
+            fi
+            sleep 1
+            if [ $i -eq 30 ]; then
+              echo "Backend failed to become healthy."
+              kill $pid || true
+              exit 1
+            fi
+          done
+
+      - name: Run tests
+        env:
+          NODE_ENV: test
+        run: npm test
         shell: bash
 
