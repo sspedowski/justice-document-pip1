@@ -1,0 +1,15 @@
+<!-- Legacy Vercel Toolbar Conditional Loader -->
+<!-- Replace placeholders server-side or during build: {{ENABLE_TOOLBAR}} and {{STAFF_EMAILS}} -->
+<script>(function(){
+  var enabled = '{{ENABLE_TOOLBAR}}' === 'true';
+  if(!enabled) return;
+  var raw = ('{{STAFF_EMAILS}}').toLowerCase();
+  var staffList = raw.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var email = (window.__CURRENT_USER_EMAIL__||'').toLowerCase();
+  if (staffList.length && staffList.indexOf(email) === -1) return;
+  if (document.querySelector('script[data-vercel-toolbar]')) return;
+  var s=document.createElement('script');
+  s.src='https://vercel.com/toolbar/script.js';
+  s.defer=true; s.setAttribute('data-vercel-toolbar','true');
+  document.head.appendChild(s);
+})();</script>

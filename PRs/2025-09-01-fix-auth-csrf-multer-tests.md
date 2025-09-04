@@ -1,4 +1,4 @@
-Title: fix(server): skip CSRF in tests; allow-list /api/summarize; requireAuth before multer; add refresh/profile; enable JSX in Jest
+# fix(server): skip CSRF in tests; allow-list /api/summarize; requireAuth before multer; add refresh/profile; enable JSX in Jest
 
 Description
 

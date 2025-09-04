@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Justice Dashboard • Firebase Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-full bg-neutral-50">
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-black/5">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-xl bg-black text-white grid place-content-center font-bold">JD</div>
+        <div>
+          <h1 class="text-base font-semibold">Justice Dashboard</h1>
+          <p class="text-xs text-neutral-500">Firebase prototype • uploads · search · summaries</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="user-pill" class="hidden rounded px-2 py-1 text-xs bg-neutral-100"></span>
+        <button id="sign-in" class="px-4 py-2 rounded bg-black text-white">Sign in with Google</button>
+        <button id="sign-out" class="hidden px-4 py-2 rounded border">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 space-y-6">
+    <section class="rounded bg-white p-4 shadow">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold">Upload documents</h2>
+          <p class="text-sm text-neutral-600">PDF, DOCX, TXT up to ~50MB each. Files are private to your account.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="file-input" type="file" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg" class="hidden">
+          <button id="browse" class="px-4 py-2 rounded bg-black text-white">Choose files</button>
+          <span id="drop-hint" class="text-xs text-neutral-500">or drag & drop anywhere</span>
+        </div>
+      </div>
+      <div id="queue" class="mt-4 grid gap-2"></div>
+    </section>
+
+    <section class="flex flex-col md:flex-row md:items-center gap-3">
+      <div class="rounded bg-white p-2 shadow flex-1">
+        <input id="search" type="search" placeholder="Search filename or summary…" class="w-full rounded border px-3 py-2 text-sm" />
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span>Total <span id="count" class="ml-1 font-semibold">0</span></span>
+        <span>Queued <span id="queued" class="ml-1 font-semibold">0</span></span>
+        <span>Uploaded <span id="uploaded" class="ml-1 font-semibold">0</span></span>
+        <span>Summarized <span id="summarized" class="ml-1 font-semibold">0</span></span>
+      </div>
+    </section>
+
+    <section class="rounded bg-white shadow">
+      <div class="p-4 border-b border-black/5">
+        <h3 class="text-base font-semibold">Your documents</h3>
+      </div>
+      <div id="doc-list"></div>
+      <div id="empty" class="hidden p-10 text-center text-sm text-neutral-500">No documents yet. Upload to get started.</div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyBZy4ABtqtklTmNB5ZEYeYyXD7TfBsj6s8',
+      authDomain: 'justice-dashboard.firebaseapp.com',
+      projectId: 'justice-dashboard',
+      storageBucket: 'justice-dashboard.appspot.com',
+      messagingSenderId: '1092402235726',
+      appId: '1:1092402235726:web:92aed63368eb6c1829f61f',
+      measurementId: 'G-7E0D2751VH'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const el = (id) => document.getElementById(id);
+    const userPill = el('user-pill');
+    const signInBtn = el('sign-in');
+    const signOutBtn = el('sign-out');
+    const browseBtn = el('browse');
+    const fileInput = el('file-input');
+    const queue = el('queue');
+    const list = el('doc-list');
+    const empty = el('empty');
+    const search = el('search');
+    const countEl = el('count');
+    const queuedEl = el('queued');
+    const uploadedEl = el('uploaded');
+    const summarizedEl = el('summarized');
+
+    let currentUser = null;
+    let unsubDocs = null;
+    let allDocs = [];
+
+    signInBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    });
+
+    signOutBtn.addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user || null;
+      if (unsubDocs) { unsubDocs(); unsubDocs = null; }
+
+      if (!user) {
+        userPill.classList.add('hidden');
+        signOutBtn.classList.add('hidden');
+        signInBtn.classList.remove('hidden');
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      userPill.textContent = user.email;
+      userPill.classList.remove('hidden');
+      signOutBtn.classList.remove('hidden');
+      signInBtn.classList.add('hidden');
+
+      const q = query(
+        collection(db, 'documents'),
+        where('uid', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      unsubDocs = onSnapshot(q, (snap) => {
+        allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderList(allDocs);
+      });
+    });
+
+    browseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    window.addEventListener('dragover', (e) => { e.preventDefault(); });
+    window.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
+
+    function handleFiles(fileList) {
+      if (!currentUser) { alert('Please sign in first.'); return; }
+      [...fileList].forEach(uploadOne);
+      fileInput.value = '';
+    }
+
+    async function uploadOne(file) {
+      const row = document.createElement('div');
+      row.className = 'rounded border p-3 text-sm flex items-center justify-between';
+      row.innerHTML = `<div>${file.name} <span class="text-xs text-neutral-500">(${fmtBytes(file.size)})</span></div>
+                       <div class="w-48"><div class="h-2 w-full rounded bg-neutral-200 overflow-hidden"><div class="h-2 w-0 bg-black" id="bar"></div></div></div>`;
+      const bar = row.querySelector('#bar');
+      queue.prepend(row);
+
+      const docRef = await addDoc(collection(db, 'documents'), {
+        uid: currentUser.uid,
+        filename: file.name,
+        size: file.size,
+        mime: file.type || 'application/octet-stream',
+        status: 'uploading',
+        createdAt: serverTimestamp(),
+      });
+
+      const path = `uploads/${currentUser.uid}/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+      const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
+
+      task.on('state_changed', (snap) => {
+        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+        bar.style.width = pct + '%';
+      }, async (err) => {
+        await updateDoc(doc(db, 'documents', docRef.id), { status: 'error', error: String(err?.message || err) });
+      }, async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+        await updateDoc(doc(db, 'documents', docRef.id), {
+          status: 'uploaded',
+          storagePath: path,
+          downloadURL: url
+        });
+        row.remove();
+      });
+    }
+
+    search.addEventListener('input', () => renderList(allDocs));
+
+    function renderList(docs) {
+      const term = search.value?.toLowerCase()?.trim() || '';
+      const filtered = term
+        ? docs.filter(d => (d.filename || '').toLowerCase().includes(term) || (d.summary || '').toLowerCase().includes(term))
+        : docs;
+
+      countEl.textContent = String(docs.length);
+      queuedEl.textContent = String(docs.filter(d => d.status === 'queued').length);
+      uploadedEl.textContent = String(docs.filter(d => d.status === 'uploaded').length);
+      summarizedEl.textContent = String(docs.filter(d => d.status === 'summarized').length);
+
+      list.innerHTML = '';
+      if (!filtered.length) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      for (const d of filtered) {
+        const row = document.createElement('div');
+        row.className = 'p-4 flex flex-col md:flex-row md:items-start gap-3';
+
+        const summary = d.summary ? `<p class=\"text-sm text-neutral-700\">${escapeHtml(d.summary)}</p>` :
+          `<p class=\"text-sm text-neutral-500 italic\">(No summary yet)</p>`;
+
+        row.innerHTML = `
+          <div class=\"flex-1 min-w-0\">
+            <div class=\"flex items-center gap-2 flex-wrap\">
+              <h4 class=\"font-medium\">${escapeHtml(d.filename || '(untitled)')}</h4>
+              <span class=\"text-xs\">${d.status || 'unknown'}</span>
+              <span class=\"text-xs text-neutral-500\">${fmtBytes(d.size || 0)}</span>
+            </div>
+            <div class=\"mt-1\">${summary}</div>
+          </div>
+          <div class=\"flex items-center gap-2\">
+            ${d.downloadURL ? `<a class=\"px-2 py-1 border rounded\" href=\"${d.downloadURL}\" target=\"_blank\">Open</a>` : ''}
+            <button class=\"px-2 py-1 border rounded text-red-600\" data-delete=\"${d.id}\">Delete</button>
+          </div>
+        `;
+
+        row.addEventListener('click', async (e) => {
+          const t = e.target;
+          if (!(t instanceof HTMLElement)) return;
+          const delId = t.getAttribute('data-delete');
+          if (delId) {
+            if (!confirm('Delete this document and its file?')) return;
+            await handleDelete(delId);
+          }
+        });
+
+        list.appendChild(row);
+      }
+    }
+
+    async function handleDelete(docId) {
+      const refDoc = doc(db, 'documents', docId);
+      const snap = await getDoc(refDoc);
+      const data = snap.data();
+      if (data?.storagePath) {
+        try { await deleteObject(ref(storage, data.storagePath)); } catch (e) { }
+      }
+      await deleteDoc(refDoc);
+    }
+
+    function fmtBytes(bytes = 0) {
+      if (!bytes) return '0 B';
+      const sizes = ['B','KB','MB','GB'];
+      const i = Math.min(Math.floor(Math.log(bytes)/Math.log(1024)), sizes.length - 1);
+      return (bytes/Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(s = '') { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[c])); }
+  </script>
+</body>
+</html>
