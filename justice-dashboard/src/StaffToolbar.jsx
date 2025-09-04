@@ -13,11 +13,14 @@ export default function StaffToolbar() {
       // Skip in Jest/node test runs
       if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') return;
 
-      const viteEnabled = typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_VERCEL_TOOLBAR_ENABLED === 'true';
+      // Avoid direct `typeof import` checks in JSX; use globalThis to probe import.meta in Vite
+      const im = (typeof globalThis !== 'undefined' && globalThis.import && globalThis.import.meta) ? globalThis.import.meta : (globalThis.importMeta || undefined);
+      const viteEnv = im && im.env ? im.env : undefined;
+      const viteEnabled = !!(viteEnv && viteEnv.VITE_VERCEL_TOOLBAR_ENABLED === 'true');
       const nextEnabled = typeof window !== 'undefined' && window.NEXT_PUBLIC_VERCEL_TOOLBAR_ENABLED === 'true';
       if (!(viteEnabled || nextEnabled)) return;
 
-      const domainPattern = (import.meta?.env?.VITE_VERCEL_TOOLBAR_DOMAIN_REGEX) || (typeof window !== 'undefined' ? window.NEXT_PUBLIC_VERCEL_TOOLBAR_DOMAIN_REGEX : undefined);
+      const domainPattern = (viteEnv && viteEnv.VITE_VERCEL_TOOLBAR_DOMAIN_REGEX) || (typeof window !== 'undefined' ? window.NEXT_PUBLIC_VERCEL_TOOLBAR_DOMAIN_REGEX : undefined);
       if (domainPattern) {
         try {
           const re = new RegExp(domainPattern);
@@ -56,4 +59,3 @@ export default function StaffToolbar() {
   }, []);
   return null;
 }
-
