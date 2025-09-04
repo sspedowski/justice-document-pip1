@@ -2,6 +2,7 @@
 // Tests for /api/profile and /api/refresh-token
 
 const request = require('supertest');
+
 const app = require('../../justice-server/server');
 
 describe('Auth refresh and profile endpoints', () => {

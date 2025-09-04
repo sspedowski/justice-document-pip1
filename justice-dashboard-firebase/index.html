@@ -8,41 +8,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root { --ring: 0 0% 9%; }
-    html, body { height: 100%; }
-    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    .card { @apply bg-white rounded-2xl shadow-sm ring-1 ring-black/5; }
-    .btn { @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium shadow-sm ring-1 ring-black/5; }
-    .btn-primary { @apply bg-black text-white hover:bg-black/90; }
-    .btn-ghost { @apply hover:bg-black/5; }
-    .badge { @apply inline-flex items-center rounded-lg px-2 py-0.5 text-[11px] font-medium ring-1 ring-black/10; }
-    .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  </style>
 </head>
 <body class="min-h-full bg-neutral-50">
-  <!-- Top Bar -->
-  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-black/5">
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-black/5">
     <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-xl bg-black text-white grid place-content-center font-bold">JD</div>
         <div>
-          <h1 class="text-base font-semibold leading-tight">Justice Dashboard</h1>
-          <p class="text-xs text-neutral-500 -mt-0.5">Firebase prototype • uploads · search · summaries</p>
+          <h1 class="text-base font-semibold">Justice Dashboard</h1>
+          <p class="text-xs text-neutral-500">Firebase prototype • uploads · search · summaries</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <span id="user-pill" class="hidden badge"></span>
-        <button id="sign-in" class="btn btn-primary">Sign in with Google</button>
-        <button id="sign-out" class="hidden btn btn-ghost">Sign out</button>
+        <span id="user-pill" class="hidden rounded px-2 py-1 text-xs bg-neutral-100"></span>
+        <button id="sign-in" class="px-4 py-2 rounded bg-black text-white">Sign in with Google</button>
+        <button id="sign-out" class="hidden px-4 py-2 rounded border">Sign out</button>
       </div>
     </div>
   </header>
 
-  <!-- Main -->
   <main class="mx-auto max-w-6xl px-4 py-6 space-y-6">
-    <!-- Uploader -->
-    <section class="card p-4 md:p-6">
+    <section class="rounded bg-white p-4 shadow">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 class="text-lg font-semibold">Upload documents</h2>
@@ -50,91 +36,55 @@
         </div>
         <div class="flex items-center gap-2">
           <input id="file-input" type="file" multiple accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg" class="hidden">
-          <button id="browse" class="btn btn-primary">Choose files</button>
+          <button id="browse" class="px-4 py-2 rounded bg-black text-white">Choose files</button>
           <span id="drop-hint" class="text-xs text-neutral-500">or drag & drop anywhere</span>
         </div>
       </div>
       <div id="queue" class="mt-4 grid gap-2"></div>
     </section>
 
-    <!-- Toolbar -->
     <section class="flex flex-col md:flex-row md:items-center gap-3">
-      <div class="card flex-1 p-2">
-        <input id="search" type="search" placeholder="Search filename or summary…" class="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10" />
+      <div class="rounded bg-white p-2 shadow flex-1">
+        <input id="search" type="search" placeholder="Search filename or summary…" class="w-full rounded border px-3 py-2 text-sm" />
       </div>
-      <div class="flex items-center gap-2">
-        <span class="badge bg-neutral-50">Total <span id="count" class="ml-1 font-semibold">0</span></span>
-        <span class="badge bg-neutral-50">Queued <span id="queued" class="ml-1 font-semibold">0</span></span>
-        <span class="badge bg-neutral-50">Uploaded <span id="uploaded" class="ml-1 font-semibold">0</span></span>
-        <span class="badge bg-neutral-50">Summarized <span id="summarized" class="ml-1 font-semibold">0</span></span>
+      <div class="flex items-center gap-2 text-xs">
+        <span>Total <span id="count" class="ml-1 font-semibold">0</span></span>
+        <span>Queued <span id="queued" class="ml-1 font-semibold">0</span></span>
+        <span>Uploaded <span id="uploaded" class="ml-1 font-semibold">0</span></span>
+        <span>Summarized <span id="summarized" class="ml-1 font-semibold">0</span></span>
       </div>
     </section>
 
-    <!-- List -->
-    <section class="card">
-      <div class="p-4 md:p-6 border-b border-black/5">
+    <section class="rounded bg-white shadow">
+      <div class="p-4 border-b border-black/5">
         <h3 class="text-base font-semibold">Your documents</h3>
       </div>
-      <div id="doc-list" class="divide-y divide-black/5"></div>
+      <div id="doc-list"></div>
       <div id="empty" class="hidden p-10 text-center text-sm text-neutral-500">No documents yet. Upload to get started.</div>
     </section>
-
-    <!-- Rules / Setup (collapsible) -->
-    <details class="card p-4 md:p-6">
-      <summary class="cursor-pointer text-sm font-medium">Show setup notes & security rules</summary>
-      <div class="mt-4 text-sm text-neutral-700 space-y-3">
-        <p><strong>Enable in Firebase Console:</strong> Authentication → Sign-in method → Google; Firestore; Storage. Update <code>firebaseConfig</code> below if your project values differ.</p>
-        <p><strong>Suggested Firestore Rules</strong> (Collections: <code>documents</code>):</p>
-        <pre class="bg-neutral-50 p-3 rounded-xl overflow-auto"><code>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /documents/{docId} {
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
-    }
-  }
-}</code></pre>
-        <p><strong>Suggested Storage Rules</strong> (Bucket path: <code>uploads/{uid}/**</code>):</p>
-        <pre class="bg-neutral-50 p-3 rounded-xl overflow-auto"><code>rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /uploads/{uid}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-  }
-}</code></pre>
-        <p class="text-xs text-neutral-500">Tip: If uploads fail, double‑check your <code>storageBucket</code> in config. Some projects use <code>PROJECT_ID.appspot.com</code>.</p>
-      </div>
-    </details>
   </main>
 
-  <!-- App Script -->
   <script type="module">
-    // --- Firebase (CDN ESM) ---
-    // Replace X.Y.Z with your local CDN version if needed.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
-    // --- Config: using your existing project values ---
     const firebaseConfig = {
       apiKey: 'AIzaSyBZy4ABtqtklTmNB5ZEYeYyXD7TfBsj6s8',
       authDomain: 'justice-dashboard.firebaseapp.com',
       projectId: 'justice-dashboard',
-      storageBucket: 'justice-dashboard.firebasestorage.app', // if issues, try 'justice-dashboard.appspot.com'
+      storageBucket: 'justice-dashboard.appspot.com',
       messagingSenderId: '1092402235726',
       appId: '1:1092402235726:web:92aed63368eb6c1829f61f',
       measurementId: 'G-7E0D2751VH'
     };
 
-    // --- Init ---
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // --- UI refs ---
     const el = (id) => document.getElementById(id);
     const userPill = el('user-pill');
     const signInBtn = el('sign-in');
@@ -154,7 +104,6 @@ service firebase.storage {
     let unsubDocs = null;
     let allDocs = [];
 
-    // --- Auth ---
     signInBtn.addEventListener('click', async () => {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -192,12 +141,9 @@ service firebase.storage {
       });
     });
 
-    // --- Uploads ---
     browseBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
-    // Drag & Drop (window-level for simplicity)
-    let drag = 0;
     window.addEventListener('dragover', (e) => { e.preventDefault(); });
     window.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
 
@@ -209,13 +155,12 @@ service firebase.storage {
 
     async function uploadOne(file) {
       const row = document.createElement('div');
-      row.className = 'rounded-xl border border-black/10 p-3 text-sm flex items-center justify-between';
-      row.innerHTML = `<div class="truncate">${file.name} <span class="text-xs text-neutral-500">(${fmtBytes(file.size)})</span></div>
-                       <div class="w-48"><div class="h-2 w-full rounded-full bg-neutral-200 overflow-hidden"><div class="h-2 w-0 bg-black" id="bar"></div></div></div>`;
+      row.className = 'rounded border p-3 text-sm flex items-center justify-between';
+      row.innerHTML = `<div>${file.name} <span class="text-xs text-neutral-500">(${fmtBytes(file.size)})</span></div>
+                       <div class="w-48"><div class="h-2 w-full rounded bg-neutral-200 overflow-hidden"><div class="h-2 w-0 bg-black" id="bar"></div></div></div>`;
       const bar = row.querySelector('#bar');
       queue.prepend(row);
 
-      // 1) Create doc (status: uploading)
       const docRef = await addDoc(collection(db, 'documents'), {
         uid: currentUser.uid,
         filename: file.name,
@@ -225,7 +170,6 @@ service firebase.storage {
         createdAt: serverTimestamp(),
       });
 
-      // 2) Upload to Storage (uploads/{uid}/ts_filename)
       const path = `uploads/${currentUser.uid}/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, path);
       const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
@@ -234,7 +178,6 @@ service firebase.storage {
         const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
         bar.style.width = pct + '%';
       }, async (err) => {
-        console.error(err);
         await updateDoc(doc(db, 'documents', docRef.id), { status: 'error', error: String(err?.message || err) });
       }, async () => {
         const url = await getDownloadURL(task.snapshot.ref);
@@ -243,27 +186,10 @@ service firebase.storage {
           storagePath: path,
           downloadURL: url
         });
-        // 3) Queue summary via HTTP function (optional) — you will implement this
-        // If you prefer a Storage-triggered function, skip this and let the backend do it.
-        try {
-          await queueSummarize({ id: docRef.id, path, url, filename: file.name });
-          await updateDoc(doc(db, 'documents', docRef.id), { status: 'queued' });
-        } catch (e) {
-          console.warn('Summarize queue failed (safe to ignore if using triggers):', e);
-        }
         row.remove();
       });
     }
 
-    async function queueSummarize(payload) {
-      // Placeholder: point this to your Genkit/Cloud Function endpoint when ready.
-      // Example: const res = await fetch('https://YOUR_CLOUD_FUNCTION_URL/summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      // if (!res.ok) throw new Error(await res.text());
-      // return res.json();
-      return Promise.resolve();
-    }
-
-    // --- Render list & actions ---
     search.addEventListener('input', () => renderList(allDocs));
 
     function renderList(docs) {
@@ -286,37 +212,29 @@ service firebase.storage {
 
       for (const d of filtered) {
         const row = document.createElement('div');
-        row.className = 'p-4 md:p-5 flex flex-col md:flex-row md:items-start gap-3';
+        row.className = 'p-4 flex flex-col md:flex-row md:items-start gap-3';
 
-        const status = badgeFor(d.status || 'unknown');
-        const summary = d.summary ? `<p class="text-sm text-neutral-700 truncate-2">${escapeHtml(d.summary)}</p>` :
+        const summary = d.summary ? `<p class="text-sm text-neutral-700">${escapeHtml(d.summary)}</p>` :
           `<p class="text-sm text-neutral-500 italic">(No summary yet)</p>`;
 
         row.innerHTML = `
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-medium truncate">${escapeHtml(d.filename || '(untitled)')}</h4>
-              ${status}
+              <h4 class="font-medium">${escapeHtml(d.filename || '(untitled)')}</h4>
+              <span class="text-xs">${d.status || 'unknown'}</span>
               <span class="text-xs text-neutral-500">${fmtBytes(d.size || 0)}</span>
             </div>
             <div class="mt-1">${summary}</div>
           </div>
           <div class="flex items-center gap-2">
-            ${d.downloadURL ? `<a class="btn btn-ghost" href="${d.downloadURL}" target="_blank" rel="noopener">Open</a>` : ''}
-            ${d.downloadURL ? `<button class="btn btn-ghost" data-copy="${d.downloadURL}">Copy link</button>` : ''}
-            <button class="btn btn-ghost text-red-600" data-delete="${d.id}">Delete</button>
+            ${d.downloadURL ? `<a class="px-2 py-1 border rounded" href="${d.downloadURL}" target="_blank">Open</a>` : ''}
+            <button class="px-2 py-1 border rounded text-red-600" data-delete="${d.id}">Delete</button>
           </div>
         `;
 
         row.addEventListener('click', async (e) => {
           const t = e.target;
           if (!(t instanceof HTMLElement)) return;
-          const copy = t.getAttribute('data-copy');
-          if (copy) {
-            await navigator.clipboard.writeText(copy);
-            t.textContent = 'Copied!';
-            setTimeout(() => (t.textContent = 'Copy link'), 1200);
-          }
           const delId = t.getAttribute('data-delete');
           if (delId) {
             if (!confirm('Delete this document and its file?')) return;
@@ -330,26 +248,12 @@ service firebase.storage {
 
     async function handleDelete(docId) {
       const refDoc = doc(db, 'documents', docId);
-      const snap = await (await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js')).getDoc(refDoc);
+      const snap = await getDoc(refDoc);
       const data = snap.data();
       if (data?.storagePath) {
-        try { await deleteObject(ref(storage, data.storagePath)); } catch (e) { console.warn('Storage delete failed:', e); }
+        try { await deleteObject(ref(storage, data.storagePath)); } catch (e) { }
       }
       await deleteDoc(refDoc);
-    }
-
-    // --- Utils ---
-    function badgeFor(status) {
-      const map = {
-        uploading: 'bg-amber-50 text-amber-700',
-        uploaded: 'bg-blue-50 text-blue-700',
-        queued: 'bg-purple-50 text-purple-700',
-        summarized: 'bg-emerald-50 text-emerald-700',
-        error: 'bg-red-50 text-red-700',
-        unknown: 'bg-neutral-50 text-neutral-600'
-      };
-      const cls = map[status] || map.unknown;
-      return `<span class="badge ${cls}">${status}</span>`;
     }
 
     function fmtBytes(bytes = 0) {
@@ -359,35 +263,7 @@ service firebase.storage {
       return (bytes/Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[i];
     }
 
-    function escapeHtml(s = '') { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+    function escapeHtml(s = '') { return s.replace(/[&<>"]'/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
   </script>
-
-  <!--
-    ───────────────────────────────────────────────────────────────────────────
-    Backend (for later): Genkit + Gemini HTTP function sketch
-    
-    import * as functions from 'firebase-functions/v2/https';
-    import { onObjectFinalized } from 'firebase-functions/v2/storage'; // alt: trigger on upload
-    import { Firestore } from '@google-cloud/firestore';
-    import { initializeApp as initAdmin } from 'firebase-admin/app';
-    import { getStorage as adminStorage } from 'firebase-admin/storage';
-    import { genkit } from '@genkit-ai/core';
-
-    initAdmin();
-    const db = new Firestore();
-
-    export const summarize = functions.onRequest(async (req, res) => {
-      const { id, path, filename } = req.body;
-      // 1) load file bytes from GCS
-      const [buf] = await adminStorage().bucket().file(path).download();
-      // 2) extract text (use Document AI, pdf-parse, or simple OCR fallback)
-      const text = await extractText(buf);
-      // 3) call LLM (Gemini via Genkit) to get a small summary tuned for legal docs
-      const summary = await genkit.generate({...});
-      // 4) write summary back to Firestore
-      await db.collection('documents').doc(id).update({ summary, status: 'summarized' });
-      res.json({ ok: true });
-    });
-  -->
 </body>
 </html>
