@@ -175,6 +175,30 @@ app.get('/api/profile', requireAuth, (req, res) => {
   return res.json({ user: { username: sub, role: role || 'user' } });
 });
 
+// --- Current user metadata (used by Next.js / toolbar gating) ---
+// Returns minimal identity info; in a real deployment you might enrich this from a user store.
+app.get('/api/me', (req, res) => {
+  const auth = req.headers["authorization"] || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  let email = null;
+  let staff = false;
+  if (token) {
+    try {
+      const payload = jwt.verify(token, JWT_SECRET) || {};
+      // We only store username in token; treat it as email if it contains '@'
+      email = (payload.sub && String(payload.sub).includes('@')) ? payload.sub : null;
+      const staffList = (process.env.TOOLBAR_STAFF_EMAILS || '')
+        .split(',')
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
+      staff = !!(email && staffList.includes(String(email).toLowerCase()));
+    } catch {
+      // ignore invalid token
+    }
+  }
+  return res.json({ email, staff });
+});
+
 // JWT middleware
 function requireAuth(req, res, next) {
   const auth = req.headers["authorization"] || "";
@@ -198,6 +222,47 @@ app.post("/api/summarize", requireAuth, upload.single("file"), async (req, res) 
   const fileURL = `/uploads/${req.file.filename}`;
   const summary = `Uploaded ${req.file.originalname} (${req.file.size} bytes)`;
   return res.status(201).json({ summary, fileURL });
+});
+
+// Toolbar injection middleware (legacy HTML pages only)
+// Injects the Vercel toolbar script for staff users when enabled. Matches simple HTML responses.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (!process.env.VERCEL_TOOLBAR_ENABLED || process.env.VERCEL_TOOLBAR_ENABLED !== 'true') return next();
+  // Only operate on legacy/static HTML under /legacy or root redirect target
+  if (!req.path.endsWith('.html') && req.path !== '/' && !req.path.startsWith('/legacy')) return next();
+
+  // Monkey-patch res.send to inject before </head>
+  const originalSend = res.send.bind(res);
+  res.send = function (body) {
+    try {
+      if (typeof body === 'string' && body.includes('</head>')) {
+        // Determine staff via token (re-run small logic)
+        let isStaff = false;
+        const auth = req.headers['authorization'] || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+        if (token) {
+          try {
+            const payload = jwt.verify(token, JWT_SECRET) || {};
+            const maybeEmail = (payload.sub && String(payload.sub).includes('@')) ? payload.sub : null;
+            if (maybeEmail) {
+              const staffList = (process.env.TOOLBAR_STAFF_EMAILS || '')
+                .split(',')
+                .map(s => s.trim().toLowerCase())
+                .filter(Boolean);
+              isStaff = staffList.includes(String(maybeEmail).toLowerCase());
+            }
+          } catch { /* ignore */ }
+        }
+        if (isStaff) {
+          const scriptTag = '\n<script src="https://vercel.com/toolbar/script.js" defer></script>\n';
+          body = body.replace('</head>', scriptTag + '</head>');
+        }
+      }
+    } catch { /* ignore injection errors */ }
+    return originalSend(body);
+  };
+  return next();
 });
 
 // Global error handler (normalize Multer/file errors to 400)
