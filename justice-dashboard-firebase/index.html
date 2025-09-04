@@ -214,21 +214,21 @@
         const row = document.createElement('div');
         row.className = 'p-4 flex flex-col md:flex-row md:items-start gap-3';
 
-        const summary = d.summary ? `<p class="text-sm text-neutral-700">${escapeHtml(d.summary)}</p>` :
-          `<p class="text-sm text-neutral-500 italic">(No summary yet)</p>`;
+        const summary = d.summary ? `<p class=\"text-sm text-neutral-700\">${escapeHtml(d.summary)}</p>` :
+          `<p class=\"text-sm text-neutral-500 italic\">(No summary yet)</p>`;
 
         row.innerHTML = `
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-medium">${escapeHtml(d.filename || '(untitled)')}</h4>
-              <span class="text-xs">${d.status || 'unknown'}</span>
-              <span class="text-xs text-neutral-500">${fmtBytes(d.size || 0)}</span>
+          <div class=\"flex-1 min-w-0\">
+            <div class=\"flex items-center gap-2 flex-wrap\">
+              <h4 class=\"font-medium\">${escapeHtml(d.filename || '(untitled)')}</h4>
+              <span class=\"text-xs\">${d.status || 'unknown'}</span>
+              <span class=\"text-xs text-neutral-500\">${fmtBytes(d.size || 0)}</span>
             </div>
-            <div class="mt-1">${summary}</div>
+            <div class=\"mt-1\">${summary}</div>
           </div>
-          <div class="flex items-center gap-2">
-            ${d.downloadURL ? `<a class="px-2 py-1 border rounded" href="${d.downloadURL}" target="_blank">Open</a>` : ''}
-            <button class="px-2 py-1 border rounded text-red-600" data-delete="${d.id}">Delete</button>
+          <div class=\"flex items-center gap-2\">
+            ${d.downloadURL ? `<a class=\"px-2 py-1 border rounded\" href=\"${d.downloadURL}\" target=\"_blank\">Open</a>` : ''}
+            <button class=\"px-2 py-1 border rounded text-red-600\" data-delete=\"${d.id}\">Delete</button>
           </div>
         `;
 
@@ -263,7 +263,7 @@
       return (bytes/Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + sizes[i];
     }
 
-    function escapeHtml(s = '') { return s.replace(/[&<>"]'/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+    function escapeHtml(s = '') { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[c])); }
   </script>
 </body>
 </html>
