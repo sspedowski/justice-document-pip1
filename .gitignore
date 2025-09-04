@@ -156,3 +156,4 @@ tmp-eslint-output.txt
 
 # Backup files from migration scripts
 *.bak
+.vercel
