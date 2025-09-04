@@ -1,0 +1,14 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd justice-dashboard-next && npm ci",
+  "buildCommand": "cd justice-dashboard-next && npm run build",
+  "outputDirectory": "justice-dashboard-next/.next",
+  "headers": [
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}
