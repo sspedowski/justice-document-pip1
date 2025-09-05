@@ -1,7 +1,7 @@
 // UI smoke test using @testing-library/react and Jest
 import { render, screen } from '@testing-library/react';
 
-import App from '../src/App';
+import App from '../src/App.jsx';
 
 describe('Justice Dashboard UI', () => {
   it('renders dashboard heading and upload controls', () => {
