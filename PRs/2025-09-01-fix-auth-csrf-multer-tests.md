@@ -17,10 +17,5 @@ Verification
 
 Follow-ups
 
-- Add small tests for `/api/refresh-token` and `/api/profile` (added in this branch).
+- Add small tests for `/api/refresh-token` and `/api/profile` (optional).
 - Consider stricter CSRF in dev/prod if browser protection is desired beyond JWT.
-
-Notes
-
-- I added integration tests for `/api/refresh-token` and `/api/profile` under `justice-dashboard/tests/` and ran the full suite locally: 5 test suites, 14 tests — all passing.
-
