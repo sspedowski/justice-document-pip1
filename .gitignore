@@ -157,3 +157,8 @@ tmp-eslint-output.txt
 # Backup files from migration scripts
 *.bak
 .vercel
+
+# Next app artifacts
+justice-dashboard-next/.next/
+justice-dashboard-next/.vercel/
+
