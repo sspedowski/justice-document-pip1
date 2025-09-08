@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd justice-dashboard-next && npm ci",
+  "buildCommand": "cd justice-dashboard-next && npm run build",
+  "devCommand": "cd justice-dashboard-next && npm run dev"
+}
