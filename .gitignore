@@ -150,6 +150,7 @@ justice-dashboard/uploads/
 # Env files in packages
 justice-server/.env
 justice-dashboard/.env
+justice-dashboard-next/.env
 
 
 tmp-eslint-output.txt
