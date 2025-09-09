@@ -13,5 +13,11 @@ export async function GET() {
   } catch {
     hasServiceAccount = false;
   }
-  return NextResponse.json({ ok: true, hasGemini, hasServiceAccount, ts: Date.now() });
+  return NextResponse.json({
+    ok: true,
+    service: 'justice-dashboard',
+    hasGemini,
+    hasServiceAccount,
+    ts: new Date().toISOString(),
+  });
 }
