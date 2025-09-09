@@ -1,0 +1,35 @@
+name: "Guard: no embedded repo"
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  guard-no-embedded-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure external/justice-document-pip is not tracked
+        shell: bash
+        run: |
+          set -e
+          echo "Checking tracked files under external/justice-document-pip ..."
+          if git ls-files 'external/justice-document-pip/**' | grep -q .; then
+            echo "❌ Found tracked files under external/justice-document-pip/"
+            git ls-files 'external/justice-document-pip/**'
+            exit 1
+          fi
+          echo "✅ No tracked files under external/justice-document-pip/"
+
+      - name: Ensure .gitmodules has no reference
+        shell: bash
+        run: |
+          set -e
+          if [ -f .gitmodules ] && grep -q 'external/justice-document-pip' .gitmodules; then
+            echo "❌ Found reference in .gitmodules"
+            cat .gitmodules
+            exit 1
+          fi
+          echo "✅ No .gitmodules reference found"
