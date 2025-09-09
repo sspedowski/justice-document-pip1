@@ -59,9 +59,9 @@
         "@babel/preset-env": "^7.22.0",
         "@babel/preset-react": "^7.22.0",
         "@eslint/eslintrc": "^3",
-        "@testing-library/jest-dom": "^6.8.0",
         "@tailwindcss/postcss": "^4",
-        "@types/node": "^20",
+        "@testing-library/jest-dom": "^6.8.0",
+        "@types/node": "^20.19.13",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "babel-eslint": "^10.1.0",
@@ -80,7 +80,7 @@
         "tw-animate-css": "^1.3.8",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.41.0",
-        "vitest": "^1.6.0"
+        "vitest": "^1.6.1"
     },
     "jest": {
         "testEnvironment": "jsdom",
@@ -92,4 +92,3 @@
         "node": ">=18"
     }
 }
-
