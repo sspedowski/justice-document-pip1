@@ -1,0 +1,118 @@
+name: codex-ci
+
+on:
+  push:
+    branches: [ main, chore/**, feat/**, sec/**, docs/** ]
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "src/**"
+      - "scripts/**"
+      - "next.config.*"
+      - "tsconfig.*"
+      - "package.json"
+      - ".github/workflows/codex-ci.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "src/**"
+      - "scripts/**"
+      - "next.config.*"
+      - "tsconfig.*"
+      - "package.json"
+
+concurrency:
+  group: codex-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codex:
+    name: Codex — typecheck, tests, health, summarize+upload smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      NODE_ENV: development               # auth/app-check bypass in dev route
+      VITEST: "1"                         # PostCSS guard used in repo
+      NEXT_TELEMETRY_DISABLED: "1"
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      UPLOAD_MAX_BYTES: "2097152"         # 2MB cap for CI
+      # Optional rate-limit secrets (if you set them):
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run -s typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Start Next dev server
+        run: |
+          nohup npm run dev > .next-dev.log 2>&1 &
+          echo $! > .server_pid
+          echo "Waiting for /api/health..."
+          for i in {1..45}; do
+            if curl -fsS http://localhost:3000/api/health >/dev/null; then
+              echo "Dev server is up."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Server failed to start"
+          cat .next-dev.log || true
+          exit 1
+
+      - name: Health check
+        run: curl -fsS http://localhost:3000/api/health | tee health.json
+
+      - name: Create tiny fixture (PNG)
+        run: |
+          mkdir -p tests/fixtures
+          # 1x1 transparent PNG (minimal)
+          printf "\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1F\x15\xC4\x89\x00\x00\x00\nIEND\xAE\x42\x60\x82" > tests/fixtures/tiny.png
+
+      - name: Summarize smoke (dev)
+        run: |
+          node scripts/verify_ai_setup.mjs --url=http://localhost:3000
+
+      - name: Upload smoke (dev)
+        if: env.FIREBASE_STORAGE_BUCKET != ''
+        run: |
+          curl -fsS -X POST http://localhost:3000/api/upload \
+            -F "doc=@tests/fixtures/tiny.png" \
+            -F "category=ci-smoke" | tee upload.json
+          test "$(jq -r '.ok' upload.json)" = "true"
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f .server_pid ]; then
+            kill $(cat .server_pid) || true
+          fi
+
+      - name: Save logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-ci-logs
+          path: |
+            .next-dev.log
+            health.json
+            upload.json
+

@@ -1,46 +1,36 @@
 import admin from 'firebase-admin';
 
-let _app: admin.app.App | null = null;
-
-function init() {
-  if (_app) return _app;
-  if (!admin.apps.length) {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      try {
-        const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        _app = admin.initializeApp({
-          credential: admin.credential.cert(creds as admin.ServiceAccount),
-          storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-        });
-      } catch (e) {
-        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT', e);
-        throw e;
-      }
-    } else {
-      _app = admin.initializeApp();
-    }
-  } else {
-    _app = admin.app();
+if (!admin.apps.length) {
+  const saRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!saRaw) throw new Error('FIREBASE_SERVICE_ACCOUNT missing');
+  let svc;
+  try {
+    svc = JSON.parse(saRaw);
+  } catch (e) {
+    throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT JSON');
   }
-  return _app;
+  admin.initializeApp({
+    credential: admin.credential.cert(svc),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  });
 }
 
-export const adminApp = init();
+export const adminApp = admin.app();
 export const db = admin.firestore();
 export const bucket = admin.storage().bucket();
 
-export function verifyIdToken(idToken: string) {
+export async function verifyIdToken(idToken?: string) {
+  if (!idToken) throw new Error('Missing auth token');
   return admin.auth().verifyIdToken(idToken);
 }
 
-export async function verifyAppCheck(token?: string): Promise<boolean> {
-  if (!token) return false;
+export async function verifyAppCheck(appCheckToken?: string) {
+  if (!appCheckToken) throw new Error('Missing App Check token');
   try {
-    // App Check API is optional unless in production
-    // @ts-ignore - appCheck may be undefined in older firebase-admin versions
-    await admin.appCheck().verifyToken(token);
+    // @ts-ignore optional depending on admin SDK version
+    await admin.appCheck().verifyToken(appCheckToken);
     return true;
   } catch {
-    return false;
+    throw new Error('Invalid App Check token');
   }
 }

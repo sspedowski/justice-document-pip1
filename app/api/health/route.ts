@@ -2,22 +2,14 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
-  const hasGemini = !!process.env.GOOGLE_API_KEY;
-  let hasServiceAccount = false;
-  try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      const json = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      hasServiceAccount = !!(json.client_email && json.private_key);
-    }
-  } catch {
-    hasServiceAccount = false;
-  }
+export function GET() {
   return NextResponse.json({
     ok: true,
-    service: 'justice-dashboard',
-    hasGemini,
-    hasServiceAccount,
-    ts: new Date().toISOString(),
+    env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'dev',
+    checks: {
+      googleApiKey: !!process.env.GOOGLE_API_KEY,
+      serviceAccount: !!process.env.FIREBASE_SERVICE_ACCOUNT,
+      storageBucket: !!process.env.FIREBASE_STORAGE_BUCKET,
+    },
   });
 }

@@ -1,94 +1,130 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Busboy from 'busboy';
-import { bucket } from '@/lib/firebaseAdmin';
-import crypto from 'crypto';
-import { extname } from 'path';
-import mime from 'mime';
+import crypto from 'node:crypto';
+import { extname } from 'node:path';
+import { v4 as uuid } from 'uuid';
+import { bucket, db, verifyIdToken, verifyAppCheck } from '../../../lib/firebaseAdmin';
+import { checkLimit } from '../../../lib/rateLimiter';
+import { getSignedUrl } from '../../../lib/signedUrl';
+import { extractPdfTextToStorage } from '../../../lib/pdf';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const MAX_BYTES = parseInt(process.env.UPLOAD_MAX_BYTES || '10485760', 10); // 10MB default
-const ALLOWED_MIME = new Set([
+const ALLOW = new Set([
   'application/pdf',
-  'image/png',
-  'image/jpeg',
-  'text/plain',
+  'image/png', 'image/jpeg', 'image/webp',
+  'text/plain'
 ]);
+const MAX_BYTES = Number(process.env.UPLOAD_MAX_BYTES || 10 * 1024 * 1024);
 
-function uid(id = crypto.randomUUID()) {
-  return id.replace(/-/g, '');
-}
+function dateFolder(d = new Date()) { return d.toISOString().slice(0,10); }
 
-export async function POST(req: Request) {
-  const ctype = req.headers.get('content-type') || '';
-  if (!ctype.toLowerCase().includes('multipart/form-data')) {
-    return NextResponse.json({ ok: false, error: 'Expected multipart/form-data' }, { status: 400 });
+export async function POST(req: NextRequest) {
+  const isProd = process.env.NODE_ENV === 'production';
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
+
+  let uid: string | null = null;
+  if (isProd) {
+    const idToken = req.headers.get('authorization')?.replace(/^Bearer\s+/i,'');
+    const appCheck = req.headers.get('x-firebase-appcheck') || undefined;
+    try {
+      const decoded = await verifyIdToken(idToken);
+      await verifyAppCheck(appCheck);
+      uid = decoded.uid;
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message || 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  const key = uid ? `u:${uid}` : `ip:${ip}`;
+  const { allowed, remaining, reset } = await checkLimit(key);
+  if (!allowed) return NextResponse.json({ error: 'Rate limit exceeded', remaining, reset }, { status: 429 });
+
+  if (!req.headers.get('content-type')?.startsWith('multipart/form-data')) {
+    return NextResponse.json({ error: 'Use multipart/form-data' }, { status: 400 });
   }
 
   const ts = new Date().toISOString();
   const fields: Record<string,string> = {};
-  const filesMeta: any[] = [];
+  const uploaded: any[] = [];
 
-  try {
-    const bb = Busboy({ headers: Object.fromEntries(req.headers) as any, limits: { fileSize: MAX_BYTES } });
+  const bb = Busboy({
+    headers: Object.fromEntries(req.headers as any),
+    limits: { fileSize: MAX_BYTES, files: 5, fields: 10 },
+  });
 
-    const finished = new Promise<void>((resolve, reject) => {
-      bb.on('field', (name, val) => { fields[name] = val; });
-
-      bb.on('file', (fieldname, file, info) => {
-        const { filename, mimeType } = info;
-        if (!ALLOWED_MIME.has(mimeType)) {
-          file.resume();
-            return reject(Object.assign(new Error('Unsupported file type'), { status: 415 }));
+  const done = new Promise<void>((resolve, reject) => {
+    bb.on('field', (name: string, val: string) => { if (typeof val === 'string' && val.length <= 2048) fields[name] = val; });
+    bb.on('file', (fieldname: string, file: any, info: { filename: string; mimeType: string }) => {
+      const { filename, mimeType } = info;
+      if (!ALLOW.has(mimeType)) { file.resume(); return bb.emit('error', new Error(`mime not allowed: ${mimeType}`)); }
+      const id = uuid();
+      const ext = extname(filename || '') || '';
+      const folder = dateFolder();
+      const storagePath = `uploads/${folder}/${id}${ext}`;
+      const hash = crypto.createHash('sha256');
+      let size = 0;
+      const dest = bucket.file(storagePath).createWriteStream({ metadata: { contentType: mimeType }, resumable: false });
+      file.on('data', (chunk: Buffer) => { size += chunk.length; hash.update(chunk); });
+      file.on('limit', () => { dest.end(); return reject(Object.assign(new Error('File too large'), { status: 413 })); });
+      file.on('error', reject);
+      dest.on('error', reject);
+      dest.on('finish', async () => {
+        const sha256 = hash.digest('hex');
+        const docId = id;
+        await db.collection('uploads').doc(docId).set({
+          uid: uid ?? null,
+          ip: isProd ? null : ip,
+            ts,
+          fieldname,
+          filename,
+          mimeType,
+          size,
+          sha256,
+          storagePath,
+          meta: fields,
+          env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'dev',
+        });
+        let textExtract: any = null;
+        if (mimeType === 'application/pdf') {
+          try { textExtract = await extractPdfTextToStorage(storagePath); } catch {}
         }
-        const base = filename?.trim() || 'upload';
-        const safeExt = extname(base) || `.${(mime.getExtension(mimeType) || 'bin').replace(/[^a-z0-9]/gi,'')}`;
-        const storagePath = `uploads/${ts.slice(0,10)}/${uid()}${safeExt}`;
-        const hash = crypto.createHash('sha256');
-        let bytes = 0;
-
-        const gcsStream = bucket.file(storagePath).createWriteStream({ metadata: { contentType: mimeType }, resumable: false });
-
-        file.on('data', (chunk: Buffer) => { bytes += chunk.length; hash.update(chunk); });
-        file.on('limit', () => {
-          file.unpipe(gcsStream);
-          gcsStream.end();
-          reject(Object.assign(new Error('File too large'), { status: 413 }));
-        });
-        file.on('error', (e) => reject(e));
-        gcsStream.on('error', (e) => reject(e));
-
-        gcsStream.on('finish', () => {
-          const sha256 = hash.digest('hex');
-          filesMeta.push({ fieldname, filename: base, mimeType, size: bytes, sha256, storagePath });
-        });
-
-        file.pipe(gcsStream);
+        let signedUrl: string | undefined;
+        try { signedUrl = await getSignedUrl(storagePath, 30); } catch {}
+        uploaded.push({ fieldname, filename, mimeType, size, sha256, storagePath, signedUrl, textExtract });
       });
-
-      bb.once('error', reject);
-      bb.once('finish', () => resolve());
+      file.pipe(dest);
     });
+    bb.on('error', reject);
+    bb.on('finish', () => resolve());
+  });
 
-    // Stream request body chunks to busboy
-    (async () => {
-      const reader = req.body?.getReader();
-      if (!reader) { bb.end(); return; }
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        if (value) bb.write(Buffer.from(value));
-      }
-      bb.end();
-    })().catch(e => bb.emit('error', e));
+  const body = req.body;
+  if (!body) return NextResponse.json({ error: 'Empty body' }, { status: 400 });
 
-    await finished;
+  // Adapt web ReadableStream to Busboy (node expects Buffer chunks)
+  // @ts-ignore
+  body.pipeThrough(new TransformStream()).readable.pipeTo(new WritableStream({
+    write(chunk) { bb.write(chunk); },
+    close() { bb.end(); }
+  }));
 
-    return NextResponse.json({ ok: true, service: 'justice-dashboard', ts, count: filesMeta.length, files: filesMeta, fields });
-  } catch (err: any) {
-    const status = Number(err?.status) || 500;
-    return NextResponse.json({ ok: false, error: err?.message || 'Upload error' }, { status });
+  try { await done; }
+  catch (e: any) {
+    const msg = e?.message || 'Upload failed';
+    const code = /mime not allowed|file too large/i.test(msg) ? 400 : 500;
+    return NextResponse.json({ error: msg }, { status: code });
   }
+
+  return NextResponse.json({
+    ok: true,
+    service: 'justice-dashboard',
+    ts,
+    count: uploaded.length,
+    files: uploaded,
+    fields,
+    rate: { remaining, reset },
+  });
 }
