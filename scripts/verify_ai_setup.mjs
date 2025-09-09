@@ -15,7 +15,7 @@ function warn(msg){log('⚠️',msg);}
 
 function scanRepo(){
   try {
-    const pattern = 'client_email|private_key_id';
+    const pattern = 'client_email|private_key_id|BEGIN PRIVATE KEY|-----BEGIN PRIVATE KEY-----|firebase-adminsdk|robot/v1/metadata/x509';
     const cmd = process.platform==='win32'
       ? `powershell -NoLogo -NoProfile -Command "Get-ChildItem -Recurse -File | Select-String -Pattern '${pattern}' | Select Path,Line"`
       : `git ls-files -z | xargs -0 grep -nE "${pattern}" || true`;
