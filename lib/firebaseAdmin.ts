@@ -10,6 +10,7 @@ function init() {
         const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         _app = admin.initializeApp({
           credential: admin.credential.cert(creds as admin.ServiceAccount),
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         });
       } catch (e) {
         console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT', e);
@@ -26,6 +27,7 @@ function init() {
 
 export const adminApp = init();
 export const db = admin.firestore();
+export const bucket = admin.storage().bucket();
 
 export function verifyIdToken(idToken: string) {
   return admin.auth().verifyIdToken(idToken);
