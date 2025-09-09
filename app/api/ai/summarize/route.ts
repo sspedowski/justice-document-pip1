@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { verifyIdToken, verifyAppCheck, db } from '../../../../lib/firebaseAdmin';
 import { redact } from '../../../../lib/redact';
@@ -12,43 +12,40 @@ interface BodyInput {
 
 export const runtime = 'nodejs';
 
-function isProd() {
-  return process.env.NODE_ENV === 'production';
-}
+const isProd = () => process.env.NODE_ENV === 'production';
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as BodyInput;
     const { text = '', docId } = body;
 
-    if (!text.trim()) {
-      return new Response(JSON.stringify({ error: 'Missing text' }), { status: 400 });
+    if (!text || !text.trim()) {
+      return NextResponse.json({ error: 'Missing text' }, { status: 400 });
+    }
+    if (text.length > 20000) {
+      return NextResponse.json({ error: 'Invalid size' }, { status: 400 });
     }
 
     let uid: string | undefined;
     if (isProd()) {
-      const authHeader = req.headers.get('authorization') || '';
-      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-      if (!token) {
-        return new Response(JSON.stringify({ error: 'Missing auth token' }), { status: 401 });
-      }
+      const authHeader = req.headers.get('authorization');
+      const token = authHeader?.replace(/^Bearer\s+/i, '') || '';
+      if (!token) return NextResponse.json({ error: 'Missing auth token' }, { status: 401 });
       try {
         const decoded = await verifyIdToken(token);
         uid = decoded.uid;
       } catch {
-        return new Response(JSON.stringify({ error: 'Invalid auth token' }), { status: 401 });
+        return NextResponse.json({ error: 'Invalid auth token' }, { status: 401 });
       }
       const appCheckToken = req.headers.get('x-firebase-appcheck') || undefined;
       const appCheckOk = await verifyAppCheck(appCheckToken);
-      if (!appCheckOk) {
-        return new Response(JSON.stringify({ error: 'Invalid App Check token' }), { status: 401 });
-      }
+      if (!appCheckOk) return NextResponse.json({ error: 'Invalid App Check token' }, { status: 401 });
     }
 
     const { redacted, summary } = redact(text);
 
     if (!process.env.GOOGLE_API_KEY) {
-      return new Response(JSON.stringify({ error: 'GOOGLE_API_KEY not configured' }), { status: 500 });
+      return NextResponse.json({ error: 'GOOGLE_API_KEY not configured' }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
@@ -57,7 +54,9 @@ export async function POST(req: NextRequest) {
 
     const resp = await model.generateContent([{ text: redacted }]);
     const outputText = resp.response.text();
-    const tokensUsed = resp.response.usageMetadata?.totalTokens ?? null;
+  // Some versions expose different fields; serialize available numeric values.
+  const usage: any = resp.response.usageMetadata || {};
+  const tokensUsed = usage.totalTokens || usage.promptTokens || usage.candidatesTokens || null;
 
     // Firestore log (avoid raw text in production)
     try {
@@ -76,12 +75,9 @@ export async function POST(req: NextRequest) {
       console.error('Failed to log ai_logs:', e);
     }
 
-    return new Response(
-      JSON.stringify({ outputText, tokensUsed, model: modelName }),
-      { status: 200, headers: { 'content-type': 'application/json' } }
-    );
+  return NextResponse.json({ outputText, tokensUsed, model: modelName });
   } catch (e) {
     console.error('AI summarize error', e);
-    return new Response(JSON.stringify({ error: 'Internal error' }), { status: 500 });
+  return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
