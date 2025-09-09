@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // AI logs: write only from server (enforced via security context on server side) and
+    // allow users to read only their own entries if desired.
+    match /ai_logs/{docId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      // Prevent client writes; server should use Admin SDK which bypasses rules.
+      allow write: if false;
+    }
+  }
+}

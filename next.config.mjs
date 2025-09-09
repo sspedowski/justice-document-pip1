@@ -1,6 +1,4 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
   output: "standalone",
   // Temporary relax build blocking while new AI integration stabilizes.
   typescript: { ignoreBuildErrors: true },
@@ -8,3 +6,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
