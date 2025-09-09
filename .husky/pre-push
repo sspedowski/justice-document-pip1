@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "[pre-push] Guarding against embedded repos..."
+
+# 1) Block tracked files in the known bad path
+if git ls-files "external/justice-document-pip/**" | grep -q .; then
+  echo "❌ Found tracked files under external/justice-document-pip/ — push blocked."
+  exit 1
+fi
+
+# 2) Block a lingering submodule reference
+if [ -f .gitmodules ] && grep -q "external/justice-document-pip" .gitmodules; then
+  echo "❌ .gitmodules references external/justice-document-pip — push blocked."
+  exit 1
+fi
+
+# 3) Block any newly-added nested .git directory anywhere in the push set
+FOUND=0
+git status --porcelain | awk '{print $2}' | while read -r p; do
+  if [ -n "$p" ] && [ -d "$p/.git" ]; then
+    echo "❌ Found nested .git directory at: $p/.git — push blocked."
+    FOUND=1
+    break
+  fi
+done
+
+if [ "$FOUND" -eq 1 ]; then
+  exit 1
+fi
+
+echo "✅ pre-push guard passed."
+exit 0
