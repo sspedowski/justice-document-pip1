@@ -91,6 +91,9 @@ jobs:
         run: |
           node scripts/verify_ai_setup.mjs --url=http://localhost:3000
 
+      - name: Summarize streaming smoke (dev)
+        run: node scripts/stream_smoke.mjs --url=http://localhost:3000 --path=/api/ai/summarize/stream
+
       - name: Upload smoke (dev)
         if: env.FIREBASE_STORAGE_BUCKET != ''
         run: |
@@ -116,3 +119,122 @@ jobs:
             health.json
             upload.json
 
+  codex-prod:
+    name: Codex — production smoke (health + summarize + upload)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: codex
+    if: >
+      github.event_name == 'push' || github.event_name == 'pull_request'
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      PROD_BASE_URL: ${{ secrets.PROD_BASE_URL }}                 # e.g. https://your-domain
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY }}   # Firebase Web API key
+      FIREBASE_WEB_APP_ID: ${{ secrets.FIREBASE_WEB_APP_ID }}     # Firebase App ID (App Check)
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install minimal deps
+        run: npm ci --omit=optional
+
+      - name: Mint Firebase ID token + App Check token
+        id: tokens
+        run: |
+          cat > mint_tokens.mjs <<'EOF'
+          import fs from 'node:fs';
+          import admin from 'firebase-admin';
+
+          const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+          const apiKey = process.env.FIREBASE_WEB_API_KEY;
+          const appId  = process.env.FIREBASE_WEB_APP_ID;
+
+          const out = process.env.GITHUB_OUTPUT;
+          function setOutput(k,v){ fs.writeFileSync(out, `${k}=${v}\n`, { flag: 'a' }); }
+
+          // Soft skip if any required secret missing
+          if (!sa || !apiKey || !appId) {
+            setOutput('skip','true');
+            process.exit(0);
+          }
+
+          try {
+            if (!admin.apps.length) {
+              admin.initializeApp({ credential: admin.credential.cert(JSON.parse(sa)) });
+            }
+            const uid = 'ci-smoke-user';
+            const customToken = await admin.auth().createCustomToken(uid);
+            const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${apiKey}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: customToken, returnSecureToken: true }),
+            });
+            if (!resp.ok) {
+              console.error('signInWithCustomToken failed', await resp.text());
+              setOutput('skip','true');
+              process.exit(0);
+            }
+            const { idToken } = await resp.json();
+            const { token: appCheckToken } = await admin.appCheck().createToken(appId);
+            setOutput('skip','false');
+            setOutput('idToken', idToken);
+            setOutput('appCheckToken', appCheckToken);
+            console.log('Minted tokens for ci-smoke-user');
+          } catch (e) {
+            console.log('Token minting unavailable, skipping protected smokes:', e?.message || e);
+            setOutput('skip','true');
+          }
+          EOF
+
+          node mint_tokens.mjs
+
+      - name: Health (prod)
+        run: curl -fsS "$PROD_BASE_URL/api/health" | tee health.prod.json
+
+      - name: Summarize (prod, protected)
+        if: steps.tokens.outputs.skip != 'true'
+        run: |
+          curl -fsS -X POST "$PROD_BASE_URL/api/ai/summarize" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ steps.tokens.outputs.idToken }}" \
+            -H "X-Firebase-AppCheck: ${{ steps.tokens.outputs.appCheckToken }}" \
+            -d '{"text":"Summarize this CI memo about evidence handling."}' \
+            | tee summarize.prod.json
+          test "$(jq -r '.outputText != null' summarize.prod.json)" = "true"
+
+      - name: Summarize streaming (prod, protected)
+        if: steps.tokens.outputs.skip != 'true'
+        run: |
+          node scripts/stream_smoke.mjs \
+            --url="$PROD_BASE_URL" \
+            --path=/api/ai/summarize/stream \
+            --idToken="${{ steps.tokens.outputs.idToken }}" \
+            --appCheck="${{ steps.tokens.outputs.appCheckToken }}"
+
+      - name: Prepare tiny PNG
+        run: |
+          printf "\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1F\x15\xC4\x89\x00\x00\x00\nIEND\xAE\x42\x60\x82" > tiny.png
+
+      - name: Upload (prod, protected)
+        if: steps.tokens.outputs.skip != 'true' && env.FIREBASE_STORAGE_BUCKET != ''
+        run: |
+          curl -fsS -X POST "$PROD_BASE_URL/api/upload" \
+            -H "Authorization: Bearer ${{ steps.tokens.outputs.idToken }}" \
+            -H "X-Firebase-AppCheck: ${{ steps.tokens.outputs.appCheckToken }}" \
+            -F "doc=@tiny.png" -F "category=ci-prod" | tee upload.prod.json
+          test "$(jq -r '.ok' upload.prod.json)" = "true"
+
+      - name: Save prod smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-prod-artifacts
+          path: |
+            health.prod.json
+            summarize.prod.json
+            upload.prod.json
