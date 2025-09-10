@@ -187,6 +187,23 @@ export async function POST(req: NextRequest) {
         }
 
         files.push(result);
+        try {
+          // Structured one-line log (avoid PII beyond filename)
+          console.log(JSON.stringify({
+            evt: "upload_result",
+            docId: result.docId,
+            filename: result.filename,
+            size: result.size,
+            mime: result.mimeType,
+            sniffed: result.sniffedMime,
+            sha256: result.sha256,
+            accepted: result.accepted,
+            isDuplicate: result.isDuplicate || false,
+            reasons: result.reasons,
+            storage: result.storage?.provider,
+            ts: new Date().toISOString()
+          }));
+        } catch {}
         resolve();
       });
 

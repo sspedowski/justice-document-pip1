@@ -34,3 +34,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Environment Variables
+
+Core (set in Vercel or `.env.local`):
+
+```
+UPLOAD_ALLOWED_MIME=application/pdf,image/png,image/jpeg
+UPLOAD_MAX_BYTES=26214400
+BLOB_READ_WRITE_TOKEN=your-token (optional for Vercel Blob persistence)
+REQUIRE_AUTH=1 (enable bearer auth middleware for /api except /api/health)
+INTERNAL_API_TOKEN=your-secret-token (required if REQUIRE_AUTH=1)
+```
+
+When `REQUIRE_AUTH=1`, every request to `/api/*` (excluding `/api/health`) must send:
+
+```
+Authorization: Bearer <INTERNAL_API_TOKEN>
+```
+
+Uploads: returns structured JSON including `sha256`, duplicate flag, and optional blob storage metadata.
