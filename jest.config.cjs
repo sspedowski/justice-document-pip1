@@ -13,8 +13,8 @@ module.exports = {
     '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json', useESM: false }]
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  modulePathIgnorePatterns: ['<rootDir>/**/.next', '<rootDir>/**/node_modules'],
-  watchPathIgnorePatterns: ['<rootDir>/**/.next', '<rootDir>/node_modules'],
+  modulePathIgnorePatterns: ['<rootDir>/.next', '<rootDir>/justice-dashboard/.next'],
+  watchPathIgnorePatterns: ['<rootDir>/.next', '<rootDir>/node_modules'],
 };
 
 
