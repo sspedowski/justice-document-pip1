@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { verifyIdToken, verifyAppCheck, db } from '../../../../lib/firebaseAdmin';
+import { requireAuth } from '../../../../lib/auth';
 import { redact } from '../../../../lib/redact';
 import { sha256Hex } from '../../../../lib/hash';
 
@@ -16,6 +17,9 @@ const isProd = () => process.env.NODE_ENV === 'production';
 
 export async function POST(req: NextRequest) {
   try {
+    const unauth = requireAuth(req as any);
+    if (unauth) return unauth;
+
     const body = (await req.json()) as BodyInput;
     const { text = '', docId } = body;
 
