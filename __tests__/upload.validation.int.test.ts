@@ -1,20 +1,14 @@
 import http from "node:http";
-import path from "node:path";
-import next from "next";
 import request from "supertest";
+import { startNextServer } from "./helpers/start-next";
 
-let app: any;
 let server: http.Server;
 
 beforeAll(async () => {
   process.env.UPLOAD_MAX_BYTES = "64"; // 64 bytes for oversize test
   process.env.UPLOAD_ALLOWED_MIME = "application/pdf,image/png";
-
-  app = next({ dev: true, dir: path.join(__dirname, "..") });
-  await app.prepare();
-  const handle = app.getRequestHandler();
-  server = http.createServer((req, res) => handle(req, res));
-  await new Promise<void>((res) => server.listen(0, res));
+  const started = await startNextServer();
+  server = started.server;
 }, 30000);
 
 afterAll(async () => {

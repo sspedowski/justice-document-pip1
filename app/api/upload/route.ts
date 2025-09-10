@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   // Optional buffer for storage
   const contentChunks: Buffer[] = [];
 
-    const p = new Promise<void>((resolve, reject) => {
+  const p = new Promise<void>((resolve, reject) => {
       file.on("limit", () => {
         oversize = true;
         reasons.push(`File exceeds limit of ${MAX_FILE_BYTES} bytes`);
@@ -108,7 +108,16 @@ export async function POST(req: NextRequest) {
         }
       });
 
-    file.on("end", async () => {
+      let digested = false;
+      const safeDigest = () => {
+        if (!digested) {
+          try { return hash.digest("hex"); }
+          finally { digested = true; }
+        }
+        return undefined;
+      };
+
+      file.once("end", async () => {
         const result: FileResult = {
           fieldname,
           filename,
@@ -121,7 +130,7 @@ export async function POST(req: NextRequest) {
         };
 
         // Finalize hash
-        result.sha256 = hash.digest("hex");
+        result.sha256 = safeDigest();
 
         // Duplicate detection (best-effort, per-process)
         if (result.sha256) {
@@ -161,7 +170,7 @@ export async function POST(req: NextRequest) {
             const key = `uploads/${result.sha256}/${encodeURIComponent(filename)}`;
             const buf = Buffer.concat(contentChunks);
             const putRes = await put(key, buf, {
-              access: "private",
+              access: "public",
               token: process.env.BLOB_READ_WRITE_TOKEN,
               contentType: effectiveMime || "application/octet-stream",
               addRandomSuffix: false,
@@ -181,7 +190,7 @@ export async function POST(req: NextRequest) {
         resolve();
       });
 
-      file.on("error", reject);
+      file.once("error", (err: any) => { digested = true; reject(err); });
     });
 
     finalizePromises.push(p);

@@ -1,25 +1,19 @@
 import http from "node:http";
-import path from "node:path";
-import next from "next";
 import request from "supertest";
+import { startNextServer } from "./helpers/start-next";
 
 jest.mock("@vercel/blob", () => ({
   put: jest.fn(async (key: string) => ({ url: `https://blob.vercel-storage.com/${key}` }))
 }));
 
-let app: any;
 let server: http.Server;
 
 beforeAll(async () => {
   process.env.UPLOAD_MAX_BYTES = "1048576"; // 1MB
   process.env.UPLOAD_ALLOWED_MIME = "application/pdf,image/png";
   process.env.BLOB_READ_WRITE_TOKEN = "test-token";
-
-  app = next({ dev: true, dir: path.join(__dirname, "..") });
-  await app.prepare();
-  const handle = app.getRequestHandler();
-  server = http.createServer((req, res) => handle(req, res));
-  await new Promise<void>((res) => server.listen(0, res));
+  const started = await startNextServer();
+  server = started.server;
 }, 30000);
 
 afterAll(async () => {
