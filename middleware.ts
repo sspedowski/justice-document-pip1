@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const REQUIRE = process.env.REQUIRE_AUTH === '1';
-const TOKEN = process.env.INTERNAL_API_TOKEN;
-
 export function middleware(req: NextRequest) {
+  const REQUIRE = process.env.REQUIRE_AUTH === '1';
+  const TOKEN = process.env.INTERNAL_API_TOKEN;
   if (!REQUIRE) return NextResponse.next();
   const { pathname } = req.nextUrl;
   if (!pathname.startsWith('/api/')) return NextResponse.next();
