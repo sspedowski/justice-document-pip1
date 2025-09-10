@@ -1,5 +1,3 @@
-// jest.config.cjs - fast handler + unit tests (no Next server spin)
-/** @type {import('jest').Config} */
 module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests', '<rootDir>/justice-dashboard/tests'],
@@ -8,7 +6,8 @@ module.exports = {
     '**/?(*.)+(test|spec).js'
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json', useESM: false }]
+    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json', useESM: false }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
   },
   transformIgnorePatterns: [
     'node_modules/(?!file-type|strtok3|token-types|peek-readable)'
@@ -16,10 +15,20 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/__tests__/',
     '<rootDir>/tests/upload/upload.docid.test.ts',
-    '<rootDir>/tests/summarize-route.*.test.ts'
+    '<rootDir>/tests/summarize-route.*.test.ts',
+    '<rootDir>/justice-dashboard/tests/ui.test.js'
   ],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  // Rely on default node_modules ignore; .next not in roots so safe
+  moduleFileExtensions: ['ts','tsx','js','jsx','json','node'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/.next',
+    '<rootDir>/**/.next',
+    '<rootDir>/**/node_modules'
+  ],
+  watchPathIgnorePatterns: [
+    '<rootDir>/.next',
+    '<rootDir>/**/.next',
+    '<rootDir>/node_modules'
+  ]
 };
 
 
