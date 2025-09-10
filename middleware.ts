@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getEnv } from '@/config/env';
 
 export function middleware(req: NextRequest) {
-  const requireAuth = process.env.REQUIRE_AUTH === '1' || process.env.NODE_ENV === 'production';
+  const { requireAuth, internalApiToken } = getEnv();
   if (!requireAuth) return NextResponse.next();
 
   // Allow health without auth
@@ -10,7 +11,7 @@ export function middleware(req: NextRequest) {
 
   const auth = req.headers.get('authorization') || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  if (!token || token !== process.env.INTERNAL_API_TOKEN) {
+  if (!token || token !== internalApiToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   return NextResponse.next();
@@ -19,4 +20,3 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: ['/api/:path*'],
 };
-
