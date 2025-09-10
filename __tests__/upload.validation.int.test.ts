@@ -12,7 +12,9 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(async () => {
-  await new Promise<void>((res) => server.close(() => res()));
+  if (server && server.listening) {
+    await new Promise<void>((res) => server.close(() => res()));
+  }
 });
 
 const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

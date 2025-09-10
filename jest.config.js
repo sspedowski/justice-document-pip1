@@ -1,7 +1,3 @@
-module.exports = {
-  testEnvironment: "node",
-  testMatch: ["**/__tests__/**/*.test.[jt]s?(x)"],
-  transform: { "^.+\\.(ts|tsx)$": ["ts-jest", { tsconfig: "tsconfig.json" }] },
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  testTimeout: 30000
-};
+// Placeholder intentionally left blank; use jest.config.cjs as the single source of truth.
+// (Empty file to neutralize legacy config discovery.)
+module.exports = {};
