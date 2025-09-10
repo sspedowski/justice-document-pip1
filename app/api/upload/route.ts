@@ -60,21 +60,23 @@ export async function POST(req: NextRequest) {
     bb.on('file', (fieldname: string, file: any, info: { filename: string; mimeType: string }) => {
       const { filename, mimeType } = info;
       if (!ALLOW.has(mimeType)) { file.resume(); return bb.emit('error', new Error(`mime not allowed: ${mimeType}`)); }
-      const id = uuid();
+  const id = uuid();
+  const docId = id; // explicit docId for response clarity
       const ext = extname(filename || '') || '';
       const folder = dateFolder();
       const storagePath = `uploads/${folder}/${id}${ext}`;
       const hash = crypto.createHash('sha256');
       let size = 0;
-      const dest = bucket.file(storagePath).createWriteStream({ metadata: { contentType: mimeType }, resumable: false });
+  const dest = bucket.file(storagePath).createWriteStream({ metadata: { contentType: mimeType }, resumable: false });
       file.on('data', (chunk: Buffer) => { size += chunk.length; hash.update(chunk); });
       file.on('limit', () => { dest.end(); return reject(Object.assign(new Error('File too large'), { status: 413 })); });
       file.on('error', reject);
       dest.on('error', reject);
-      dest.on('finish', async () => {
+      let finalized = false;
+      const finalize = async () => {
+        if (finalized) return; finalized = true;
         const sha256 = hash.digest('hex');
-        const docId = id;
-        await db.collection('uploads').doc(docId).set({
+  await db.collection('uploads').doc(docId).set({
           uid: uid ?? null,
           ip: isProd ? null : ip,
             ts,
@@ -91,10 +93,11 @@ export async function POST(req: NextRequest) {
         if (mimeType === 'application/pdf') {
           try { textExtract = await extractPdfTextToStorage(storagePath); } catch {}
         }
-        let signedUrl: string | undefined;
-        try { signedUrl = await getSignedUrl(storagePath, 30); } catch {}
-        uploaded.push({ fieldname, filename, mimeType, size, sha256, storagePath, signedUrl, textExtract });
-      });
+  let signedUrl: string | undefined;
+  try { signedUrl = await getSignedUrl(storagePath, 30); } catch {}
+  uploaded.push({ docId, fieldname, filename, mimeType, size, sha256, storagePath, signedUrl, textExtract });
+  };
+  dest.on('finish', finalize);
       file.pipe(dest);
     });
     bb.on('error', reject);
@@ -104,12 +107,25 @@ export async function POST(req: NextRequest) {
   const body = req.body;
   if (!body) return NextResponse.json({ error: 'Empty body' }, { status: 400 });
 
-  // Adapt web ReadableStream to Busboy (node expects Buffer chunks)
+  // If body is a web ReadableStream (standard in NextRequest), pipe directly into Busboy.
+  // Otherwise (tests providing Buffer), end Busboy with that Buffer.
   // @ts-ignore
-  body.pipeThrough(new TransformStream()).readable.pipeTo(new WritableStream({
-    write(chunk) { bb.write(chunk); },
-    close() { bb.end(); }
-  }));
+  if (typeof body.pipeTo === 'function') {
+    // @ts-ignore
+    body.pipeTo(new WritableStream({
+      write(chunk) { bb.write(chunk); },
+      close() { bb.end(); }
+    }));
+  } else {
+    // Treat body as Buffer containing full multipart payload; feed in chunks then end.
+    // @ts-ignore
+    const buf: Buffer = body as any;
+    const CHUNK = 64 * 1024;
+    for (let i = 0; i < buf.length; i += CHUNK) {
+      bb.write(buf.subarray(i, i + CHUNK));
+    }
+    bb.end();
+  }
 
   try { await done; }
   catch (e: any) {
