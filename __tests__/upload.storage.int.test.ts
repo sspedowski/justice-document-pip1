@@ -17,7 +17,9 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(async () => {
-  await new Promise<void>((res) => server.close(() => res()));
+  if (server && server.listening) {
+    await new Promise<void>((res) => server.close(() => res()));
+  }
   jest.resetAllMocks();
 });
 
