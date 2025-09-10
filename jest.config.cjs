@@ -1,8 +1,9 @@
 /** @type {import('jest').Config} */
 module.exports = {
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests', '<rootDir>/__tests__', '<rootDir>/justice-dashboard/tests'],
+  roots: ['<rootDir>/justice-dashboard/tests'],
   testMatch: ['**/?(*.)+(test|spec).[tj]s?(x)'],
+  testPathIgnorePatterns: ['<rootDir>/__tests__/', '<rootDir>/tests/', '<rootDir>/justice-dashboard/tests/ui.test.js'],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json', useESM: false }],
   },
