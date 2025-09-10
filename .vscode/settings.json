@@ -1,7 +1,21 @@
 {
-  "editor.formatOnSave": true,
-  "files.eol": "\n",
-  "http.systemCertificates": true,
-  "http.proxySupport": "on",
-  "githubPullRequests.useReviewMode": true
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.vercel": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/.vercel/**": true
+  },
+  "git.autofetch": false
 }
