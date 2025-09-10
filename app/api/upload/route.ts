@@ -9,18 +9,22 @@ import { put } from "@vercel/blob";
 export const runtime = "nodejs";
 
 // Config (env overrideable)
-const DEFAULT_ALLOWED = [
+const DEFAULT_ALLOWED_DEV = [
   "application/pdf",
   "image/jpeg",
   "image/png",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
-const ALLOWED_MIME = (process.env.UPLOAD_ALLOWED_MIME ?? "")
+const ENV_ALLOWED = (process.env.UPLOAD_ALLOWED_MIME ?? "")
   .split(",")
   .map(s => s.trim())
   .filter(Boolean);
-const ALLOWED = ALLOWED_MIME.length ? ALLOWED_MIME : DEFAULT_ALLOWED;
+const ALLOWED = ENV_ALLOWED.length
+  ? ENV_ALLOWED
+  : (process.env.NODE_ENV === 'production'
+      ? ["application/pdf"]
+      : DEFAULT_ALLOWED_DEV);
 const MAX_FILE_BYTES = Number(process.env.UPLOAD_MAX_BYTES ?? 25 * 1024 * 1024); // 25MB
 
 const HAVE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
