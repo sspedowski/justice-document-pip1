@@ -6,6 +6,8 @@ module.exports = {
   testMatch: [
     '<rootDir>/justice-dashboard/tests/**/?(*.)+(test|spec).[tj]s?(x)',
     '<rootDir>/tests/auth.middleware.test.ts',
+    '<rootDir>/tests/upload.ratelimit.test.ts',
+    '<rootDir>/tests/upload.kv-dedupe.test.ts',
   ],
   testPathIgnorePatterns: [
     '<rootDir>/__tests__/',
@@ -20,4 +22,5 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
   watchPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
 };
+
 
