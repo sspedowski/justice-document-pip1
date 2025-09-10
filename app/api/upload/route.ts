@@ -5,6 +5,9 @@ import { Readable } from "node:stream";
 import { randomUUID, createHash } from "node:crypto";
 import { fileTypeFromBuffer } from "file-type";
 import { put } from "@vercel/blob";
+import { kv } from "@vercel/kv";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 export const runtime = "nodejs";
 
@@ -28,6 +31,23 @@ const ALLOWED = ENV_ALLOWED.length
 const MAX_FILE_BYTES = Number(process.env.UPLOAD_MAX_BYTES ?? 25 * 1024 * 1024); // 25MB
 
 const HAVE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
+const HAVE_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+
+// Optional rate limit flags
+const HAVE_RL =
+  process.env.RATE_LIMIT === "1" &&
+  !!process.env.UPSTASH_REDIS_REST_URL &&
+  !!process.env.UPSTASH_REDIS_REST_TOKEN;
+const RL_MAX = Number(process.env.RATE_LIMIT_MAX ?? 20);
+const RL_WINDOW = String(process.env.RATE_LIMIT_WINDOW ?? "1 m");
+const rlRedis = HAVE_RL ? Redis.fromEnv() : null;
+const rl = HAVE_RL
+  ? new Ratelimit({
+      redis: rlRedis!,
+      limiter: Ratelimit.slidingWindow(RL_MAX, RL_WINDOW),
+      prefix: "rl:upload",
+    })
+  : null;
 
 // Ephemeral duplicate detector (per-process)
 const KNOWN_HASHES = new Set<string>();
@@ -54,6 +74,29 @@ export async function POST(req: NextRequest) {
   const ctype = req.headers.get("content-type") || "";
   if (!ctype.includes("multipart/form-data")) {
     return NextResponse.json({ ok: false, error: "Expected multipart/form-data" }, { status: 400 });
+  }
+
+  // Optional rate limit (per IP) for /api/upload
+  if (rl) {
+    const ip =
+      (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
+      (req as any).ip ||
+      "unknown";
+    const { success, limit, remaining, reset } = await rl.limit(ip);
+    if (!success) {
+      const retryAfter = Math.max(1, Math.ceil((reset * 1000 - Date.now()) / 1000));
+      return NextResponse.json(
+        { error: "Too Many Requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(limit),
+            "X-RateLimit-Remaining": String(remaining),
+          },
+        }
+      );
+    }
   }
 
   const files: FileResult[] = [];
@@ -141,6 +184,22 @@ export async function POST(req: NextRequest) {
           result.isDuplicate = KNOWN_HASHES.has(result.sha256);
           if (result.isDuplicate) reasons.push("Duplicate content (sha256 already seen)");
           KNOWN_HASHES.add(result.sha256);
+        }
+
+        // Persistent dedupe via Vercel KV (optional)
+        if (HAVE_KV && result.sha256) {
+          try {
+            const key = `uploads:sha:${result.sha256}`;
+            const seen = await kv.get<number>(key);
+            if (seen) {
+              result.isDuplicate = true;
+              reasons.push("Duplicate content (sha256 already present in KV)");
+            }
+            // keep for ~180 days
+            await kv.set(key, 1, { ex: 60 * 60 * 24 * 180 });
+          } catch (e: any) {
+            reasons.push(`KV error: ${e?.message || "unknown"}`);
+          }
         }
 
         // Sniff magic bytes
