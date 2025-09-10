@@ -20,14 +20,10 @@ module.exports = {
   ],
   moduleFileExtensions: ['ts','tsx','js','jsx','json','node'],
   modulePathIgnorePatterns: [
-    '<rootDir>/.next',
-    '<rootDir>/**/.next',
-    '<rootDir>/**/node_modules'
+  '<rootDir>/.next'
   ],
   watchPathIgnorePatterns: [
-    '<rootDir>/.next',
-    '<rootDir>/**/.next',
-    '<rootDir>/node_modules'
+  '<rootDir>/.next'
   ]
 };
 
