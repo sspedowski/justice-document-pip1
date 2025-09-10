@@ -2,24 +2,21 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const REQUIRE = process.env.REQUIRE_AUTH === '1';
-  const TOKEN = process.env.INTERNAL_API_TOKEN;
-  if (!REQUIRE) return NextResponse.next();
-  const { pathname } = req.nextUrl;
-  if (!pathname.startsWith('/api/')) return NextResponse.next();
-  if (pathname === '/api/health') return NextResponse.next();
+  const requireAuth = process.env.REQUIRE_AUTH === '1' || process.env.NODE_ENV === 'production';
+  if (!requireAuth) return NextResponse.next();
 
-  if (!TOKEN) {
-    return NextResponse.json({ ok: false, error: 'Server missing INTERNAL_API_TOKEN' }, { status: 500 });
-  }
+  // Allow health without auth
+  if (req.nextUrl.pathname === '/api/health') return NextResponse.next();
+
   const auth = req.headers.get('authorization') || '';
-  const expected = `Bearer ${TOKEN}`;
-  if (auth !== expected) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  if (!token || token !== process.env.INTERNAL_API_TOKEN) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/:path*']
+  matcher: ['/api/:path*'],
 };
+
