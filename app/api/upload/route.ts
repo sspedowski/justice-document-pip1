@@ -8,38 +8,22 @@ import { put } from "@vercel/blob";
 import { kv } from "@vercel/kv";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { getEnv } from "@/config/env";
 
 export const runtime = "nodejs";
 
 // Config (env overrideable)
-const DEFAULT_ALLOWED_DEV = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-const ENV_ALLOWED = (process.env.UPLOAD_ALLOWED_MIME ?? "")
-  .split(",")
-  .map(s => s.trim())
-  .filter(Boolean);
-const ALLOWED = ENV_ALLOWED.length
-  ? ENV_ALLOWED
-  : (process.env.NODE_ENV === 'production'
-      ? ["application/pdf"]
-      : DEFAULT_ALLOWED_DEV);
-const MAX_FILE_BYTES = Number(process.env.UPLOAD_MAX_BYTES ?? 25 * 1024 * 1024); // 25MB
+const E = getEnv();
+const ALLOWED = E.upload.allowed;
+const MAX_FILE_BYTES = E.upload.maxBytes; // 25MB default
 
-const HAVE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
-const HAVE_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const HAVE_BLOB = E.providers.blob.enabled;
+const HAVE_KV = E.providers.kv.enabled;
 
 // Optional rate limit flags
-const HAVE_RL =
-  process.env.RATE_LIMIT === "1" &&
-  !!process.env.UPSTASH_REDIS_REST_URL &&
-  !!process.env.UPSTASH_REDIS_REST_TOKEN;
-const RL_MAX = Number(process.env.RATE_LIMIT_MAX ?? 20);
-const RL_WINDOW = String(process.env.RATE_LIMIT_WINDOW ?? "1 m");
+const HAVE_RL = E.rateLimit.enabled;
+const RL_MAX = E.rateLimit.max;
+const RL_WINDOW = E.rateLimit.window;
 const rlRedis = HAVE_RL ? Redis.fromEnv() : null;
 const rl = HAVE_RL
   ? new Ratelimit({
@@ -234,7 +218,7 @@ export async function POST(req: NextRequest) {
             const buf = Buffer.concat(contentChunks);
             const putRes = await put(key, buf, {
               access: "public",
-              token: process.env.BLOB_READ_WRITE_TOKEN,
+              token: E.providers.blob.token,
               contentType: effectiveMime || "application/octet-stream",
               addRandomSuffix: false,
             });
