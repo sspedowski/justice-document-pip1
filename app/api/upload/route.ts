@@ -4,6 +4,7 @@ import Busboy from "busboy";
 import { Readable } from "node:stream";
 import { randomUUID, createHash } from "node:crypto";
 import { fileTypeFromBuffer } from "file-type";
+import { put } from "@vercel/blob";
 
 export const runtime = "nodejs";
 
@@ -22,20 +23,27 @@ const ALLOWED_MIME = (process.env.UPLOAD_ALLOWED_MIME ?? "")
 const ALLOWED = ALLOWED_MIME.length ? ALLOWED_MIME : DEFAULT_ALLOWED;
 const MAX_FILE_BYTES = Number(process.env.UPLOAD_MAX_BYTES ?? 25 * 1024 * 1024); // 25MB
 
+const HAVE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
+
 // Ephemeral duplicate detector (per-process)
 const KNOWN_HASHES = new Set<string>();
 
 type FileResult = {
   fieldname: string;
   filename: string;
-  mimeType: string;     // from client/form
-  sniffedMime?: string; // from magic bytes
+  mimeType: string;     // client-provided
+  sniffedMime?: string; // magic-bytes
   size: number;
-  docId: string;
+  docId: string;        // stable per upload
   sha256?: string;
   accepted: boolean;
   isDuplicate?: boolean;
   reasons?: string[];
+  storage?: {
+    provider: "vercel-blob" | "none";
+    key?: string;
+    url?: string;
+  };
 };
 
 export async function POST(req: NextRequest) {
@@ -73,10 +81,12 @@ export async function POST(req: NextRequest) {
     let oversize = false;
 
     // For sniffing + hashing
-    const HEADER_MAX = 4100;
+  const HEADER_MAX = 4100;
     let headerLen = 0;
     const headerChunks: Buffer[] = [];
     const hash = createHash("sha256");
+  // Optional buffer for storage
+  const contentChunks: Buffer[] = [];
 
     const p = new Promise<void>((resolve, reject) => {
       file.on("limit", () => {
@@ -84,7 +94,7 @@ export async function POST(req: NextRequest) {
         reasons.push(`File exceeds limit of ${MAX_FILE_BYTES} bytes`);
       });
 
-      file.on("data", (chunk: Buffer) => {
+  file.on("data", (chunk: Buffer) => {
         size += chunk.length;
         hash.update(chunk);
 
@@ -93,9 +103,12 @@ export async function POST(req: NextRequest) {
           headerChunks.push(chunk.subarray(0, Math.min(remaining, chunk.length)));
           headerLen += Math.min(remaining, chunk.length);
         }
+        if (!oversize && size <= MAX_FILE_BYTES) {
+          contentChunks.push(chunk);
+        }
       });
 
-      file.on("end", async () => {
+    file.on("end", async () => {
         const result: FileResult = {
           fieldname,
           filename,
@@ -104,6 +117,7 @@ export async function POST(req: NextRequest) {
           docId,
           accepted: true,
           reasons,
+      storage: { provider: HAVE_BLOB ? "vercel-blob" : "none" }
         };
 
         // Finalize hash
@@ -141,6 +155,28 @@ export async function POST(req: NextRequest) {
           reasons.push("Empty file");
         }
 
+        // Persist if accepted and token present
+        if (result.accepted && HAVE_BLOB) {
+          try {
+            const key = `uploads/${result.sha256}/${encodeURIComponent(filename)}`;
+            const buf = Buffer.concat(contentChunks);
+            const putRes = await put(key, buf, {
+              access: "private",
+              token: process.env.BLOB_READ_WRITE_TOKEN,
+              contentType: effectiveMime || "application/octet-stream",
+              addRandomSuffix: false,
+            });
+            result.storage = {
+              provider: "vercel-blob",
+              key,
+              url: (putRes as any)?.url || undefined,
+            };
+          } catch (e: any) {
+            result.accepted = false;
+            reasons.push(`Storage error: ${e?.message || "unknown"}`);
+          }
+        }
+
         files.push(result);
         resolve();
       });
@@ -171,6 +207,7 @@ export async function POST(req: NextRequest) {
     files,
     fields,
     limits: { maxBytes: MAX_FILE_BYTES, allowed: ALLOWED },
+    storage: { enabled: HAVE_BLOB, provider: HAVE_BLOB ? "vercel-blob" : "none" },
     service: "upload-api",
     ts: new Date().toISOString(),
   });
