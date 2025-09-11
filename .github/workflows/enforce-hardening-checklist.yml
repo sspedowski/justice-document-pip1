@@ -1,0 +1,27 @@
+name: enforce: hardening checklist
+on:
+  pull_request:
+    types: [ready_for_review, edited, synchronize, reopened, labeled]
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  enforce:
+    if: >
+      !github.event.pull_request.draft &&
+      contains(toJson(github.event.pull_request.labels), 'hardening')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if unchecked tasks remain
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const hasUnchecked = /- \[ \]/.test(body);
+            if (hasUnchecked) {
+              core.setFailed('Unchecked hardening tasks remain. Keep as Draft or complete all items before review.');
+            } else {
+              core.notice('All hardening tasks checked. ✅');
+            }
+
