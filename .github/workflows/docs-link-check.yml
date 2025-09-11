@@ -1,5 +1,4 @@
 name: "docs: link check"
-
 on:
   pull_request:
     paths:
@@ -12,13 +11,13 @@ permissions:
   contents: read
 
 jobs:
-  lychee:
+  linkcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Link check
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --no-progress --format detailed README.md HELP.md HELP_IMPLEMENTATION_SUMMARY.md
+          args: --no-progress --format detailed --config .lychee.toml README.md HELP.md HELP_IMPLEMENTATION_SUMMARY.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

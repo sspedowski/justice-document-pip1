@@ -1,0 +1,26 @@
+name: "docs: help summary up-to-date"
+on:
+  pull_request:
+    paths:
+      - HELP.md
+      - docs/HELP.md
+      - HELP_IMPLEMENTATION_SUMMARY.md
+      - scripts/build-help-summary.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm run build:help:summary
+      - name: Verify summary matches
+        run: |
+          git diff --exit-code HELP_IMPLEMENTATION_SUMMARY.md || \
+          (echo "::error::HELP_IMPLEMENTATION_SUMMARY.md is out of date. Run `npm run build:help:summary` and commit."; exit 1)
