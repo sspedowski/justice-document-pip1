@@ -1,5 +1,18 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+![vercel-min health](https://github.com/sspedowski/justice-document-pip1/actions/workflows/health-check.yml/badge.svg)
+
+## Hardening Gate (CI)
+If a PR is labeled hardening, CI will:
+1) Post a progress comment showing the Hardening TODO checklist status.
+2) Block leaving Draft unless all items under the section heading `## Hardening TODO` in the PR description are checked.
+
+Keep the checklist in the PR description (not comments) so automation can read it.
+
+## Help Demo
+
+Accessible modal + version footer (served by the minimal app): **/help-demo.html**
+
 ## Getting Started
 
 First, run the development server:
