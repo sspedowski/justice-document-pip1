@@ -1,0 +1,51 @@
+name: vercel-min health check
+
+on:
+  push:
+    paths:
+      - 'vercel-min/**'
+  pull_request:
+    paths:
+      - 'vercel-min/**'
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: vercel-min/package-lock.json
+
+      - name: Install deps
+        working-directory: vercel-min
+        run: npm ci
+
+      - name: Build
+        working-directory: vercel-min
+        run: npm run build
+
+      - name: Start server
+        working-directory: vercel-min
+        env:
+          PORT: 3000
+        run: |
+          nohup npm start >/tmp/server.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS "http://127.0.0.1:3000/api/health" && break || sleep 1
+          done
+          curl -fsS "http://127.0.0.1:3000/api/health"
+
+      - name: Upload sanity test
+        run: |
+          echo "tiny" > /tmp/test.pdf
+          curl -fsS -X POST \
+            -F "doc=@/tmp/test.pdf;type=application/pdf" \
+            -F "note=ci" \
+            "http://127.0.0.1:3000/api/upload" | tee /tmp/upload.json
+          node -e 'const r=require("fs").readFileSync("/tmp/upload.json","utf8"); const j=JSON.parse(r); if(!(j.ok && j.count===1)) { console.error(j); process.exit(1); }'
