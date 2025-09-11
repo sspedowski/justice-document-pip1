@@ -1,5 +1,4 @@
 name: "docs: link check"
-
 on:
   pull_request:
     paths:
@@ -12,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  lychee:
+  linkcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
