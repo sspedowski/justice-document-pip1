@@ -21,7 +21,8 @@
     "test:ci": "vitest run --reporter=dot",
     "test:run": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "clean": "git reset --hard && git clean -xfd && node -e \"require('fs').rmSync('.next',{recursive:true,force:true}); require('fs').rmSync('node_modules',{recursive:true,force:true});\""
+  "clean": "git reset --hard && git clean -xfd && node -e \"require('fs').rmSync('.next',{recursive:true,force:true}); require('fs').rmSync('node_modules',{recursive:true,force:true});\"",
+  "release:tag": "node scripts/tag-release.cjs"
   },
   "prepare": "husky install",
   "lint-staged": {

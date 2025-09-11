@@ -1,3 +1,5 @@
+# Justice Dashboard
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -39,7 +41,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 Core (set in Vercel or `.env.local`):
 
-```
+```env
 UPLOAD_ALLOWED_MIME=application/pdf,image/png,image/jpeg
 UPLOAD_MAX_BYTES=26214400
 BLOB_READ_WRITE_TOKEN=your-token (optional for Vercel Blob persistence)
@@ -49,8 +51,24 @@ INTERNAL_API_TOKEN=your-secret-token (required if REQUIRE_AUTH=1)
 
 When `REQUIRE_AUTH=1`, every request to `/api/*` (excluding `/api/health`) must send:
 
-```
+```http
 Authorization: Bearer <INTERNAL_API_TOKEN>
 ```
 
 Uploads: returns structured JSON including `sha256`, duplicate flag, and optional blob storage metadata.
+
+## Release Tagging
+
+Create an annotated git tag based on the current `package.json` version:
+
+```bash
+npm run release:tag
+```
+
+If the tag already exists, bump the `version` field first. Push tags with:
+
+```bash
+git push origin --tags
+```
+
+The `/api/version` endpoint returns build metadata (`sha`, `short`, `buildTime`, `env`, `version`). Caching is disabled (`Cache-Control: no-store`) for immediate freshness.

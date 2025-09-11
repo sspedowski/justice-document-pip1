@@ -23,15 +23,8 @@ function envLabel(): "production" | "preview" | "development" {
 function cacheHeaders(label: "production" | "preview" | "development", sha: string | null, buildTime: string) {
   const h = new Headers();
   const short = sha ? sha.slice(0, 7) : null;
-
-  // cache strategy: prod=CDN 60s SWR, preview=CDN 30s SWR, dev=no-store
-  const sMaxAge = label === "production" ? 60 : label === "preview" ? 30 : 0;
-  if (sMaxAge > 0) {
-    h.set("Cache-Control", `public, max-age=0, s-maxage=${sMaxAge}, stale-while-revalidate=300`);
-  } else {
-    h.set("Cache-Control", "no-store");
-  }
-
+  // Force no-store everywhere (intentionally overriding previous env-differentiated caching)
+  h.set("Cache-Control", "no-store");
   h.set("ETag", `"${short ?? "na"}-${buildTime}"`);
   if (short) h.set("X-Commit", short);
   h.set("X-Build-Time", buildTime);
