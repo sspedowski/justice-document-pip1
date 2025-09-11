@@ -5,7 +5,8 @@
     "**/dist": true,
     "**/build": true,
     "**/coverage": true,
-    "**/.vercel": true
+    "**/.vercel": true,
+    "**/archive/**": true
   },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
@@ -15,7 +16,8 @@
     "**/dist/**": true,
     "**/build/**": true,
     "**/coverage/**": true,
-    "**/.vercel/**": true
+    "**/.vercel/**": true,
+    "**/archive/**": true
   },
   "git.autofetch": false
 }

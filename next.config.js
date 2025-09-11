@@ -2,5 +2,8 @@
 module.exports = {
   experimental: {
     esmExternals: 'loose'
-  }
+  },
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+  },
 };

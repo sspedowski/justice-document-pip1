@@ -14,17 +14,21 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '<rootDir>/__tests__/',
+    '<rootDir>/archive/',
     '<rootDir>/tests/upload/upload.docid.test.ts',
     '<rootDir>/tests/summarize-route.*.test.ts',
     '<rootDir>/justice-dashboard/tests/ui.test.js'
   ],
   moduleFileExtensions: ['ts','tsx','js','jsx','json','node'],
   modulePathIgnorePatterns: [
-  '<rootDir>/.next'
+  '<rootDir>/.next',
+  '<rootDir>/**/.next',
+  '<rootDir>/**/node_modules',
+  '<rootDir>/archive'
   ],
   watchPathIgnorePatterns: [
-  '<rootDir>/.next'
+  '<rootDir>/.next',
+  '<rootDir>/archive'
   ]
 };
-
 

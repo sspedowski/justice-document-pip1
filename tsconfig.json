@@ -33,7 +33,8 @@
     "node_modules",
     "**/*.test.ts",
     "**/*.test.tsx",
-  "scripts/fine-tune.ts",
-  "app/api/chat/route.ts"
+    "archive",
+    "scripts/fine-tune.ts",
+    "app/api/chat/route.ts"
   ]
 }
