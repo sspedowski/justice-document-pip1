@@ -21,7 +21,6 @@ describe("/api/version", () => {
     const cc = head.headers.get("cache-control") || "";
     const etag = head.headers.get("etag") || "";
     expect(cc).toMatch(/no-store|s-maxage=\d+/);
-    expect(etag).toMatch(/^".*\"-2025-01-01T00:00:00.000Z"$/);
+    expect(etag).toMatch(/^".*-2025-01-01T00:00:00.000Z"$/);
   });
 });
-
