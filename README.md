@@ -17,10 +17,6 @@ We ship two PR templates:
 How to use the Hardening template: on the “Open a pull request” page, click Choose a template → Hardening PR.
 Enforcement: when a PR has the hardening label and leaves Draft, CI enforces the checklist under `## Hardening TODO`. Use the security label as an additional signal for reviewers.
 
-## Help Demo
-
-Accessible modal + version footer (served by the minimal app): **/help-demo.html**
-
 ## Getting Started
 
 First, run the development server:

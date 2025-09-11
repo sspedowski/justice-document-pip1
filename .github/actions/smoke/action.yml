@@ -9,6 +9,14 @@ inputs:
     required: false
     default: "1500"
   check_help_demo:
+    description: "Also request a static help demo page to verify it's served"
+    required: false
+    default: "false"
+  help_path:
+    description: "Path to help demo page (e.g., /help-demo.html)"
+    required: false
+    default: "/help-demo.html"
+  check_help_demo:
     description: "If 'true', assert Help Demo page exists with modal/button"
     required: false
     default: "false"
@@ -60,6 +68,17 @@ runs:
         LIVE_URL: ${{ inputs.live_url }}
       run: |
         curl -s -f "$LIVE_URL/api/version" | tee /tmp/version.json >/dev/null
+
+    - name: Help demo (optional)
+      if: ${{ inputs.check_help_demo == 'true' }}
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+        HELP_PATH: ${{ inputs.help_path }}
+      run: |
+        P=${HELP_PATH:-/help-demo.html}
+        echo "Fetching $LIVE_URL$P"
+        curl -sSf "$LIVE_URL$P" -o /tmp/help-demo.html
 
     - name: Validate /api/version against JSON Schema (ajv + formats, fallback to jq)
       shell: bash
@@ -147,6 +166,8 @@ runs:
           /tmp/version.json
           /tmp/upload.json
           /tmp/latency.json
+          /tmp/help-demo.html
+        if-no-files-found: ignore
           /tmp/help-demo.html
 
     - name: Slack notify (on failure)

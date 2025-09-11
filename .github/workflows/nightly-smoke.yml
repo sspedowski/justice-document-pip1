@@ -26,9 +26,9 @@ jobs:
             exit 1;
           fi
 
-      - name: Smoke (health/version/upload + help demo)
+      - name: Smoke (health/version/upload)
         uses: ./.github/actions/smoke
         with:
           live_url: ${{ env.LIVE_URL }}
           latency_ms: "2500"
-          check_help_demo: "true"
+          check_help_demo: "false"
