@@ -9,6 +9,14 @@ If a PR is labeled hardening, CI will:
 
 Keep the checklist in the PR description (not comments) so automation can read it.
 
+## Contributing: PR templates & hardening
+We ship two PR templates:
+- **Default PR template** – auto-applied to every PR.
+- **Hardening PR** – selectable for security/performance changes. See the template: [.github/PULL_REQUEST_TEMPLATE/hardening.md](.github/PULL_REQUEST_TEMPLATE/hardening.md)
+
+How to use the Hardening template: on the “Open a pull request” page, click Choose a template → Hardening PR.
+Enforcement: when a PR has the hardening label and leaves Draft, CI enforces the checklist under `## Hardening TODO`. Use the security label as an additional signal for reviewers.
+
 ## Help Demo
 
 Accessible modal + version footer (served by the minimal app): **/help-demo.html**
