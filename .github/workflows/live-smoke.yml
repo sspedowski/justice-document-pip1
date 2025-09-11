@@ -1,0 +1,33 @@
+name: vercel-min live smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      live_url:
+        description: 'Live base URL (e.g., https://your-app.vercel.app)'
+        required: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait until /api/health is ready
+        env:
+          LIVE_URL: ${{ github.event.inputs.live_url }}
+        run: |
+          for i in {1..60}; do
+            if curl -fsS "$LIVE_URL/api/health" > /dev/null; then exit 0; fi
+            sleep 5
+          done
+          echo "Timed out waiting for $LIVE_URL/api/health" && exit 1
+
+      - name: Upload sanity test
+        env:
+          LIVE_URL: ${{ github.event.inputs.live_url }}
+        run: |
+          echo "tiny" > /tmp/test.pdf
+          curl -fsS -X POST \
+            -F "doc=@/tmp/test.pdf;type=application/pdf" \
+            -F "note=ci-live" \
+            "$LIVE_URL/api/upload" | tee /tmp/upload.json
+          node -e 'const j=require("fs").readFileSync("/tmp/upload.json","utf8");const r=JSON.parse(j);if(!(r.ok&&r.count===1&&r.files[0].sha256)){console.error(r);process.exit(1)}'
