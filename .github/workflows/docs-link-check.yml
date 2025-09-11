@@ -1,0 +1,24 @@
+name: "docs: link check"
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - HELP.md
+      - HELP_IMPLEMENTATION_SUMMARY.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --format detailed README.md HELP.md HELP_IMPLEMENTATION_SUMMARY.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
