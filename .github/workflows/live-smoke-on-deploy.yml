@@ -1,0 +1,41 @@
+name: live-smoke (auto on Vercel deploy)
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  deployments: read
+
+concurrency:
+  group: smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      (
+        github.event.deployment.ref == 'hotfix/vercel-min' ||
+        startsWith(github.event.deployment.environment, 'Production')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Compute deployment URL
+        id: pick
+        run: |
+          URL="${{ github.event.deployment_status.environment_url }}"
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+            URL="${{ github.event.deployment_status.target_url }}"
+          fi
+          echo "live_url=$URL" >> $GITHUB_OUTPUT
+          echo "Using $URL"
+
+      - name: Smoke (health/version/upload + help demo)
+        uses: ./.github/actions/smoke
+        with:
+          live_url: ${{ steps.pick.outputs.live_url }}
+          latency_ms: "2000"
+          check_help_demo: "true"
+          help_path: "/help-demo.html"

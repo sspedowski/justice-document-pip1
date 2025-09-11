@@ -1,0 +1,165 @@
+name: "HTTP smoke: health/version/upload"
+description: "Hit /api/health, validate /api/version via JSON Schema, POST /api/upload with backoff + artifacts + optional Slack alert + latency budget"
+inputs:
+  live_url:
+    description: "Base URL to hit (e.g., https://app.vercel.app)"
+    required: true
+  latency_ms:
+    description: "Fail if health/upload exceed this many ms (per endpoint)"
+    required: false
+    default: "1500"
+  check_help_demo:
+    description: "If 'true', assert Help Demo page exists with modal/button"
+    required: false
+    default: "false"
+  help_path:
+    description: "Path to help demo page"
+    required: false
+    default: "/help-demo.html"
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure tools (jq, curl)
+      shell: bash
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y jq
+
+    # We need the schema file from the repo, so check out just the schemas dir.
+    - name: Checkout schemas (sparse)
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          .github/schemas
+        fetch-depth: 1
+
+    - name: Wait for /api/health (exponential backoff)
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        echo "Using $LIVE_URL"
+        ok=""
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$LIVE_URL/api/health" || true)
+          if [ "$code" = "200" ]; then
+            ok="yes"
+            break
+          fi
+          sleep $((i*2))
+        done
+        [ -n "$ok" ] || { echo "Timed out waiting for $LIVE_URL/api/health"; exit 1; }
+        # measure health latency
+        HEALTH_TIME=$(curl -s -o /tmp/health.json -w '%{time_total}' "$LIVE_URL/api/health"; echo)
+        echo "HEALTH_TIME=$HEALTH_TIME" >> $GITHUB_ENV
+        cat /tmp/health.json | jq .
+
+    - name: Check /api/version (download)
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        curl -s -f "$LIVE_URL/api/version" | tee /tmp/version.json >/dev/null
+
+    - name: Validate /api/version against JSON Schema (ajv + formats, fallback to jq)
+      shell: bash
+      run: |
+        set -e
+        if npx -y ajv-cli@5 -s .github/schemas/version.schema.json -d /tmp/version.json \
+             -c ajv-formats --spec=draft2020 --valid; then
+          echo "ajv schema validation (with date-time format) passed"
+        else
+          echo "ajv validation failed (or ajv unavailable); attempting minimal jq structural validation…" >&2
+          jq -e '
+            .ok == true and
+            (.name | type=="string") and
+            (.version | type=="string") and
+            ((.gitSha | type=="string") or (.gitSha == null)) and
+            (.at | type=="string")
+          ' /tmp/version.json >/dev/null
+        fi
+
+    - name: Upload test (3 tries, backoff) + measure latency
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        echo "smoke $(date -Iseconds)" > /tmp/smoke.txt
+        success=""
+        for i in 1 2 3; do
+          set +e
+          UPLOAD_TIME=$(curl -s -w '%{time_total}' -o /tmp/upload.json -f -X POST -F "doc=@/tmp/smoke.txt" "$LIVE_URL/api/upload"; echo)
+          rc=$?
+          set -e
+          if [ $rc -eq 0 ]; then
+            success="yes"
+            break
+          fi
+          sleep $((i*3))
+        done
+        [ -n "$success" ] || { echo "Upload failed after retries"; exit 1; }
+        echo "UPLOAD_TIME=$UPLOAD_TIME" >> $GITHUB_ENV
+        cat /tmp/upload.json | jq .
+        test "$(jq -r '.ok' /tmp/upload.json)" = "true"
+        test "$(jq -r '.count' /tmp/upload.json)" = "1"
+
+    - name: Enforce latency budget
+      shell: bash
+      env:
+        LAT_MS: ${{ inputs.latency_ms }}
+        HEALTH_TIME: ${{ env.HEALTH_TIME }}
+        UPLOAD_TIME: ${{ env.UPLOAD_TIME }}
+      run: |
+        sec_to_ms () { awk -v t="$1" 'BEGIN{printf "%.0f", t*1000}'; }
+        H_MS=$(sec_to_ms "$HEALTH_TIME")
+        U_MS=$(sec_to_ms "$UPLOAD_TIME")
+        echo "{\"health_ms\":$H_MS,\"upload_ms\":$U_MS,\"budget_ms\":$LAT_MS}" | tee /tmp/latency.json
+        fail=0
+        [ "$H_MS" -le "$LAT_MS" ] || { echo "Health latency $H_MS ms > budget $LAT_MS ms"; fail=1; }
+        [ "$U_MS" -le "$LAT_MS" ] || { echo "Upload latency $U_MS ms > budget $LAT_MS ms"; fail=1; }
+        [ $fail -eq 0 ] || exit 1
+
+    - name: Check Help Demo page (optional)
+      if: ${{ inputs.check_help_demo == 'true' }}
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+        HELP_PATH: ${{ inputs.help_path }}
+      run: |
+        set -e
+        echo "Fetching $LIVE_URL$HELP_PATH"
+        code=$(curl -s -o /tmp/help-demo.html -w '%{http_code}' "$LIVE_URL$HELP_PATH" || true)
+        if [ "$code" != "200" ]; then
+          echo "Help page missing (HTTP $code) at $LIVE_URL$HELP_PATH"
+          exit 1
+        fi
+        grep -q 'id="helpModal"' /tmp/help-demo.html
+        grep -q 'id="helpButton"' /tmp/help-demo.html
+        echo "Help Demo page looks OK."
+
+    - name: Save responses as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: smoke-responses
+        path: |
+          /tmp/health.json
+          /tmp/version.json
+          /tmp/upload.json
+          /tmp/latency.json
+          /tmp/help-demo.html
+
+    - name: Slack notify (on failure)
+      if: failure() && env.SLACK_WEBHOOK_URL != ''
+      shell: bash
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        GIT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        msg=":rotating_light: $GITHUB_WORKFLOW failed on $GITHUB_REF (#$GITHUB_RUN_NUMBER) — $GIT_URL"
+        if [ -f /tmp/latency.json ]; then
+          lat=$(cat /tmp/latency.json)
+          msg="$msg\n\`\`\`$lat\`\`\`"
+        fi
+        payload=$(jq -n --arg t "$msg" '{text:$t}')
+        curl -s -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"

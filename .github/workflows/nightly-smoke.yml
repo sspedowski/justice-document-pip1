@@ -1,0 +1,34 @@
+name: nightly-smoke
+
+on:
+  schedule:
+    - cron: "0 10 * * *"   # 10:00 UTC (~06:00 America/Detroit)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LIVE_URL: ${{ vars.VERCEL_PROD_URL }}
+    steps:
+      - name: Ensure LIVE_URL is set
+        run: |
+          if [ -z "$LIVE_URL" ]; then
+            echo "Set repository variable VERCEL_PROD_URL to your Vercel domain, e.g., https://your-app.vercel.app";
+            exit 1;
+          fi
+
+      - name: Smoke (health/version/upload + help demo)
+        uses: ./.github/actions/smoke
+        with:
+          live_url: ${{ env.LIVE_URL }}
+          latency_ms: "2500"
+          check_help_demo: "true"
