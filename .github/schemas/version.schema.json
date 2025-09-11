@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/version.schema.json",
+  "title": "VersionResponse",
+  "type": "object",
+  "required": ["ok", "name", "version", "at"],
+  "properties": {
+    "ok": { "const": true },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "gitSha": { "type": ["string", "null"] },
+    "service": { "type": ["string", "null"] },
+    "at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}
