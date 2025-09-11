@@ -1,0 +1,82 @@
+name: "HTTP smoke: health/version/upload"
+description: "Hit /api/health, validate /api/version shape, POST /api/upload with backoff + artifacts + optional Slack alert"
+inputs:
+  live_url:
+    description: "Base URL to hit (e.g., https://app.vercel.app)"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install jq
+      shell: bash
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y jq
+
+    - name: Wait for /api/health (exponential backoff)
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        echo "Using $LIVE_URL"
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$LIVE_URL/api/health" || true)
+            if [ "$code" = "200" ]; then
+              curl -s "$LIVE_URL/api/health" | jq . | tee /tmp/health.json
+              break
+            fi
+          sleep $((i*2))
+        done
+        test -f /tmp/health.json || { echo "Timed out waiting for $LIVE_URL/api/health"; exit 1; }
+
+    - name: Check /api/version and validate shape
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        curl -s -f "$LIVE_URL/api/version" | tee /tmp/version.json
+        jq -e '
+          .ok == true and
+          (.name | type=="string") and
+          (.version | type=="string") and
+          ((.gitSha | type=="string") or (.gitSha == null)) and
+          (.at | type=="string")
+        ' /tmp/version.json > /dev/null
+
+    - name: Upload test (3 tries, backoff)
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+      run: |
+        echo "smoke $(date -Iseconds)" > /tmp/smoke.txt
+        for i in 1 2 3; do
+          if out=$(curl -s -f -X POST -F "doc=@/tmp/smoke.txt" "$LIVE_URL/api/upload"); then
+            echo "$out" | tee /tmp/upload.json
+            test "$(jq -r '.ok' /tmp/upload.json)" = "true"
+            test "$(jq -r '.count' /tmp/upload.json)" = "1"
+            jq -r '.files[0].sha256, .service, .at' /tmp/upload.json || true
+            break
+          fi
+          sleep $((i*3))
+        done
+        test -f /tmp/upload.json || { echo "Upload failed after retries"; exit 1; }
+
+    - name: Save responses as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: smoke-responses
+        path: |
+          /tmp/health.json
+          /tmp/version.json
+          /tmp/upload.json
+
+    - name: Slack notify (on failure)
+      if: failure() && env.SLACK_WEBHOOK_URL != ''
+      shell: bash
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        msg=":rotating_light: $GITHUB_WORKFLOW failed on $GITHUB_REF (run #$GITHUB_RUN_NUMBER) – $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        payload=$(jq -n --arg t "$msg" '{text:$t}')
+        curl -s -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"

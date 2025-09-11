@@ -5,10 +5,17 @@ on:
     - cron: "0 10 * * *"   # 10:00 UTC (~06:00 America/Detroit)
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       LIVE_URL: ${{ vars.VERCEL_PROD_URL }}
     steps:
@@ -18,13 +25,8 @@ jobs:
             echo "Set repository variable VERCEL_PROD_URL to your Vercel domain, e.g., https://your-app.vercel.app";
             exit 1;
           fi
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-      - name: Health
-        run: curl -s -f "$LIVE_URL/api/health" | jq .
-      - name: Version
-        run: curl -s -f "$LIVE_URL/api/version" | jq .
-      - name: Upload
-        run: |
-          echo "nightly $(date -Iseconds)" > /tmp/nightly.txt
-          curl -s -f -X POST -F "doc=@/tmp/nightly.txt" "$LIVE_URL/api/upload" | jq .
+
+      - name: Smoke (health/version/upload)
+        uses: ./.github/actions/smoke
+        with:
+          live_url: ${{ env.LIVE_URL }}
