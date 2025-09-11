@@ -32,7 +32,10 @@ jobs:
           echo "live_url=$URL" >> $GITHUB_OUTPUT
           echo "Using $URL"
 
-      - name: Smoke (health/version/upload)
+      - name: Smoke (health/version/upload + help demo)
         uses: ./.github/actions/smoke
         with:
           live_url: ${{ steps.pick.outputs.live_url }}
+          latency_ms: "2000"
+          check_help_demo: "true"
+          help_path: "/help-demo.html"

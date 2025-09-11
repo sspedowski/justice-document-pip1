@@ -8,6 +8,14 @@ inputs:
     description: "Fail if health/upload exceed this many ms (per endpoint)"
     required: false
     default: "1500"
+  check_help_demo:
+    description: "If 'true', assert Help Demo page exists with modal/button"
+    required: false
+    default: "false"
+  help_path:
+    description: "Path to help demo page"
+    required: false
+    default: "/help-demo.html"
 runs:
   using: "composite"
   steps:
@@ -111,6 +119,24 @@ runs:
         [ "$U_MS" -le "$LAT_MS" ] || { echo "Upload latency $U_MS ms > budget $LAT_MS ms"; fail=1; }
         [ $fail -eq 0 ] || exit 1
 
+    - name: Check Help Demo page (optional)
+      if: ${{ inputs.check_help_demo == 'true' }}
+      shell: bash
+      env:
+        LIVE_URL: ${{ inputs.live_url }}
+        HELP_PATH: ${{ inputs.help_path }}
+      run: |
+        set -e
+        echo "Fetching $LIVE_URL$HELP_PATH"
+        code=$(curl -s -o /tmp/help-demo.html -w '%{http_code}' "$LIVE_URL$HELP_PATH" || true)
+        if [ "$code" != "200" ]; then
+          echo "Help page missing (HTTP $code) at $LIVE_URL$HELP_PATH"
+          exit 1
+        fi
+        grep -q 'id="helpModal"' /tmp/help-demo.html
+        grep -q 'id="helpButton"' /tmp/help-demo.html
+        echo "Help Demo page looks OK."
+
     - name: Save responses as artifact
       if: always()
       uses: actions/upload-artifact@v4
@@ -121,6 +147,7 @@ runs:
           /tmp/version.json
           /tmp/upload.json
           /tmp/latency.json
+          /tmp/help-demo.html
 
     - name: Slack notify (on failure)
       if: failure() && env.SLACK_WEBHOOK_URL != ''
