@@ -10,7 +10,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Empty body' }, { status: 400 });
   }
 
-  const nodeStream = Readable.fromWeb(request.body as unknown as ReadableStream);
+  // Cast to any to satisfy Node's Readable.fromWeb type expectations in TS.
+  // NextRequest.body is a web ReadableStream; Node's types can mismatch in some setups.
+  const nodeStream = (Readable as any).fromWeb(request.body as any);
   const bb = Busboy({ headers: Object.fromEntries(request.headers) });
 
   const files: Array<{
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
       }));
     });
 
-    nodeStream.on('error', (err) => reject(err));
+  nodeStream.on('error', (err: unknown) => reject(err));
     nodeStream.pipe(bb);
   });
 }

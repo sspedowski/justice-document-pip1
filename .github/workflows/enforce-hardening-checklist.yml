@@ -1,4 +1,4 @@
-name: enforce: hardening checklist
+name: "enforce: hardening checklist"
 on:
   pull_request:
     types: [ready_for_review, edited, synchronize, reopened, labeled]

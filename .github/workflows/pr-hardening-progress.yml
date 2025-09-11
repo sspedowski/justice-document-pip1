@@ -1,4 +1,4 @@
-name: pr: hardening progress comment
+name: "pr: hardening progress comment"
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review, labeled]
