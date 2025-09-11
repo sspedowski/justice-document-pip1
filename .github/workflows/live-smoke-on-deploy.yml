@@ -1,0 +1,49 @@
+name: live-smoke (auto on Vercel deploy)
+
+on:
+  deployment_status:
+
+jobs:
+  smoke:
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      (
+        github.event.deployment.ref == 'hotfix/vercel-min' ||
+        startsWith(github.event.deployment.environment, 'Production')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Pick deployment URL
+        run: |
+          URL="${{ github.event.deployment_status.environment_url }}"
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+            URL="${{ github.event.deployment_status.target_url }}"
+          fi
+          echo "LIVE_URL=$URL" >> $GITHUB_ENV
+          echo "Using $URL"
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Wait for /api/health
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$LIVE_URL/api/health")
+            if [ "$code" = "200" ]; then
+              curl -s "$LIVE_URL/api/health" | jq .
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Timeout waiting for /api/health"; exit 1
+      - name: Check /api/version
+        run: |
+          curl -s "$LIVE_URL/api/version" | tee /tmp/version.json
+          test "$(jq -r '.ok' /tmp/version.json)" = "true"
+          jq -r '.gitSha, .service, .at' /tmp/version.json || true
+      - name: Upload smoke
+        run: |
+          echo "hello $(date -Iseconds)" > /tmp/hello.txt
+          curl -s -f -X POST -F "doc=@/tmp/hello.txt" "$LIVE_URL/api/upload" | tee /tmp/upload.json
+          test "$(jq -r '.ok' /tmp/upload.json)" = "true"
+          test "$(jq -r '.count' /tmp/upload.json)" = "1"
+          jq -r '.files[0].sha256, .service, .at' /tmp/upload.json || true
