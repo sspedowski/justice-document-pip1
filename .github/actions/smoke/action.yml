@@ -53,14 +53,15 @@ runs:
       run: |
         curl -s -f "$LIVE_URL/api/version" | tee /tmp/version.json >/dev/null
 
-    - name: Validate /api/version against JSON Schema (ajv, fallback to jq)
+    - name: Validate /api/version against JSON Schema (ajv + formats, fallback to jq)
       shell: bash
       run: |
         set -e
-        if npx -y ajv-cli@5 -s .github/schemas/version.schema.json -d /tmp/version.json --valid; then
-          echo "ajv schema validation passed"
+        if npx -y ajv-cli@5 -s .github/schemas/version.schema.json -d /tmp/version.json \
+             -c ajv-formats --spec=draft2020 --valid; then
+          echo "ajv schema validation (with date-time format) passed"
         else
-          echo "ajv not available or validation failed; trying minimal jq validation…" >&2
+          echo "ajv validation failed (or ajv unavailable); attempting minimal jq structural validation…" >&2
           jq -e '
             .ok == true and
             (.name | type=="string") and
