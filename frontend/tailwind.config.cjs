@@ -75,4 +75,11 @@ module.exports = {
     },
   },
   plugins: [require("@tailwindcss/forms")],
+  // Safelist utilities used in dynamically injected / demo help modal content
+  safelist: [
+    'max-h-[90vh]',
+    'bg-green-50','bg-blue-50','bg-yellow-50',
+    'border-green-200','border-blue-200','border-yellow-200',
+    'text-gray-400'
+  ]
 };

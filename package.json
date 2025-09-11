@@ -29,6 +29,7 @@
         "test:ci": "vitest run --reporter=dot",
         "test:run": "vitest run",
         "typecheck": "tsc --noEmit"
+        ,"build:help:summary": "node scripts/build-help-summary.mjs"
     },
     "prepare": "husky install",
     "lint-staged": {
