@@ -1,0 +1,23 @@
+# Ignore subdirectories with their own package.json files
+# This ensures Vercel uses the root package.json with Next.js
+justice-dashboard/
+justice-server/
+justice-dashboard-v2/
+justice-dashboard-firebase/
+
+# Ignore legacy and development directories
+legacy/
+backend/
+frontend/
+build/
+dist/
+tmp-*
+validation-logs/
+pdfs/
+
+# Ignore development and build artifacts
+node_modules/
+.next/
+.env.local
+.env.*.local
+*.log
