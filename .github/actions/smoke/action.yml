@@ -24,6 +24,10 @@ inputs:
     description: "Path to help demo page"
     required: false
     default: "/help-demo.html"
+  protection_bypass:
+    description: "Vercel Protection bypass token (adds x-vercel-protection-bypass header)"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -41,15 +45,24 @@ runs:
           .github/schemas
         fetch-depth: 1
 
+    - name: Set protection header (optional)
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.protection_bypass }}" ]; then
+          echo "PROTECT=${{ inputs.protection_bypass }}" >> $GITHUB_ENV
+        fi
+
     - name: Wait for /api/health (exponential backoff)
       shell: bash
       env:
         LIVE_URL: ${{ inputs.live_url }}
       run: |
+        AUTH_ARGS=()
+        if [ -n "$PROTECT" ]; then AUTH_ARGS=(-H "x-vercel-protection-bypass: $PROTECT"); fi
         echo "Using $LIVE_URL"
         ok=""
         for i in 1 2 3 4 5 6 7 8 9 10; do
-          code=$(curl -s -o /dev/null -w '%{http_code}' "$LIVE_URL/api/health" || true)
+          code=$(curl -s "${AUTH_ARGS[@]}" -o /dev/null -w '%{http_code}' "$LIVE_URL/api/health" || true)
           if [ "$code" = "200" ]; then
             ok="yes"
             break
@@ -58,7 +71,7 @@ runs:
         done
         [ -n "$ok" ] || { echo "Timed out waiting for $LIVE_URL/api/health"; exit 1; }
         # measure health latency
-        HEALTH_TIME=$(curl -s -o /tmp/health.json -w '%{time_total}' "$LIVE_URL/api/health"; echo)
+        HEALTH_TIME=$(curl -s "${AUTH_ARGS[@]}" -o /tmp/health.json -w '%{time_total}' "$LIVE_URL/api/health"; echo)
         echo "HEALTH_TIME=$HEALTH_TIME" >> $GITHUB_ENV
         cat /tmp/health.json | jq .
 
@@ -67,7 +80,9 @@ runs:
       env:
         LIVE_URL: ${{ inputs.live_url }}
       run: |
-        curl -s -f "$LIVE_URL/api/version" | tee /tmp/version.json >/dev/null
+        AUTH_ARGS=()
+        if [ -n "$PROTECT" ]; then AUTH_ARGS=(-H "x-vercel-protection-bypass: $PROTECT"); fi
+        curl -s -f "${AUTH_ARGS[@]}" "$LIVE_URL/api/version" | tee /tmp/version.json >/dev/null
 
     - name: Help demo (optional)
       if: ${{ inputs.check_help_demo == 'true' }}
@@ -76,9 +91,11 @@ runs:
         LIVE_URL: ${{ inputs.live_url }}
         HELP_PATH: ${{ inputs.help_path }}
       run: |
+        AUTH_ARGS=()
+        if [ -n "$PROTECT" ]; then AUTH_ARGS=(-H "x-vercel-protection-bypass: $PROTECT"); fi
         P=${HELP_PATH:-/help-demo.html}
         echo "Fetching $LIVE_URL$P"
-        curl -sSf "$LIVE_URL$P" -o /tmp/help-demo.html
+        curl -sSf "${AUTH_ARGS[@]}" "$LIVE_URL$P" -o /tmp/help-demo.html
 
     - name: Validate /api/version against JSON Schema (ajv + formats, fallback to jq)
       shell: bash
@@ -105,9 +122,11 @@ runs:
       run: |
         echo "smoke $(date -Iseconds)" > /tmp/smoke.txt
         success=""
+        AUTH_ARGS=()
+        if [ -n "$PROTECT" ]; then AUTH_ARGS=(-H "x-vercel-protection-bypass: $PROTECT"); fi
         for i in 1 2 3; do
           set +e
-          UPLOAD_TIME=$(curl -s -w '%{time_total}' -o /tmp/upload.json -f -X POST -F "doc=@/tmp/smoke.txt" "$LIVE_URL/api/upload"; echo)
+          UPLOAD_TIME=$(curl -s -w '%{time_total}' -o /tmp/upload.json -f -X POST -F "doc=@/tmp/smoke.txt" "${AUTH_ARGS[@]}" "$LIVE_URL/api/upload"; echo)
           rc=$?
           set -e
           if [ $rc -eq 0 ]; then
@@ -146,8 +165,10 @@ runs:
         HELP_PATH: ${{ inputs.help_path }}
       run: |
         set -e
+        AUTH_ARGS=()
+        if [ -n "$PROTECT" ]; then AUTH_ARGS=(-H "x-vercel-protection-bypass: $PROTECT"); fi
         echo "Fetching $LIVE_URL$HELP_PATH"
-        code=$(curl -s -o /tmp/help-demo.html -w '%{http_code}' "$LIVE_URL$HELP_PATH" || true)
+        code=$(curl -s "${AUTH_ARGS[@]}" -o /tmp/help-demo.html -w '%{http_code}' "$LIVE_URL$HELP_PATH" || true)
         if [ "$code" != "200" ]; then
           echo "Help page missing (HTTP $code) at $LIVE_URL$HELP_PATH"
           exit 1

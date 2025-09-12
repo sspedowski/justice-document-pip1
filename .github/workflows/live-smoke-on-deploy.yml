@@ -35,3 +35,4 @@ jobs:
           live_url: ${{ steps.pick.outputs.live_url }}
           latency_ms: "2000"
           check_help_demo: "false"
+          protection_bypass: ${{ secrets.VERCEL_PROTECTION_BYPASS }}

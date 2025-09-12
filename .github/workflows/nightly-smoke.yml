@@ -32,3 +32,4 @@ jobs:
           live_url: ${{ env.LIVE_URL }}
           latency_ms: "2500"
           check_help_demo: "false"
+          protection_bypass: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
