@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { verifyIdToken, verifyAppCheck, db } from '../../../../lib/firebaseAdmin';
-import { redact } from '../../../../lib/redact';
-import { sha256Hex } from '../../../../lib/hash';
+import { verifyIdToken, verifyAppCheck, db } from '../../../../../lib/firebaseAdmin';
+import { redact } from '../../../../../lib/redact';
+import { sha256Hex } from '../../../../../lib/hash';
 
 interface BodyInput {
   text?: string;
