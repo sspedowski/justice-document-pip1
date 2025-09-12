@@ -43,7 +43,6 @@
         "@radix-ui/react-progress": "^1.1.7",
         "@radix-ui/react-scroll-area": "^1.2.10",
         "@radix-ui/react-slot": "^1.2.3",
-        "@vercel/toolbar": "^0.1.32",
         "ai": "^5.0.41",
         "busboy": "^1.6.0",
         "chalk": "^4.1.2",
