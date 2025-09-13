@@ -70,6 +70,15 @@ export default [
         },
       ],
       "import/no-duplicates": "warn",
+      // Prefer @/ alias instead of deep parent relative imports
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            { "group": ["../../*", "../../../*"], "message": "Use @/… alias instead." }
+          ],
+        },
+      ],
     },
   },
   // Allow raw fetch in the fetch wrapper itself
