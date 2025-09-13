@@ -1,14 +1,22 @@
 import '@testing-library/jest-dom';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-// Ensure predictable test env vars
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-for-testing-only';
-process.env.ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adminpass';
+// Ensure predictable test env vars without mutating process.env directly
+beforeAll(() => {
+  if (typeof vi.stubEnv === 'function') {
+    vi.stubEnv('NODE_ENV', 'test');
+    vi.stubEnv('JWT_SECRET', 'test-jwt-secret-for-testing-only');
+    vi.stubEnv('ADMIN_USERNAME', 'admin');
+    vi.stubEnv('ADMIN_PASSWORD', 'adminpass');
+  }
+});
+afterAll(() => {
+  if (typeof vi.unstubAllEnvs === 'function') {
+    vi.unstubAllEnvs();
+  }
+});
 
 // Quiet console noise, but keep errors
-// eslint-disable-next-line no-console
 globalThis.console = {
   ...console,
   log: vi.fn(),
@@ -18,19 +26,24 @@ globalThis.console = {
   error: console.error,
 };
 
-// Test timeouts
-vi.setTimeout(10000);
+// Prefer default timers; individual tests can control timeouts or use fake timers if needed.
 
 // Polyfill TextEncoder/TextDecoder if missing
-try {
-  // util exports are present on Node 18+
-  // @ts-ignore - allow require in TS setup
-  const u = require('util');
-  if (!globalThis.TextEncoder && u.TextEncoder) globalThis.TextEncoder = u.TextEncoder;
-  if (!globalThis.TextDecoder && u.TextDecoder) globalThis.TextDecoder = u.TextDecoder as any;
-} catch {
-  // ignore
-}
+(() => {
+  try {
+    // In Node-based environments, util provides TextEncoder/TextDecoder
+    // Use dynamic import to avoid require in ESM contexts
+    // @ts-ignore - allow dynamic import without top-level await in setup
+    import('node:util').then((u) => {
+      // @ts-ignore
+      if (!globalThis.TextEncoder && u.TextEncoder) globalThis.TextEncoder = u.TextEncoder;
+      // @ts-ignore
+      if (!globalThis.TextDecoder && u.TextDecoder) globalThis.TextDecoder = u.TextDecoder;
+    }).catch(() => {/* ignore */});
+  } catch {
+    // ignore
+  }
+})();
 
 // Clear mocks between tests
 afterEach(() => {
