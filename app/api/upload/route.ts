@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
 
   // Cast to any to satisfy Node's Readable.fromWeb type expectations in TS.
   // NextRequest.body is a web ReadableStream; Node's types can mismatch in some setups.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodeStream = (Readable as any).fromWeb(request.body as any);
   const bb = Busboy({ headers: Object.fromEntries(request.headers) });
 

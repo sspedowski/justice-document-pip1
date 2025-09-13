@@ -26,7 +26,7 @@ export function redact(input: string): RedactionResult {
   let working = input;
 
   working = working.replace(emailRe, () => { emails++; return '[REDACTED_EMAIL]'; });
-  working = working.replace(phoneRe, (m) => {
+  working = working.replace(phoneRe, () => {
     // Avoid double-counting numeric sequences that might be SSNs; leave order: phone before ssn is fine
     phones++; return '[REDACTED_PHONE]';
   });

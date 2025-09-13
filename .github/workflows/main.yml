@@ -43,6 +43,9 @@ jobs:
       - name: Validate Environment
         run: npm run validate || true
 
+      - name: Build Next.js app
+        run: npm run build
+
       - name: Start Backend
         run: |
           nohup npm start &
