@@ -1,24 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Skip ESLint during `next build` to avoid parser config conflicts
+  // while migrating to flat config. Re-enable once ESLint config is unified.
   eslint: {
-    // Allow production builds to succeed even if ESLint errors are present.
     ignoreDuringBuilds: true,
   },
-};
-
-module.exports = nextConfig;
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Configure ESLint to run during builds
-  eslint: {
-    // Allow builds to continue even with ESLint errors during development
-    // Set to false once all issues are resolved
-    ignoreDuringBuilds: false,
-  },
-  experimental: {
-    // Enable SWC for better performance
-    swcMinify: true,
-  },
+  // Use SWC minification
+  swcMinify: true,
 };
 
 export default nextConfig;
