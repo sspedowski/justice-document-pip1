@@ -13,6 +13,14 @@ function Write-Info($msg) { Write-Host $msg -ForegroundColor Cyan }
 function Write-Warn($msg) { Write-Host $msg -ForegroundColor Yellow }
 function Write-Err($msg)  { Write-Host $msg -ForegroundColor Red }
 
+function Get-RelativePath([string]$BasePath, [string]$FullPath) {
+  if ([string]::IsNullOrWhiteSpace($BasePath) -or [string]::IsNullOrWhiteSpace($FullPath)) { return $FullPath }
+  if ($FullPath.StartsWith($BasePath, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return $FullPath.Substring($BasePath.Length).TrimStart([char]92, [char]47)
+  }
+  return $FullPath
+}
+
 # Validate inputs
 if (-not (Test-Path $ZipPath)) {
   Write-Err "ZIP not found: $ZipPath"
@@ -59,7 +67,7 @@ Get-ChildItem -Recurse -File -Path $workDir | ForEach-Object {
     Write-Warn "Hash failed: $src - $($_.Exception.Message)"; return
   }
   $size = $_.Length
-  $rel  = $src.Substring($repoRoot.Length).TrimStart('\\','/')
+  $rel  = Get-RelativePath -BasePath $repoRoot -FullPath $src
   $duplicateOf = $null
   $isDuplicate = $false
   if ($existing.ContainsKey($hash)) {
