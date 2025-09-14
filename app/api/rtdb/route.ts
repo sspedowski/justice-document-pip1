@@ -1,0 +1,50 @@
+// app/api/rtdb/route.ts
+import { NextRequest, NextResponse } from "next/server"
+import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "@/lib/firebaseAdmin"
+
+export const runtime = "nodejs"
+
+type PostBody = {
+  path: string
+  data?: unknown
+  method?: "set" | "push"
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // Optional auth:
+    // const auth = req.headers.get("authorization")
+    // if (!auth?.startsWith("Bearer ")) return NextResponse.json({ ok:false, error:"Missing bearer token" }, { status: 401 })
+    // await verifyIdToken(auth.slice("Bearer ".length))
+
+    const { path, data, method = "set" } = (await req.json()) as PostBody
+    if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })
+
+    const db = getRtdb()
+    const ref = db.ref(path)
+
+    if (method === "push") {
+      const newRef = ref.push()
+      await newRef.set(data ?? { ok: true, ts: Date.now() })
+      return NextResponse.json({ ok: true, mode: "push", key: newRef.key })
+    }
+
+    await ref.set(data ?? { ok: true, ts: Date.now() })
+    return NextResponse.json({ ok: true, mode: "set" })
+  } catch (err: any) {
+    return NextResponse.json({ ok:false, error: err?.message ?? "Unknown error" }, { status: 500 })
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url)
+    const path = url.searchParams.get("path")
+    if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })
+
+    const snap = await getRtdb().ref(path).get()
+    return NextResponse.json({ ok:true, exists: snap.exists(), value: snap.val() })
+  } catch (err: any) {
+    return NextResponse.json({ ok:false, error: err?.message ?? "Unknown error" }, { status: 500 })
+  }
+}

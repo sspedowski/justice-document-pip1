@@ -1,43 +1,70 @@
-import admin from 'firebase-admin';
+// lib/firebaseAdmin.ts — lazy, single-instance Admin app (Node runtime only)
 
-let _app: admin.app.App | null = null;
+type AdminNS = typeof import("firebase-admin")
 
-function init() {
-  if (_app) return _app;
-  if (!admin.apps.length) {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      try {
-        const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        _app = admin.initializeApp({
-          credential: admin.credential.cert(creds as admin.ServiceAccount),
-        });
-      } catch (e) {
-        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT', e);
-        throw e;
-      }
-    } else {
-      _app = admin.initializeApp();
-    }
-  } else {
-    _app = admin.app();
-  }
-  return _app;
+const globalForAdmin = globalThis as unknown as {
+  __adminApp?: import("firebase-admin").app.App
 }
 
-export const adminApp = init();
-export const db = admin.firestore();
+function getAdmin(): AdminNS {
+  // require at call-time (avoids Edge/SSR import-time issues)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("firebase-admin") as AdminNS
+}
+
+function initAdminApp() {
+  if (globalForAdmin.__adminApp) return globalForAdmin.__adminApp
+  const admin = getAdmin()
+
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ||
+    (process.env.FIREBASE_SERVICE_ACCOUNT
+      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT).project_id
+      : undefined)
+
+  const databaseURL =
+    process.env.FIREBASE_DATABASE_URL ||
+    (projectId ? `https://${projectId}.firebaseio.com` : undefined)
+
+  if (!admin.apps.length) {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+      globalForAdmin.__adminApp = admin.initializeApp({
+        credential: admin.credential.cert(creds),
+        projectId: projectId || creds.project_id,
+        databaseURL,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+      })
+    } else {
+      // local dev fallback (GOOGLE_APPLICATION_CREDENTIALS / metadata)
+      globalForAdmin.__adminApp = admin.initializeApp({ projectId, databaseURL })
+    }
+  } else {
+    globalForAdmin.__adminApp = admin.app()
+  }
+  return globalForAdmin.__adminApp
+}
+
+export function getDb() {
+  return initAdminApp().firestore()
+}
+
+export function getRtdb() {
+  return initAdminApp().database()
+}
 
 export function verifyIdToken(idToken: string) {
-  return admin.auth().verifyIdToken(idToken);
+  const admin = getAdmin()
+  return admin.auth().verifyIdToken(idToken)
 }
 
 export async function verifyAppCheck(token?: string): Promise<boolean> {
-  if (!token) return false;
+  if (!token) return false
+  const admin = getAdmin()
   try {
-    // App Check API is optional unless in production
-    await admin.appCheck().verifyToken(token);
-    return true;
+    await admin.appCheck().verifyToken(token)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
