@@ -1,0 +1,7 @@
+# Ignore everything in evidence by default
+*
+!.gitignore
+!README.md
+!_INBOX/
+!KEEP/
+!ARCHIVE/
