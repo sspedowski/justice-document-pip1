@@ -1,0 +1,21 @@
+# Justice Server Dockerfile (build context: ./justice-server)
+FROM node:20-alpine AS base
+
+# Ensure timezone and bash (optional)
+RUN apk add --no-cache tzdata
+
+WORKDIR /app
+
+# Install prod deps first for better layer cache
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy source
+COPY . .
+
+ENV NODE_ENV=production \
+    PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
