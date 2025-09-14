@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     const resp = await model.generateContent([{ text: redacted }]);
     const outputText = resp.response.text();
   // Some versions expose different fields; serialize available numeric values.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const usage: any = resp.response.usageMetadata || {};
   const tokensUsed = usage.totalTokens || usage.promptTokens || usage.candidatesTokens || null;
 

@@ -19,7 +19,7 @@ export async function summarize({ text, docId }: SummarizeInput): Promise<Summar
       // Try App Check
       try {
         const { getToken } = await import('firebase/app-check');
-        // @ts-ignore
+        // @ts-expect-error - getToken may not have proper types in all versions
         const appCheckTokenResult = await getToken();
         if (appCheckTokenResult?.token) {
           headers['x-firebase-appcheck'] = appCheckTokenResult.token;

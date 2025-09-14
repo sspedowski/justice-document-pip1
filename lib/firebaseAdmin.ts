@@ -35,7 +35,6 @@ export async function verifyAppCheck(token?: string): Promise<boolean> {
   if (!token) return false;
   try {
     // App Check API is optional unless in production
-    // @ts-ignore - appCheck may be undefined in older firebase-admin versions
     await admin.appCheck().verifyToken(token);
     return true;
   } catch {
