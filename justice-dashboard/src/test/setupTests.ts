@@ -1,14 +1,16 @@
+/* eslint-env node */
 import '@testing-library/jest-dom';
+import { env as processEnv } from 'node:process';
+import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from 'node:util';
 import { afterEach, vi } from 'vitest';
 
 // Ensure predictable test env vars
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-for-testing-only';
-process.env.ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adminpass';
+processEnv.NODE_ENV = processEnv.NODE_ENV || 'test';
+processEnv.JWT_SECRET = processEnv.JWT_SECRET || 'test-jwt-secret-for-testing-only';
+processEnv.ADMIN_USERNAME = processEnv.ADMIN_USERNAME || 'admin';
+processEnv.ADMIN_PASSWORD = processEnv.ADMIN_PASSWORD || 'adminpass';
 
 // Quiet console noise, but keep errors
-// eslint-disable-next-line no-console
 globalThis.console = {
   ...console,
   log: vi.fn(),
@@ -18,18 +20,16 @@ globalThis.console = {
   error: console.error,
 };
 
-// Test timeouts
-vi.setTimeout(10000);
+// Test timeouts are controlled via vitest.config.ts (testTimeout)
 
-// Polyfill TextEncoder/TextDecoder if missing
-try {
-  // util exports are present on Node 18+
-  // @ts-ignore - allow require in TS setup
-  const u = require('util');
-  if (!globalThis.TextEncoder && u.TextEncoder) globalThis.TextEncoder = u.TextEncoder;
-  if (!globalThis.TextDecoder && u.TextDecoder) globalThis.TextDecoder = u.TextDecoder as any;
-} catch {
-  // ignore
+// Polyfill TextEncoder/TextDecoder if missing (Node 18+ provides these in node:util)
+if (!globalThis.TextEncoder && typeof NodeTextEncoder !== 'undefined') {
+  // @ts-ignore - assign Node's TextEncoder to global
+  globalThis.TextEncoder = NodeTextEncoder;
+}
+if (!globalThis.TextDecoder && typeof NodeTextDecoder !== 'undefined') {
+  // @ts-ignore - assign Node's TextDecoder to global
+  globalThis.TextDecoder = NodeTextDecoder;
 }
 
 // Clear mocks between tests
