@@ -279,8 +279,18 @@ app.use((err, _req, res, _next) => {
 
 // If run directly, start listening; when imported (tests), export app only
 if (require.main === module) {
-  // Use the project logger (CJS) to provide consistent, timestamped output
-  const { logger } = require(path.join(__dirname, '..', 'backend', 'utils', 'logger.cjs'));
+  // Try to use project logger if available; fall back to console in minimal/container builds
+  let logger;
+  try {
+    ({ logger } = require(path.join(__dirname, '..', 'backend', 'utils', 'logger.cjs')));
+  } catch (e) {
+    const c = console;
+    logger = {
+      info: (...args) => c.log('[info]', ...args),
+      warn: (...args) => c.warn('[warn]', ...args),
+      error: (...args) => c.error('[error]', ...args),
+    };
+  }
   app.listen(PORT, () => {
     logger.info(`Justice server listening on port ${PORT}`);
   });
