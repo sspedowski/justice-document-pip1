@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     // Firestore log (avoid raw text in production)
     try {
       const hashedDocId = sha256Hex(docId || text.slice(0, 256));
-      await db.collection('ai_logs').add({
+      await db().collection('ai_logs').add({
         uid: uid || null,
         ts: Date.now(),
         model: modelName,

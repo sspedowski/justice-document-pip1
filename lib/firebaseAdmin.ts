@@ -49,6 +49,11 @@ export function getDb() {
   return initAdminApp().firestore()
 }
 
+// Alternative export name for compatibility
+export function db() {
+  return getDb()
+}
+
 export function getRtdb() {
   return initAdminApp().database()
 }
