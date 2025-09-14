@@ -106,6 +106,8 @@ class FileRow:
     extreme_flags: str
     suggested_inclusion: str  # YES/NO/TBD
     notes: str
+    ocr_needed: str  # YES/NO/blank
+    text_preview: str  # first ~500 chars if available
 
 
 def sha256_file(p: Path) -> str:
@@ -147,6 +149,56 @@ def docx_len(p: Path) -> str:
         d = docx.Document(str(p))
         # Approximate: paragraphs count
         return str(max(1, len(d.paragraphs)))
+    except Exception:
+        return ""
+
+
+def extract_pdf_preview(p: Path, max_chars: int = 500) -> str:
+    if not PyPDF2:
+        return ""
+    try:
+        with p.open("rb") as f:
+            reader = PyPDF2.PdfReader(f)
+            if not reader.pages:
+                return ""
+            try:
+                txt = reader.pages[0].extract_text() or ""
+            except Exception:
+                txt = ""
+            txt = re.sub(r"\s+", " ", txt).strip()
+            return txt[:max_chars]
+    except Exception:
+        return ""
+
+
+def extract_docx_preview(p: Path, max_chars: int = 500) -> str:
+    if not docx or p.suffix.lower() != ".docx":
+        return ""
+    try:
+        d = docx.Document(str(p))
+        parts: List[str] = []
+        for para in d.paragraphs:
+            if para.text:
+                parts.append(para.text)
+            if sum(len(s) for s in parts) >= max_chars:
+                break
+        txt = " ".join(parts)
+        txt = re.sub(r"\s+", " ", txt).strip()
+        return txt[:max_chars]
+    except Exception:
+        return ""
+
+
+def extract_text_head(p: Path, max_chars: int = 500) -> str:
+    """Best-effort text read for .txt/.rtf and others as plain text."""
+    try:
+        # Try utf-8 then latin-1 fallback
+        try:
+            data = p.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            data = p.read_text(encoding="latin-1", errors="ignore")
+        data = re.sub(r"\s+", " ", data).strip()
+        return data[:max_chars]
     except Exception:
         return ""
 
@@ -207,6 +259,31 @@ def analyze(root: Path) -> Tuple[List[FileRow], Dict[str, List[FileRow]]]:
                 pages_len = count_pdf_pages(p)
             elif ftype == "doc":
                 pages_len = docx_len(p)
+
+            # Text preview + OCR-needed heuristic
+            preview = ""
+            ocr_needed = ""
+            if ftype == "pdf":
+                preview = extract_pdf_preview(p)
+                try:
+                    pg = int(pages_len) if pages_len else 0
+                except Exception:
+                    pg = 0
+                if pg > 0 and len(preview) < 5:
+                    ocr_needed = "YES"
+                elif len(preview) >= 5:
+                    ocr_needed = "NO"
+            elif ftype == "doc":
+                if p.suffix.lower() == ".docx":
+                    preview = extract_docx_preview(p)
+                else:
+                    preview = ""  # legacy .doc unsupported for preview without extra libs
+                if preview:
+                    ocr_needed = "NO"
+            elif ftype == "text":
+                preview = extract_text_head(p)
+                if preview:
+                    ocr_needed = "NO"
             category = guess_category(name)
             kids = ", ".join(tag_children(name))
             flags = ", ".join(extreme_flags(name))
@@ -231,6 +308,8 @@ def analyze(root: Path) -> Tuple[List[FileRow], Dict[str, List[FileRow]]]:
                 extreme_flags=flags,
                 suggested_inclusion=inclusion,
                 notes="",
+                ocr_needed=ocr_needed,
+                text_preview=preview,
             )
             rows.append(row)
             dup_map.setdefault(digest, []).append(row)
