@@ -80,3 +80,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# parked legacy
+legacy/_parking/**/node_modules/
+legacy/_parking/**/.next/
+legacy/_parking/**/dist/
+legacy/_parking/**/build/
