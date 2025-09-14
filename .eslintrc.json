@@ -1,6 +1,6 @@
 {
   "root": true,
-  "extends": ["next/core-web-vitals"],
+  "extends": ["next/core-web-vitals", "next/typescript"],
   "ignorePatterns": [
     "node_modules/",
     ".next/",
@@ -16,7 +16,11 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
-      "parserOptions": { "project": false }
+      "parserOptions": { 
+        "project": false,
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+      }
     },
     {
       "files": [
@@ -30,5 +34,8 @@
       "env": { "node": true }
     }
   ],
-  "rules": {}
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-require-imports": "warn"
+  }
 }
