@@ -1,6 +1,8 @@
 /* eslint-env browser */
 import { useEffect } from 'react';
 
+import { authFetch } from './lib/auth-fetch.js';
+
 // Lightweight staff toolbar loader for the Vite app.
 // Loads Vercel Toolbar script only when enabled and the user is staff.
 // Env detection:
@@ -10,8 +12,8 @@ import { useEffect } from 'react';
 export default function StaffToolbar() {
   useEffect(() => {
     try {
-      // Skip in Jest/node test runs
-      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') return;
+  // Skip in test runs
+  if (import.meta && import.meta.env && import.meta.env.MODE === 'test') return;
 
       // Avoid direct `typeof import` checks in JSX; use globalThis to probe import.meta in Vite
       const im = (typeof globalThis !== 'undefined' && globalThis.import && globalThis.import.meta) ? globalThis.import.meta : (globalThis.importMeta || undefined);
@@ -34,7 +36,7 @@ export default function StaffToolbar() {
       (async () => {
         let staff = false;
         try {
-          const r = await fetch('/api/me', { credentials: 'include' });
+          const r = await authFetch('/api/me', { credentials: 'include' });
           if (r.ok) {
             const data = await r.json().catch(() => ({}));
             staff = !!data?.staff;
