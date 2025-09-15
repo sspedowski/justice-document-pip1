@@ -4,6 +4,7 @@
   "ignorePatterns": [
     "node_modules/",
     ".next/",
+    "**/.next/**",
     "legacy/",
     "frontend/",
     "web/",
@@ -11,7 +12,10 @@
     "justice-dashboard/",
     "justice-server/",
     "dist/",
-    "build/"
+    "**/dist/**",
+    "build/",
+    "**/coverage/**",
+    "**/node_modules/**"
   ],
   "settings": {
     "react": { "version": "detect" }
