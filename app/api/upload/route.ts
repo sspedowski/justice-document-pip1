@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { Readable } from 'node:stream';
 
 export const runtime = 'nodejs';
+export const preferredRegion = ['iad1'];
 
 export async function POST(request: NextRequest) {
   if (!request.body) {

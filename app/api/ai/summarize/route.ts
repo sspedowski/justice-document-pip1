@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { verifyIdToken, verifyAppCheck, db } from '../../../../lib/firebaseAdmin';
+import { verifyIdToken, verifyAppCheck } from '../../../../lib/firebaseAdmin';
+import { getDb } from '../../../../lib/firebaseAdmin';
 import { redact } from '../../../../lib/redact';
 import { sha256Hex } from '../../../../lib/hash';
 
@@ -11,6 +12,7 @@ interface BodyInput {
 }
 
 export const runtime = 'nodejs';
+export const preferredRegion = ['iad1'];
 
 const isProd = () => process.env.NODE_ENV === 'production';
 
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Firestore log (avoid raw text in production)
     try {
       const hashedDocId = sha256Hex(docId || text.slice(0, 256));
-      await db.collection('ai_logs').add({
+      await getDb().collection('ai_logs').add({
         uid: uid || null,
         ts: Date.now(),
         model: modelName,

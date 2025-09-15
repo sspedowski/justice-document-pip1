@@ -1,8 +1,9 @@
 // app/api/rtdb/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "@/lib/firebaseAdmin"
+import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "../../../lib/firebaseAdmin"
 
 export const runtime = "nodejs"
+export const preferredRegion = ["iad1"]
 
 type PostBody = {
   path: string
