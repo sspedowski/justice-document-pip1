@@ -9,6 +9,7 @@
     "build:css": "if not exist \"frontend\\dist\" mkdir \"frontend\\dist\" && postcss frontend/styles.css -o frontend/dist/output.css",
     "watch:css": "if not exist \"frontend\\dist\" mkdir \"frontend\\dist\" && postcss frontend/styles.css -o frontend/dist/output.css --watch",
     "build": "npm run build:css && vite build",
+    "preview": "vite preview --port 5175",
     "build:prod": "set NODE_ENV=production && npm run build",
     "start": "node ../justice-server/server.js",
     "start:prod": "NODE_ENV=production node ../justice-server/server.js",
@@ -17,10 +18,12 @@
     "check": "node check-files.js",
     "deploy:check": "cross-env NODE_ENV=production node deployment-check.js",
     "deploy:check:win": "set NODE_ENV=production && node deployment-check.js",
-    "security:check": "npm audit && npm run lint",
-    "lint": "eslint .",
+  "security:check": "npm audit && npm run lint",
+  "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --fix",
     "lint:report": "eslint . -f stylish -o tmp-eslint-output.txt",
+  "typecheck": "tsc --noEmit",
+  "build:ci": "npm run lint && npm run typecheck && npm run build && node -e \"if (process.env.NODE_ENV==='production' && typeof globalThis.React!=='undefined'){process.exit(1)}\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
@@ -78,7 +81,8 @@
     "vitest": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
     "jsdom": "^25.0.0",
-    "ts-morph": "^23.0.0"
+    "ts-morph": "^23.0.0",
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "react": "^18.2.0",
