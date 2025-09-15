@@ -1,10 +1,13 @@
-import * as React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import App from './App';
 import './index.css';
-// development-friendly object pretty-printer (no-op in production)
-import '../../frontend/debug-tracer.js';
+// Dev-only shim: expose React and ReactDOM for overlays/UMD tools expecting globals
+if (typeof window !== 'undefined' && import.meta && import.meta.env && import.meta.env.MODE !== 'production') {
+  if (!('React' in window)) window.React = React;
+  if (!('ReactDOM' in window)) window.ReactDOM = ReactDOM;
+}
 
 // Provide a React global for any dev overlays or third-party scripts that expect it.
 if (typeof window !== 'undefined' && !('React' in window)) {
