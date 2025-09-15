@@ -81,6 +81,18 @@ export default [
       ],
     },
   },
+  // Node scripts
+  {
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      sourceType: "module",
+      globals: { ...globals.node },
+    },
+    rules: {
+      "no-undef": "off",
+      "no-console": "off",
+    },
+  },
   // Allow raw fetch in the fetch wrapper itself
   {
     files: ["src/lib/auth-fetch.js"],
