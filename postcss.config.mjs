@@ -1,7 +1,8 @@
 // Vitest / pure Node contexts don't need PostCSS; guard to avoid plugin load errors.
-const disabled = process.env.VITEST;
-const config = disabled
-  ? { plugins: [] }
-  : { plugins: ["@tailwindcss/postcss"] };
+import tailwindcss from "@tailwindcss/postcss";
 
-export default config;
+const disabled = !!process.env.VITEST;
+
+export default disabled
+  ? { plugins: [] }
+  : { plugins: [tailwindcss()] };
