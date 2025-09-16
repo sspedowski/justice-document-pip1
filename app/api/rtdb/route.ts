@@ -32,8 +32,9 @@ export async function POST(req: NextRequest) {
 
     await ref.set(data ?? { ok: true, ts: Date.now() })
     return NextResponse.json({ ok: true, mode: "set" })
-  } catch (err: any) {
-    return NextResponse.json({ ok:false, error: err?.message ?? "Unknown error" }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error"
+    return NextResponse.json({ ok:false, error: message }, { status: 500 })
   }
 }
 
@@ -45,7 +46,8 @@ export async function GET(req: NextRequest) {
 
     const snap = await getRtdb().ref(path).get()
     return NextResponse.json({ ok:true, exists: snap.exists(), value: snap.val() })
-  } catch (err: any) {
-    return NextResponse.json({ ok:false, error: err?.message ?? "Unknown error" }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error"
+    return NextResponse.json({ ok:false, error: message }, { status: 500 })
   }
 }
