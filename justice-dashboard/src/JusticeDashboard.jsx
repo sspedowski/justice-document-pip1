@@ -28,35 +28,7 @@ export default function JusticeDashboard() {
   const [progressPct, setProgressPct] = useState(0);
   const [currentFile, setCurrentFile] = useState(null);
   const [results, setResults] = useState([]);
-  const API_BASE = (function () {
-    try {
-      // Prefer Vite env, then global override, then localhost fallback
-      // Avoid using `typeof import` in JSX files since some parsers choke on it.
-      let fromEnv = null;
-      try {
-        // importMeta may not be available in some bundlers; check defensively
-        // Vite exposes `import.meta.env`. Some runtimes don't define `importMeta` or `import.meta`.
-        // Use a defensive access via globalThis to avoid a reference error in non-Vite environments.
-        try {
-          const im = (globalThis.import && globalThis.import.meta) ? globalThis.import.meta : (globalThis.importMeta || undefined);
-          if (im && im.env && im.env.VITE_API_URL) {
-            fromEnv = im.env.VITE_API_URL;
-          }
-        } catch {
-          // ignore
-        }
-      } catch {
-        // importMeta may not be available in some bundlers; fall back silently
-      }
-      if (fromEnv) return fromEnv;
-      if (globalThis.API_BASE_URL) return globalThis.API_BASE_URL;
-      const host = globalThis.location?.hostname;
-      const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
-      return isLocal ? 'http://localhost:3000' : '';
-    } catch {
-      return '';
-    }
-  })();
+  const API_BASE = (import.meta?.env?.VITE_API_BASE || '/api');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.JusticeDashboard) {
@@ -124,7 +96,7 @@ export default function JusticeDashboard() {
       // Prepare upload
   const form = new (globalThis.FormData)();
       form.append('file', next);
-      const uploadPromise = authFetch(`${API_BASE}/api/summarize`, {
+      const uploadPromise = authFetch(`${API_BASE}/summarize`, {
         method: 'POST',
         body: form,
       });
@@ -142,7 +114,9 @@ export default function JusticeDashboard() {
         if (finalRes && typeof finalRes.ok === 'boolean') {
           const data = await finalRes.json().catch(() => ({}));
           const fileURL = typeof data.fileURL === 'string'
-            ? (data.fileURL.startsWith('http') ? data.fileURL : `${API_BASE}${data.fileURL}`)
+            ? (data.fileURL.startsWith('http')
+                ? data.fileURL
+                : (data.fileURL.startsWith('/uploads') ? data.fileURL : `${API_BASE}${data.fileURL}`))
             : '';
           setResults((r) => [
             { name: next.name, ok: finalRes.ok, summary: data.summary || '', fileURL, error: data.error || '' },

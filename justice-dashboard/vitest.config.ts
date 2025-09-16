@@ -1,7 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
+  plugins: [
+    react({ jsxRuntime: 'automatic' }),
+  ],
   test: {
     environment: 'jsdom',
     globals: true,
@@ -9,6 +13,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
     },
+  },
+  esbuild: {
+    jsx: 'automatic',
+    jsxDev: true,
   },
   resolve: {
     alias: {

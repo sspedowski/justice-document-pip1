@@ -4,6 +4,8 @@
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
   "ignorePatterns": [
     "node_modules/",
     ".next/",
@@ -26,7 +28,6 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
-      "parser": "@typescript-eslint/parser",
       "parserOptions": { "project": false }
     },
     {
@@ -41,7 +42,6 @@
       "env": { "node": true }
     }
   ],
-  "plugins": ["@typescript-eslint"],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off"
