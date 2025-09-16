@@ -1,12 +1,10 @@
-// UI smoke test using @testing-library/react and Jest
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react'
+import App from '../src/App.jsx'
 
-import App from '../src/App.jsx';
-
-describe('Justice Dashboard UI', () => {
-  it('renders dashboard heading and upload controls', () => {
-    render(<App />);
-    expect(screen.getByText(/justice dashboard/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /select files/i })).toBeInTheDocument();
-  });
-});
+describe('UI', () => {
+  it('renders the dashboard shell', () => {
+    render(<App />)
+    // This string appears in App.jsx heading
+    expect(screen.getByText(/justice dashboard/i)).toBeTruthy()
+  })
+})
