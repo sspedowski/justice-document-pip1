@@ -17,8 +17,8 @@
 
   // Tailwind IntelliSense (enable Emmet mapping)
   "tailwindCSS.emmetCompletions": true,
-  // If you add a Tailwind config for the Vite app, point this to it:
-  // "tailwindCSS.experimental.configFile": "justice-dashboard/tailwind.config.js",
+  // Tailwind config for the Vite app
+  "tailwindCSS.experimental.configFile": "justice-dashboard/tailwind.config.js",
 
   // YAML schemas (GitHub Actions)
   "yaml.schemas": {

@@ -18,6 +18,7 @@
     },
     {
       "files": ["justice-dashboard/src/**/*.{js,jsx,ts,tsx}"],
+      "env": { "browser": true, "es2022": true },
       "rules": {
         "no-restricted-properties": [
           "error",

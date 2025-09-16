@@ -9,7 +9,7 @@
     "dev:server": "nodemon ../justice-server/server.js",
     "build:css": "if not exist \"frontend\\dist\" mkdir \"frontend\\dist\" && postcss frontend/styles.css -o frontend/dist/output.css",
     "watch:css": "if not exist \"frontend\\dist\" mkdir \"frontend\\dist\" && postcss frontend/styles.css -o frontend/dist/output.css --watch",
-    "build": "npm run build:css && vite build",
+    "build": "vite build",
     "preview": "vite preview --port 5175",
     "build:prod": "set NODE_ENV=production && npm run build",
     "start": "node ../justice-server/server.js",
