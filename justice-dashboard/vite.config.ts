@@ -11,6 +11,9 @@ export default defineConfig({
       babel: { plugins: [] },
     }),
   ],
+  // Ensure static assets load correctly when embedded under /dashboard
+  base: './',
+  publicDir: 'public',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
