@@ -1,0 +1,23 @@
+### Health
+GET http://localhost:3020/api/health
+
+### Upload (adjust file path)
+POST http://localhost:3020/api/upload
+Content-Type: multipart/form-data; boundary=BOUND
+
+--BOUND
+Content-Disposition: form-data; name="file"; filename="example.pdf"
+Content-Type: application/pdf
+
+< ./justice-dashboard/example.pdf
+--BOUND--
+
+### RTDB set
+POST http://localhost:3020/api/rtdb
+Content-Type: application/json
+
+{
+  "path": "/tests/smoke",
+  "data": { "ok": true, "ts": {{ $timestamp }} },
+  "method": "set"
+}

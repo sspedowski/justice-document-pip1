@@ -1,45 +1,33 @@
 {
   "root": true,
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "ignorePatterns": [
-    "node_modules/",
-    ".next/",
     "**/.next/**",
-    "legacy/",
-    "frontend/",
-    "web/",
-    "backend/",
-    "justice-dashboard/",
-    "justice-server/",
-    "dist/",
+    "**/node_modules/**",
     "**/dist/**",
-    "build/",
     "**/coverage/**",
-    "**/node_modules/**"
+    "justice-dashboard/dist/**",
+    "justice-dashboard/coverage/**"
   ],
-  "settings": {
-    "react": { "version": "detect" }
-  },
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": ["**/*.ts", "**/*.tsx"],
       "parserOptions": { "project": false }
     },
     {
-      "files": [
-        "next.config.*",
-        "postcss.config.*",
-        "tailwind.config.*",
-        "scripts/**/*",
-        "justice-server/**/*.js",
-        "backend/**/*.js"
-      ],
-      "env": { "node": true }
+      "files": ["justice-dashboard/src/**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "process",
+            "property": "env",
+            "message": "Use import.meta.env.* in Vite client code."
+          }
+        ]
+      }
     }
   ],
   "rules": {

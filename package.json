@@ -15,13 +15,8 @@
   },
   "prepare": "husky install",
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --no-ignore --fix",
-      "git add"
-    ]
-      "eslint --fix"
-    ],
-    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "npm --prefix justice-dashboard run test -- --changed"
+    "*.{js,jsx,ts,tsx}": "eslint --fix",
+    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "npm --prefix justice-dashboard run test:run"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -72,4 +67,3 @@
     "node": ">=18"
   }
 }
-

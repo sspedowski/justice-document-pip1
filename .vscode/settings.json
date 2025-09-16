@@ -1,31 +1,38 @@
-
+// VS Code workspace settings (JSON with comments allowed)
 {
+  // ESLint
   "eslint.useFlatConfig": true,
-  "eslint.workingDirectories": [{ "mode": "auto" }]
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  // Disable Jest noise (we use Vitest here)
+  "jest.enable": false,
+  "jest.autoRun": "off",
+
+  // Error Lens – helpful but not noisy
+  "errorLens.enabled": true,
+  "errorLens.delay": 120,
+  "errorLens.messageBackgroundMode": "line",
+  "errorLens.enabledDiagnosticLevels": ["error"],
+  "errorLens.margin": "90",
+
+  // Tailwind IntelliSense (enable Emmet mapping)
+  "tailwindCSS.emmetCompletions": true,
+  // If you add a Tailwind config for the Vite app, point this to it:
+  // "tailwindCSS.experimental.configFile": "justice-dashboard/tailwind.config.js",
+
+  // YAML schemas (GitHub Actions)
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
+  },
+
+  // GitLens – line blame and codelens
+  "gitlens.codeLens.enabled": true,
+  "gitlens.currentLine.enabled": true,
+
+  // Spell checker words
+  "cSpell.words": [
+    "Aversys","Allegan","Barry","Baskin","BRAINS","CTAC","Firestore",
+    "Gladding","Huizenga","Muldrow","Nextjs","Pylance","Vercel",
+    "Jace","Josh","Peyton","Eleanora","Spedowski"
+  ]
 }
-  "github.copilot.enable": {
-    {
-      "eslint.useFlatConfig": true,
-      "eslint.workingDirectories": [{ "mode": "auto" }],
-      "github.copilot.enable": {
-        "*": true,
-        "plaintext": true,
-        "markdown": true,
-        "javascript": true
-      },
-      "aws.amazonq.enableCodeScanning": false,
-      "aws.amazonq.enableCodeSuggestions": false,
-      "javascript.validate.enable": false,
-      "typescript.validate.enable": false,
-      "editor.inlineSuggest.enabled": true,
-      "chat.promptFiles": true,
-      "chat.promptFilesLocations": { ".github/prompts": true },
-      "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-      "chatgpt.config": {
-        "api_base": "https://api.openai.com/v1",
-        "api_key": "${env:OPENAI_API_KEY}",
-        "timeout_ms": 60000
-      },
-      "chatgpt.model": "gpt-5",
-      "chatgpt.openOnStartup": true
-    }
