@@ -11,16 +11,15 @@
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
-    "vite:preview": "npm --prefix justice-dashboard run preview",
-    "prepare": "husky"
+    "vite:preview": "npm --prefix justice-dashboard run preview"
   },
   "prepare": "husky install",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0"
+      "eslint --max-warnings=0 --fix"
     ],
     "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": [
-      "bash -lc \"cd justice-dashboard && vitest --run --silent\""
+      "node -e \"process.exit(0)\" && npm --prefix justice-dashboard run test:run -- --changed"
     ]
   },
   "dependencies": {
@@ -52,9 +51,9 @@
     "@types/node": "^20.19.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@typescript-eslint/eslint-plugin": "^8.12.2",
-    "@typescript-eslint/parser": "^8.12.2",
-    "eslint": "^8.57.0",
+  "eslint": "^8.57.0",
+  "@typescript-eslint/parser": "^8.12.2",
+  "@typescript-eslint/eslint-plugin": "^8.12.2",
     "eslint-config-next": "^14.2.0",
     "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",

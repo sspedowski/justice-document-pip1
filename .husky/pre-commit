@@ -1,3 +1,5 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Minimal Husky v9+ hook: run lint-staged directly
 npx lint-staged
