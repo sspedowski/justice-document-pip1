@@ -40,9 +40,10 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "connect-src 'self' http://localhost:5173 ws://localhost:5173",
-      "script-src 'self' 'unsafe-inline' http://localhost:5173",
-      "style-src 'self' 'unsafe-inline' http://localhost:5173",
+      // Allow Vite dev server (5173 default and 5174 used in this repo) for HMR and assets in development
+      "connect-src 'self' http://localhost:5173 ws://localhost:5173 http://localhost:5174 ws://localhost:5174",
+      "script-src 'self' 'unsafe-inline' http://localhost:5173 http://localhost:5174",
+      "style-src 'self' 'unsafe-inline' http://localhost:5173 http://localhost:5174",
       "img-src 'self' blob: data:",
       "font-src 'self' data:",
       "object-src 'none'",
