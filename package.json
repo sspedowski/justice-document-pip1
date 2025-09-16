@@ -11,12 +11,17 @@
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
-    "vite:preview": "npm --prefix justice-dashboard run preview"
+    "vite:preview": "npm --prefix justice-dashboard run preview",
+    "prepare": "husky"
   },
   "prepare": "husky install",
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --fix",
-    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "npm --prefix justice-dashboard run test:run"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0"
+    ],
+    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": [
+      "bash -lc \"cd justice-dashboard && vitest --run --silent\""
+    ]
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -47,9 +52,9 @@
     "@types/node": "^20.19.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-  "eslint": "^8.57.0",
-  "@typescript-eslint/parser": "^8.12.2",
-  "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",

@@ -65,3 +65,18 @@ jobs:
           else
             echo "No build script; skipping"
           fi
+
+  vite-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Vite app deps
+        run: npm --prefix justice-dashboard ci
+      - name: Build Vite app
+        run: npm --prefix justice-dashboard run build
+      - name: Run Vitest
+        run: npm --prefix justice-dashboard run test:run

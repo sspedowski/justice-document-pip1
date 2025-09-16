@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
-. "$GIT_DIR/hooks/huskypre"
-
+. "$(dirname "$0")/_/husky.sh"
 npx lint-staged

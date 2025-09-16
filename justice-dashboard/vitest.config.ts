@@ -12,6 +12,8 @@ export default defineConfig({
     setupFiles: './src/test/setupTests.ts',
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'lcov'],
+      reportsDirectory: 'coverage',
     },
   },
   esbuild: {
