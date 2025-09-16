@@ -19,6 +19,9 @@
       "eslint --no-ignore --fix",
       "git add"
     ]
+      "eslint --fix"
+    ],
+    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "npm --prefix justice-dashboard run test -- --changed"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
