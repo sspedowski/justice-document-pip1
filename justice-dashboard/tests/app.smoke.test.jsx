@@ -9,5 +9,6 @@ describe('App smoke', () => {
   it('renders Justice Dashboard title', () => {
     render(<App />);
     expect(screen.getByText(/Justice Dashboard/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Justice Dashboard/i })).toBeInTheDocument();
   });
 });

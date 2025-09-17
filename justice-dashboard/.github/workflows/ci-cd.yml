@@ -13,8 +13,6 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-      matrix: # Run on the LTS version
-        node-version: [20.x] # Previously had a duplicate matrix key. Consolidated to just the LTS version.
 
     steps:
     - uses: actions/checkout@v4
@@ -37,7 +35,6 @@ jobs:
         npx jest --coverage --ci
       env:
         NODE_ENV: test
-        # The following secret is expected to be set in the repository settings. The warning can be ignored.
         JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
         ADMIN_USER: admin
         ADMIN_PASS: adminpass
@@ -98,7 +95,6 @@ jobs:
         record: true
         parallel: true
       env:
-        # The following secret is expected to be set in the repository settings for Cypress Dashboard recording.
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
