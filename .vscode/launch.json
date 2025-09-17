@@ -1,11 +1,37 @@
 {
-    "configurations": [
-        
-        {
-            "type": "chrome",
-            "name": "http://localhost:3000",
-            "request": "launch",
-            "url": "http://localhost:3000"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: Launch (http://localhost:3000)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Vite app: Launch (http://localhost:5174)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5174",
+      "webRoot": "${workspaceFolder}/justice-dashboard"
+    },
+    {
+      "name": "Next.js: npm run dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "ESLint: npm run lint",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "lint"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
 }

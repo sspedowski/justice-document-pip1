@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run Vite tests before pushing
+npm --prefix justice-dashboard run test:run

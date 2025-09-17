@@ -5,6 +5,7 @@ import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "../../../lib/fireb
 export const runtime = "nodejs"
 export const preferredRegion = ["iad1"]
 
+
 type PostBody = {
   path: string
   data?: unknown
@@ -17,6 +18,8 @@ export async function POST(req: NextRequest) {
     // const auth = req.headers.get("authorization")
     // if (!auth?.startsWith("Bearer ")) return NextResponse.json({ ok:false, error:"Missing bearer token" }, { status: 401 })
     // await verifyIdToken(auth.slice("Bearer ".length))
+    // const appCheckToken = getAppCheckToken(req)
+    // if (appCheckToken) { await verifyAppCheck(appCheckToken) }
 
     const { path, data, method = "set" } = (await req.json()) as PostBody
     if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })

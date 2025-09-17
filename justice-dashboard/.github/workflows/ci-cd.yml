@@ -11,8 +11,8 @@ jobs:
   api-tests:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        node-version: [18.x, 20.x]
+      matrix: # Run on the LTS version
+        node-version: [20.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -22,12 +22,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: justice-dashboard/package.json
+        cache-dependency-path: package-lock.json # Use root lockfile for caching
     
     - name: Install dependencies
-      run: |
-        cd justice-dashboard
-        npm ci
+      run: npm ci
     
     - name: Run API tests
       run: |
@@ -35,7 +33,8 @@ jobs:
         npx jest --coverage --ci
       env:
         NODE_ENV: test
-        JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
+        # The following secret is expected to be set in the repository settings. The warning can be ignored.
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
         ADMIN_USER: admin
         ADMIN_PASS: adminpass
     
@@ -92,12 +91,19 @@ jobs:
         working-directory: justice-dashboard
         wait-on: 'http://localhost:5174'
         wait-on-timeout: 120
-        record: true
+        record: ${{ secrets.CYPRESS_RECORD_KEY != '' }}
         parallel: true
       env:
+        # The following secret is expected to be set in the repository settings for Cypress Dashboard recording.
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+    - name: Check Cypress record key
+      run: |
+        if [ -z "${{ secrets.CYPRESS_RECORD_KEY }}" ]; then
+          echo "⚠️ CYPRESS_RECORD_KEY is not set. Cypress Dashboard recording will be skipped."
+        else
+          echo "✅ CYPRESS_RECORD_KEY is set. Cypress Dashboard recording enabled."
+        fi    
     - name: Upload Cypress screenshots on failure
       uses: actions/upload-artifact@v3
       if: failure()
