@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "publish:dashboard": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"npm --prefix justice-dashboard ci; npm --prefix justice-dashboard run build; if (Test-Path public/dashboard) { Remove-Item -Recurse -Force public/dashboard }; New-Item -ItemType Directory -Force -Path public | Out-Null; Copy-Item -Recurse -Force justice-dashboard/dist public/dashboard; Write-Host '✅ Published Vite dashboard to public/dashboard'\"",
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
@@ -68,6 +69,6 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.11 <21"
   }
 }

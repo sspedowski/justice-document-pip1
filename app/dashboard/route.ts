@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+let dashboardWarned = false;
+
 export async function GET() {
   const file = path.join(process.cwd(), 'public', 'dashboard', 'index.html');
   try {
@@ -13,6 +15,10 @@ export async function GET() {
     });
   } catch {
     // Fallback HTML when the dashboard bundle hasn't been built/copied yet.
+    if (!dashboardWarned) {
+      console.warn('[dashboard] Fallback served; missing public/dashboard/index.html');
+      dashboardWarned = true;
+    }
     const html = `<!doctype html>
 <html lang="en">
   <head>
