@@ -24,8 +24,8 @@
     "lint:fix": "eslint . --fix",
     "lint:report": "eslint . -f stylish -o tmp-eslint-output.txt",
     "typecheck": "tsc --noEmit",
-  "check:prod-globals": "node ./scripts/checkProdGlobals.mjs",
-  "build:ci": "npm run lint && npm run typecheck && npm run build && npm run check:prod-globals",
+    "check:prod-globals": "node ./scripts/checkProdGlobals.mjs",
+    "build:ci": "npm run lint && npm run typecheck && npm run build && npm run check:prod-globals",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
@@ -86,10 +86,7 @@
     "ts-morph": "^23.0.0",
     "typescript": "^5.6.3"
   },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
+  "dependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"

@@ -58,5 +58,8 @@
     "subapp",
     "Vercel",
     "Vite"
-  ]
+  ],
+  "geminicodeassist.codeGenerationPaneViewEnabled": true,
+  "geminicodeassist.agentYoloMode": true,
+  "geminicodeassist.agentDebugMode": true
 }

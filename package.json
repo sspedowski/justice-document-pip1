@@ -8,21 +8,44 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo '✅ Published Vite dashboard to public/dashboard'",
+    "publish:dashboard": "npm run publish:dashboard:posix",
+    "publish:dashboard:win": "powershell -ExecutionPolicy Bypass -File ./scripts/publish-dashboard.ps1 -VitePath ./dashboard -AltPath ./justice-dashboard -NextPublic ./public/dashboard",
+    "build:dashboard": "npm --prefix justice-dashboard run build",
+    "build+publish:dashboard:win": "npm run build:dashboard && npm run publish:dashboard:win",
+    "build+publish:dashboard": "npm run build:dashboard && npm run publish:dashboard",
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
     "vite:preview": "npm --prefix justice-dashboard run preview",
-    "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
-    "typecheck": "tsc --noEmit"
+    "publish:dashboard:posix": "bash scripts/publish-dashboard.sh ./dashboard ./justice-dashboard ./public/dashboard",
+    "typecheck": "tsc --noEmit",
+    "dash:publish:posix": "npm run publish:dashboard:posix",
+    "dash:publish:win": "npm run publish:dashboard:win",
+    "next-config:prepare": "node scripts/prepare-next-config.mjs",
+    "predev": "node scripts/prepare-next-config.mjs",
+    "prebuild": "node scripts/prepare-next-config.mjs && node scripts/publish-dashboard.mjs ./dashboard ./justice-dashboard ./public/dashboard",
+    "prestart": "node scripts/prepare-next-config.mjs && node scripts/publish-dashboard.mjs ./dashboard ./justice-dashboard ./public/dashboard",
+    "prelint": "node scripts/prepare-next-config.mjs",
+    "e2e": "playwright test",
+    "test:unit": "vitest run",
+    "ci:full": "npm run build && npm run test:unit && npm run e2e",
+    "smoke:dev:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-smoke.ps1 -Port 3020 -TimeoutSec 120",
+    "smoke:dev:sh": "bash ./scripts/dev-smoke.sh"
   },
   "prepare": "husky install",
   "lint-staged": {
-    "app/**/*.{ts,tsx,js,jsx}": "eslint --fix",
-    "lib/**/*.{ts,tsx,js,jsx}": "eslint --fix",
-    "next.config.*": "eslint --fix",
-    "middleware.ts": "eslint --fix",
-    "justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "npm --prefix justice-dashboard run test:run -- --changed || true"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0 --fix",
+      "node scripts/run-vitest-changed.mjs"
+    ],
+    "{app,lib}/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings=0 --fix"
+    ],
+    "next.config.*": "eslint --max-warnings=0 --fix",
+    "middleware.ts": "eslint --max-warnings=0 --fix",
+    "*.{css,scss,md,yml,yaml,json}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -47,21 +70,23 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.8.0",
     "@types/busboy": "^1.5.4",
     "@types/node": "^20.19.13",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^8.57.0",
-    "@typescript-eslint/parser": "^8.12.2",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "minimist": "^1.2.8",
+    "prettier": "^3.6.0",
     "supertest": "^7.1.4",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.8",
@@ -70,6 +95,6 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=20.11 <21"
+    "node": ">=20.17.0 <21"
   }
 }

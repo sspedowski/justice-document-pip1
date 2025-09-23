@@ -8,8 +8,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 If a PR is labeled hardening, CI will:
 
-1) Post a progress comment showing the Hardening TODO checklist status.
-2) Block leaving Draft unless all items under the section heading `## Hardening TODO` in the PR description are checked.
+1. Post a progress comment showing the Hardening TODO checklist status.
+2. Block leaving Draft unless all items under the section heading `## Hardening TODO` in the PR description are checked.
 
 Keep the checklist in the PR description (not comments) so automation can read it.
 
@@ -54,6 +54,44 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=.create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Testing
+
+This project uses Playwright for E2E tests and Vitest for unit tests.
+
+### Local Testing
+
+1.  **Build and start the app:**
+
+    ```bash
+    npm run build
+    npm start
+    ```
+
+2.  **Run tests in a separate terminal:**
+
+    ```bash
+    # Run Vitest unit tests
+    npm run test:unit
+
+    # Run Playwright E2E tests
+    npm run e2e
+    ```
+
+### CI Flow
+
+The CI pipeline is defined in `.github/workflows/test.yml` and runs on every pull request and push to `main`.
+
+```mermaid
+graph TD
+    A[Start] --> B{npm ci};
+    B --> C{scripts/publish-dashboard.sh};
+    C --> D{npm run build};
+    D --> E{npm start};
+    E --> F{vitest run};
+    F --> G{playwright test};
+    G --> H[End];
+```
