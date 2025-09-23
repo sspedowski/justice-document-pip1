@@ -47,6 +47,10 @@
       "prettier --write"
     ]
   },
+  "overrides": {
+    "path-to-regexp": ">=6.2.1",
+    "cookie": ">=0.6.0"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-progress": "^1.1.7",
@@ -95,6 +99,6 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=20.17.0 <21"
+    "node": ">=20 <23 || ^22"
   }
 }

@@ -1,17 +1,28 @@
 export const runtime = 'nodejs';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 let dashboardWarned = false;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Enforce trailing slash so relative asset URLs (e.g., ./assets, vite.svg) resolve under /dashboard/
+  const url = new URL(req.url);
+  if (!url.pathname.endsWith('/')) {
+    url.pathname = '/dashboard/';
+    return NextResponse.redirect(url, 308);
+  }
+
   const file = path.join(process.cwd(), 'public', 'dashboard', 'index.html');
   try {
     const html = await fs.readFile(file, 'utf8');
     return new NextResponse(html, {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        // Do not cache HTML so updates are visible; assets are cached via Next static headers
+        'cache-control': 'no-store',
+      },
     });
   } catch {
     // Fallback HTML when the dashboard bundle hasn't been built/copied yet.
@@ -48,7 +59,10 @@ export async function GET() {
 </html>`;
     return new NextResponse(html, {
       status: 200,
-      headers: { 'content-type': 'text/html; charset=utf-8' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'no-store',
+      },
     });
   }
 }
