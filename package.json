@@ -35,14 +35,14 @@
   "prepare": "husky install",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0 --fix",
+      "next lint --max-warnings=0 --fix --file",
       "node scripts/run-vitest-changed.mjs"
     ],
     "{app,lib}/**/*.{ts,tsx,js,jsx}": [
-      "eslint --max-warnings=0 --fix"
+      "next lint --max-warnings=0 --fix --file"
     ],
-    "next.config.*": "eslint --max-warnings=0 --fix",
-    "middleware.ts": "eslint --max-warnings=0 --fix",
+    "next.config.*": "next lint --max-warnings=0 --fix --file",
+    "middleware.ts": "next lint --max-warnings=0 --fix --file",
     "*.{css,scss,md,yml,yaml,json}": [
       "prettier --write"
     ]
