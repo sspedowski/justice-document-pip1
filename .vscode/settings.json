@@ -61,5 +61,6 @@
   ],
   "geminicodeassist.codeGenerationPaneViewEnabled": true,
   "geminicodeassist.agentYoloMode": true,
-  "geminicodeassist.agentDebugMode": true
+  "geminicodeassist.agentDebugMode": true,
+  "github.copilot.selectedCompletionModel": "Configure Code Completions"
 }
