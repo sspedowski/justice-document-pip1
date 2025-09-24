@@ -1,6 +1,7 @@
 // app/api/rtdb/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { getRtdb, verifyAppCheck } from "../../../lib/firebaseAdmin"
+import { extractAppCheckToken } from "./auth-util"
 
 export const runtime = "nodejs"
 export const preferredRegion = ["iad1"]
@@ -14,7 +15,7 @@ type PostBody = {
 
 export async function POST(req: NextRequest) {
   try {
-    const appCheckToken = req.headers.get("X-Firebase-AppCheck")
+    const appCheckToken = extractAppCheckToken(req)
     const isVerified = await verifyAppCheck(appCheckToken || undefined)
     if (!isVerified) {
       return NextResponse.json({ ok: false, error: "App Check verification failed" }, { status: 401 })
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const appCheckToken = req.headers.get("X-Firebase-AppCheck")
+    const appCheckToken = extractAppCheckToken(req)
     const isVerified = await verifyAppCheck(appCheckToken || undefined)
     if (!isVerified) {
       return NextResponse.json({ ok: false, error: "App Check verification failed" }, { status: 401 })
