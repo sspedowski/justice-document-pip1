@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/**": { "memory": 512, "maxDuration": 30 },
+    "app/**/route.ts": { "memory": 512, "maxDuration": 30 },
+    "app/**/route.js": { "memory": 512, "maxDuration": 30 },
+    "app/**/route.mjs": { "memory": 512, "maxDuration": 30 }
+  }
+}

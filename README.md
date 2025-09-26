@@ -58,6 +58,58 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Deployment (Vercel)
+
+We intentionally keep platform config minimal:
+
+- `vercel.json` defines only `functions` memory/maxDuration (no rewrites/redirects/routes mix).
+- `next.config.mjs` adds security headers (CSP commented until audited) and long-term cache headers for `/dashboard/assets/*` built by Vite.
+- No legacy `now.json` / `.now*` artifacts are present.
+
+### Re‑linking the project if local state is stale
+
+Sometimes a cloned repo has a `.vercel` folder pointing at the wrong project or team which can surface “mixed routing” style warnings even when configs are clean.
+
+Windows (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force .vercel -ErrorAction SilentlyContinue
+vercel logout
+vercel login
+vercel link
+vercel
+```
+
+macOS / Linux:
+
+```bash
+rm -rf .vercel || true
+vercel logout
+vercel login
+vercel link
+vercel
+```
+
+### Adding routing changes safely
+
+If you later add rewrites/redirects/headers/trailingSlash, do NOT also add a top-level `routes` array in `vercel.json`—pick the granular keys only. Avoid setting `basePath` unless you relocate the entire app.
+
+### Adjusting function limits
+
+To change memory/duration defaults, edit `vercel.json`:
+
+```jsonc
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/**": { "memory": 512, "maxDuration": 30 },
+    "app/**/route.ts": { "memory": 512, "maxDuration": 30 },
+  },
+}
+```
+
+See `README_DEPLOY.md` for full deployment notes.
+
 ## Testing
 
 This project uses Playwright for E2E tests and Vitest for unit tests.

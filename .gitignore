@@ -89,4 +89,3 @@ legacy/_parking/**/.next/
 legacy/_parking/**/dist/
 legacy/_parking/**/build/
 
-next.config.mjs
