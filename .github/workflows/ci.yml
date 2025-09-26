@@ -102,11 +102,11 @@ jobs:
 
   integration:
     name: Secret-gated integration checks
-    # Only run when secrets exist AND (push to main OR PR has label run-integration)
+    # Run only if core secrets exist AND (push to main OR PR labeled run-integration)
     if: >
-      ${{
-        (secrets.FIREBASE_SERVICE_ACCOUNT != '' || (secrets.UPSTASH_REDIS_REST_URL != '' && secrets.UPSTASH_REDIS_REST_TOKEN != '')) &&
-        (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-integration')))
+      ${{ 
+        (secrets.FIREBASE_SERVICE_ACCOUNT != '' && secrets.GOOGLE_API_KEY != '') &&
+        (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-integration'))) 
       }}
     runs-on: ubuntu-latest
     needs: smoke
