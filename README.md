@@ -8,8 +8,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 If a PR is labeled hardening, CI will:
 
-1) Post a progress comment showing the Hardening TODO checklist status.
-2) Block leaving Draft unless all items under the section heading `## Hardening TODO` in the PR description are checked.
+1. Post a progress comment showing the Hardening TODO checklist status.
+2. Block leaving Draft unless all items under the section heading `## Hardening TODO` in the PR description are checked.
 
 Keep the checklist in the PR description (not comments) so automation can read it.
 
@@ -54,6 +54,128 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=.create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Deployment (Vercel)
+
+We intentionally keep platform config minimal:
+
+- `vercel.json` defines only `functions` memory/maxDuration (no rewrites/redirects/routes mix).
+- `next.config.mjs` adds security headers (CSP commented until audited) and long-term cache headers for `/dashboard/assets/*` built by Vite.
+- No legacy `now.json` / `.now*` artifacts are present.
+
+### Re‑linking the project if local state is stale
+
+Sometimes a cloned repo has a `.vercel` folder pointing at the wrong project or team which can surface “mixed routing” style warnings even when configs are clean.
+
+Windows (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force .vercel -ErrorAction SilentlyContinue
+vercel logout
+vercel login
+vercel link
+vercel
+```
+
+macOS / Linux:
+
+```bash
+rm -rf .vercel || true
+vercel logout
+vercel login
+vercel link
+vercel
+```
+
+### Adding routing changes safely
+
+If you later add rewrites/redirects/headers/trailingSlash, do NOT also add a top-level `routes` array in `vercel.json`—pick the granular keys only. Avoid setting `basePath` unless you relocate the entire app.
+
+### Adjusting function limits
+
+To change memory/duration defaults, edit `vercel.json`:
+
+```jsonc
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/**": { "memory": 512, "maxDuration": 30 },
+  },
+}
+```
+
+For App Router handlers, prefer inline per-route exports:
+
+```ts
+// app/api/example/route.ts
+export const runtime = "nodejs";
+export const maxDuration = 30; // plan permitting
+export async function GET() {
+  return new Response("ok");
+}
+```
+
+See `README_DEPLOY.md` for full deployment notes.
+
+## Testing
+
+This project uses Playwright for E2E tests and Vitest for unit tests.
+
+### Local Testing
+
+1. **Build and start the app:**
+
+   ```bash
+   npm run build
+   npm start
+   ```
+
+2. **Run tests in a separate terminal:**
+
+   ```bash
+   # Run Vitest unit tests
+   npm run test:unit
+
+   # Run Playwright E2E tests
+   npm run e2e
+   ```
+
+### CI Flow
+
+The CI pipeline is defined in `.github/workflows/test.yml` and runs on every pull request and push to `main`.
+
+```mermaid
+graph TD
+    A[Start] --> B{npm ci};
+    B --> C{scripts/publish-dashboard.sh};
+    C --> D{npm run build};
+    D --> E{npm start};
+    E --> F{vitest run};
+    F --> G{playwright test};
+    G --> H[End];
+```
+
+## Developer Assistant (Claude Code)
+
+We optionally support AI-assisted workflows using Claude Code. See `docs/CLAUDE_CODE.md` for:
+
+- Installation & login steps
+- Safe usage patterns (test generation, refactors, security review prompts)
+- Guardrails for keeping changes minimal
+
+To start (after global install):
+
+```bash
+claude
+```
+
+Then describe the task (e.g. "refactor upload middleware into smaller functions"). Always follow with:
+
+```bash
+npm run lint && npm test
+```
+
+to validate edits.

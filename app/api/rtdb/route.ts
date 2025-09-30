@@ -1,9 +1,11 @@
 // app/api/rtdb/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "../../../lib/firebaseAdmin"
+import { getRtdb, verifyAppCheck } from "../../../lib/firebaseAdmin"
+import { extractAppCheckToken } from "./auth-util"
 
 export const runtime = "nodejs"
 export const preferredRegion = ["iad1"]
+
 
 type PostBody = {
   path: string
@@ -13,6 +15,12 @@ type PostBody = {
 
 export async function POST(req: NextRequest) {
   try {
+    const appCheckToken = extractAppCheckToken(req)
+    const isVerified = await verifyAppCheck(appCheckToken || undefined)
+    if (!isVerified) {
+      return NextResponse.json({ ok: false, error: "App Check verification failed" }, { status: 401 })
+    }
+
     // Optional auth:
     // const auth = req.headers.get("authorization")
     // if (!auth?.startsWith("Bearer ")) return NextResponse.json({ ok:false, error:"Missing bearer token" }, { status: 401 })
@@ -40,6 +48,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    const appCheckToken = extractAppCheckToken(req)
+    const isVerified = await verifyAppCheck(appCheckToken || undefined)
+    if (!isVerified) {
+      return NextResponse.json({ ok: false, error: "App Check verification failed" }, { status: 401 })
+    }
+
     const url = new URL(req.url)
     const path = url.searchParams.get("path")
     if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })

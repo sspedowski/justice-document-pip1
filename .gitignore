@@ -51,6 +51,8 @@ cypress/videos/
 /coverage
 
 # next.js
+public/dashboard/*
+!public/dashboard/README.md
 /.next/
 /out/
 /dist/
@@ -86,3 +88,4 @@ legacy/_parking/**/node_modules/
 legacy/_parking/**/.next/
 legacy/_parking/**/dist/
 legacy/_parking/**/build/
+

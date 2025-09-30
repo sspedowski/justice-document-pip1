@@ -1,0 +1,2 @@
+/* Forward to the actual global styles that define theme tokens and Tailwind layers. */
+@import url("../src/app/globals.css");

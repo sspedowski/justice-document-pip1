@@ -35,15 +35,18 @@ const app = express();
 app.disable("x-powered-by");
 // Single CSP header applied by the server. Remove any <meta http-equiv="Content-Security-Policy"> tags in HTML.
 // Frontend should call /api (same origin via Vite proxy); allow Vite dev server & websocket for HMR.
+const isProd = process.env.NODE_ENV === 'production';
 app.use((req, res, next) => {
+  const viteDevSrc = "http://localhost:5173 http://localhost:5174";
+  const viteWSSrc = "ws://localhost:5173 ws://localhost:5174";
   res.setHeader(
     'Content-Security-Policy',
     [
       "default-src 'self'",
       // Allow Vite dev server (5173 default and 5174 used in this repo) for HMR and assets in development
-      "connect-src 'self' http://localhost:5173 ws://localhost:5173 http://localhost:5174 ws://localhost:5174",
-      "script-src 'self' 'unsafe-inline' http://localhost:5173 http://localhost:5174",
-      "style-src 'self' 'unsafe-inline' http://localhost:5173 http://localhost:5174",
+      `connect-src 'self' ${isProd ? '' : viteDevSrc} ${isProd ? '' : viteWSSrc}`,
+      `script-src 'self' ${isProd ? '' : "'unsafe-inline' " + viteDevSrc}`, // unsafe-inline for Vite HMR styles
+      `style-src 'self' 'unsafe-inline' ${isProd ? '' : viteDevSrc}`, // unsafe-inline for Vite HMR styles
       "img-src 'self' blob: data:",
       "font-src 'self' data:",
       "object-src 'none'",
@@ -57,7 +60,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection. In tests we skip csurf entirely for simplicity.
 app.use(cookieParser());
-const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: false } });
+const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: isProd } });
 if (process.env.NODE_ENV !== 'test') {
   // Apply CSRF protection except for open auth endpoints used in API-style flows.
   // Also allow /api/summarize so file uploads in dev aren't blocked by CSRF.
