@@ -103,8 +103,18 @@ To change memory/duration defaults, edit `vercel.json`:
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/**": { "memory": 512, "maxDuration": 30 },
-    "app/**/route.ts": { "memory": 512, "maxDuration": 30 },
   },
+}
+```
+
+For App Router handlers, prefer inline per-route exports:
+
+```ts
+// app/api/example/route.ts
+export const runtime = "nodejs";
+export const maxDuration = 30; // plan permitting
+export async function GET() {
+  return new Response("ok");
 }
 ```
 
@@ -116,22 +126,22 @@ This project uses Playwright for E2E tests and Vitest for unit tests.
 
 ### Local Testing
 
-1.  **Build and start the app:**
+1. **Build and start the app:**
 
-    ```bash
-    npm run build
-    npm start
-    ```
+   ```bash
+   npm run build
+   npm start
+   ```
 
-2.  **Run tests in a separate terminal:**
+2. **Run tests in a separate terminal:**
 
-    ```bash
-    # Run Vitest unit tests
-    npm run test:unit
+   ```bash
+   # Run Vitest unit tests
+   npm run test:unit
 
-    # Run Playwright E2E tests
-    npm run e2e
-    ```
+   # Run Playwright E2E tests
+   npm run e2e
+   ```
 
 ### CI Flow
 
@@ -147,3 +157,25 @@ graph TD
     F --> G{playwright test};
     G --> H[End];
 ```
+
+## Developer Assistant (Claude Code)
+
+We optionally support AI-assisted workflows using Claude Code. See `docs/CLAUDE_CODE.md` for:
+
+- Installation & login steps
+- Safe usage patterns (test generation, refactors, security review prompts)
+- Guardrails for keeping changes minimal
+
+To start (after global install):
+
+```bash
+claude
+```
+
+Then describe the task (e.g. "refactor upload middleware into smaller functions"). Always follow with:
+
+```bash
+npm run lint && npm test
+```
+
+to validate edits.
