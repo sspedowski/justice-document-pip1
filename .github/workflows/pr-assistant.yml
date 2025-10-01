@@ -1,0 +1,184 @@
+name: PR Assistant
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+
+jobs:
+  assist:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check PR scope
+        id: scope
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get PR details
+          PR_NUM=${{ github.event.pull_request.number }}
+
+          # Get files changed count
+          FILES_CHANGED=$(gh pr view $PR_NUM --json files --jq '.files | length')
+
+          # Get diff stats
+          DIFF_STATS=$(gh pr diff $PR_NUM --patch | wc -l)
+
+          echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
+          echo "diff_lines=$DIFF_STATS" >> $GITHUB_OUTPUT
+
+          # Check if labeled ai-ok-large
+          HAS_LABEL=$(gh pr view $PR_NUM --json labels --jq '.labels[]?.name' | grep -c "ai-ok-large" || echo "0")
+          echo "has_override=$HAS_LABEL" >> $GITHUB_OUTPUT
+
+          # Check if labeled security
+          HAS_SECURITY=$(gh pr view $PR_NUM --json labels --jq '.labels[]?.name' | grep -c "security" || echo "0")
+          echo "has_security=$HAS_SECURITY" >> $GITHUB_OUTPUT
+
+      - name: Skip if too large
+        if: steps.scope.outputs.files_changed > 150 || (steps.scope.outputs.diff_lines > 3000 && steps.scope.outputs.has_override == '0')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+
+          # Find existing comment
+          COMMENT_ID=$(gh api repos/${{ github.repository }}/issues/$PR_NUM/comments \
+            --jq '.[] | select(.body | contains("<!-- ai-pr-assistant -->")) | .id' | head -1)
+
+          SKIP_MSG="<!-- ai-pr-assistant -->
+          **🤖 PR Assistant**
+
+          Scope too large — please narrow or label \`ai-ok-large\` to proceed.
+
+          Files: ${{ steps.scope.outputs.files_changed }} | Lines: ${{ steps.scope.outputs.diff_lines }}"
+
+          if [ -n "$COMMENT_ID" ]; then
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID \
+              -f body="$SKIP_MSG"
+          else
+            gh pr comment $PR_NUM --body "$SKIP_MSG"
+          fi
+
+          exit 0
+
+      - name: Get PR diff and metadata
+        if: steps.scope.outputs.files_changed <= 150 && (steps.scope.outputs.diff_lines <= 3000 || steps.scope.outputs.has_override == '1')
+        id: pr_data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+
+          # Get PR metadata
+          gh pr view $PR_NUM --json title,body,labels > pr_meta.json
+
+          # Get diff (first 2500 lines to stay under token limits)
+          gh pr diff $PR_NUM --patch | head -2500 > pr_diff.txt
+
+          echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
+
+      - name: Generate PR notes
+        if: steps.scope.outputs.files_changed <= 150 && (steps.scope.outputs.diff_lines <= 3000 || steps.scope.outputs.has_override == '1')
+        id: pr_notes
+        env:
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+        run: |
+          DIFF=$(cat pr_diff.txt)
+          TITLE=$(jq -r '.title' pr_meta.json)
+          BODY=$(jq -r '.body // ""' pr_meta.json)
+
+          # Determine model based on security label
+          MODEL="sonnet"
+          if [ "${{ steps.scope.outputs.has_security }}" = "1" ]; then
+            MODEL="opus"
+          fi
+
+          # Call AI for PR notes
+          curl -sS -X POST "$DASHBOARD_URL/api/ai" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg diff "$DIFF" --arg title "$TITLE" --arg body "$BODY" --arg model "$MODEL" \
+              '{mode:"pr-notes", model:$model, payload:{diff:$diff, title:$title, body:$body}}')" \
+            > pr_notes_response.json
+
+          # Extract result
+          jq -r '.result // ""' pr_notes_response.json > pr_notes.txt
+
+      - name: Generate review assistance
+        if: steps.scope.outputs.files_changed <= 150 && (steps.scope.outputs.diff_lines <= 3000 || steps.scope.outputs.has_override == '1')
+        id: review_assist
+        env:
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+        run: |
+          DIFF=$(cat pr_diff.txt)
+          TITLE=$(jq -r '.title' pr_meta.json)
+          BODY=$(jq -r '.body // ""' pr_meta.json)
+
+          # Determine model based on security label
+          MODEL="sonnet"
+          if [ "${{ steps.scope.outputs.has_security }}" = "1" ]; then
+            MODEL="opus"
+          fi
+
+          # Call AI for review assistance
+          curl -sS -X POST "$DASHBOARD_URL/api/ai" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg diff "$DIFF" --arg title "$TITLE" --arg body "$BODY" --arg model "$MODEL" \
+              '{mode:"review-assist", model:$model, payload:{diff:$diff, title:$title, body:$body}}')" \
+            > review_assist_response.json
+
+          # Extract result
+          jq -r '.result // ""' review_assist_response.json > review_assist.txt
+
+      - name: Post or update comment
+        if: steps.scope.outputs.files_changed <= 150 && (steps.scope.outputs.diff_lines <= 3000 || steps.scope.outputs.has_override == '1')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=${{ steps.pr_data.outputs.pr_number }}
+
+          # Build combined comment
+          cat > comment.md <<'EOF'
+          <!-- ai-pr-assistant -->
+          ## 🤖 PR Assistant
+
+          ### Release Notes
+
+          EOF
+
+          cat pr_notes.txt >> comment.md
+
+          cat >> comment.md <<'EOF'
+
+          ---
+
+          EOF
+
+          cat review_assist.txt >> comment.md
+
+          cat >> comment.md <<'EOF'
+
+          ---
+
+          *AI-generated via PR Assistant • Model: EOF
+
+          if [ "${{ steps.scope.outputs.has_security }}" = "1" ]; then
+            echo -n "Opus (security)" >> comment.md
+          else
+            echo -n "Sonnet" >> comment.md
+          fi
+
+          echo "*" >> comment.md
+
+          # Find existing comment by marker
+          COMMENT_ID=$(gh api repos/${{ github.repository }}/issues/$PR_NUM/comments \
+            --jq '.[] | select(.body | contains("<!-- ai-pr-assistant -->")) | .id' | head -1)
+
+          if [ -n "$COMMENT_ID" ]; then
+            # Update existing comment
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID \
+              --input comment.md -f body=@-
+          else
+            # Create new comment
+            gh pr comment $PR_NUM --body-file comment.md
+          fi
