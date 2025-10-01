@@ -24,10 +24,18 @@ Response: `text/event-stream` frames
 Test locally:
 
 ```bash
-curl -N -X POST http://localhost:3000/api/summarize \\
-  -H 'content-type: application/json' \\
+curl -N -X POST http://localhost:3000/api/summarize \
+  -H 'content-type: application/json' \
   -d '{"text":"Hello streaming world"}'
 ```
+
+**Windows note:** Use `curl.exe` (not the PowerShell alias) so `-H` works correctly:
+
+```powershell
+curl.exe -N -X POST http://localhost:3000/api/summarize -H 'content-type: application/json' -d '{\"text\":\"Hello streaming world\"}'
+```
+
+**Demo page:** Visit [http://localhost:3000/summarize-demo](http://localhost:3000/summarize-demo) for an interactive SSE demo with progress UI and cancel.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
