@@ -6,7 +6,7 @@
 
   // Disable Jest noise (we use Vitest here)
   "jest.enable": false,
-  "jest.autoRun": "off",
+  "jest.runMode": "on-demand",
 
   // Error Lens – helpful but not noisy
   "errorLens.enabled": true,
@@ -31,8 +31,36 @@
 
   // Spell checker words
   "cSpell.words": [
-    "Aversys","Allegan","Barry","Baskin","BRAINS","CTAC","Firestore",
-    "Gladding","Huizenga","Muldrow","Nextjs","Pylance","Vercel",
-    "Jace","Josh","Peyton","Eleanora","Spedowski"
-  ]
+    "AppCheck",
+    "adminpass",
+    "Allegan",
+    "Aversys",
+    "Barry",
+    "Baskin",
+    "BRAINS",
+    "Cantarell",
+    "CTAC",
+    "Eleanora",
+    "Firestore",
+    "Gladding",
+    "Huizenga",
+    "Jace",
+    "Josh",
+    "Muldrow",
+    "Nextjs",
+    "Peyton",
+    "pwsh",
+    "Pylance",
+    "Rtdb",
+    "RTDB",
+    "getRtdb",
+    "Spedowski",
+    "subapp",
+    "Vercel",
+    "Vite"
+  ],
+  "geminicodeassist.codeGenerationPaneViewEnabled": true,
+  "geminicodeassist.agentYoloMode": true,
+  "geminicodeassist.agentDebugMode": true,
+  "github.copilot.selectedCompletionModel": "Configure Code Completions"
 }

@@ -1,0 +1,46 @@
+name: PR Template Guard
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  classify-and-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            security_sensitive:
+              - "api/**"
+              - "pages/api/**"
+              - "app/**/route.*"
+              - "middleware.*"
+              - "lib/**auth**"
+              - "lib/**appcheck**"
+              - "lib/**/rate*"
+              - "next.config.*"
+              - "vercel.json"
+              - "firebase.json"
+              - "firestore.rules"
+              - "database.rules.json"
+
+      - name: Enforce required template sections
+        uses: actions/github-script@v7
+        env:
+          SECURITY_SENSITIVE: ${{ steps.filter.outputs.security_sensitive }}
+        with:
+          script: |
+            const body = (context.payload.pull_request.body || "").toLowerCase();
+            const isSec = (process.env.SECURITY_SENSITIVE || "false").toLowerCase() === "true";
+            const hasFull = body.includes("## security & hardening (mandatory)".toLowerCase());
+            const hasLite = body.includes("## lite checklist (non-security)".toLowerCase());
+
+            if (isSec && !hasFull) {
+              core.setFailed("Security-sensitive changes detected - PR body must include the FULL template (missing '## Security & Hardening (MANDATORY)').");
+            }
+            if (!isSec && !(hasLite || hasFull)) {
+              core.setFailed("Non-security change - PR body must include either the LITE checklist or the FULL template.");
+            }
