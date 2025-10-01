@@ -1,5 +1,34 @@
 # Justice Dashboard
 
+## Streaming summarize API
+
+Endpoint: `POST /api/summarize`
+
+Body (JSON):
+
+```jsonc
+{ "text": "string <= 4000 chars" }
+```
+
+Response: `text/event-stream` frames
+
+```jsonc
+{ "stage": "queued" }
+{ "stage": "fetching", "progress": 10 }
+{ "stage": "chunking", "progress": 35 }
+{ "stage": "summarizing", "progress": 70 }
+{ "stage": "result", "result": "Summary (...)" }
+{ "stage": "end", "ok": true }
+```
+
+Test locally:
+
+```bash
+curl -N -X POST http://localhost:3000/api/summarize \\
+  -H 'content-type: application/json' \\
+  -d '{"text":"Hello streaming world"}'
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ![vercel-min health](https://github.com/sspedowski/justice-document-pip1/actions/workflows/health-check.yml/badge.svg)
