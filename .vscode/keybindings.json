@@ -1,0 +1,4 @@
+[
+  { "key": "ctrl+alt+g", "command": "workbench.action.chat.open", "when": "editorTextFocus && !inQuickOpen" },
+  { "key": "ctrl+alt+;", "command": "github.copilot.generate", "when": "editorTextFocus && !inSnippetMode" }
+]
