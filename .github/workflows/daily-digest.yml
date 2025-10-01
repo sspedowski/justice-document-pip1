@@ -1,0 +1,26 @@
+name: Daily Digest
+
+on:
+  schedule:
+    - cron: "0 13 * * 1-5" # 9:00 ET during DST (America/Detroit)
+  workflow_dispatch: {}
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Detroit
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Post digest to Slack
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          node -e "console.log('Node', process.version)"
+          node ./scripts/post-digest.cjs
