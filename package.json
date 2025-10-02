@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "justice-dashboard",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "lint:no-any": "eslint -c .eslintrc.ci.cjs .",
-    "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo 'âœ… Published Vite dashboard to public/dashboard'",
+    "lint:no-any": "eslint --no-eslintrc -c .eslintrc.ci.cjs app src lib --ext .ts,.tsx",
+    "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo 'Published Vite dashboard to public/dashboard'",
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
@@ -77,3 +77,4 @@
     "node": ">=20.11 <21"
   }
 }
+

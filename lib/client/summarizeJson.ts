@@ -1,68 +1,48 @@
-// lib/client/summarizeJson.ts
-// Typed client for /api/summarize/json with safety guards
+import type { SummarizeJsonRequest, SummarizeJsonResponse, SummarizeJsonSuccess, SummarizeJsonError } from '@/lib/types/summarize';
 
-export type SummarizeJsonResult = {
-  ok: boolean;
-  summary?: string;
-  tags?: string[];
-  provider?: string;
-  model?: string;
-  error?: string;
-  requestId?: string;
-  elapsedMs?: number;
-};
-
-function isSummarizeJsonResult(v: any): v is SummarizeJsonResult {
+function isSuccess(x: unknown): x is SummarizeJsonSuccess {
+  if (!x || typeof x !== 'object') return false;
+  const o = x as Record<string, unknown>;
   return (
-    v &&
-    typeof v.ok === 'boolean' &&
-    (v.summary === undefined || typeof v.summary === 'string') &&
-    (v.tags === undefined || Array.isArray(v.tags))
+    o.ok === true &&
+    typeof o.summary === 'string' &&
+    Array.isArray(o.tags) &&
+    typeof o.provider === 'string' &&
+    typeof o.model === 'string' &&
+    typeof o.requestId === 'string' &&
+    typeof o.elapsedMs === 'number'
   );
 }
 
+function isError(x: unknown): x is SummarizeJsonError {
+  if (!x || typeof x !== 'object') return false;
+  const o = x as Record<string, unknown>;
+  return o.ok === false && typeof o.error === 'string';
+}
+
 /**
- * Calls /api/summarize/json safely.
- * Throws if non-JSON or unexpected shape.
- *
- * @param input - Text to summarize
- * @param init - Optional fetch RequestInit
- * @returns Promise<SummarizeJsonResult>
- * @throws Error if response is invalid or request fails
+ * summarizeJson
+ * Typed fetch helper returning a union (never throws for shape mismatches).
  */
-export async function summarizeJson(
-  input: string,
-  init?: RequestInit
-): Promise<SummarizeJsonResult> {
+export async function summarizeJson(input: SummarizeJsonRequest): Promise<SummarizeJsonResponse> {
   const res = await fetch('/api/summarize/json', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
-    body: JSON.stringify({ text: input }),
-    ...init,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input)
   });
-
   const ct = res.headers.get('content-type') || '';
-  const raw = await res.text();
-
   if (!ct.includes('application/json')) {
-    throw new Error(`Non-JSON response: ${ct} head="${raw.slice(0, 120)}"`);
+    const err: SummarizeJsonError = { ok: false, error: `Unexpected content-type: ${ct}` };
+    return err;
   }
-
   let data: unknown;
   try {
-    data = JSON.parse(raw);
-  } catch (e) {
-    throw new Error(`Invalid JSON: ${String(e)} head="${raw.slice(0, 120)}"`);
+    data = await res.json();
+  } catch {
+    const err: SummarizeJsonError = { ok: false, error: 'Failed to parse JSON response' };
+    return err;
   }
-
-  if (!isSummarizeJsonResult(data)) {
-    throw new Error(`Unexpected shape: ${raw.slice(0, 160)}`);
-  }
-
-  if (!res.ok || !data.ok) {
-    const msg = (data as SummarizeJsonResult).error || `HTTP ${res.status}`;
-    throw new Error(msg);
-  }
-
-  return data;
+  if (isSuccess(data) || isError(data)) return data;
+  const err: SummarizeJsonError = { ok: false, error: 'Response shape mismatch' };
+  return err;
 }

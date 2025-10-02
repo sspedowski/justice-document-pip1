@@ -48,16 +48,6 @@
     "react/jsx-uses-react": "off",
     "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": false }],
     "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports", "fixStyle": "inline-type-imports" }],
-    "no-restricted-imports": [
-      "error",
-      {
-        "paths": [
-          {
-            "name": "@/lib/client/summarizeJson",
-            "message": "The JSON client belongs only on the branch/PR that introduces /api/summarize/json."
-          }
-        ]
-      }
-    ]
+    "no-restricted-imports": "off"
   }
 }

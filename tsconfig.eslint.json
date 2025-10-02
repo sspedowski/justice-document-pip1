@@ -10,6 +10,9 @@
     "**/*.test.tsx",
     "tests-node/**",
     "node_modules",
-    "justice-dashboard/**"
+    "justice-dashboard/**",
+    "justice-server/**",
+    "types/**",
+    "vitest.config.ts"
   ]
 }

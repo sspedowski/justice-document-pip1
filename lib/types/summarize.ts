@@ -83,3 +83,26 @@ export interface ParsedSSE<T = SSEFrame> {
 export function assertNever(x: never): never {
   throw new Error(`Unhandled case: ${JSON.stringify(x)}`);
 }
+
+// ----- JSON summarize endpoint types -----
+export interface SummarizeJsonRequest {
+  text: string;
+}
+
+export interface SummarizeJsonSuccess {
+  ok: true;
+  summary: string;
+  tags: string[];
+  provider: string;
+  model: string;
+  requestId: string;
+  elapsedMs: number;
+}
+
+export interface SummarizeJsonError {
+  ok: false;
+  error: string;
+  requestId?: string;
+}
+
+export type SummarizeJsonResponse = SummarizeJsonSuccess | SummarizeJsonError;

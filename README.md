@@ -1,11 +1,13 @@
 # Justice Dashboard
 
-## Streaming summarize API
+## Summarize APIs
 
-Endpoint: `POST /api/summarize/stream`
+### Streaming endpoint
+
+Endpoint: `POST /api/summarize/stream`  
 Legacy pointer: `/api/summarize` returns 410 JSON `{ error: 'MOVED_TO_SSE', next: '/api/summarize/stream' }`.
 
-> ℹ️ **Note:** A non-stream JSON summarization endpoint lives in a separate branch/PR. This branch intentionally ships **SSE-only**; use `/api/summarize/stream`.
+Use the streaming endpoint for progressive UI updates and long-running model calls.
 
 Body (JSON):
 
@@ -111,6 +113,35 @@ for await (const frame of summarizeFrames({ text: "hello", delayMs: 0 })) {
   - `npm run test:unit-node`
 
 The API route dynamically imports the module so tests never pull in Next.js internals.
+
+### JSON endpoint
+
+For short / synchronous summaries (no SSE required) call:
+
+**Request**
+
+```http
+POST /api/summarize/json
+Content-Type: application/json
+
+{ "text": "Hello world..." }
+```
+
+**Response (success)**
+
+```json
+{
+  "ok": true,
+  "summary": "...",
+  "tags": ["..."],
+  "provider": "local",
+  "model": "heuristic-v1",
+  "requestId": "uuid",
+  "elapsedMs": 123
+}
+```
+
+The scaffold uses a local heuristic so it works without provider keys. Swap in a real model integration later.
 
 ### AI Integration (Claude)
 
