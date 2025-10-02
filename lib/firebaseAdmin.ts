@@ -3,9 +3,11 @@
 import type { AppOptions } from 'firebase-admin/app'
 import { createRequire } from 'module'
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type AdminNS = typeof import("firebase-admin")
 
 const globalForAdmin = globalThis as unknown as {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   __adminApp?: import("firebase-admin").app.App
 }
 
@@ -25,6 +27,7 @@ function initAdminApp() {
 
   if (!admin.apps.length) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-imports
       const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) as unknown as import('firebase-admin/app').ServiceAccount & { project_id?: string }
       const effectiveProjectId = envProjectId || creds.project_id
       const inferredDbUrl = process.env.FIREBASE_DATABASE_URL || (effectiveProjectId ? `https://${effectiveProjectId}.firebaseio.com` : undefined)

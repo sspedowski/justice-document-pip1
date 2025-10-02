@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import Busboy from 'busboy';
 import { createHash } from 'node:crypto';
 import { Readable } from 'node:stream';
