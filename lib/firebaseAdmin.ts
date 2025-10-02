@@ -1,6 +1,7 @@
 // lib/firebaseAdmin.ts — lazy, single-instance Admin app (Node runtime only)
 
 import type { AppOptions } from 'firebase-admin/app'
+import { createRequire } from 'module'
 
 type AdminNS = typeof import("firebase-admin")
 
@@ -8,10 +9,11 @@ const globalForAdmin = globalThis as unknown as {
   __adminApp?: import("firebase-admin").app.App
 }
 
+const requireFn = createRequire(import.meta.url)
+
 function getAdmin(): AdminNS {
-  // require at call-time (avoids Edge/SSR import-time issues)
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require("firebase-admin") as AdminNS
+  // load at call-time (avoids Edge/SSR import-time issues)
+  return requireFn('firebase-admin') as AdminNS
 }
 
 function initAdminApp() {
@@ -23,7 +25,7 @@ function initAdminApp() {
 
   if (!admin.apps.length) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+      const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) as unknown as import('firebase-admin/app').ServiceAccount & { project_id?: string }
       const effectiveProjectId = envProjectId || creds.project_id
       const inferredDbUrl = process.env.FIREBASE_DATABASE_URL || (effectiveProjectId ? `https://${effectiveProjectId}.firebaseio.com` : undefined)
 
@@ -47,6 +49,27 @@ function initAdminApp() {
     globalForAdmin.__adminApp = admin.app()
   }
   return globalForAdmin.__adminApp
+}
+
+// Test helper: build the AppOptions object the module would use without
+// actually initializing firebase-admin (so unit tests avoid real SDK init).
+// Not for production use.
+export function __testBuildOptions() {
+  const envProjectId = process.env.FIREBASE_PROJECT_ID
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
+  const hasCreds = !!process.env.FIREBASE_SERVICE_ACCOUNT
+  let creds: { project_id?: string } | undefined
+  if (hasCreds) {
+    try { creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string) } catch { creds = undefined }
+  }
+  const effectiveProjectId = envProjectId || creds?.project_id
+  const inferredDbUrl = process.env.FIREBASE_DATABASE_URL || (effectiveProjectId ? `https://${effectiveProjectId}.firebaseio.com` : undefined)
+  const base: Record<string, unknown> = {}
+  if (hasCreds) base.credential = 'present'
+  if (effectiveProjectId) base.projectId = effectiveProjectId
+  if (inferredDbUrl) base.databaseURL = inferredDbUrl
+  if (storageBucket) base.storageBucket = storageBucket
+  return base
 }
 
 export function getDb() {

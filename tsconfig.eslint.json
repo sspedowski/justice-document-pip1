@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "app/**/*",
+    "src/**/*",
+    "lib/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "tests-node/**",
+    "node_modules",
+    "justice-dashboard/**"
+  ]
+}
