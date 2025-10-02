@@ -4,10 +4,9 @@ This guide covers production-ready enhancements added to the Justice Dashboard C
 
 ## Features Included
 
-1. **Rate Limiting** - Protects `/api/summarize/*` endpoints (20 req/min/IP)
-2. **Typed Client** - Safe fetch wrapper for `/api/summarize/json`
-3. **Request Tracking** - `requestId` and `elapsedMs` in responses
-4. **CI Smoke Tests** - Automated SSE endpoint verification
+1. **Rate Limiting** - Protects `/api/summarize/stream` endpoint (20 req/min/IP)
+2. **Request Tracking** - `requestId` and `elapsedMs` in responses
+3. **CI Smoke Tests** - Automated SSE endpoint verification
 
 ---
 
@@ -20,7 +19,7 @@ The default configuration uses an in-memory rate limiter suitable for dev and si
 **No setup required** - works out of the box with:
 - Limit: 20 requests per minute per IP
 - Window: Sliding 1-minute window
-- Applies to: `/api/summarize/stream` and `/api/summarize/json`
+- Applies to: `/api/summarize/stream`
 
 ### Production (Upstash Redis)
 
@@ -65,33 +64,7 @@ const ratelimit = new Ratelimit({
 
 ---
 
-## 2. Typed Client (`lib/client/summarizeJson.ts`)
-
-Use the typed client for safe JSON endpoint calls:
-
-```typescript
-import { summarizeJson } from '@/lib/client/summarizeJson';
-
-try {
-  const result = await summarizeJson('Your text to summarize');
-  console.log(result.summary);
-  console.log(result.tags);
-  console.log(result.requestId); // For debugging
-  console.log(result.elapsedMs); // Response time
-} catch (error) {
-  console.error('Summarization failed:', error);
-}
-```
-
-**Safety features:**
-- ✅ Validates `Content-Type: application/json`
-- ✅ Type-checks response shape
-- ✅ Prevents accidental `.json()` on SSE endpoints
-- ✅ Includes helpful error messages with response previews
-
----
-
-## 3. Request Tracking
+## 2. Request Tracking
 
 All responses now include:
 
@@ -104,17 +77,6 @@ event: end
 data: {"stage":"done","ok":true,"summary":"...","requestId":"123e4567-...","elapsedMs":1234}
 ```
 
-### JSON Response
-```json
-{
-  "ok": true,
-  "summary": "...",
-  "tags": ["tag1", "tag2"],
-  "requestId": "123e4567-e89b-12d3-a456-426614174000",
-  "elapsedMs": 1234
-}
-```
-
 **Usage in logs:**
 ```typescript
 console.log(`[${requestId}] Summarization completed in ${elapsedMs}ms`);
@@ -122,7 +84,7 @@ console.log(`[${requestId}] Summarization completed in ${elapsedMs}ms`);
 
 ---
 
-## 4. CI Smoke Tests
+## 3. CI Smoke Tests
 
 Automated smoke tests run after successful deployments.
 
