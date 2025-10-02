@@ -122,23 +122,6 @@ The Justice Dashboard supports optional AI-powered summarization using Anthropic
 
 **Documentation:** See [docs/ai-usage-claude.md](docs/ai-usage-claude.md) for detailed configuration, privacy considerations, prompt engineering, and troubleshooting.
 
-### Security & Secrets
-
-- Startup validation runs before `build` and `start`:
-  - In **production/staging/preview**, the app **fails fast** if:
-    - `JWT_SECRET` or `SESSION_SECRET` are missing/weak (≥32 chars required)
-    - Default admin creds are used (`ADMIN_USERNAME=admin/root` or weak `ADMIN_PASSWORD`)
-  - In **development**, placeholders are allowed (with warnings).
-
-- CI runs **Gitleaks** to catch accidental secrets in commits.
-
-Local commands:
-
-```bash
-npm run test:security           # unit test for secrets validator
-npm run secret-scan:local       # gitleaks local scan (redacted)
-```
-
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
