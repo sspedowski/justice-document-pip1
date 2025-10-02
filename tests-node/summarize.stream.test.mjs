@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { __framesForTest } from '../app/api/summarize/route.ts';
+import { framesForText } from '../lib/summarize/frames.mjs';
 
 test('SSE frames sequence is well-formed', () => {
-  const frames = [...__framesForTest('hello world')];
+  const frames = [...framesForText('hello world')];
   const stages = frames.map(f => f.stage);
   assert.deepEqual(stages, ['queued','fetching','chunking','summarizing','result','end']);
   const result = frames.find(f => f.stage === 'result');
@@ -13,5 +13,5 @@ test('SSE frames sequence is well-formed', () => {
 });
 
 test('input validation enforced', () => {
-  assert.throws(() => [...__framesForTest('')]);
+  assert.throws(() => [...framesForText('')]);
 });
