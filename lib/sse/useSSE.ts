@@ -1,15 +1,29 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { SSEFrame } from '@/lib/types/summarize';
+import { isSSEFrame } from '@/lib/types/guards';
 
-type Stage = 'queued' | 'fetching' | 'chunking' | 'summarizing' | 'result' | 'end';
-export type SSEMessage =
-  | { stage: Exclude<Stage, 'result' | 'end'>; progress?: number }
-  | { stage: 'result'; result: string }
-  | { stage: 'end'; ok: true };
+export interface UseSSEOptions<T extends SSEFrame = SSEFrame> {
+  url: string;
+  body: Record<string, unknown> | null;
+  auto?: boolean;
+  onMessage?: (frame: T) => void;
+  onError?: (err: Event) => void;
+}
 
-export function useSSE(opts: { url: string; body: Record<string, any> | null; auto?: boolean }) {
-  const { url, body, auto = false } = opts;
-  const [messages, setMessages] = useState<SSEMessage[]>([]);
+export interface UseSSEReturn<T extends SSEFrame = SSEFrame> {
+  messages: T[];
+  loading: boolean;
+  start: () => Promise<void>;
+  cancel: () => void;
+  canStart: boolean;
+}
+
+export function useSSE<T extends SSEFrame = SSEFrame>(
+  opts: UseSSEOptions<T>
+): UseSSEReturn<T> {
+  const { url, body, auto = false, onMessage, onError } = opts;
+  const [messages, setMessages] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
 
@@ -45,12 +59,21 @@ export function useSSE(opts: { url: string; body: Record<string, any> | null; au
           const line = chunk.split('\n').find(l => l.startsWith('data: '));
           if (!line) continue;
           try {
-            const json = JSON.parse(line.slice(6));
-            setMessages(m => [...m, json]);
+            const raw = JSON.parse(line.slice(6));
+            if (!isSSEFrame(raw)) {
+              console.warn('Invalid SSE frame shape:', raw);
+              continue;
+            }
+            const frame = raw as T;
+            setMessages(m => [...m, frame]);
+            onMessage?.(frame);
           } catch { /* ignore */ }
         }
       }
-    } catch {
+    } catch (err) {
+      if (onError && err instanceof Event) {
+        onError(err);
+      }
       // swallow for now; could push an error frame variant
     } finally {
       setLoading(false);

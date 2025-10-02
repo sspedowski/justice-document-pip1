@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "lint:no-any": "eslint . --rule '@typescript-eslint/no-explicit-any:error'",
     "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo '✅ Published Vite dashboard to public/dashboard'",
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
@@ -15,7 +17,8 @@
     "vite:preview": "npm --prefix justice-dashboard run preview",
     "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
     "typecheck": "tsc --noEmit",
-  "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\""
+    "test:node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\"",
+    "test": "npm run test:node"
   },
   "prepare": "husky install",
   "lint-staged": {
