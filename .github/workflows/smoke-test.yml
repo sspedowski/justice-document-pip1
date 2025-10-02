@@ -1,0 +1,43 @@
+name: Smoke Test
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: SSE Smoke Test
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'success'
+    steps:
+      - name: Smoke SSE summarize endpoint
+        env:
+          SITE_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          set -euo pipefail
+          echo "Testing SSE endpoint at $SITE_URL/api/summarize/stream"
+
+          RESP=$(curl -s -N -X POST \
+            -H 'Accept: text/event-stream' \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"CI smoke test"}' \
+            "$SITE_URL/api/summarize/stream" | head -n 30)
+
+          echo "Response:"
+          echo "$RESP"
+
+          # Check for SSE format
+          echo "$RESP" | grep -E '(^data:|^event:|^: )' >/dev/null || {
+            echo "ERROR: Response is not valid SSE format"
+            exit 1
+          }
+
+          # Check for start or done stage
+          echo "$RESP" | grep -E '"stage":"(start|done)"' >/dev/null || {
+            echo "ERROR: No start or done stage found in response"
+            exit 1
+          }
+
+          echo "✅ SSE smoke test passed"

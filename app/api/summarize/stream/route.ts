@@ -12,19 +12,35 @@ const sseHeaders: Record<string,string> = {
 async function buildStream(req: Request) {
   const { summarizeFrames, frameToSSE } = await import('@/lib/summarize/frames.mjs');
   const encoder = new TextEncoder();
+  const requestId = crypto.randomUUID();
+  const t0 = Date.now();
+
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(encoder.encode(`: connected ${Date.now()}\n\n`));
-      let payload: any = {};
-      try { payload = await req.json(); } catch {}
+      let payload: Record<string, unknown> = {};
+      try { payload = await req.json() as Record<string, unknown>; } catch {}
       const text = typeof payload?.text === 'string' ? payload.text : '';
       try {
+        let lastFrame: any = null;
         for await (const frame of summarizeFrames({ text })) {
+          lastFrame = frame;
           controller.enqueue(encoder.encode(frameToSSE(frame)));
         }
-        controller.enqueue(encoder.encode('event: end\ndata: {}\n\n'));
-      } catch (err:any) {
-        controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ message: String(err) })}\n\n`));
+        // Add tracking to final frame
+        const finalFrame = {
+          ...(lastFrame || {}),
+          requestId,
+          elapsedMs: Date.now() - t0,
+        };
+        controller.enqueue(encoder.encode(`event: end\ndata: ${JSON.stringify(finalFrame)}\n\n`));
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({
+          message: errMsg,
+          requestId,
+          elapsedMs: Date.now() - t0
+        })}\n\n`));
       } finally {
         controller.close();
       }
