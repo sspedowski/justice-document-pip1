@@ -4,6 +4,8 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
+    "prestart": "node scripts/validate-secrets.mjs",
+    "prebuild": "node scripts/validate-secrets.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -14,7 +16,10 @@
     "vite:dev": "npm --prefix justice-dashboard run dev",
     "vite:preview": "npm --prefix justice-dashboard run preview",
     "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:unit-node": "node --test --test-reporter=spec \"tests-node/**/*.mjs\"",
+    "secret-scan:local": "npx gitleaks detect --no-git --redact --source . || (echo Secrets scan failed && exit 1)",
+    "test:security": "node --test tests-node/validate-secrets.test.mjs"
   },
   "prepare": "husky install",
   "lint-staged": {
@@ -67,7 +72,8 @@
     "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "gitleaks": "^8.18.4"
   },
   "engines": {
     "node": ">=20.11 <21"
