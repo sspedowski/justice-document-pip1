@@ -19,15 +19,47 @@ if (dotenvPath) {
   require("dotenv").config({ path: dotenvPath });
 }
 
-// Config
+// Config & Secret Validation
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PROD = NODE_ENV === 'production';
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
-// Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
-let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
-if (process.env.NODE_ENV === 'test') {
+
+// Helper: enforce required secret in production
+function requireProdSecret(name, value, { minLength = 32, allowDefault = false } = {}) {
+  if (!IS_PROD) return value; // Only enforce strictly in production
+  if (!value) throw new Error(`[config] Missing required env var ${name} in production.`);
+  if (!allowDefault && /dev|change-me|default|example/i.test(value)) {
+    throw new Error(`[config] ${name} uses an insecure placeholder value; set a strong unique secret.`);
+  }
+  if (value.length < minLength) {
+    throw new Error(`[config] ${name} must be at least ${minLength} characters in production.`);
+  }
+  return value;
+}
+
+// JWT secret: allow short/insecure only in non-prod for convenience
+let JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret-change-me';
+if (IS_PROD) {
+  JWT_SECRET = requireProdSecret('JWT_SECRET', process.env.JWT_SECRET, { minLength: 32 });
+} else if (JWT_SECRET === 'dev-jwt-secret-change-me') {
+  // eslint-disable-next-line no-console
+  console.warn('[warn] Using development JWT secret fallback; NEVER use this in production.');
+}
+
+// Admin credentials (intended only for local/test bootstrap). Force explicit override in production.
+let ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adminpass';
+if (NODE_ENV === 'test') {
   ADMIN_USERNAME = 'admin';
   ADMIN_PASSWORD = 'adminpass';
+}
+if (IS_PROD) {
+  if (['admin', 'root'].includes(ADMIN_USERNAME)) {
+    throw new Error('[config] ADMIN_USERNAME must be overridden in production (not "admin"/"root").');
+  }
+  if (ADMIN_PASSWORD === 'adminpass' || ADMIN_PASSWORD.length < 12) {
+    throw new Error('[config] ADMIN_PASSWORD must be a strong unique value (>=12 chars) in production.');
+  }
 }
 
 // App
