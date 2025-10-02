@@ -1,3 +1,5 @@
+# Windows phantom file safeguard
+nul
 # Env & local configs
 .env
 .env.*
@@ -94,3 +96,6 @@ legacy/_parking/**/build/
 .vscode/
 !.vscode/settings.json
 !.vscode/keybindings.json
+
+# Windows reserved filenames
+nul
