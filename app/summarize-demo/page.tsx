@@ -4,7 +4,7 @@ import { useSSE } from '@/lib/sse/useSSE';
 
 export default function SummarizeDemo() {
   const [text, setText] = useState('Paste text here to “summarize” (mock)…');
-  const { messages, loading, start, cancel, canStart } = useSSE({ url: '/api/summarize', body: { text } });
+  const { messages, loading, start, cancel, canStart } = useSSE({ url: '/api/summarize/stream', body: { text } });
   const last = messages[messages.length - 1];
   const progress = (messages.find((m: any) => m.stage === 'summarizing' && m.progress)?.progress ??
     messages.find((m: any) => typeof m.progress === 'number')?.progress ??

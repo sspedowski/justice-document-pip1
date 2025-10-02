@@ -2,7 +2,8 @@
 
 ## Streaming summarize API
 
-Endpoint: `POST /api/summarize`
+Endpoint: `POST /api/summarize/stream`
+Legacy pointer: `/api/summarize` returns 410 JSON `{ error: 'MOVED_TO_SSE', next: '/api/summarize/stream' }`.
 
 Body (JSON):
 
@@ -24,7 +25,7 @@ Response: `text/event-stream` frames
 Test locally:
 
 ```bash
-curl -N -X POST http://localhost:3000/api/summarize \
+curl -N -X POST http://localhost:3000/api/summarize/stream \
   -H 'content-type: application/json' \
   -d '{"text":"Hello streaming world"}'
 ```
@@ -32,7 +33,7 @@ curl -N -X POST http://localhost:3000/api/summarize \
 **Windows note:** Use `curl.exe` (not the PowerShell alias) so `-H` works correctly:
 
 ```powershell
-curl.exe -N -X POST http://localhost:3000/api/summarize -H 'content-type: application/json' -d '{\"text\":\"Hello streaming world\"}'
+curl.exe -N -X POST http://localhost:3000/api/summarize/stream -H 'content-type: application/json' -d '{\"text\":\"Hello streaming world\"}'
 ```
 
 **Demo page:** Visit [http://localhost:3000/summarize-demo](http://localhost:3000/summarize-demo) for an interactive SSE demo with progress UI and cancel.
