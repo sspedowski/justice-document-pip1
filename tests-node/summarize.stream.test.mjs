@@ -7,5 +7,5 @@ test('emits stages in order and ends cleanly', async () => {
   for await (const f of summarizeFrames({ text: 'hello world', delayMs: 0 })) {
     seen.push(f.stage);
   }
-  assert.deepEqual(seen, ['queued','fetching','chunking','summarizing','result','end']);
+  assert.deepEqual(seen, ['start','queued','fetching','chunking','summarizing','result','end']);
 });

@@ -110,6 +110,18 @@ for await (const frame of summarizeFrames({ text: "hello", delayMs: 0 })) {
 
 The API route dynamically imports the module so tests never pull in Next.js internals.
 
+### AI Integration (Claude)
+
+The Justice Dashboard supports optional AI-powered summarization using Anthropic's Claude API.
+
+**Quick setup:**
+
+1. Add `CLAUDE_API_KEY` to your `.env.local` (see `.env.example`)
+2. The summarize stream will automatically use Claude when the key is present
+3. Without a key, falls back to mock responses for testing
+
+**Documentation:** See [docs/ai-usage-claude.md](docs/ai-usage-claude.md) for detailed configuration, privacy considerations, prompt engineering, and troubleshooting.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
