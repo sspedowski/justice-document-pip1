@@ -86,3 +86,11 @@ legacy/_parking/**/node_modules/
 legacy/_parking/**/.next/
 legacy/_parking/**/dist/
 legacy/_parking/**/build/
+
+# Local assistants / workspace
+.claude/
+
+# VS Code (ignore directory by default; allow curated files)
+.vscode/
+!.vscode/settings.json
+!.vscode/keybindings.json

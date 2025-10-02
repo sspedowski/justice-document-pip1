@@ -14,7 +14,8 @@
     "vite:dev": "npm --prefix justice-dashboard run dev",
     "vite:preview": "npm --prefix justice-dashboard run preview",
     "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+  "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\""
   },
   "prepare": "husky install",
   "lint-staged": {
