@@ -33,6 +33,17 @@
   ],
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "react/jsx-uses-react": "off"
+    "react/jsx-uses-react": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@/lib/client/summarizeJson",
+            "message": "The JSON client belongs only on the branch/PR that introduces /api/summarize/json."
+          }
+        ]
+      }
+    ]
   }
 }

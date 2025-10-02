@@ -5,6 +5,8 @@
 Endpoint: `POST /api/summarize/stream`
 Legacy pointer: `/api/summarize` returns 410 JSON `{ error: 'MOVED_TO_SSE', next: '/api/summarize/stream' }`.
 
+> ℹ️ **Note:** A non-stream JSON summarization endpoint lives in a separate branch/PR. This branch intentionally ships **SSE-only**; use `/api/summarize/stream`.
+
 Body (JSON):
 
 ```jsonc
