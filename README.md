@@ -38,6 +38,24 @@ curl.exe -N -X POST http://localhost:3000/api/summarize/stream -H 'content-type:
 
 **Demo page:** Visit [http://localhost:3000/summarize-demo](http://localhost:3000/summarize-demo) for an interactive SSE demo with progress UI and cancel.
 
+### JSON (non-stream) summarization
+
+Endpoint: `POST /api/summarize/json` (also supports GET with `?text=`)
+
+Body (JSON):
+
+```jsonc
+{ "text": "string" }
+```
+
+Response (200):
+
+```jsonc
+{ "ok": true, "summary": "...", "tags": ["..."], "provider": "claude|mock", "model": "..." }
+```
+
+Use this for synchronous clients that don't need incremental frames. For live progress and token streaming, prefer the SSE endpoint `POST /api/summarize/stream`.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ![vercel-min health](https://github.com/sspedowski/justice-document-pip1/actions/workflows/health-check.yml/badge.svg)
