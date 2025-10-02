@@ -1,5 +1,7 @@
 // lib/firebaseAdmin.ts — lazy, single-instance Admin app (Node runtime only)
 
+import type { AppOptions } from 'firebase-admin/app'
+
 type AdminNS = typeof import("firebase-admin")
 
 const globalForAdmin = globalThis as unknown as {
@@ -16,28 +18,30 @@ function initAdminApp() {
   if (globalForAdmin.__adminApp) return globalForAdmin.__adminApp
   const admin = getAdmin()
 
-  const projectId =
-    process.env.FIREBASE_PROJECT_ID ||
-    (process.env.FIREBASE_SERVICE_ACCOUNT
-      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT).project_id
-      : undefined)
-
-  const databaseURL =
-    process.env.FIREBASE_DATABASE_URL ||
-    (projectId ? `https://${projectId}.firebaseio.com` : undefined)
+  const envProjectId = process.env.FIREBASE_PROJECT_ID
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
 
   if (!admin.apps.length) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       const creds = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-      globalForAdmin.__adminApp = admin.initializeApp({
+      const effectiveProjectId = envProjectId || creds.project_id
+      const inferredDbUrl = process.env.FIREBASE_DATABASE_URL || (effectiveProjectId ? `https://${effectiveProjectId}.firebaseio.com` : undefined)
+
+      const opts: AppOptions = {
         credential: admin.credential.cert(creds),
-        projectId: projectId || creds.project_id,
-        databaseURL,
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-      })
+        ...(effectiveProjectId ? { projectId: effectiveProjectId } : {}),
+        ...(inferredDbUrl ? { databaseURL: inferredDbUrl } : {}),
+        ...(storageBucket ? { storageBucket } : {})
+      }
+      globalForAdmin.__adminApp = admin.initializeApp(opts)
     } else {
       // local dev fallback (GOOGLE_APPLICATION_CREDENTIALS / metadata)
-      globalForAdmin.__adminApp = admin.initializeApp({ projectId, databaseURL })
+      const inferredDbUrl = process.env.FIREBASE_DATABASE_URL || (envProjectId ? `https://${envProjectId}.firebaseio.com` : undefined)
+      const opts: AppOptions = {
+        ...(envProjectId ? { projectId: envProjectId } : {}),
+        ...(inferredDbUrl ? { databaseURL: inferredDbUrl } : {})
+      }
+      globalForAdmin.__adminApp = admin.initializeApp(opts)
     }
   } else {
     globalForAdmin.__adminApp = admin.app()

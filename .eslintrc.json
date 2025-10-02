@@ -34,6 +34,8 @@
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off",
+    "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": false }],
+    "@typescript-eslint/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
     "no-restricted-imports": [
       "error",
       {
