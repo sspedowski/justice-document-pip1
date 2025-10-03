@@ -5,13 +5,24 @@ const ORIG_ENV = { ...process.env }
 
 test.afterEach(() => { process.env = { ...ORIG_ENV } })
 
-test('__testBuildOptions builds expected option shape without undefined fields', async () => {
+test('__testBuildOptions builds expected option shape without undefined fields', async (t) => {
   process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({ project_id: 'proj-123' })
   process.env.FIREBASE_PROJECT_ID = '' // ensure fallback to creds.project_id
   delete process.env.FIREBASE_DATABASE_URL // simulate absence
   process.env.FIREBASE_STORAGE_BUCKET = 'bucket-1'
 
-  const mod = await import('../lib/firebaseAdmin.ts?t=' + Math.random())
+  let mod
+  try {
+    mod = await import('../lib/firebaseAdmin.ts?t=' + Math.random())
+  } catch (err) {
+    // Node v20 doesn't support .ts imports; skip test
+    if (err.code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+      t.skip('Requires Node v22+ for .ts import support')
+      return
+    }
+    throw err
+  }
+
   assert.ok(mod.__testBuildOptions, 'helper exported')
   const opts = mod.__testBuildOptions()
   assert.equal(opts.projectId, 'proj-123')
