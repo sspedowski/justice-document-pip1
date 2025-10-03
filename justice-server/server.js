@@ -4,7 +4,8 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-// const helmet = require("helmet"); // no longer used; server applies CSP header manually
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
@@ -72,6 +73,18 @@ if (isProd && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
 
 // App
 const app = express();
+// Security headers via helmet (CSP handled manually below). Disable conflicting policies.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'no-referrer' },
+}));
+// Additional headers not covered or we want explicit values
+app.use((_, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
 app.disable("x-powered-by");
 // Single CSP header applied by the server. Remove any <meta http-equiv="Content-Security-Policy"> tags in HTML.
 // Frontend should call /api (same origin via Vite proxy); allow Vite dev server & websocket for HMR.
@@ -117,6 +130,16 @@ if (!isTest) {
 } else {
   // In test environment, do not use csurf at all to simplify automated requests
 }
+
+// Rate limit authentication endpoints to mitigate brute force
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth requests, please try again later.' }
+});
+app.use(['/api/login', '/api/refresh-token'], authLimiter);
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
