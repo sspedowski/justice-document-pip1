@@ -22,6 +22,13 @@ if (dotenvPath) {
 // Config
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
+// Enforce strong secret in production
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'dev-jwt-secret-change-me') {
+  console.error('[FATAL] JWT_SECRET is not set (still using fallback) in production. Exiting.');
+  process.exit(1);
+} else if (JWT_SECRET === 'dev-jwt-secret-change-me') {
+  console.warn('[WARN] Using fallback JWT secret (development only). Set JWT_SECRET for security.');
+}
 // Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
 let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
@@ -107,10 +114,17 @@ app.get('/', (_req, res) => {
   return res.redirect('/legacy/index.html');
 });
 
-// Multer setup for PDF uploads — use memory storage so requireAuth runs before disk ops
+// Multer setup for PDF uploads — switch to disk storage with randomized safe filenames
 const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname || '').toLowerCase();
+      const safe = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`;
+      cb(null, safe);
+    }
+  }),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB cap
   fileFilter: (_req, file, cb) => {
     const isPdf = file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf';
     if (!isPdf) return cb(new Error('Only PDF files are allowed'));
@@ -173,10 +187,10 @@ app.post('/api/refresh-token', (req, res) => {
   }
 });
 
-// --- Profile (protected) ---
+// --- Profile (protected) --- normalized shape { success, profile }
 app.get('/api/profile', requireAuth, (req, res) => {
   const { sub, role } = req.user || {};
-  return res.json({ user: { username: sub, role: role || 'user' } });
+  return res.json({ success: true, profile: { username: sub, role: role || 'user' } });
 });
 
 // --- Current user metadata (used by Next.js / toolbar gating) ---
