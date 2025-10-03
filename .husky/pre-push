@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run Vite subapp tests before pushing
+CHANGED=$(git diff --name-only --cached || true)
+if ! echo "$CHANGED" | grep -q '^justice-dashboard/'; then
+  echo "No changes in justice-dashboard/, skipping subapp tests."
+  exit 0
+fi
+
 npm --prefix justice-dashboard run test:run
 

@@ -8,6 +8,7 @@ const multer = require("multer");
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
+const crypto = require('crypto');
 
 // Load environment variables (prefer local .env if present)
 const dotenvPath = [
@@ -20,21 +21,53 @@ if (dotenvPath) {
 }
 
 // Config
+const ENV = process.env.NODE_ENV || "development";
+const isProd = ENV === "production";
+const isTest = ENV === "test";
+
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
-// Enforce strong secret in production
-if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'dev-jwt-secret-change-me') {
-  console.error('[FATAL] JWT_SECRET is not set (still using fallback) in production. Exiting.');
-  process.exit(1);
-} else if (JWT_SECRET === 'dev-jwt-secret-change-me') {
-  console.warn('[WARN] Using fallback JWT secret (development only). Set JWT_SECRET for security.');
+const devSecretPath = path.join(__dirname, ".jwt-dev.secret");
+let JWT_SECRET = (process.env.JWT_SECRET || "").trim();
+
+if (!JWT_SECRET) {
+  if (isProd) {
+    console.error("[FATAL] JWT_SECRET environment variable is required in production. Exiting.");
+    process.exit(1);
+  }
+  try {
+    if (fs.existsSync(devSecretPath)) {
+      JWT_SECRET = fs.readFileSync(devSecretPath, "utf8").trim();
+    }
+    if (!JWT_SECRET) {
+      JWT_SECRET = crypto.randomBytes(48).toString("hex");
+      fs.writeFileSync(devSecretPath, JWT_SECRET, { encoding: "utf8", mode: 0o600 });
+      const relPath = path.relative(process.cwd(), devSecretPath);
+      console.warn("[WARN] Generated a local JWT secret at " + relPath + ". Set JWT_SECRET to override.");
+    } else if (!isTest) {
+      const relPath = path.relative(process.cwd(), devSecretPath);
+      console.warn("[WARN] Using stored development JWT secret from " + relPath + ". Set JWT_SECRET to override.");
+    }
+  } catch (error) {
+    JWT_SECRET = crypto.randomBytes(48).toString("hex");
+    console.warn("[WARN] Generated ephemeral development JWT secret; persistence failed: " + error.message);
+  }
+} else if (!isProd && !isTest) {
+  console.info("[info] JWT_SECRET loaded from environment.");
 }
+process.env.JWT_SECRET = JWT_SECRET;
+
 // Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
 let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
-if (process.env.NODE_ENV === 'test') {
-  ADMIN_USERNAME = 'admin';
-  ADMIN_PASSWORD = 'adminpass';
+if (isTest) {
+  ADMIN_USERNAME = "admin";
+  ADMIN_PASSWORD = "adminpass";
+}
+if (isProd && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
+  console.error("[FATAL] ADMIN_USERNAME/ADMIN_PASSWORD must be set in production. Exiting.");
+  process.exit(1);
+} else if (!isTest && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
+  console.warn("[WARN] Using default admin credentials. Set ADMIN_USERNAME and ADMIN_PASSWORD.");
 }
 
 // App
@@ -42,7 +75,6 @@ const app = express();
 app.disable("x-powered-by");
 // Single CSP header applied by the server. Remove any <meta http-equiv="Content-Security-Policy"> tags in HTML.
 // Frontend should call /api (same origin via Vite proxy); allow Vite dev server & websocket for HMR.
-const isProd = process.env.NODE_ENV === 'production';
 app.use((req, res, next) => {
   const viteDevSrc = "http://localhost:5173 http://localhost:5174";
   const viteWSSrc = "ws://localhost:5173 ws://localhost:5174";
@@ -68,7 +100,7 @@ app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection. In tests we skip csurf entirely for simplicity.
 app.use(cookieParser());
 const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: isProd } });
-if (process.env.NODE_ENV !== 'test') {
+if (!isTest) {
   // Apply CSRF protection except for open auth endpoints used in API-style flows.
   // Also allow /api/summarize so file uploads in dev aren't blocked by CSRF.
   app.use((req, res, next) => {
@@ -141,7 +173,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Dev-only ping endpoint (authenticated) — useful for quick DevTools checks
-if (process.env.NODE_ENV !== 'production') {
+if (!isProd) {
   app.get('/api/_ping', requireAuth, (req, res) => {
     res.json({ ok: true, user: req.user, ts: Date.now() });
   });

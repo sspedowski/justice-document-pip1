@@ -99,3 +99,7 @@ legacy/_parking/**/build/
 
 # Windows reserved filenames
 nul
+
+# Local JWT secret generated for dev server
+justice-server/.jwt-dev.secret
+
