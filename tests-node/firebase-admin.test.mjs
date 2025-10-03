@@ -11,7 +11,7 @@ test('__testBuildOptions builds expected option shape without undefined fields',
   delete process.env.FIREBASE_DATABASE_URL // simulate absence
   process.env.FIREBASE_STORAGE_BUCKET = 'bucket-1'
 
-  const mod: any = await import('../lib/firebaseAdmin.ts?t=' + Math.random())
+  const mod = await import('../lib/firebaseAdmin.ts?t=' + Math.random())
   assert.ok(mod.__testBuildOptions, 'helper exported')
   const opts = mod.__testBuildOptions()
   assert.equal(opts.projectId, 'proj-123')
