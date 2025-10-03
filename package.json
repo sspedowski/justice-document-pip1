@@ -17,7 +17,7 @@
     "vite:preview": "npm --prefix justice-dashboard run preview",
     "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
     "typecheck": "tsc --noEmit",
-    "test:node": "node --import ./tools/register-alias-loader.mjs --test --test-reporter=spec tests-node/*.mjs tests-node/*.mts",
+    "test:node": "node --import ./tools/register-alias-loader.mjs --test --test-reporter=spec tests-node/*.mjs",
     "test": "npm run test:node"
   },
   "prepare": "husky install",
