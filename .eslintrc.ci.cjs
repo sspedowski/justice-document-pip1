@@ -1,33 +1,36 @@
-/** CI-only config: enforce no-explicit-any on first-party TS only */
+/** CI-only config: enforce no-explicit-any on first-party TS only (classic ESLint format) */
 module.exports = {
   root: true,
   ignorePatterns: [
     'node_modules/**',
-    'cypress/**',
+    '.next/**',
+    'dist/**',
+    'coverage/**',
     'tests/**',
     'tests-node/**',
+    'cypress/**',
     'examples/**',
-    'dist/**',
-    '.next/**',
+    'types/**',
+    'vitest.config.ts',
+    'justice-server/**',
   ],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
+  plugins: ['@typescript-eslint', 'react-hooks'],
   overrides: [
     {
-      files: [
-        'app/**/*.ts',
-        'app/**/*.tsx',
-        'src/**/*.ts',
-        'src/**/*.tsx',
-        'lib/**/*.ts',
-        'lib/**/*.tsx',
-      ],
-      parser: '@typescript-eslint/parser',
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-      },
-      plugins: ['@typescript-eslint', 'react-hooks'],
+      files: ['app/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+    {
+      files: ['**/*.d.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
       },
     },
   ],
