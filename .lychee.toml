@@ -1,0 +1,25 @@
+# Lychee link checker configuration
+
+# Exclude patterns
+exclude = [
+  # Localhost/development URLs
+  "http://localhost:*",
+  "https://localhost:*",
+  "http://127.0.0.1:*",
+
+  # Placeholder/example URLs
+  "https://<your-*",
+  "http://<your-*",
+
+  # Private/internal URLs
+  "file:///*"
+]
+
+# Accept status codes
+accept = [200, 201, 204, 301, 302, 307, 308]
+
+# Timeout in seconds
+timeout = 20
+
+# Retry count
+max_retries = 3
