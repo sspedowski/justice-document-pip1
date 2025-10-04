@@ -26,7 +26,7 @@ export async function safeFetchJson<T=unknown>(input: RequestInfo | URL, init?: 
   try {
     const parsed = JSON.parse(text) as T;
     return { ok: res.ok, status, json: parsed };
-  } catch (e:any) {
+  } catch (e: unknown) {
     return { ok: false, status, json: null, parseError: String(e), raw: text };
   }
 }

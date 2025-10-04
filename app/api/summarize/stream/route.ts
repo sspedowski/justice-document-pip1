@@ -22,9 +22,9 @@ async function buildStream(req: Request) {
       try { payload = await req.json() as Record<string, unknown>; } catch {}
       const text = typeof payload?.text === 'string' ? payload.text : '';
       try {
-        let lastFrame: any = null;
+        let lastFrame: Record<string, unknown> | null = null;
         for await (const frame of summarizeFrames({ text })) {
-          lastFrame = frame;
+          lastFrame = frame as Record<string, unknown>;
           controller.enqueue(encoder.encode(frameToSSE(frame)));
         }
         // Add tracking to final frame

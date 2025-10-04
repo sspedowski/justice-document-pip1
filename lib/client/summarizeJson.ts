@@ -12,13 +12,13 @@ export type SummarizeJsonResult = {
   elapsedMs?: number;
 };
 
-function isSummarizeJsonResult(v: any): v is SummarizeJsonResult {
-  return (
-    v &&
-    typeof v.ok === 'boolean' &&
-    (v.summary === undefined || typeof v.summary === 'string') &&
-    (v.tags === undefined || Array.isArray(v.tags))
-  );
+function isSummarizeJsonResult(v: unknown): v is SummarizeJsonResult {
+  if (!v || typeof v !== 'object') return false;
+  const o = v as Record<string, unknown>;
+  const ok = typeof o.ok === 'boolean';
+  const summaryOk = o.summary === undefined || typeof o.summary === 'string';
+  const tagsOk = o.tags === undefined || Array.isArray(o.tags);
+  return ok && summaryOk && tagsOk;
 }
 
 /**

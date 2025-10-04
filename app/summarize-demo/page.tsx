@@ -2,13 +2,34 @@
 import { useState } from 'react';
 import { useSSE } from '@/lib/sse/useSSE';
 
+type Stage = 'queued' | 'fetching' | 'chunking' | 'summarizing' | 'result' | 'end';
+type Msg =
+  | { stage: Exclude<Stage, 'result' | 'end'>; progress?: number }
+  | { stage: 'result'; result: string }
+  | { stage: 'end'; ok: true };
+
+type ProgressMsg = { stage: 'queued' | 'fetching' | 'chunking' | 'summarizing'; progress: number };
+type SummarizingMsg = { stage: 'summarizing'; progress: number };
+
+function hasProgress(m: Msg): m is ProgressMsg {
+  const candidate = m as Record<string, unknown>;
+  return 'progress' in candidate && typeof candidate.progress === 'number';
+}
+
+function isSummarizingWithProgress(m: Msg): m is SummarizingMsg {
+  return m.stage === 'summarizing' && hasProgress(m);
+}
+
 export default function SummarizeDemo() {
   const [text, setText] = useState('Paste text here to “summarize” (mock)…');
   const { messages, loading, start, cancel, canStart } = useSSE({ url: '/api/summarize/stream', body: { text } });
-  const last = messages[messages.length - 1];
-  const progress = (messages.find((m: any) => m.stage === 'summarizing' && m.progress)?.progress ??
-    messages.find((m: any) => typeof m.progress === 'number')?.progress ??
-    (last?.stage === 'end' ? 100 : 0)) as number;
+  const typed = messages as Msg[];
+  const last = typed[typed.length - 1];
+  const progress = (
+    typed.find(isSummarizingWithProgress)?.progress ??
+    typed.find(hasProgress)?.progress ??
+    (last?.stage === 'end' ? 100 : 0)
+  ) as number;
   const steps = [0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
   const nearest = steps.reduce((a,b)=> Math.abs(b-progress) < Math.abs(a-progress) ? b : a, 0);
   const widthClass = nearest===100? 'w-full' : nearest===0? 'w-0' : `w-[${nearest}%]`;
@@ -39,10 +60,10 @@ export default function SummarizeDemo() {
         <summary className="cursor-pointer font-medium">Raw events ({messages.length})</summary>
         <pre className="mt-3 text-sm overflow-auto">{JSON.stringify(messages, null, 2)}</pre>
       </details>
-      {messages.find((m: any) => m.stage === 'result') && (
+      {typed.find((m) => m.stage === 'result') && (
         <div className="border rounded-md p-3">
           <h2 className="font-medium mb-2">Result</h2>
-          <p>{(messages.find((m: any) => m.stage === 'result') as any)?.result}</p>
+          <p>{(typed.find((m) => m.stage === 'result') as Extract<Msg,{stage:'result'}>)?.result}</p>
         </div>
       )}
     </main>

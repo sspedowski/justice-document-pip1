@@ -7,7 +7,7 @@ export type SSEMessage =
   | { stage: 'result'; result: string }
   | { stage: 'end'; ok: true };
 
-export function useSSE(opts: { url: string; body: Record<string, any> | null; auto?: boolean }) {
+export function useSSE(opts: { url: string; body: Record<string, unknown> | null; auto?: boolean }) {
   const { url, body, auto = false } = opts;
   const [messages, setMessages] = useState<SSEMessage[]>([]);
   const [loading, setLoading] = useState(false);
