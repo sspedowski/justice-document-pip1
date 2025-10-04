@@ -226,5 +226,43 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 ---
 
-**Last Updated:** 2025-10-02
+**Last Updated:** 2025-10-04
 **Version:** 1.0.0 (Production enhancements)
+
+---
+
+## Amazon Q (VS Code) hardening checklist
+
+If you use Amazon Q inside VS Code, these settings help reduce noise and improve privacy.
+
+- Set a default AWS region (avoids us-east-1 fallback):
+  - VS Code: Command Palette → “AWS: Set Region”
+  - Or edit your AWS config (`%UserProfile%\\.aws\\config` on Windows, `~/.aws/config` elsewhere):
+
+    ```ini
+    [default]
+    region = us-east-1
+    ```
+
+- Privacy controls:
+  - VS Code Settings → Amazon Q → disable “Share CodeWhisperer Content with AWS” if you don’t want snippets shared
+  - Optionally set telemetry to opt-out
+  - Example user settings:
+
+    ```jsonc
+    {
+      "telemetry.telemetryLevel": "off",
+      "aws.telemetry": "optOut",
+      "amazonQ.shareCodeWhispererContentWithAWS": false
+    }
+    ```
+
+- Token hygiene:
+  - Don’t share logs that include bearer token updates; if exposed, sign out/in to rotate
+
+- Memory spikes:
+  - If you see repeated “exceeded memory threshold” warnings after startup, try Reload Window, close large folders, or temporarily disable unused Q features
+
+- Proxy (enterprise networks):
+  - Configure VS Code proxy (Settings → “Proxy”) or set `HTTP_PROXY` / `HTTPS_PROXY` before launching VS Code
+
