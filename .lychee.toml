@@ -1,0 +1,20 @@
+# Ignore ephemeral & CI-only URLs
+exclude = [
+  "http://localhost:*",
+  "https://*.vercel.app/*",
+  "https://results-receiver.actions.githubusercontent.com/.*",
+  "mailto:.*",
+  "tel:.*",
+  "data:.*"
+]
+
+# Be resilient
+max_retries = 2
+retry_wait_time = 1000
+accept = ["200..299", "403", "429"] # allow rate-limited docs sites
+
+# Don’t crawl build outputs
+exclude_path = ["node_modules", ".next", "dist", "out", "coverage"]
+
+# Stabilize requests
+user_agent = "lychee/0.14 (+https://github.com/lycheeverse/lychee)"

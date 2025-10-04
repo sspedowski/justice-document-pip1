@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Link check
-        uses: lycheeverse/lychee-action@v2
+      - name: docs: link check
+        uses: lycheeverse/lychee-action@v1
         with:
-          args: --no-progress --format detailed --config .lychee.toml README.md HELP.md HELP_IMPLEMENTATION_SUMMARY.md
+          args: --config .lychee.toml --no-progress .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
