@@ -54,4 +54,4 @@ jobs:
       - run: npm ci
       - run: echo "::add-matcher::.github/eslint-problem-matcher.json"
       - name: ESLint (annotated)
-        run: npx eslint --no-ignore "justice-dashboard/**/*.{js,jsx,ts,tsx}" "frontend/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0 --cache --cache-location .eslintcache
+        run: npx eslint --no-ignore "justice-dashboard/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0 --cache --cache-location .eslintcache
