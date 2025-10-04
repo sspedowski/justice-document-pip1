@@ -1,5 +1,7 @@
 # Justice Dashboard
 
+# Justice Dashboard
+
 ## Summarize APIs
 
 ### Streaming endpoint
@@ -240,3 +242,7 @@ Deployments → select previous healthy build → Promote to Production.
 
 ---
 _This SOP section is source‑controlled; update when deployment or infrastructure changes._
+
+### Auth rate limiting
+
+`/api/login` is protected by `express-rate-limit` v8. Default: **5** attempts per 15 minutes per IP → 429 on the 6th. Configured via `limit` (v8), not the deprecated `max`.
