@@ -3,36 +3,5 @@
   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
-  "ignorePatterns": [
-    "**/.next/**",
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/coverage/**",
-    "justice-dashboard/dist/**",
-    "justice-dashboard/coverage/**"
-  ],
-  "overrides": [
-    {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "parserOptions": { "project": false }
-    },
-    {
-      "files": ["justice-dashboard/src/**/*.{js,jsx,ts,tsx}"],
-      "env": { "browser": true, "es2022": true },
-      "rules": {
-        "no-restricted-properties": [
-          "error",
-          {
-            "object": "process",
-            "property": "env",
-            "message": "Use import.meta.env.* in Vite client code."
-          }
-        ]
-      }
-    }
-  ],
-  "rules": {
-    "react/react-in-jsx-scope": "off",
-    "react/jsx-uses-react": "off"
-  }
+  "ignorePatterns": ["justice-dashboard/**", ".next/**", "out/**", "dist/**", "coverage/**"]
 }

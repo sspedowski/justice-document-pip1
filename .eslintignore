@@ -1,16 +1,5 @@
-# Ignore build outputs and third-party code
-**/.next/**
-**/node_modules/**
-**/dist/**
-**/build/**
-**/coverage/**
-
-# Ignore Vite subapp from root ESLint
-justice-dashboard/**
-justice-dashboard/dist/**
-justice-dashboard/coverage/**
-justice-dashboard-v2/**
-frontend/**
-justice-server/**
-legacy/**
-web/**
+justice-dashboard/
+.next/
+out/
+dist/
+coverage/
