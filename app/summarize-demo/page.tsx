@@ -4,7 +4,7 @@ import { useSSE } from '@/lib/sse/useSSE';
 import type { SSEFrame } from '@/lib/types/summarize';
 
 type ProgressFrame = Extract<SSEFrame, { stage: 'progress' }>;
-type ResultFrame = Extract<SSEFrame, { stage: 'result' }>;
+type DoneFrame = Extract<SSEFrame, { stage: 'done' }>;
 
 const STEPS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -22,8 +22,8 @@ export default function SummarizeDemo() {
   const nearest = useMemo(() => STEPS.reduce((a, b) => (Math.abs(b - pct) < Math.abs(a - pct) ? b : a), 0), [pct]);
   const widthClass = nearest === 100 ? 'w-full' : nearest === 0 ? 'w-0' : `w-[${nearest}%]`;
 
-  const resultFrame = [...messages].reverse().find((m): m is ResultFrame => m.stage === 'result');
-  const statusText = lastProgress?.message || (last?.stage === 'end' ? 'completed' : 'waiting');
+  const doneFrame = [...messages].reverse().find((m): m is DoneFrame => m.stage === 'done');
+  const statusText = lastProgress?.hint || (last?.stage === 'end' ? 'completed' : 'waiting');
 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-6">
@@ -49,27 +49,27 @@ export default function SummarizeDemo() {
         </div>
         <div className="text-xs text-gray-600 uppercase tracking-wide">{statusText}</div>
       </div>
-      <div className="text-sm text-gray-600">Last frame: <code>{last ? JSON.stringify({ stage: last.stage, ok: 'ok' in last ? last.ok : undefined }) : '-'}</code></div>
+      <div className="text-sm text-gray-600">Last frame: <code>{last ? JSON.stringify({ stage: last.stage }) : '-'}</code></div>
       <details className="border rounded-md p-3">
         <summary className="cursor-pointer font-medium">Raw events ({messages.length})</summary>
         <pre className="mt-3 text-sm overflow-auto">{JSON.stringify(messages, null, 2)}</pre>
       </details>
-      {resultFrame && (
+      {doneFrame && (
         <div className="border rounded-md p-3 space-y-2">
           <h2 className="font-medium">Result</h2>
-          {resultFrame.ok ? (
+          {doneFrame.ok ? (
             <>
-              <p className="text-sm whitespace-pre-wrap">{resultFrame.summary}</p>
-              {resultFrame.tags && resultFrame.tags.length > 0 && (
+              <p className="text-sm whitespace-pre-wrap">{doneFrame.summary}</p>
+              {doneFrame.tags && doneFrame.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  {resultFrame.tags.map((tag) => (
+                  {doneFrame.tags.map((tag: string) => (
                     <span key={tag} className="px-2 py-1 bg-gray-100 rounded-full">{tag}</span>
                   ))}
                 </div>
               )}
             </>
           ) : (
-            <p className="text-sm text-red-600">{resultFrame.error ?? 'Summarization failed.'}</p>
+            <p className="text-sm text-red-600">Summarization failed.</p>
           )}
         </div>
       )}

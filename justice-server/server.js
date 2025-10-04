@@ -1,4 +1,5 @@
 // Justice Dashboard Server (minimal, test-friendly)
+// cSpell:ignore nosniff
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");

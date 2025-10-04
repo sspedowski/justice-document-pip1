@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# cSpell:ignore testjwt testsession adminpass
 
 name: CI
 
@@ -49,8 +50,8 @@ jobs:
       - name: Start Backend
         run: |
           nohup npm start &
-          sleep 5
-          curl --fail http://localhost:3000/api/health
+          sleep 10
+          timeout 30 bash -c 'until curl --fail http://localhost:3000/api/health; do sleep 2; done'
 
       - name: Test Login Endpoint
         run: |
@@ -59,7 +60,8 @@ jobs:
             -d '{"username":"admin","password":"adminpass"}'
 
       - name: Run Tests
-        run: npm test || echo "Tests skipped"
+        run: npm test
+        continue-on-error: true
 
   deploy:
     needs: build
@@ -76,10 +78,15 @@ jobs:
           node-version: '20.19.x'
 
       - name: Install Dependencies
-        run: |
-          npm install
-          cd justice-server && npm install
-          cd ../justice-dashboard && npm install
+        run: npm install
+
+      - name: Install Backend Dependencies
+        working-directory: justice-server
+        run: npm install
+
+      - name: Install Frontend Dependencies
+        working-directory: justice-dashboard
+        run: npm install
 
       - name: Build Frontend
         working-directory: justice-dashboard
@@ -88,14 +95,14 @@ jobs:
       - name: Deploy to Render
         if: success()
         env:
-          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }} # yamllint disable-line
         run: |
           if [ -n "$RENDER_DEPLOY_HOOK" ]; then
             echo "🚀 Triggering Render deployment..."
             curl -X POST "$RENDER_DEPLOY_HOOK"
             echo "✅ Deployed to Render"
           else
-            echo "⚠️  RENDER_DEPLOY_HOOK not configured, skipping Render deployment"
+            echo "⚠️ RENDER_DEPLOY_HOOK not configured, skipping Render deployment"
           fi
 
       - name: Deploy to Vercel
@@ -108,7 +115,7 @@ jobs:
             npx vercel --token "$VERCEL_TOKEN" --prod --yes
             echo "✅ Deployed to Vercel"
           else
-            echo "⚠️  VERCEL_TOKEN not configured, skipping Vercel deployment"
+            echo "⚠️ VERCEL_TOKEN not configured, skipping Vercel deployment"
           fi
 
       - name: Deployment Summary
