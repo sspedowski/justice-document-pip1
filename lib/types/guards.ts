@@ -9,15 +9,17 @@ export function isSSEFrame(u: unknown): u is SSEFrame {
   const frame = u as Record<string, unknown>;
   const stage = frame.stage;
 
-  // Check that stage is one of the valid discriminant values
-  return (
-    stage === 'start' ||
-    stage === 'queued' ||
-    stage === 'provider' ||
-    stage === 'progress' ||
-    stage === 'result' ||
-    stage === 'end' ||
-    stage === 'done' ||
-    stage === 'error'
-  );
+  if (stage === 'progress') {
+    return true;
+  }
+
+  if (stage === 'result') {
+    return typeof frame.ok === 'boolean';
+  }
+
+  if (stage === 'end') {
+    return typeof frame.ok === 'boolean';
+  }
+
+  return false;
 }

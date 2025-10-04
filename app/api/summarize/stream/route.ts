@@ -38,11 +38,10 @@ async function buildStream(req: Request): Promise<ReadableStream<Uint8Array>> {
           controller.enqueue(frameToSSE(frame as SSEFrame));
         }
       } catch (err) {
-        const errorFrame: SSEFrame = {
-          stage: 'error',
-          error: String(err),
-        };
+        const message = err instanceof Error ? err.message : String(err);
+        const errorFrame: SSEFrame = { stage: 'result', ok: false, error: message };
         controller.enqueue(frameToSSE(errorFrame));
+        controller.enqueue(frameToSSE({ stage: 'end', ok: false }));
       } finally {
         controller.close();
       }

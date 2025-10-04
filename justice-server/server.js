@@ -73,6 +73,7 @@ if (isProd && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
 
 // App
 const app = express();
+app.set('trust proxy', 1);
 // Security headers via helmet (CSP handled manually below). Disable conflicting policies.
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -139,7 +140,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many auth requests, please try again later.' }
 });
-app.use(['/api/login', '/api/refresh-token'], authLimiter);
+app.use('/api/refresh-token', authLimiter);
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
@@ -212,7 +213,7 @@ app.get('/api/csrf-token', (req, res) => {
 });
 
 // Auth: login to get a JWT
-app.post("/api/login", (req, res) => {
+function loginHandler(req, res) {
   const { username, password } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ success: false, error: "Username and password required" });
@@ -222,7 +223,9 @@ app.post("/api/login", (req, res) => {
     return res.json({ success: true, user: { username, role: "admin" }, token });
   }
   return res.status(401).json({ success: false, error: "Invalid credentials" });
-});
+}
+
+app.post("/api/login", authLimiter, loginHandler);
 
 // Auth: logout (stateless JWT, so just acknowledge)
 app.post("/api/logout", (_req, res) => res.json({ success: true }));
@@ -370,3 +373,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+

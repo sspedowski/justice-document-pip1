@@ -9,7 +9,7 @@ const STOP = new Set([
 
 function summarizeHeuristic(text: string): { summary: string; tags: string[] } {
   const clean = text.trim().replace(/\s+/g, ' ');
-  const summary = clean.length <= 220 ? clean : clean.slice(0, 217) + '…';
+  const summary = clean.length <= 220 ? clean : `${clean.slice(0, 217)}...`;
   const words = clean.toLowerCase().match(/[a-z0-9][a-z0-9\-]+/g) ?? [];
   const freq = new Map<string, number>();
   for (const w of words) {
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     return NextResponse.json(res, { status: 400 });
   }
   if (text.length > 4000) {
-    const res: SummarizeJsonResponse = { ok: false, error: '`text` must be ≤ 4000 characters', requestId };
-    return NextResponse.json(res, { status: 400 });
+    const res: SummarizeJsonResponse = { ok: false, error: 'Request too large. Please keep input under 4,000 characters.', requestId };
+    return NextResponse.json(res, { status: 413 });
   }
   const { summary, tags } = summarizeHeuristic(text);
   const elapsedMs = Date.now() - started;

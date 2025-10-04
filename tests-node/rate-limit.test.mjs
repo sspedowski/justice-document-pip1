@@ -1,41 +1,29 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import request from 'supertest'
+import supertest from 'supertest'
 
-// Ensure server boots in test mode (disables csurf and fixes admin creds)
 process.env.NODE_ENV = 'test'
 
-// Import the Express app (CommonJS export) using dynamic import of CJS path
-const app = (await import('../justice-server/server.js')).default || (await import('../justice-server/server.js'))
+const serverModule = await import('../justice-server/server.js')
+const app = serverModule.default || serverModule
 
-function getToken(agent) {
-  return agent
-    .post('/api/login')
-    .set('content-type', 'application/json')
-    .send({ username: 'admin', password: 'adminpass' })
-    .then(r => (r.body && r.body.token) || null)
-}
+test('auth endpoints are rate limited after 5 requests per minute', async () => {
+  const agent = supertest.agent(app)
 
-test('auth endpoints are rate limited after 5 requests per minute', async (t) => {
-  const agent = request(app)
-  // make 5 valid attempts
   for (let i = 0; i < 5; i++) {
     const res = await agent
       .post('/api/login')
       .set('content-type', 'application/json')
       .send({ username: 'admin', password: 'adminpass' })
-    // First five should not be limited
-    assert.equal(res.statusCode, 200)
-    if (res.statusCode === 429) {
-      // if we hit limiter early due to shared state, test still passes
-      return
-    }
+    assert.equal(res.statusCode, 200, `attempt ${i + 1} should succeed`)
   }
-  // 6th should be limited
-  const res6 = await agent
+
+  const limited = await agent
     .post('/api/login')
     .set('content-type', 'application/json')
     .send({ username: 'admin', password: 'adminpass' })
-  assert.equal(res6.statusCode, 429)
-  assert.equal(typeof res6.body, 'object')
+
+  assert.equal(limited.statusCode, 429, '6th attempt should be rate limited')
+  assert.equal(limited.body?.error, 'Too many auth requests, please try again later.')
+  assert.ok(limited.headers['retry-after'], 'retry-after header should be present')
 })
