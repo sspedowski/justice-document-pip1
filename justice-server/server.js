@@ -1,13 +1,16 @@
 // Justice Dashboard Server (minimal, test-friendly)
+// cSpell:ignore nosniff
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-// const helmet = require("helmet"); // no longer used; server applies CSP header manually
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
+const crypto = require('crypto');
 
 // Load environment variables (prefer local .env if present)
 const dotenvPath = [
@@ -20,22 +23,72 @@ if (dotenvPath) {
 }
 
 // Config
+const ENV = process.env.NODE_ENV || "development";
+const isProd = ENV === "production";
+const isTest = ENV === "test";
+
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || "dev-jwt-secret-change-me";
+const devSecretPath = path.join(__dirname, ".jwt-dev.secret");
+let JWT_SECRET = (process.env.JWT_SECRET || "").trim();
+
+if (!JWT_SECRET) {
+  if (isProd) {
+    console.error("[FATAL] JWT_SECRET environment variable is required in production. Exiting.");
+    process.exit(1);
+  }
+  try {
+    if (fs.existsSync(devSecretPath)) {
+      JWT_SECRET = fs.readFileSync(devSecretPath, "utf8").trim();
+    }
+    if (!JWT_SECRET) {
+      JWT_SECRET = crypto.randomBytes(48).toString("hex");
+      fs.writeFileSync(devSecretPath, JWT_SECRET, { encoding: "utf8", mode: 0o600 });
+      const relPath = path.relative(process.cwd(), devSecretPath);
+      console.warn("[WARN] Generated a local JWT secret at " + relPath + ". Set JWT_SECRET to override.");
+    } else if (!isTest) {
+      const relPath = path.relative(process.cwd(), devSecretPath);
+      console.warn("[WARN] Using stored development JWT secret from " + relPath + ". Set JWT_SECRET to override.");
+    }
+  } catch (error) {
+    JWT_SECRET = crypto.randomBytes(48).toString("hex");
+    console.warn("[WARN] Generated ephemeral development JWT secret; persistence failed: " + error.message);
+  }
+} else if (!isProd && !isTest) {
+  console.info("[info] JWT_SECRET loaded from environment.");
+}
+process.env.JWT_SECRET = JWT_SECRET;
+
 // Default admin creds; when running tests (Jest sets NODE_ENV='test') force known defaults
 let ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminpass";
-if (process.env.NODE_ENV === 'test') {
-  ADMIN_USERNAME = 'admin';
-  ADMIN_PASSWORD = 'adminpass';
+if (isTest) {
+  ADMIN_USERNAME = "admin";
+  ADMIN_PASSWORD = "adminpass";
+}
+if (isProd && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
+  console.error("[FATAL] ADMIN_USERNAME/ADMIN_PASSWORD must be set in production. Exiting.");
+  process.exit(1);
+} else if (!isTest && (ADMIN_USERNAME === "admin" || ADMIN_PASSWORD === "adminpass")) {
+  console.warn("[WARN] Using default admin credentials. Set ADMIN_USERNAME and ADMIN_PASSWORD.");
 }
 
 // App
 const app = express();
+// Security headers via helmet (CSP handled manually below). Disable conflicting policies.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'no-referrer' },
+}));
+// Additional headers not covered or we want explicit values
+app.use((_, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
 app.disable("x-powered-by");
 // Single CSP header applied by the server. Remove any <meta http-equiv="Content-Security-Policy"> tags in HTML.
 // Frontend should call /api (same origin via Vite proxy); allow Vite dev server & websocket for HMR.
-const isProd = process.env.NODE_ENV === 'production';
 app.use((req, res, next) => {
   const viteDevSrc = "http://localhost:5173 http://localhost:5174";
   const viteWSSrc = "ws://localhost:5173 ws://localhost:5174";
@@ -61,7 +114,7 @@ app.use(express.json({ limit: "1mb" }));
 // Cookies and CSRF protection. In tests we skip csurf entirely for simplicity.
 app.use(cookieParser());
 const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: 'lax', secure: isProd } });
-if (process.env.NODE_ENV !== 'test') {
+if (!isTest) {
   // Apply CSRF protection except for open auth endpoints used in API-style flows.
   // Also allow /api/summarize so file uploads in dev aren't blocked by CSRF.
   app.use((req, res, next) => {
@@ -78,6 +131,16 @@ if (process.env.NODE_ENV !== 'test') {
 } else {
   // In test environment, do not use csurf at all to simplify automated requests
 }
+
+// Rate limit authentication endpoints to mitigate brute force
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 5, // express-rate-limit v8 uses 'limit' (not 'max')
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth requests, please try again later.' }
+});
+app.use(['/api/login', '/api/refresh-token'], authLimiter);
 
 // Ensure uploads directory exists and is publicly served
 const uploadsDir = path.join(__dirname, "uploads");
@@ -107,10 +170,17 @@ app.get('/', (_req, res) => {
   return res.redirect('/legacy/index.html');
 });
 
-// Multer setup for PDF uploads — use memory storage so requireAuth runs before disk ops
+// Multer setup for PDF uploads — switch to disk storage with randomized safe filenames
 const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname || '').toLowerCase();
+      const safe = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`;
+      cb(null, safe);
+    }
+  }),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB cap
   fileFilter: (_req, file, cb) => {
     const isPdf = file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf';
     if (!isPdf) return cb(new Error('Only PDF files are allowed'));
@@ -127,7 +197,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Dev-only ping endpoint (authenticated) — useful for quick DevTools checks
-if (process.env.NODE_ENV !== 'production') {
+if (!isProd) {
   app.get('/api/_ping', requireAuth, (req, res) => {
     res.json({ ok: true, user: req.user, ts: Date.now() });
   });
@@ -173,10 +243,10 @@ app.post('/api/refresh-token', (req, res) => {
   }
 });
 
-// --- Profile (protected) ---
+// --- Profile (protected) --- normalized shape { success, profile }
 app.get('/api/profile', requireAuth, (req, res) => {
   const { sub, role } = req.user || {};
-  return res.json({ user: { username: sub, role: role || 'user' } });
+  return res.json({ success: true, profile: { username: sub, role: role || 'user' } });
 });
 
 // --- Current user metadata (used by Next.js / toolbar gating) ---

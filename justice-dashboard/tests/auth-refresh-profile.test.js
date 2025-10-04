@@ -22,8 +22,8 @@ describe('Auth refresh and profile endpoints', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('user');
-    expect(res.body.user).toMatchObject({ username: 'admin', role: 'admin' });
+    expect(res.body).toHaveProperty('profile');
+    expect(res.body.profile).toMatchObject({ username: 'admin', role: 'admin' });
   });
 
   test('POST /api/refresh-token returns a new token with valid bearer token', async () => {

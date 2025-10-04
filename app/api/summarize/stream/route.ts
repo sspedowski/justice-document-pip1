@@ -1,50 +1,52 @@
 // Dedicated SSE streaming endpoint: /api/summarize/stream
+import { type SSEFrame, type SummarizeRequest } from '@/lib/types/summarize';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const sseHeaders: Record<string,string> = {
+const encoder = new TextEncoder();
+
+function frameToSSE(frame: SSEFrame): Uint8Array {
+  // Minimal: every frame as a single `data:` line + blank line
+  const payload = `data: ${JSON.stringify(frame)}\n\n`;
+  return encoder.encode(payload);
+}
+
+const sseHeaders: HeadersInit = {
   'Content-Type': 'text/event-stream; charset=utf-8',
   'Cache-Control': 'no-cache, no-transform',
   Connection: 'keep-alive',
   'X-Accel-Buffering': 'no'
 };
 
-async function buildStream(req: Request) {
-  const { summarizeFrames, frameToSSE } = await import('@/lib/summarize/frames.mjs');
-  const encoder = new TextEncoder();
-  const requestId = crypto.randomUUID();
-  const t0 = Date.now();
+async function buildStream(req: Request): Promise<ReadableStream<Uint8Array>> {
+  let payload: SummarizeRequest | undefined;
+  try {
+    payload = await req.json();
+  } catch {
+    payload = undefined;
+  }
+  const text = typeof payload?.text === 'string' ? payload!.text : '';
+
+  // Import lazily if needed to keep route cold starts small
+  const { summarizeFrames } = await import('@/lib/summarize/frames.mjs');
 
   return new ReadableStream<Uint8Array>({
-    async start(controller) {
-      controller.enqueue(encoder.encode(`: connected ${Date.now()}\n\n`));
-      let payload: Record<string, unknown> = {};
-      try { payload = await req.json() as Record<string, unknown>; } catch {}
-      const text = typeof payload?.text === 'string' ? payload.text : '';
+    async start(controller: ReadableStreamDefaultController<Uint8Array>) {
       try {
-        let lastFrame: any = null;
         for await (const frame of summarizeFrames({ text })) {
-          lastFrame = frame;
-          controller.enqueue(encoder.encode(frameToSSE(frame)));
+          controller.enqueue(frameToSSE(frame as SSEFrame));
         }
-        // Add tracking to final frame
-        const finalFrame = {
-          ...(lastFrame || {}),
-          requestId,
-          elapsedMs: Date.now() - t0,
+      } catch (err) {
+        const errorFrame: SSEFrame = {
+          stage: 'error',
+          error: String(err),
         };
-        controller.enqueue(encoder.encode(`event: end\ndata: ${JSON.stringify(finalFrame)}\n\n`));
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({
-          message: errMsg,
-          requestId,
-          elapsedMs: Date.now() - t0
-        })}\n\n`));
+        controller.enqueue(frameToSSE(errorFrame));
       } finally {
         controller.close();
       }
-    }
+    },
   });
 }
 

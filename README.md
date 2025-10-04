@@ -1,9 +1,15 @@
 # Justice Dashboard
 
-## Streaming summarize API
+# Justice Dashboard
 
-Endpoint: `POST /api/summarize/stream`
+## Summarize APIs
+
+### Streaming endpoint
+
+Endpoint: `POST /api/summarize/stream`  
 Legacy pointer: `/api/summarize` returns 410 JSON `{ error: 'MOVED_TO_SSE', next: '/api/summarize/stream' }`.
+
+Use the streaming endpoint for progressive UI updates and long-running model calls.
 
 Body (JSON):
 
@@ -110,6 +116,35 @@ for await (const frame of summarizeFrames({ text: "hello", delayMs: 0 })) {
 
 The API route dynamically imports the module so tests never pull in Next.js internals.
 
+### JSON endpoint
+
+For short / synchronous summaries (no SSE required) call:
+
+**Request**
+
+```http
+POST /api/summarize/json
+Content-Type: application/json
+
+{ "text": "Hello world..." }
+```
+
+**Response (success)**
+
+```json
+{
+  "ok": true,
+  "summary": "...",
+  "tags": ["..."],
+  "provider": "local",
+  "model": "heuristic-v1",
+  "requestId": "uuid",
+  "elapsedMs": 123
+}
+```
+
+The scaffold uses a local heuristic so it works without provider keys. Swap in a real model integration later.
+
 ### AI Integration (Claude)
 
 The Justice Dashboard supports optional AI-powered summarization using Anthropic's Claude API.
@@ -136,3 +171,78 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Production Deployment SOP (Vercel)
+
+Follow this checklist to ensure a clean, reproducible deployment:
+
+### 1. Branch & PR
+- Open / merge a PR into `main` (production branch).
+- Confirm CI passes (lint, tests, health checks).
+
+### 2. Project Settings (one‑time validation)
+Navigate: Vercel → Project → Settings → General
+- Root Directory: `.` (blank)
+- Framework Preset: Next.js
+- Install Command: `npm ci` (or leave blank for auto)
+- Build Command: `npm run build` (or auto)
+- Output Directory: `.next` (auto‑detected)
+
+### 3. Environment Variables
+Set for both Preview and Production (Settings → Environment Variables):
+```
+JWT_SECRET=<long random secret>
+ADMIN_USERNAME=<non-default>
+ADMIN_PASSWORD=<non-default>
+CLAUDE_API_KEY=<optional>
+FIREBASE_PROJECT_ID=<optional>
+FIREBASE_SERVICE_ACCOUNT=<optional JSON blob>
+```
+
+### 4. Domains
+Settings → Domains
+- Add production domain (e.g. `justice-dashboard.vercel.app` or custom domain)
+- After adding, trigger a redeploy if not automatic.
+
+### 5. Clear Build Cache (when in doubt)
+Settings → Advanced → “Clear Build Cache” → Redeploy latest commit.
+
+### 6. Expected Build Log Signals
+```
+Detected Next.js 14.x
+... added 8xx packages
+Compiled successfully
+```
+No 401s or unexpected middleware rewrites in the log.
+
+### 7. Post-Deploy Smoke (PowerShell examples)
+```powershell
+$AppUrl = "https://<your-domain>"
+curl.exe -I $AppUrl
+curl.exe -I "$AppUrl/api/health"
+curl.exe -s -X POST "$AppUrl/api/summarize/json" -H "content-type: application/json" -d '{"text":"hello"}'
+```
+Expect 200/400 (validation) — not 401.
+
+### 8. Troubleshooting Quick Table
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| 401 on `/` | Password Protection enabled | Disable under Security |
+| 404 domain | Domain not attached | Add domain in Settings → Domains |
+| Build reuses old code | Cache stale | Clear build cache + redeploy |
+| `/api/summarize/json` 404 | Route not merged/deployed | Merge feature branch / verify file path |
+
+### 9. Rollback
+Deployments → select previous healthy build → Promote to Production.
+
+### 10. Security Hardening (Enabled in Server)
+- Enforced `JWT_SECRET` in production
+- Helmet headers + rate limiting on auth endpoints
+- CSP set manually (avoid duplicating in HTML `<meta>`)
+
+---
+_This SOP section is source‑controlled; update when deployment or infrastructure changes._
+
+### Auth rate limiting
+
+`/api/login` is protected by `express-rate-limit` v8. Default: **5** attempts per 15 minutes per IP → 429 on the 6th. Configured via `limit` (v8), not the deprecated `max`.

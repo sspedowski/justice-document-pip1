@@ -155,13 +155,25 @@ class AuthManager {
           this.getCsrfToken.bind(this)
         )
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          this.setStoredUser(data.profile);
-          return data.profile;
-        }
+      const data = await response.json();
+      // Preferred normalized shape
+      if (response.ok && data?.success && data.profile) {
+        this.setStoredUser(data.profile);
+        return data.profile;
+      }
+      // Backward compatible legacy shape { user: { username, role } }
+      if (response.ok && data?.user) {
+        const profile = {
+          username: data.user.username || data.user.sub || 'user',
+            role: data.user.role || 'user'
+        };
+        this.setStoredUser(profile);
+        return profile;
+      }
+      // Auth/trust failure paths
+      if (response.status === 401 || data?.code === 'TOKEN_EXPIRED' || data?.error === 'Invalid token') {
+        await this.logout();
+        return null;
       }
       return null;
     } catch (error) {

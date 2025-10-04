@@ -8,14 +8,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo '✅ Published Vite dashboard to public/dashboard'",
+    "lint:fix": "next lint --fix",
+    "lint:no-any": "eslint --no-eslintrc -c .eslintrc.ci.cjs app src lib --ext .ts,.tsx",
+    "publish:dashboard": "npm --prefix justice-dashboard ci && npm --prefix justice-dashboard run build && rm -rf public/dashboard && mkdir -p public && cp -R justice-dashboard/dist public/dashboard && echo Published Vite dashboard to public/dashboard",
     "vite:lint": "npm --prefix justice-dashboard run lint",
     "vite:build:ci": "npm --prefix justice-dashboard run build:ci",
     "vite:dev": "npm --prefix justice-dashboard run dev",
     "vite:preview": "npm --prefix justice-dashboard run preview",
     "publish:dashboard:posix": "bash scripts/publish-dashboard.sh",
     "typecheck": "tsc --noEmit",
-  "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\""
+    "test:node": "node --import ./tools/register-alias-loader.mjs --test --test-reporter=spec tests-node/*.mjs",
+    "test": "npm run test:node"
   },
   "prepare": "husky install",
   "lint-staged": {
@@ -37,10 +40,17 @@
     "chalk": "^4.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csurf": "^1.11.0",
     "dotenv": "^17.2.2",
+    "express-rate-limit": "^8.1.0",
     "firebase": "^12.2.1",
     "firebase-admin": "^12.7.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.542.0",
+    "multer": "^2.0.2",
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -54,9 +64,9 @@
     "@types/node": "^20.19.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^8.57.0",
-    "@typescript-eslint/parser": "^8.12.2",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",
@@ -71,6 +81,9 @@
     "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=20.11 <21"
+    "node": ">=20.19 <21"
+  },
+  "volta": {
+    "node": "20.19.0"
   }
 }

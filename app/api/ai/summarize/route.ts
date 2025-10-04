@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { verifyIdToken, verifyAppCheck } from '../../../../lib/firebaseAdmin';
 import { getDb } from '../../../../lib/firebaseAdmin';

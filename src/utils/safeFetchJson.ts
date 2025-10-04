@@ -1,32 +1,39 @@
 // Guarded JSON fetch utility: prevents hard crashes when endpoint returns non-JSON (e.g. SSE or HTML/banner)
-export interface SafeFetchJsonResult<T=unknown> {
-  ok: boolean;
-  status: number;
-  json: T | null;
-  nonJson?: boolean;
-  body?: string; // raw body when nonJson
-  parseError?: string;
-  raw?: string; // raw body when parse error
-}
+export type SafeJson<T> =
+  | { ok: true; status: number; json: T; nonJson: false }
+  | { ok: false; status: number; json: null; nonJson: true; body: string }
+  | { ok: false; status: number; json: null; nonJson: false; parseError: string; raw: string };
 
-export async function safeFetchJson<T=unknown>(input: RequestInfo | URL, init?: RequestInit): Promise<SafeFetchJsonResult<T>> {
+export async function safeFetchJson<T>(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<SafeJson<T>> {
   const res = await fetch(input, init);
-  const status = res.status;
   const ct = res.headers.get('content-type') || '';
-  let text: string;
+  let body: string;
   try {
-    text = await res.text(); // always read once
+    body = await res.text();
   } catch (e) {
-    return { ok: res.ok, status, json: null, nonJson: true, body: `<<unreadable body: ${e}>>` };
+    return { ok: false, status: res.status, json: null, nonJson: true, body: `<<unreadable: ${e}>>` };
   }
 
   if (!ct.includes('application/json')) {
-    return { ok: res.ok, status, json: null, nonJson: true, body: text };
+    return { ok: false, status: res.status, json: null, nonJson: true, body };
   }
   try {
-    const parsed = JSON.parse(text) as T;
-    return { ok: res.ok, status, json: parsed };
-  } catch (e:any) {
-    return { ok: false, status, json: null, parseError: String(e), raw: text };
+    const parsed = JSON.parse(body) as T;
+    if (!res.ok) {
+      return { ok: false, status: res.status, json: null, nonJson: false, parseError: 'HTTP error', raw: body };
+    }
+    return { ok: true, status: res.status, json: parsed, nonJson: false };
+  } catch (e) {
+    return {
+      ok: false,
+      status: res.status,
+      json: null,
+      nonJson: false,
+      parseError: String(e),
+      raw: body,
+    };
   }
 }
