@@ -134,7 +134,7 @@ if (!isTest) {
 // Rate limit authentication endpoints to mitigate brute force
 const authLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 5,
+  limit: 5, // express-rate-limit v8 uses 'limit' (not 'max')
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many auth requests, please try again later.' }

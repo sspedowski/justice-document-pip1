@@ -11,17 +11,8 @@ test('__testBuildOptions builds expected option shape without undefined fields',
   delete process.env.FIREBASE_DATABASE_URL // simulate absence
   process.env.FIREBASE_STORAGE_BUCKET = 'bucket-1'
 
-  let mod
-  try {
-    mod = await import('../lib/firebaseAdmin.ts?t=' + Math.random())
-  } catch (err) {
-    // Node v20 doesn't support .ts imports; skip test
-    if (err.code === 'ERR_UNKNOWN_FILE_EXTENSION') {
-      t.skip('Requires Node v22+ for .ts import support')
-      return
-    }
-    throw err
-  }
+    // Import JS test helper (avoids importing TypeScript directly in Node test runner)
+    const mod = await import('../lib/firebaseAdmin.testhelper.mjs?t=' + Math.random())
 
   assert.ok(mod.__testBuildOptions, 'helper exported')
   const opts = mod.__testBuildOptions()
