@@ -1,11 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CHANGED=$(git diff --name-only --cached || true)
-if ! echo "$CHANGED" | grep -q '^justice-dashboard/'; then
-  echo "No changes in justice-dashboard/, skipping subapp tests."
+# Skip in CI or when developer opts out
+if [ "${CI:-}" = "true" ] || [ "${FAST_PUSH:-}" = "1" ]; then
+  echo "Skipping pre-push checks (CI or FAST_PUSH)."
   exit 0
 fi
 
-npm --prefix justice-dashboard run test:run
+# Prefer Volta-pinned Node if available
+NPM="npm"
+if command -v volta >/dev/null 2>&1; then
+  NPM="volta run npm"
+fi
+
+CHANGED="$(git diff --name-only --cached || true)"
+
+# If backend/core changed, run fast root node tests
+if echo "$CHANGED" | grep -Eq '^(justice-server/|tests-node/|app/|lib/|middleware\.ts|next\.config)'; then
+  echo "Detected backend/core changes; running root node tests..."
+  $NPM run test:node
+fi
+
+# Subapp tests only when subapp changed
+if echo "$CHANGED" | grep -q '^justice-dashboard/'; then
+  echo "Changes in justice-dashboard/ detected; running subapp tests..."
+  # Ensure deps exist once per machine
+  if [ ! -d "justice-dashboard/node_modules" ]; then
+    $NPM --prefix justice-dashboard ci
+  fi
+  $NPM --prefix justice-dashboard run test:run -s
+else
+  echo "No changes in justice-dashboard/, skipping subapp tests."
+fi
 
