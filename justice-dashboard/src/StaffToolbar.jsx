@@ -9,11 +9,11 @@ import { authFetch } from './lib/auth-fetch.js';
 //  - Vite: import.meta.env.VITE_VERCEL_TOOLBAR_ENABLED === 'true'
 //  - Optional domain guard: VITE_VERCEL_TOOLBAR_DOMAIN_REGEX (regex string)
 //  - Also respects NEXT_PUBLIC_* if present on window for consistency with Next apps
-export default function StaffToolbar() {
+export function StaffToolbar() {
   useEffect(() => {
     try {
-  // Skip in test runs
-  if (import.meta && import.meta.env && import.meta.env.MODE === 'test') return;
+      // Skip in test runs
+      if (import.meta && import.meta.env && import.meta.env.MODE === 'test') return;
 
       // Avoid direct `typeof import` checks in JSX; use globalThis to probe import.meta in Vite
       const im = (typeof globalThis !== 'undefined' && globalThis.import && globalThis.import.meta) ? globalThis.import.meta : (globalThis.importMeta || undefined);
@@ -61,3 +61,5 @@ export default function StaffToolbar() {
   }, []);
   return null;
 }
+
+export default StaffToolbar;
