@@ -30,16 +30,17 @@
     "types/**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/**/*",
+    "**/*.mjs",
+    "**/*.cjs"
   ],
   "exclude": [
     "node_modules",
     "**/*.test.ts",
     "**/*.test.tsx",
-  "scripts/fine-tune.ts",
-  "app/api/chat/route.ts"
-  ,
-  // Exclude Vite subproject to prevent Next type-checking its tests
-  "justice-dashboard/**"
+    "scripts/fine-tune.ts",
+    "app/api/chat/route.ts",
+    "justice-dashboard/**"
   ]
 }
