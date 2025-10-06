@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { redact } from './redact';
+import { redact } from './redact.ts';
 
 describe('redact', () => {
   it('redacts emails and counts them', () => {
