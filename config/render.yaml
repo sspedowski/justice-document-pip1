@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: justice-dashboard
+    env: node
+    plan: free
+    buildCommand: |
+      echo "🚀 Starting Justice Dashboard build process..."
+      echo "📦 Installing root dependencies..."
+      npm install
+      echo "📦 Installing backend dependencies..."
+      cd justice-server && npm install
+      echo "📦 Installing frontend dependencies and building..."
+      cd ../justice-dashboard && npm install && npm run build
+      echo "📂 Copying frontend build to backend public directory..."
+      mkdir -p ../justice-server/public
+      cp -r dist/* ../justice-server/public/
+      echo "✅ Build process complete!"
+    startCommand: cd justice-server && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET  
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+    healthCheckPath: /api/health

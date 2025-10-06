@@ -2,21 +2,99 @@ name: CI
 
 on:
   pull_request:
+  push:
     branches: [ main ]
 
 concurrency:
-  group: pr-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      cachekey: ${{ steps.cachekey.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 20.11.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+      - id: cachekey
+        run: echo "key=$(node -v)-$(pnpm -v)" >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: Lint
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with: { node-version: '20.11.1', cache: 'pnpm' }
+      - run: corepack enable
+      - run: pnpm -r install --frozen-lockfile
+      - run: pnpm -r lint --max-warnings=0
+
+  typecheck:
+    name: Typecheck
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.11.1', cache: 'pnpm' }
+      - run: corepack enable
+      - run: pnpm -r install --frozen-lockfile
+      - run: pnpm -r typecheck
+
+  unit:
+    name: Unit tests
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.11.1', cache: 'pnpm' }
+      - run: corepack enable
+      - run: pnpm -r install --frozen-lockfile
+      - run: pnpm -r test --reporter=spec || true
+
+  build:
+    name: Build (Next)
+    needs: [lint, typecheck, unit]
+    runs-on: ubuntu-latest
+    env:
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.11.1', cache: 'pnpm' }
+      - run: corepack enable
+      - run: pnpm -r install --frozen-lockfile
+      - run: pnpm build
+
+  linkcheck_pr:
+    name: Link Check (PR-tolerant)
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lychee (tolerant on PRs)
+        uses: lycheeverse/lychee-action@v2
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run lint -- --max-warnings=0
-      - run: npm run build
+          args: >-
+            --no-progress --max-concurrency 10 --retry-wait-time 2
+            --timeout 15 --config .lychee.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

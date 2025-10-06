@@ -1,5 +1,18 @@
 # Justice Dashboard
 
+## Smoke & Bypass
+
+We ship with deploy-triggered and nightly smoke tests already wired.
+
+- Nightly: `.github/workflows/nightly-smoke.yml` (uses `vars.VERCEL_PROD_URL`)
+- On deploy: `.github/workflows/live-smoke-on-deploy.yml`
+
+Vercel protection bypass:
+
+1) Create a `VERCEL_BYPASS_TOKEN` secret in GitHub → Settings → Secrets and variables → Actions.
+2) The smoke workflows will pass this token (when present) to bypass protection in Production.
+3) For ad-hoc checks, trigger the smoke workflow and set the base URL to your production domain.
+
 ## Streaming summarize API
 
 Endpoint: `POST /api/summarize/stream`

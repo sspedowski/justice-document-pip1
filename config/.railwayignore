@@ -1,0 +1,15 @@
+# Ignore local dev files and configs
+node_modules/
+.env
+*.log
+*.sh
+*.bat
+cypress/
+*.md
+start-local.js
+justice-dashboard/
+# Only deploy built frontend in justice-server/public
+justice-dashboard/dist/
+justice-dashboard/node_modules/
+justice-dashboard/.env
+justice-dashboard/*.log

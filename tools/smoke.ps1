@@ -22,8 +22,8 @@ if (-not [string]::IsNullOrWhiteSpace($BypassToken)) {
 }
 
 Write-Host "GET $BaseUrl" -ForegroundColor Cyan
-$home = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -WebSession $session
-if ($home.StatusCode -ne 200) { throw "Home != 200 ($($home.StatusCode))" }
+$homeResp = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -WebSession $session
+if ($homeResp.StatusCode -ne 200) { throw "Home != 200 ($($homeResp.StatusCode))" }
 Write-Host "Home 200"
 
 Write-Host "GET $BaseUrl/api/health" -ForegroundColor Cyan

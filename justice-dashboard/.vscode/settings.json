@@ -1,6 +1,0 @@
-﻿{
-    "javascript.validate.enable":  false,
-    "typescript.validate.enable":  false,
-    "aws.amazonq.enableCodeSuggestions":  false,
-    "aws.amazonq.enableCodeScanning":  false
-}
