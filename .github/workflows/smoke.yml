@@ -1,0 +1,55 @@
+name: Manual Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Base URL to probe (e.g. https://your-app.vercel.app)"
+        required: true
+        type: string
+      use_bypass:
+        description: "Use Vercel bypass token secret?"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 20.11.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+      - name: Compute bypass token env
+        id: bypass
+        shell: pwsh
+        env:
+          USE_BYPASS: ${{ inputs.use_bypass }}
+          SECRET_BYPASS: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+        run: |
+          if ($env:USE_BYPASS -eq 'true' -and -not [string]::IsNullOrWhiteSpace($env:SECRET_BYPASS)) {
+            echo "token=$env:SECRET_BYPASS" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "token=" >> $env:GITHUB_OUTPUT
+          }
+      - name: Run smoke.ps1
+        shell: pwsh
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          VERCEL_BYPASS_TOKEN: ${{ steps.bypass.outputs.token }}
+        run: |
+          if (-not (Test-Path .\tools\smoke.ps1)) {
+            Write-Error "tools/smoke.ps1 not found"; exit 1
+          }
+          .\tools\smoke.ps1 -BaseUrl $env:BASE_URL
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-artifacts
+          path: |
+            tools/smoke.log
+            tools/smoke/**/*
+          if-no-files-found: ignore
