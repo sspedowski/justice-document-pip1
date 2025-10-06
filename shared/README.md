@@ -1,76 +1,27 @@
-# Justice Dashboard
+# Shared Documentation
 
----
+This directory contains documentation and guides that may be shared across different deployment configurations.
 
-## 🚀 Railway Deployment Automation
+## Active Guides
 
-Justice Dashboard is fully automated for Railway deployment. To build, bundle, and deploy live:
+- `AUTO_DEPLOY_SETUP.md` - Automated deployment setup instructions
+- `CODE_CITATIONS.md` - Code citation requirements
+- `DEPLOY.md` - General deployment guide
+- `MASTER_DOCUMENTATION.md` - Master documentation reference
+- `RENDER_DEPLOYMENT_GUIDE.md` - Render deployment guide (if using Render)
 
-```
-npm run deploy
-```
+## Archived Documentation
 
-This will:
-- Build the frontend
-- Copy the build to the backend public folder
-- Deploy the backend to Railway
-- Bind ports automatically
+Historical documentation has been moved to `archive/` subdirectory. These files may contain outdated information but are preserved for reference.
 
-### Environment Variables (set in Railway dashboard):
-- `NODE_ENV=production`
-- `ADMIN_USERNAME=<secure>`
-- `ADMIN_PASSWORD=<secure>`
-- `JWT_SECRET=<generated>`
-- `SESSION_SECRET=<generated>`
+## Current Project Documentation
 
-After deploy, your app will be live at:
-```
-https://<your-project>.up.railway.app
-```
+For current deployment and setup instructions, see:
 
----
-
-[![E2E Tests](https://github.com/sspedowski/justice-dashboard/actions/workflows/cypress.yml/badge.svg)](https://github.com/sspedowski/justice-dashboard/actions/workflows/cypress.yml)
+- Main project `README.md` in repository root
+- `docs/DEPLOYMENT.md` - Deployment instructions
+- `docs/PRODUCTION_SETUP.md` - Production setup guide
 
 ## Testing
 
-Justice Dashboard includes automated tests for backend APIs, frontend UI, and end-to-end (E2E) user flows.
-
-### Run All Tests
-
-```
-npm test
-```
-
-### API & UI Unit Tests (Jest)
-
-```
-npx jest
-```
-
-### E2E Tests (Cypress)
-
-```
-npx cypress open
-```
-
-Or run headless:
-
-```
-npx cypress run
-```
-
-### Continuous Integration (CI)
-
-All tests run automatically on every push and pull request via GitHub Actions. See the badge above for status.
-
----
-
-- API tests: `tests/api.test.js`
-- UI tests: `tests/ui.test.js`
-- E2E tests: `cypress/e2e/*.cy.js`
-- Sample upload file: `cypress/fixtures/sample.pdf`
-
----
-
-For troubleshooting or to add more tests, see the `tests/` and `cypress/` folders.
+For testing documentation, see the main project README and CI workflow files in `.github/workflows/`.
