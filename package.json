@@ -14,8 +14,9 @@
     "start": "next start",
     "lint": "eslint -c config/.eslintrc.json .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test --test-reporter=spec",
+    "test": "pnpm run test:unit-node && pnpm run test:vitest",
     "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\"",
+    "test:vitest": "vitest run",
     "linkcheck": "lychee --no-progress --verbose --include-fragments --accept 200,206 --max-redirects 5 ."
   },
   "prepare": "husky install",

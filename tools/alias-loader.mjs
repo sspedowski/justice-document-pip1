@@ -1,15 +1,40 @@
 // tools/alias-loader.mjs
 // ESM loader for Node.js tests to resolve '@/' alias (used by Next.js via tsconfig paths)
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+import { resolve as resolvePath } from 'node:path';
 
-const rootUrl = pathToFileURL(process.cwd() + '/'); // repo root
+const rootPath = process.cwd();
+const rootUrl = pathToFileURL(rootPath + '/');
 
 export async function resolve(specifier, context, nextResolve) {
-  // Map "@/foo/bar" -> "<repoRoot>/foo/bar"
-  if (specifier.startsWith('@/')) {
-    const rel = specifier.slice(2); // drop "@/"
-    const target = new URL(rel, rootUrl).href;
+  // Map "@/lib/*" with priority: src/lib/* then lib/*
+  if (specifier.startsWith('@/lib/')) {
+    const rel = specifier.slice(6); // drop "@/lib/"
+    const srcLibPath = resolvePath(rootPath, 'src/lib', rel);
+    const libPath = resolvePath(rootPath, 'lib', rel);
+
+    if (existsSync(srcLibPath)) {
+      return { url: pathToFileURL(srcLibPath).href, shortCircuit: true };
+    }
+    if (existsSync(libPath)) {
+      return { url: pathToFileURL(libPath).href, shortCircuit: true };
+    }
+  }
+
+  // Map "@/app/*" -> "app/*"
+  if (specifier.startsWith('@/app/')) {
+    const rel = specifier.slice(6); // drop "@/app/"
+    const target = new URL('app/' + rel, rootUrl).href;
     return { url: target, shortCircuit: true };
   }
+
+  // Map "@/*" -> "src/*" (default)
+  if (specifier.startsWith('@/')) {
+    const rel = specifier.slice(2); // drop "@/"
+    const target = new URL('src/' + rel, rootUrl).href;
+    return { url: target, shortCircuit: true };
+  }
+
   return nextResolve(specifier, context);
 }
