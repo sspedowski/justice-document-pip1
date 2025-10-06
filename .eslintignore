@@ -3,8 +3,10 @@ node_modules/
 out/
 dist/
 coverage/
+public/
+cypress/
 legacy/**
 justice-server/**
+packages/frontend/**
 **/*.d.ts
-packages/frontend/pdf.min.js
-packages/frontend/pdf.worker.min.js
+.eslintcache

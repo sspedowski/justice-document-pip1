@@ -3,6 +3,7 @@
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 const rootPath = process.cwd();
 const rootUrl = pathToFileURL(rootPath + '/');
@@ -37,4 +38,18 @@ export async function resolve(specifier, context, nextResolve) {
   }
 
   return nextResolve(specifier, context);
+}
+
+export async function load(url, context, nextLoad) {
+  // Handle .ts files by reading source and marking as module
+  if (url.endsWith('.ts') || url.endsWith('.tsx')) {
+    const filePath = fileURLToPath(url);
+    const source = readFileSync(filePath, 'utf-8');
+    return {
+      format: 'module',
+      source,
+      shortCircuit: true,
+    };
+  }
+  return nextLoad(url, context);
 }
