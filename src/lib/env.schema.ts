@@ -13,11 +13,13 @@ const EnvSchema = z.object({
 
 const parsed = EnvSchema.safeParse(process.env);
 if (!parsed.success) {
-  console.error('\n❌ Environment validation failed:\n');
-  for (const issue of parsed.error.issues) {
-    console.error(`- ${issue.path.join('.')}: ${issue.message}`);
+  if (process.env.NODE_ENV !== 'test') {
+    console.error('\n❌ Environment validation failed:\n');
+    for (const issue of parsed.error.issues) {
+      console.error(`- ${issue.path.join('.')}: ${issue.message}`);
+    }
+    process.exit(1);
   }
-  process.exit(1);
 }
 
-export const ENV = parsed.data;
+export const ENV = parsed.success ? parsed.data : {} as z.infer<typeof EnvSchema>;
