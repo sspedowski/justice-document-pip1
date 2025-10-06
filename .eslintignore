@@ -6,3 +6,5 @@ coverage/
 legacy/**
 justice-server/**
 **/*.d.ts
+packages/frontend/pdf.min.js
+packages/frontend/pdf.worker.min.js
