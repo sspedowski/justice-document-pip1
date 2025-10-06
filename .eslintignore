@@ -1,0 +1,21 @@
+# Ignore large or legacy areas from root lint
+legacy/**
+justice-server/**
+packages/justice-server/**
+packages/backend/**
+packages/uploads/**
+
+# Build artifacts
+dist/**
+build/**
+.next/**
+coverage/**
+
+# Dependencies
+node_modules/**
+packages/**/node_modules/**
+justice-dashboard/
+.next/
+out/
+dist/
+coverage/

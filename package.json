@@ -3,14 +3,20 @@
   "private": true,
   "type": "module",
   "version": "0.1.0",
+  "engines": {
+    "node": "20.11.1",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
-    "typecheck": "tsc --build --verbose",
-    "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\""
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --test-reporter=spec",
+    "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\"",
+    "linkcheck": "lychee --no-progress --accept 200,206,403 --max-redirects 10 ."
   },
   "prepare": "husky install",
   "lint-staged": {
@@ -21,6 +27,7 @@
     "packages/justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "pnpm --filter justice-dashboard test -- --changed"
   },
   "dependencies": {
+    "zod": "^3.23.8",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-scroll-area": "^1.2.10",
@@ -65,8 +72,5 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
     "vitest": "^3.2.4"
-  },
-  "engines": {
-    "node": ">=20.11 <21"
   }
 }
