@@ -16,7 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test --test-reporter=spec",
     "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\"",
-    "linkcheck": "lychee --no-progress --accept 200,206,403 --max-redirects 10 ."
+    "linkcheck": "lychee --no-progress --verbose --include-fragments --accept 200,206 --max-redirects 5 ."
   },
   "prepare": "husky install",
   "lint-staged": {

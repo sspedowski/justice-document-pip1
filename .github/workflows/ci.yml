@@ -39,8 +39,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20.11.1', cache: 'pnpm' }
       - run: corepack enable
-      - run: pnpm -r install --frozen-lockfile
-      - run: pnpm -r lint --max-warnings=0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --max-warnings=0
 
   typecheck:
     name: Typecheck
@@ -51,8 +51,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20.11.1', cache: 'pnpm' }
       - run: corepack enable
-      - run: pnpm -r install --frozen-lockfile
-      - run: pnpm -r typecheck
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
 
   unit:
     name: Unit tests
@@ -65,8 +65,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20.11.1', cache: 'pnpm' }
       - run: corepack enable
-      - run: pnpm -r install --frozen-lockfile
-      - run: pnpm -r test --reporter=spec || true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
 
   build:
     name: Build (Next)
@@ -79,7 +79,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20.11.1', cache: 'pnpm' }
       - run: corepack enable
-      - run: pnpm -r install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
   linkcheck_pr:
