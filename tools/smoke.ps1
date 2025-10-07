@@ -31,7 +31,8 @@ try {
 $Endpoints = @(
   '/',                  # root
   '/api/health',        # health (if present)
-  '/api/summarize/stream?dryRun=1'  # dry-run SSE/JSON path if you expose one
+  '/api/summarize/stream?dryRun=1',  # dry-run SSE/JSON path if you expose one
+  '/dashboard'          # dashboard bundle (if copied to public/)
 ) | Select-Object -Unique
 
 # Build headers (Vercel preview protection)
