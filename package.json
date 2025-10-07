@@ -16,7 +16,7 @@
     "lint": "eslint -c config/.eslintrc.json . --ext .ts,.tsx,.js,.jsx --max-warnings=0 --cache --cache-location .eslintcache",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm run test:unit-node && pnpm run test:vitest",
-    "test:unit-node": "node --test --test-reporter=spec --loader=@esbuild-kit/esm-loader --loader ./tools/alias-loader.mjs tests-node",
+  "test:unit-node": "node --test --test-reporter=spec --loader=./tools/alias-loader.mjs --loader=@esbuild-kit/esm-loader tests-node",
     "test:vitest": "vitest run",
     "linkcheck": "lychee --no-progress --verbose --include-fragments --accept 200,206 --max-redirects 5 ."
   },

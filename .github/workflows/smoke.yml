@@ -4,52 +4,72 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: "Base URL to probe (e.g. https://your-app.vercel.app)"
+        description: "Base URL to probe (e.g., https://your-app.vercel.app)"
         required: true
         type: string
-      use_bypass:
-        description: "Use Vercel bypass token secret?"
+      with_bypass:
+        description: "Send Vercel protection bypass token header"
         required: false
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   smoke:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node 20.11.1
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-      - name: Compute bypass token env
-        id: bypass
-        shell: pwsh
-        env:
-          USE_BYPASS: ${{ inputs.use_bypass }}
-          SECRET_BYPASS: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Preflight: if bypass requested but secret is missing, fail fast with a clear message.
+      - name: Verify bypass secret present (only when requested)
+        if: ${{ inputs.with_bypass == true }}
         run: |
-          if ($env:USE_BYPASS -eq 'true' -and -not [string]::IsNullOrWhiteSpace($env:SECRET_BYPASS)) {
-            echo "token=$env:SECRET_BYPASS" >> $env:GITHUB_OUTPUT
-          } else {
-            echo "token=" >> $env:GITHUB_OUTPUT
+          if (-not $env:VERCEL_BYPASS_TOKEN -or $env:VERCEL_BYPASS_TOKEN.Trim().Length -eq 0) {
+            Write-Error "with_bypass=true but secret VERCEL_BYPASS_TOKEN is not set."
           }
-      - name: Run smoke.ps1
-        shell: pwsh
+        env:
+          VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+
+      # Runs with the Vercel bypass header if requested.
+      - name: Run smoke (with bypass)
+        if: ${{ inputs.with_bypass == true }}
         env:
           BASE_URL: ${{ inputs.base_url }}
-          VERCEL_BYPASS_TOKEN: ${{ steps.bypass.outputs.token }}
+          VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
         run: |
-          if (-not (Test-Path .\tools\smoke.ps1)) {
-            Write-Error "tools/smoke.ps1 not found"; exit 1
-          }
-          .\tools\smoke.ps1 -BaseUrl $env:BASE_URL
-      - name: Upload smoke artifacts
+          if (-not (Test-Path ./tools/smoke.ps1)) { Write-Error "tools/smoke.ps1 not found"; exit 1 }
+          ./tools/smoke.ps1 -BaseUrl "$env:BASE_URL" -BypassToken "$env:VERCEL_BYPASS_TOKEN" *>&1 | Tee-Object -FilePath smoke.log
+
+      # Default: runs without the header.
+      - name: Run smoke
+        if: ${{ inputs.with_bypass != true }}
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          if (-not (Test-Path ./tools/smoke.ps1)) { Write-Error "tools/smoke.ps1 not found"; exit 1 }
+          ./tools/smoke.ps1 -BaseUrl "$env:BASE_URL" *>&1 | Tee-Object -FilePath smoke.log
+
+      - name: Upload smoke log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-artifacts
-          path: |
-            tools/smoke.log
-            tools/smoke/**/*
-          if-no-files-found: ignore
+          name: smoke-log
+          path: smoke.log
+
+      - name: Job summary
+        if: always()
+        run: |
+          "### Smoke results (tail)" | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          "" | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          (Get-Content smoke.log -Tail 200) -join "`n" | Out-File -Append $env:GITHUB_STEP_SUMMARY

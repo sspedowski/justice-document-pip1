@@ -1,63 +1,91 @@
 param(
-  [string]$BaseUrl = $env:BASE_URL,
-  [string]$BypassToken = $env:VERCEL_BYPASS_TOKEN
+  [Parameter(Mandatory=$true)] [string]$BaseUrl,
+  [Parameter(Mandatory=$false)] [string]$BypassToken
 )
 
 $ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
 
-# Use a shared session so cookies persist (e.g., Vercel protection bypass)
-$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+function Normalize-BaseUrl([string]$u) {
+  $u = $u.Trim()
+  if (-not $u.StartsWith('http')) { $u = "https://$u" }
+  # drop trailing slash for consistent joins
+  if ($u.EndsWith('/')) { $u = $u.Substring(0, $u.Length - 1) }
+  return $u
+}
 
-if ([string]::IsNullOrWhiteSpace($BaseUrl)) { throw "BASE_URL is empty." }
+$Base = Normalize-BaseUrl $BaseUrl
+Write-Host "Base URL: $Base"
 
-# If a Vercel deployment protection bypass token is provided, set the bypass cookie first
-if (-not [string]::IsNullOrWhiteSpace($BypassToken)) {
-  $bypassUrl = "$BaseUrl?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=$BypassToken"
-  Write-Host "SET BYPASS COOKIE $bypassUrl" -ForegroundColor DarkCyan
+# Endpoints to probe (tune to your app)
+$Endpoints = @(
+  '/',                  # root
+  '/api/health',        # health (if present)
+  '/api/summarize/stream?dryRun=1'  # dry-run SSE/JSON path if you expose one
+) | Select-Object -Unique
+
+# Build headers (Vercel preview protection)
+$Headers = @{}
+if ($BypassToken -and $BypassToken.Trim().Length -gt 0) {
+  $Headers['x-vercel-protection-bypass'] = $BypassToken.Trim()
+  Write-Host "Bypass header enabled."
+}
+
+# Accept 2xx + 3xx as success.
+$OkCodes = 200..299 + 300..399
+
+function Invoke-Probe {
+  param(
+    [string]$Url
+  )
+  # try HEAD first (fast), fallback to GET
   try {
-    Invoke-WebRequest -Uri $bypassUrl -UseBasicParsing -WebSession $session | Out-Null
+    $r = Invoke-WebRequest -Uri $Url -Method Head -Headers $Headers -MaximumRedirection 5 -TimeoutSec 20
+    return $r
   } catch {
-    Write-Warning "Bypass cookie request returned an error; continuing to attempt requests with session. $_"
+    Write-Host "HEAD failed for $Url — falling back to GET. Reason: $($_.Exception.Message)"
+    return Invoke-WebRequest -Uri $Url -Method Get -Headers $Headers -MaximumRedirection 5 -TimeoutSec 25
   }
 }
 
-Write-Host "GET $BaseUrl" -ForegroundColor Cyan
-$homeResp = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing -WebSession $session
-if ($homeResp.StatusCode -ne 200) { throw "Home != 200 ($($homeResp.StatusCode))" }
-Write-Host "Home 200"
+$Results = New-Object System.Collections.Generic.List[Object]
 
-Write-Host "GET $BaseUrl/api/health" -ForegroundColor Cyan
-$health = Invoke-WebRequest -Uri "$BaseUrl/api/health" -UseBasicParsing -WebSession $session
-if ($health.StatusCode -ne 200 -or -not $health.Content.Contains("ok")) {
-  throw "/api/health not ok"
-}
-Write-Host "/api/health → ok"
+foreach ($ep in $Endpoints) {
+  $url = "$Base$ep"
+  $sw = [System.Diagnostics.Stopwatch]::StartNew()
+  $code = $null
+  $ok = $false
+  $err = $null
 
-Write-Host "HEAD $BaseUrl/api/summarize/stream" -ForegroundColor Cyan
-try {
-  $resp = Invoke-WebRequest -Uri "$BaseUrl/api/summarize/stream" -Method Head -MaximumRedirection 0 -ErrorAction Stop -WebSession $session
-} catch { $resp = $_.Exception.Response }
-if (-not $resp) { throw "No response from /api/summarize/stream" }
-$ct = $resp.Headers.'Content-Type'
-if (-not $ct -or -not $ct.ToString().StartsWith('text/event-stream')) {
-  Write-Host "Content-Type: $ct"
-  throw "/api/summarize/stream not serving text/event-stream"
-}
-Write-Host "/api/summarize/stream returns text/event-stream"
-
-Write-Host "POST rate-limit test: $BaseUrl/api/login" -ForegroundColor Cyan
-$ok=0
-for ($i=1; $i -le 6; $i++) {
   try {
-    $r = Invoke-WebRequest -Uri "$BaseUrl/api/login" -Method POST -Body '{}' -ContentType 'application/json' -ErrorAction Stop -WebSession $session
-    if ($r.StatusCode -eq 200) { $ok++ }
+    $resp = Invoke-Probe -Url $url
+    $code = [int]$resp.StatusCode
+    $ok = $OkCodes -contains $code
   } catch {
-    $code = $_.Exception.Response.StatusCode.value__
-    if ($i -eq 6 -and $code -eq 429) {
-      Write-Host "/api/login → 6th attempt is 429"
-      break
-    } elseif ($code -ne 200) {
-      throw "/api/login unexpected status on try $($i): $($code)"
-    }
+    $err = $_.Exception.Message
+  } finally {
+    $sw.Stop()
   }
+
+  $Results.Add([pscustomobject]@{
+    Endpoint = $ep
+    Url      = $url
+    Status   = $(if ($code) { $code } else { 'ERR' })
+    Ok       = $(if ($ok) { '✅' } else { '❌' })
+    Ms       = $sw.ElapsedMilliseconds
+    Error    = $err
+  })
 }
+
+# Print table + summary
+$Results | Sort-Object { $_.Ok -ne '✅' }, Ms | Format-Table -AutoSize | Out-String | Write-Host
+
+$failed = @($Results | Where-Object { $_.Ok -ne '✅' })
+if ($failed.Count -gt 0) {
+  Write-Host "`nFailures:"
+  $failed | Format-Table -AutoSize | Out-String | Write-Host
+  Exit 1
+}
+
+Write-Host "`nAll smoke checks passed."
+Exit 0

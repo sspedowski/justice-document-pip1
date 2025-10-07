@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+set -euo pipefail
 # 🧪 Justice Dashboard - Post-Deployment Testing Script
 
 RENDER_URL="https://justice-dashboard.onrender.com"
@@ -11,7 +13,7 @@ echo ""
 
 # Test 1: Health Check
 echo "1️⃣ Testing Health Check Endpoint..."
-HEALTH_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/api/health")
+HEALTH_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/api/health" || echo "000")
 
 if [ "$HEALTH_RESPONSE" = "200" ]; then
     echo "✅ Health check passed (HTTP 200)"
@@ -24,7 +26,7 @@ echo ""
 
 # Test 2: Frontend Loading
 echo "2️⃣ Testing Frontend Loading..."
-FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/")
+FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/" || echo "000")
 
 if [ "$FRONTEND_RESPONSE" = "200" ]; then
     echo "✅ Frontend loads successfully (HTTP 200)"
@@ -38,7 +40,7 @@ echo ""
 echo "3️⃣ Testing API Endpoints..."
 
 # Test login endpoint exists
-LOGIN_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_URL/api/login" -H "Content-Type: application/json" -d '{}')
+LOGIN_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_URL/api/login" -H "Content-Type: application/json" -d '{}' || echo "000")
 
 if [ "$LOGIN_RESPONSE" = "400" ] || [ "$LOGIN_RESPONSE" = "401" ] || [ "$LOGIN_RESPONSE" = "500" ]; then
     echo "✅ Login endpoint exists and responding (HTTP $LOGIN_RESPONSE)"
@@ -50,7 +52,7 @@ echo ""
 
 # Test 4: Static File Serving
 echo "4️⃣ Testing Static File Serving..."
-STATIC_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/favicon.ico")
+STATIC_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$RENDER_URL/favicon.ico" || echo "000")
 
 if [ "$STATIC_RESPONSE" = "200" ] || [ "$STATIC_RESPONSE" = "404" ]; then
     echo "✅ Static file serving is working"

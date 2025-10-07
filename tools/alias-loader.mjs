@@ -41,15 +41,7 @@ export async function resolve(specifier, context, nextResolve) {
 }
 
 export async function load(url, context, nextLoad) {
-  // Handle .ts files by reading source and marking as module
-  if (url.endsWith('.ts') || url.endsWith('.tsx')) {
-    const filePath = fileURLToPath(url);
-    const source = readFileSync(filePath, 'utf-8');
-    return {
-      format: 'module',
-      source,
-      shortCircuit: true,
-    };
-  }
+  // Delegate transpilation to subsequent loaders (e.g., esbuild/tsx)
+  // We only perform alias resolution in resolve(); for load(), we let the next loader handle it.
   return nextLoad(url, context);
 }

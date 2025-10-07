@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # 🚀 Justice Dashboard - Render Deployment Validation Script
 
 echo "🔍 JUSTICE DASHBOARD DEPLOYMENT VALIDATION"
@@ -32,51 +33,23 @@ fi
 echo ""
 echo "🔧 Validating server.js configurations..."
 
-if grep -q "process.env.PORT" justice-server/server.js; then
-    echo "✅ Dynamic PORT binding configured"
-else
-    echo "❌ PORT binding not dynamic!"
-fi
+grep -q "process.env.PORT" justice-server/server.js && echo "✅ Dynamic PORT binding configured" || { echo "❌ PORT binding not dynamic!"; exit 1; }
 
-if grep -q "express.static.*public" justice-server/server.js; then
-    echo "✅ Static file serving configured"
-else
-    echo "❌ Static file serving missing!"
-fi
+grep -q "express.static.*public" justice-server/server.js && echo "✅ Static file serving configured" || { echo "❌ Static file serving missing!"; exit 1; }
 
-if grep -q "/api/health" justice-server/server.js; then
-    echo "✅ Health check endpoint exists"
-else
-    echo "❌ Health check endpoint missing!"
-fi
+grep -q "/api/health" justice-server/server.js && echo "✅ Health check endpoint exists" || { echo "❌ Health check endpoint missing!"; exit 1; }
 
 # Check render.yaml configuration
 echo ""
 echo "⚙️ Validating render.yaml configuration..."
 
-if grep -q "cd justice-server && npm install" render.yaml; then
-    echo "✅ Backend dependency installation configured"
-else
-    echo "❌ Backend dependencies not configured!"
-fi
+grep -q "cd justice-server && npm install" render.yaml && echo "✅ Backend dependency installation configured" || { echo "❌ Backend dependencies not configured!"; exit 1; }
 
-if grep -q "cd ../justice-dashboard && npm install && npm run build" render.yaml; then
-    echo "✅ Frontend build process configured"
-else
-    echo "❌ Frontend build not configured!"
-fi
+grep -q "cd ../justice-dashboard && npm install && npm run build" render.yaml && echo "✅ Frontend build process configured" || { echo "❌ Frontend build not configured!"; exit 1; }
 
-if grep -q "cp -r dist/\* ../justice-server/public/" render.yaml; then
-    echo "✅ Frontend copy process configured"
-else
-    echo "❌ Frontend copy not configured!"
-fi
+grep -q "cp -r dist/\* ../justice-server/public/" render.yaml && echo "✅ Frontend copy process configured" || { echo "❌ Frontend copy not configured!"; exit 1; }
 
-if grep -q "generateValue: true" render.yaml; then
-    echo "✅ Secure environment variables configured"
-else
-    echo "❌ Environment variables not secure!"
-fi
+grep -q "generateValue: true" render.yaml && echo "✅ Secure environment variables configured" || { echo "❌ Environment variables not secure!"; exit 1; }
 
 echo ""
 echo "🎯 DEPLOYMENT READINESS SUMMARY"
