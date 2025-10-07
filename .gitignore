@@ -62,6 +62,8 @@ justice-server/node_modules/
 # production
 /build
 
+/public/dashboard/
+
 # misc
 .DS_Store
 *.pem

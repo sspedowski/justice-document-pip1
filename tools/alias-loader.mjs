@@ -1,12 +1,14 @@
 // tools/alias-loader.mjs
-// ESM loader for Node.js tests to resolve '@/' alias (used by Next.js via tsconfig paths)
+// Custom ESM loader used by node:test to mirror Next.js alias behaviour
+// and transpile TypeScript sources on the fly.
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import ts from 'typescript';
 
 const rootPath = process.cwd();
-const rootUrl = pathToFileURL(rootPath + '/');
+const rootUrl = pathToFileURL(`${rootPath}/`);
 
 export async function resolve(specifier, context, nextResolve) {
   // Map "@/lib/*" with priority: src/lib/* then lib/*
@@ -26,14 +28,14 @@ export async function resolve(specifier, context, nextResolve) {
   // Map "@/app/*" -> "app/*"
   if (specifier.startsWith('@/app/')) {
     const rel = specifier.slice(6); // drop "@/app/"
-    const target = new URL('app/' + rel, rootUrl).href;
+    const target = new URL(`app/${rel}`, rootUrl).href;
     return { url: target, shortCircuit: true };
   }
 
   // Map "@/*" -> "src/*" (default)
   if (specifier.startsWith('@/')) {
     const rel = specifier.slice(2); // drop "@/"
-    const target = new URL('src/' + rel, rootUrl).href;
+    const target = new URL(`src/${rel}`, rootUrl).href;
     return { url: target, shortCircuit: true };
   }
 
@@ -41,7 +43,26 @@ export async function resolve(specifier, context, nextResolve) {
 }
 
 export async function load(url, context, nextLoad) {
-  // Delegate transpilation to subsequent loaders (e.g., esbuild/tsx)
-  // We only perform alias resolution in resolve(); for load(), we let the next loader handle it.
+  if (url.startsWith('file:') && (url.endsWith('.ts') || url.endsWith('.tsx'))) {
+    const filePath = fileURLToPath(url);
+    const source = await readFile(filePath, 'utf8');
+    const { outputText } = ts.transpileModule(source, {
+      fileName: filePath,
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.ESNext,
+        moduleResolution: ts.ModuleResolutionKind.NodeNext,
+        jsx: ts.JsxEmit.ReactJSX,
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        resolveJsonModule: true,
+        isolatedModules: true,
+        verbatimModuleSyntax: true,
+        sourceMap: false,
+      },
+    });
+    return { format: 'module', source: outputText, shortCircuit: true };
+  }
+
   return nextLoad(url, context);
 }

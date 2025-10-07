@@ -10,8 +10,9 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:local": "cross-env NEXT_DISABLE_FILE_TRACING=1 next build",
+    "build": "pnpm run build:dashboard:copy && next build",
+    "build:local": "pnpm run build:dashboard:copy && cross-env NEXT_DISABLE_FILE_TRACING=1 next build",
+    "build:dashboard:copy": "node ./tools/copy-dashboard.mjs",
     "start": "next start",
     "lint": "eslint -c config/.eslintrc.json . --ext .ts,.tsx,.js,.jsx --max-warnings=0 --cache --cache-location .eslintcache",
     "typecheck": "tsc -p tsconfig.json --noEmit",

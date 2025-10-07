@@ -17,6 +17,16 @@ function Normalize-BaseUrl([string]$u) {
 $Base = Normalize-BaseUrl $BaseUrl
 Write-Host "Base URL: $Base"
 
+# Validate base URL includes a hostname
+try {
+  $uri = [Uri]$Base
+  if (-not $uri.Host -or [string]::IsNullOrWhiteSpace($uri.Host)) {
+    throw "Missing host"
+  }
+} catch {
+  throw "BaseUrl is invalid. Provide a full URL like https://your-app.vercel.app"
+}
+
 # Endpoints to probe (tune to your app)
 $Endpoints = @(
   '/',                  # root
@@ -43,7 +53,7 @@ function Invoke-Probe {
     $r = Invoke-WebRequest -Uri $Url -Method Head -Headers $Headers -MaximumRedirection 5 -TimeoutSec 20
     return $r
   } catch {
-    Write-Host "HEAD failed for $Url — falling back to GET. Reason: $($_.Exception.Message)"
+  Write-Host "HEAD failed for $Url - falling back to GET. Reason: $($_.Exception.Message)"
     return Invoke-WebRequest -Uri $Url -Method Get -Headers $Headers -MaximumRedirection 5 -TimeoutSec 25
   }
 }
@@ -71,16 +81,16 @@ foreach ($ep in $Endpoints) {
     Endpoint = $ep
     Url      = $url
     Status   = $(if ($code) { $code } else { 'ERR' })
-    Ok       = $(if ($ok) { '✅' } else { '❌' })
+    Ok       = $(if ($ok) { 'OK' } else { 'FAIL' })
     Ms       = $sw.ElapsedMilliseconds
     Error    = $err
   })
 }
 
 # Print table + summary
-$Results | Sort-Object { $_.Ok -ne '✅' }, Ms | Format-Table -AutoSize | Out-String | Write-Host
+$Results | Sort-Object { $_.Ok -ne 'OK' }, Ms | Format-Table -AutoSize | Out-String | Write-Host
 
-$failed = @($Results | Where-Object { $_.Ok -ne '✅' })
+$failed = @($Results | Where-Object { $_.Ok -ne 'OK' })
 if ($failed.Count -gt 0) {
   Write-Host "`nFailures:"
   $failed | Format-Table -AutoSize | Out-String | Write-Host
