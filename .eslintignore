@@ -9,4 +9,4 @@ legacy/**
 justice-server/**
 packages/frontend/**
 **/*.d.ts
-.eslintcache
+..eslintcache
