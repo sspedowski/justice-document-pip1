@@ -14,6 +14,33 @@ function Normalize-BaseUrl([string]$u) {
   return $u
 }
 
+function Test-IsVercelPreviewProtection {
+  param(
+    [int]$StatusCode,
+    $Headers,
+    [string]$ErrorMessage
+  )
+  try {
+    # If we have a status code and it's definitely not auth-related, bail early
+    if ($null -ne $StatusCode -and $StatusCode -ne 401 -and $StatusCode -ne 403) { return $false }
+    if ($null -ne $Headers) {
+      $verr = $Headers['x-vercel-error']
+      $vid  = $Headers['x-vercel-id']
+      $vc   = $Headers['x-vercel-cache']
+      $srv  = $Headers['server']
+      if ($verr -match 'preview_protection') { return $true }
+      if ($vid -or $vc) { return $true }
+      if ($srv -and ($srv -match 'vercel')) { return $true }
+    }
+    # If host is vercel.app and the status suggests auth, treat as preview protection
+    if ($script:BaseHost -and $script:BaseHost.EndsWith('.vercel.app')) {
+      if ($null -eq $StatusCode -or $StatusCode -eq 401 -or $StatusCode -eq 403) { return $true }
+    }
+    if ($ErrorMessage -and ($ErrorMessage.ToLowerInvariant() -match 'preview.*protect|vercel')) { return $true }
+  } catch {}
+  return $false
+}
+
 $Base = Normalize-BaseUrl $BaseUrl
 Write-Host "Base URL: $Base"
 
@@ -23,6 +50,8 @@ try {
   if (-not $uri.Host -or [string]::IsNullOrWhiteSpace($uri.Host)) {
     throw "Missing host"
   }
+  # expose base host for preview-protection heuristics
+  $script:BaseHost = $uri.Host.ToLowerInvariant()
 } catch {
   throw "BaseUrl is invalid. Provide a full URL like https://your-app.vercel.app"
 }
@@ -103,12 +132,19 @@ foreach ($ep in $Endpoints) {
       $err = ($hints -join '; ')
     }
 
-    if (-not $ok -and $code -eq 401 -and $verr -match 'preview_protection') {
-      $previewProtected = $true
+    if (-not $ok) {
+      if (Test-IsVercelPreviewProtection -StatusCode $code -Headers $resp.Headers -ErrorMessage $err) {
+        $previewProtected = $true
+      }
     }
   } catch {
     $method = if ($ep -match '/stream') { 'GET (SSE)' } else { 'HEAD→GET' }
     $err = $_.Exception.Message
+    # Try to parse status code from error message when no response object is available
+    if (-not $code) {
+      if ($err -match '\b401\b') { $code = 401 }
+      elseif ($err -match '\b403\b') { $code = 403 }
+    }
     # Try to extract response details from WebException when present
     try {
       $we = $_.Exception
@@ -125,7 +161,10 @@ foreach ($ep in $Endpoints) {
         if ($hints.Count -gt 0) {
           $err = ($err + ' | ' + ($hints -join '; ')).Trim()
         }
-        if ($code -eq 401 -and $verr -match 'preview_protection') { $previewProtected = $true }
+        if (Test-IsVercelPreviewProtection -StatusCode $code -Headers $resp.Headers -ErrorMessage $err) { $previewProtected = $true }
+      } else {
+        # No response object; still try host-based detection
+        if (Test-IsVercelPreviewProtection -StatusCode $code -Headers $null -ErrorMessage $err) { $previewProtected = $true }
       }
     } catch { }
   } finally {
@@ -144,6 +183,17 @@ foreach ($ep in $Endpoints) {
 }
 
 # Print table + summary
+# If protected preview (vercel.app + no bypass), convert 401/403 failures to SKIP
+$isProtectedHost = ($script:BaseHost -and $script:BaseHost.EndsWith('.vercel.app'))
+$hasBypass = ($BypassToken -and $BypassToken.Trim().Length -gt 0)
+if ($isProtectedHost -and -not $hasBypass) {
+  foreach ($row in $Results) {
+    if ($row.Ok -eq 'FAIL' -and ($row.Status -eq 401 -or $row.Status -eq 403)) {
+      $row.Ok = 'SKIP'
+    }
+  }
+}
+
 $Results | Sort-Object { $_.Ok -ne 'OK' }, Ms | Format-Table -AutoSize | Out-String | Write-Host
 
 $failed = @($Results | Where-Object { $_.Ok -eq 'FAIL' })
