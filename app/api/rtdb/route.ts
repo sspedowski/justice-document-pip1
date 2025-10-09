@@ -1,16 +1,21 @@
 // app/api/rtdb/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { getRtdb /*, verifyIdToken, verifyAppCheck */ } from "../../../lib/firebaseAdmin"
+import { z } from "zod"
 
 export const runtime = "nodejs"
 export const preferredRegion = ["iad1"]
 
 
-type PostBody = {
-  path: string
-  data?: unknown
-  method?: "set" | "push"
-}
+const PostBodySchema = z.object({
+  path: z.string().min(1).max(256).regex(/^[a-zA-Z0-9/_-]+$/),
+  data: z.unknown().optional(),
+  method: z.enum(["set", "push"]).optional().default("set")
+});
+
+const GetQuerySchema = z.object({
+  path: z.string().min(1).max(256).regex(/^[a-zA-Z0-9/_-]+$/)
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,8 +26,12 @@ export async function POST(req: NextRequest) {
     // const appCheckToken = getAppCheckToken(req)
     // if (appCheckToken) { await verifyAppCheck(appCheckToken) }
 
-    const { path, data, method = "set" } = (await req.json()) as PostBody
-    if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })
+    const body = await req.json()
+    const parsed = PostBodySchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ ok: false, error: 'Invalid request body' }, { status: 400 })
+    }
+    const { path, data, method } = parsed.data
 
     const db = getRtdb()
     const ref = db.ref(path)
@@ -44,8 +53,12 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url)
-    const path = url.searchParams.get("path")
-    if (!path) return NextResponse.json({ ok:false, error:'Missing "path"' }, { status: 400 })
+    const pathParam = url.searchParams.get("path")
+    const parsed = GetQuerySchema.safeParse({ path: pathParam })
+    if (!parsed.success) {
+      return NextResponse.json({ ok: false, error: 'Invalid path parameter' }, { status: 400 })
+    }
+    const { path } = parsed.data
 
     const snap = await getRtdb().ref(path).get()
     return NextResponse.json({ ok:true, exists: snap.exists(), value: snap.val() })

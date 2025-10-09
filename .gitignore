@@ -1,99 +1,54 @@
-# Env & local configs
-.env
-.env.*
-*.local
-*.dev
-
-# Node
+# Dependencies
 node_modules/
-.parcel-cache/
+.pnpm-debug.log*
+
+# Build outputs
 .next/
+out/
 dist/
 build/
 coverage/
-.turbo/
 
-# Build artifacts (common)
-*.tsbuildinfo
-.eslintcache
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Logs & OS noise
-npm-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-*.log
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
 Thumbs.db
 
-# Editors
-.vscode/
-.idea/
-
-# Cypress artifacts (optional)
-cypress/screenshots/
-cypress/videos/
-
-# Generated maps (optional)
-*.map
-
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-/dist/
-node_modules/
-justice-dashboard/node_modules/
-justice-server/node_modules/
-
-# production
-/build
-
-/public/dashboard/
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# vercel
-.vercel
+# Archive and legacy code
+_archive/
+legacy/
 
-# typescript
+# Uploads and temp files
+uploads/
+*.tmp
+*.temp
+
+# TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
-# parked legacy
-legacy/_parking/**/node_modules/
-legacy/_parking/**/.next/
-legacy/_parking/**/dist/
-legacy/_parking/**/build/
-
-# Local assistants / workspace
-.claude/
-
-# VS Code (ignore directory by default; allow curated files)
-.vscode/
-!.vscode/settings.json
-!.vscode/keybindings.json
+# ESLint cache
+.eslintcache

@@ -1,6 +1,7 @@
 param(
   [Parameter(Mandatory=$true)] [string]$BaseUrl,
-  [Parameter(Mandatory=$false)] [string]$BypassToken
+  [Parameter(Mandatory=$false)] [string]$BypassToken,
+  [Parameter(Mandatory=$false)] [string]$SsoBypassToken
 )
 
 $ErrorActionPreference = 'Stop'
@@ -17,6 +18,12 @@ function Add-BypassQuery([string]$Url, [string]$Token) {
   if ([string]::IsNullOrWhiteSpace($Token)) { return $Url }
   $sep = ($Url -match '\?') ? '&' : '?'
   return "$Url${sep}vercel-protection-bypass=$Token"
+}
+
+function Add-QueryParam([string]$Url, [string]$Key, [string]$Value) {
+  if ([string]::IsNullOrWhiteSpace($Value)) { return $Url }
+  $sep = ($Url -match '\?') ? '&' : '?'
+  return "$Url${sep}$Key=$Value"
 }
 
 function Test-IsVercelPreviewProtection {
@@ -70,13 +77,20 @@ $Endpoints = @(
 ) | Select-Object -Unique
 
 $HasBypass = ($BypassToken -and $BypassToken.Trim().Length -gt 0)
+$HasSso    = ($SsoBypassToken -and $SsoBypassToken.Trim().Length -gt 0)
 $Session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $Headers = @{}
-if ($HasBypass) {
-  $Headers['x-vercel-protection-bypass'] = $BypassToken.Trim()
-  Write-Host "Bypass enabled: header + query param + cookie via WebSession."
-  # Warm-up GET to set bypass cookie
-  $warmUrl = Add-BypassQuery "$Base/" $BypassToken
+if ($HasBypass -or $HasSso) {
+  if ($HasBypass) { $Headers['x-vercel-protection-bypass'] = $BypassToken.Trim() }
+  if ($HasSso)    { $Headers['x-vercel-sso-bypass']        = $SsoBypassToken.Trim() }
+  $modes = @()
+  if ($HasBypass) { $modes += 'PreviewProtection' }
+  if ($HasSso)    { $modes += 'SSO' }
+  Write-Host ("Bypass enabled ({0}): header + query param + cookie via WebSession." -f ($modes -join '+'))
+  # Warm-up GET to set bypass cookies (send both params when present)
+  $warmUrl = "$Base/"
+  if ($HasBypass) { $warmUrl = Add-QueryParam $warmUrl 'vercel-protection-bypass' $BypassToken }
+  if ($HasSso)    { $warmUrl = Add-QueryParam $warmUrl 'vercel-sso-bypass'        $SsoBypassToken }
   try { $null = Invoke-WebRequest -UseBasicParsing -Method Get -Uri $warmUrl -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 20 } catch {}
 }
 
@@ -87,8 +101,10 @@ function Invoke-Probe {
   param(
     [string]$Url
   )
-  $UrlQ = if ($HasBypass) { Add-BypassQuery $Url $BypassToken } else { $Url }
-  if ($HasBypass) {
+  $UrlQ = $Url
+  if ($HasBypass) { $UrlQ = Add-QueryParam $UrlQ 'vercel-protection-bypass' $BypassToken }
+  if ($HasSso)    { $UrlQ = Add-QueryParam $UrlQ 'vercel-sso-bypass'        $SsoBypassToken }
+  if ($HasBypass -or $HasSso) {
     $r = Invoke-WebRequest -Uri $UrlQ -Method Get -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 20
     $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET' -Force
     return $r
@@ -123,7 +139,9 @@ foreach ($ep in $Endpoints) {
       foreach ($k in $Headers.Keys) { $h[$k] = $Headers[$k] }
       $h['Accept'] = 'text/event-stream'
 
-      $urlSse = if ($HasBypass) { Add-BypassQuery $url $BypassToken } else { $url }
+      $urlSse = $url
+      if ($HasBypass) { $urlSse = Add-QueryParam $urlSse 'vercel-protection-bypass' $BypassToken }
+      if ($HasSso)    { $urlSse = Add-QueryParam $urlSse 'vercel-sso-bypass'        $SsoBypassToken }
       $resp = Invoke-WebRequest -Uri $urlSse -Method Get -Headers $h -WebSession $Session -MaximumRedirection 5 -TimeoutSec 25
       $resp | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET (SSE)' -Force
     } else {
@@ -210,7 +228,7 @@ foreach ($ep in $Endpoints) {
 # Print table + summary
 # If protected preview (vercel.app + no bypass), convert 401/403 failures to SKIP
 $isProtectedHost = ($script:BaseHost -and $script:BaseHost.EndsWith('.vercel.app'))
-$hasBypass = ($BypassToken -and $BypassToken.Trim().Length -gt 0)
+$hasBypass = ($HasBypass -or $HasSso)
 if ($isProtectedHost -and -not $hasBypass) {
   foreach ($row in $Results) {
     if ($row.Ok -eq 'FAIL' -and ($row.Status -eq 401 -or $row.Status -eq 403)) {

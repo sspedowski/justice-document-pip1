@@ -38,8 +38,9 @@ jobs:
         shell: bash
         env:
           VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+          VERCEL_SSO_BYPASS: ${{ secrets.VERCEL_SSO_BYPASS }}
         run: |
-          if [[ "${{ inputs.with_bypass }}" == "true" && -n "${VERCEL_BYPASS_TOKEN}" ]]; then
+          if [[ "${{ inputs.with_bypass }}" == "true" && ( -n "${VERCEL_BYPASS_TOKEN}" || -n "${VERCEL_SSO_BYPASS}" ) ]]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
@@ -54,9 +55,13 @@ jobs:
         if: ${{ steps.bypass.outputs.enabled == 'true' }}
         env:
           VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+          VERCEL_SSO_BYPASS: ${{ secrets.VERCEL_SSO_BYPASS }}
         run: |
           if (-not (Test-Path ./tools/smoke.ps1)) { Write-Error "tools/smoke.ps1 not found"; exit 1 }
-          ./tools/smoke.ps1 -BaseUrl "$env:BASE_URL" -BypassToken "$env:VERCEL_BYPASS_TOKEN" *>&1 | Tee-Object -FilePath smoke.log
+          $args = @('-BaseUrl', "$env:BASE_URL")
+          if ($env:VERCEL_BYPASS_TOKEN) { $args += @('-BypassToken', "$env:VERCEL_BYPASS_TOKEN") }
+          if ($env:VERCEL_SSO_BYPASS)   { $args += @('-SsoBypassToken', "$env:VERCEL_SSO_BYPASS") }
+          ./tools/smoke.ps1 @args *>&1 | Tee-Object -FilePath smoke.log
 
       # Default: runs without the header.
       - name: Run smoke
