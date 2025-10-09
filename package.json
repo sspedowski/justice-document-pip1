@@ -11,8 +11,9 @@
   "scripts": {
     "preinstall": "node ./tools/enforce-pnpm.js",
     "dev": "next dev",
-    "build": "rimraf .next && pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && next build",
-    "build:local": "rimraf .next && pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && cross-env NEXT_DISABLE_FILE_TRACING=1 next build",
+        "build": "pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && pnpm run build:next",
+    "build:next": "node ./tools/build-next-retry.mjs",
+      "build:local": "pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && cross-env NEXT_DISABLE_FILE_TRACING=1 pnpm exec next build",
     "build:dashboard:bundle": "node ./tools/build-dashboard.mjs",
     "build:dashboard:copy": "node ./tools/copy-dashboard.mjs",
     "start": "next start",
