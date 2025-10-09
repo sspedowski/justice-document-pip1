@@ -154,6 +154,17 @@ foreach ($ep in $Endpoints) {
   } catch {
     $method = if ($ep -match '/stream') { 'GET (SSE)' } else { 'HEAD→GET' }
     $err = $_.Exception.Message
+    # Diagnostics: print status and headers when available to distinguish preview protection vs app middleware
+    try {
+      $respDiag = $_.Exception.Response
+      if ($respDiag) {
+        $statusDiag = $null
+        try { $statusDiag = $respDiag.StatusCode.value__ } catch {}
+        if ($statusDiag) { Write-Host ("Status: {0}" -f $statusDiag) -ForegroundColor Yellow }
+        Write-Host "Headers:" -ForegroundColor Yellow
+        try { $respDiag.Headers.GetEnumerator() | ForEach-Object { Write-Host ("  {0}: {1}" -f $_.Key, ($_.Value -join ', ')) } } catch {}
+      }
+    } catch {}
     # Try to parse status code from error message when no response object is available
     if (-not $code) {
       if ($err -match '\b401\b') { $code = 401 }
