@@ -1,19 +1,27 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "jsx": "preserve",
-    "allowImportingTsExtensions": true,
-    
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./*"],
       "@/lib/*": ["./src/lib/*", "./lib/*"],
       "@/app/*": ["./app/*"]
-    }
+    },
+    "types": ["node"],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -33,6 +41,7 @@
     "packages",
     "dist",
     "build",
-    ".next"
+    ".next",
+    "justice-dashboard/node_modules"
   ]
 }
