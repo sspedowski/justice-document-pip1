@@ -9,15 +9,18 @@
   },
   "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "preinstall": "node ./tools/enforce-pnpm.js",
     "dev": "next dev",
-    "build": "pnpm run build:dashboard:copy && next build",
-    "build:local": "pnpm run build:dashboard:copy && cross-env NEXT_DISABLE_FILE_TRACING=1 next build",
+    "build": "rimraf .next && pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && next build",
+    "build:local": "rimraf .next && pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && cross-env NEXT_DISABLE_FILE_TRACING=1 next build",
+    "build:dashboard:bundle": "node ./tools/build-dashboard.mjs",
     "build:dashboard:copy": "node ./tools/copy-dashboard.mjs",
     "start": "next start",
     "lint": "eslint -c config/.eslintrc.json . --ext .ts,.tsx,.js,.jsx --max-warnings=0 --cache --cache-location .eslintcache",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm run test:unit-node && pnpm run test:vitest",
-  "test:unit-node": "node --test --test-reporter=spec --loader=./tools/alias-loader.mjs --loader=@esbuild-kit/esm-loader tests-node",
+    "test:unit-node": "node --test --test-reporter=spec --loader=./tools/alias-loader.mjs --loader=@esbuild-kit/esm-loader tests-node",
+    "test:unit-ts": "tsx --test \"tests-node/**/*.test.ts\"",
     "test:vitest": "vitest run",
     "linkcheck": "lychee --no-progress --verbose --include-fragments --accept 200,206 --max-redirects 5 ."
   },
@@ -76,6 +79,8 @@
     "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "tsx": "^4.19.0",
+    "rimraf": "^6.0.1"
   }
 }

@@ -38,6 +38,7 @@ jobs:
     name: Lint
     needs: setup
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,6 +55,7 @@ jobs:
     name: Typecheck
     needs: setup
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -88,6 +90,7 @@ jobs:
     name: Build (Next)
     needs: [lint, typecheck, unit]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       CI: '1'
     steps:
@@ -100,6 +103,24 @@ jobs:
           version: 9.12.0
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - name: Build dashboard bundle
+        run: pnpm run build:dashboard:bundle
+      - name: Copy dashboard into public
+        env:
+          DASHBOARD_COPY_STRICT: true
+        run: pnpm run build:dashboard:copy
+      - name: Assert dashboard assets present
+        shell: bash
+        run: |
+          if [ ! -f public/dashboard/index.html ]; then
+            echo "::error ::public/dashboard/index.html missing. Did the copy step run (build:dashboard:copy)?"
+            exit 1
+          fi
+          if [ ! -d public/dashboard/assets ]; then
+            echo "::error ::public/dashboard/assets missing. Did Vite emit assets with base=/dashboard/?"
+            ls -R public/dashboard || true
+            exit 1
+          fi
       - run: pnpm build
 
   linkcheck_pr:

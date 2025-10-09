@@ -10,13 +10,9 @@ function getApiBaseUrl() {
 }
 const API_BASE_URL = getApiBaseUrl();
 
-// 2. Universal event delegation for Upload and Lawyer buttons
-document.addEventListener("click", (event) => {
-  if (event.target?.id === "uploadBtn") alert("Upload button (delegated)");
-  if (event.target?.id === "lawyerBtn") alert("Lawyer button (delegated)");
-});
+// 2. PDF.js status check (console only)
 
-// 3. PDF.js status check (console only)
+// 2. PDF.js status check (console only)
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof pdfjsLib !== "undefined") {
     console.log("✅ PDF.js library loaded:", pdfjsLib.version);
@@ -25,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// 4. Dashboard Auth System (Login, Logout, Auth Check)
+// 3. Dashboard Auth System (Login, Logout, Auth Check)
 const DashboardAuth = {
   isAuthenticated: false,
   currentUser: null,
@@ -98,7 +94,7 @@ const DashboardAuth = {
   }
 };
 
-// 5. Dashboard UI (Login, Main, Tracker, Stats, Filters, etc)
+// 4. Dashboard UI (Login, Main, Tracker, Stats, Filters, etc)
 const DashboardUI = {
   renderLogin(errorMsg = "") {
     const app = document.getElementById("app");
@@ -257,7 +253,7 @@ const DashboardUI = {
   }
 };
 
-// 6. Entry point: show login or dashboard on load
+// 5. Entry point: show login or dashboard on load
 document.addEventListener("DOMContentLoaded", () => {
   if (DashboardAuth.init()) {
     DashboardUI.renderDashboard();

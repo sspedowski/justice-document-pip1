@@ -2,5 +2,4 @@
 set -euo pipefail
 
 # Run Vite subapp tests before pushing
-npm --prefix justice-dashboard run test:run
-
+pnpm --dir justice-dashboard test

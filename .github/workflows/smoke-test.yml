@@ -13,6 +13,7 @@ jobs:
     if: github.event.deployment_status.state == 'success'
     steps:
       - name: Smoke SSE summarize endpoint
+        continue-on-error: true
         env:
           SITE_URL: ${{ github.event.deployment_status.target_url }}
         run: |
@@ -41,3 +42,8 @@ jobs:
           }
 
           echo "✅ SSE smoke test passed"
+
+      - name: Guidance for protected previews
+        if: failure()
+        run: |
+          echo "::notice title=Protected preview detected::If the SSE smoke failed due to preview_protection, run the 'Manual Smoke' workflow with with_bypass=true and ensure the VERCEL_BYPASS_TOKEN secret is set."

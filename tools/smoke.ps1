@@ -30,9 +30,9 @@ try {
 # Endpoints to probe (tune to your app)
 $Endpoints = @(
   '/',                  # root
+  '/dashboard',         # dashboard bundle (ensures copy step succeeded)
   '/api/health',        # health (if present)
-  '/api/summarize/stream?dryRun=1',  # dry-run SSE/JSON path if you expose one
-  '/dashboard'          # dashboard bundle (if copied to public/)
+  '/api/summarize/stream?dryRun=1'   # dry-run SSE/JSON path if you expose one
 ) | Select-Object -Unique
 
 # Build headers (Vercel preview protection)
@@ -52,10 +52,14 @@ function Invoke-Probe {
   # try HEAD first (fast), fallback to GET
   try {
     $r = Invoke-WebRequest -Uri $Url -Method Head -Headers $Headers -MaximumRedirection 5 -TimeoutSec 20
+    # annotate method used
+    $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'HEAD' -Force
     return $r
   } catch {
-  Write-Host "HEAD failed for $Url - falling back to GET. Reason: $($_.Exception.Message)"
-    return Invoke-WebRequest -Uri $Url -Method Get -Headers $Headers -MaximumRedirection 5 -TimeoutSec 25
+    Write-Host "HEAD failed for $Url - falling back to GET. Reason: $($_.Exception.Message)"
+    $r = Invoke-WebRequest -Uri $Url -Method Get -Headers $Headers -MaximumRedirection 5 -TimeoutSec 25
+    $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET' -Force
+    return $r
   }
 }
 
@@ -67,13 +71,63 @@ foreach ($ep in $Endpoints) {
   $code = $null
   $ok = $false
   $err = $null
+  $method = $null
+  $previewProtected = $false
 
   try {
-    $resp = Invoke-Probe -Url $url
+    if ($ep -match '/stream') {
+      # SSE endpoints: GET only with Accept header
+      $h = @{}
+      foreach ($k in $Headers.Keys) { $h[$k] = $Headers[$k] }
+      $h['Accept'] = 'text/event-stream'
+
+      $resp = Invoke-WebRequest -Uri $url -Method Get -Headers $h -MaximumRedirection 5 -TimeoutSec 25
+      $resp | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET (SSE)' -Force
+    } else {
+      $resp = Invoke-Probe -Url $url
+    }
+
     $code = [int]$resp.StatusCode
     $ok = $OkCodes -contains $code
+    $method = $resp.MethodUsed
+
+    # Surface helpful Vercel headers when available
+    $vcache = $resp.Headers['x-vercel-cache']
+    $vid    = $resp.Headers['x-vercel-id']
+    $verr   = $resp.Headers['x-vercel-error']
+    $hints = @()
+    if ($verr) { $hints += "x-vercel-error=$verr" }
+    if ($vcache) { $hints += "x-vercel-cache=$vcache" }
+    if ($vid)    { $hints += "x-vercel-id=$vid" }
+    if ($hints.Count -gt 0) {
+      $err = ($hints -join '; ')
+    }
+
+    if (-not $ok -and $code -eq 401 -and $verr -match 'preview_protection') {
+      $previewProtected = $true
+    }
   } catch {
+    $method = if ($ep -match '/stream') { 'GET (SSE)' } else { 'HEAD→GET' }
     $err = $_.Exception.Message
+    # Try to extract response details from WebException when present
+    try {
+      $we = $_.Exception
+      if ($we.Response) {
+        $resp = $we.Response
+        if ($resp.StatusCode) { $code = [int]$resp.StatusCode }
+        $vcache = $resp.Headers['x-vercel-cache']
+        $vid    = $resp.Headers['x-vercel-id']
+        $verr   = $resp.Headers['x-vercel-error']
+        $hints = @()
+        if ($verr) { $hints += "x-vercel-error=$verr" }
+        if ($vcache) { $hints += "x-vercel-cache=$vcache" }
+        if ($vid)    { $hints += "x-vercel-id=$vid" }
+        if ($hints.Count -gt 0) {
+          $err = ($err + ' | ' + ($hints -join '; ')).Trim()
+        }
+        if ($code -eq 401 -and $verr -match 'preview_protection') { $previewProtected = $true }
+      }
+    } catch { }
   } finally {
     $sw.Stop()
   }
@@ -82,8 +136,9 @@ foreach ($ep in $Endpoints) {
     Endpoint = $ep
     Url      = $url
     Status   = $(if ($code) { $code } else { 'ERR' })
-    Ok       = $(if ($ok) { 'OK' } else { 'FAIL' })
+    Ok       = $(if ($ok) { 'OK' } elseif ($previewProtected) { 'SKIP' } else { 'FAIL' })
     Ms       = $sw.ElapsedMilliseconds
+    Method   = $method
     Error    = $err
   })
 }
@@ -91,12 +146,12 @@ foreach ($ep in $Endpoints) {
 # Print table + summary
 $Results | Sort-Object { $_.Ok -ne 'OK' }, Ms | Format-Table -AutoSize | Out-String | Write-Host
 
-$failed = @($Results | Where-Object { $_.Ok -ne 'OK' })
+$failed = @($Results | Where-Object { $_.Ok -eq 'FAIL' })
 if ($failed.Count -gt 0) {
   Write-Host "`nFailures:"
   $failed | Format-Table -AutoSize | Out-String | Write-Host
   Exit 1
 }
 
-Write-Host "`nAll smoke checks passed."
+Write-Host "`nAll smoke checks passed (non-200s due to preview protection are marked SKIP)."
 Exit 0

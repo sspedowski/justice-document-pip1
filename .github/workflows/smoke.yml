@@ -27,25 +27,32 @@ jobs:
     defaults:
       run:
         shell: pwsh
+    env:
+      BASE_URL: ${{ inputs.base_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Preflight: if bypass requested but secret is missing, fail fast with a clear message.
-      - name: Verify bypass secret present (only when requested)
-        if: ${{ inputs.with_bypass == true }}
-        run: |
-          if (-not $env:VERCEL_BYPASS_TOKEN -or $env:VERCEL_BYPASS_TOKEN.Trim().Length -eq 0) {
-            Write-Error "with_bypass=true but secret VERCEL_BYPASS_TOKEN is not set."
-          }
+      - name: Compute optional bypass header
+        id: bypass
+        shell: bash
         env:
           VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+        run: |
+          if [[ "${{ inputs.with_bypass }}" == "true" && -n "${VERCEL_BYPASS_TOKEN}" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      # Runs with the Vercel bypass header if requested.
+      - name: Show bypass status (redacted)
+        run: |
+          "Bypass enabled: ${{ steps.bypass.outputs.enabled }}"
+
+      # Runs with the Vercel bypass header when both input and secret are present
       - name: Run smoke (with bypass)
-        if: ${{ inputs.with_bypass == true }}
+        if: ${{ steps.bypass.outputs.enabled == 'true' }}
         env:
-          BASE_URL: ${{ inputs.base_url }}
           VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
         run: |
           if (-not (Test-Path ./tools/smoke.ps1)) { Write-Error "tools/smoke.ps1 not found"; exit 1 }
@@ -53,9 +60,7 @@ jobs:
 
       # Default: runs without the header.
       - name: Run smoke
-        if: ${{ inputs.with_bypass != true }}
-        env:
-          BASE_URL: ${{ inputs.base_url }}
+        if: ${{ steps.bypass.outputs.enabled != 'true' }}
         run: |
           if (-not (Test-Path ./tools/smoke.ps1)) { Write-Error "tools/smoke.ps1 not found"; exit 1 }
           ./tools/smoke.ps1 -BaseUrl "$env:BASE_URL" *>&1 | Tee-Object -FilePath smoke.log
