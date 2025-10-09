@@ -1,22 +1,12 @@
 # Justice Dashboard
 
-## 🆕 What’s New — Vite Dashboard Integration
+### 🆕 What’s New — Vite Dashboard Integration
 
-The Justice Dashboard has been fully rebuilt as a standalone Vite + React + TypeScript sub-application under `justice-dashboard/`.
-It now builds, tests, and deploys independently while integrating cleanly into the main Next.js app.
+- Vite + React + TS sub-app now lives in `justice-dashboard/`.
+- CI builds Vite → copies to `public/dashboard/` → builds Next.
+- See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** and the Contributor Command Reference below.
 
-### Key Improvements
 
-- 🔧 Real Vite build pipeline — replaces static bundle with a reproducible sub-app flow (bundle → copy → Next build).
-- 🧪 CI enforcement — `tools/build-dashboard.mjs`, `tools/copy-dashboard.mjs`, and `.github/workflows/ci.yml` ensure consistent assets.
-- 🧰 Local developer flow — new commands for building, copying, and testing the dashboard in isolation.
-- 🪶 Cleaner structure — all dashboard code lives in `justice-dashboard/src/` with dedicated helpers, toolbar, and feature toggles.
-
-### Quickstart
-
-See: Contributor Command Reference →
-
-Use the pnpm and smoke-test commands there to verify your setup, run local builds, or confirm Vercel deployments.
 
 ## Smoke & Bypass
 
