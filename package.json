@@ -9,13 +9,20 @@
   },
   "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "preinstall": "node ./tools/enforce-pnpm.js",
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && pnpm run build:dashboard:assert && pnpm run build:next",
+    "build:next": "node ./tools/build-next-retry.mjs",
+    "build:local": "pnpm run build:dashboard:bundle && pnpm run build:dashboard:copy && pnpm run build:dashboard:assert && cross-env NEXT_DISABLE_FILE_TRACING=1 pnpm exec next build",
+    "build:dashboard:bundle": "node ./tools/build-dashboard.mjs",
+    "build:dashboard:copy": "node ./tools/copy-dashboard.mjs",
+    "build:dashboard:assert": "node ./tools/assert-dashboard.mjs",
     "start": "next start",
-    "lint": "eslint -c config/.eslintrc.json .",
+    "lint": "eslint -c config/.eslintrc.json . --ext .ts,.tsx,.js,.jsx --max-warnings=0 --cache --cache-location .eslintcache",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm run test:unit-node && pnpm run test:vitest",
-    "test:unit-node": "node --test --test-reporter=spec --loader ./tools/alias-loader.mjs \"tests-node/**/*.mjs\"",
+    "test:unit-node": "node --test --test-reporter=spec --loader=./tools/alias-loader.mjs --loader=@esbuild-kit/esm-loader tests-node",
+    "test:unit-ts": "tsx --test \"tests-node/**/*.test.ts\"",
     "test:vitest": "vitest run",
     "linkcheck": "lychee --no-progress --verbose --include-fragments --accept 200,206 --max-redirects 5 ."
   },
@@ -28,7 +35,6 @@
     "packages/justice-dashboard/src/**/*.{js,jsx,ts,tsx}": "pnpm --filter justice-dashboard test -- --changed"
   },
   "dependencies": {
-    "zod": "^3.23.8",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-scroll-area": "^1.2.10",
@@ -47,10 +53,12 @@
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "styled-jsx": "^5.1.6",
     "tailwind-merge": "^3.3.1",
-    "styled-jsx": "^5.1.6"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@esbuild-kit/esm-loader": "^2.6.5",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.8.0",
@@ -58,9 +66,10 @@
     "@types/node": "^20.19.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^8.57.0",
-    "@typescript-eslint/parser": "^8.12.2",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-react": "^7.37.5",
@@ -72,6 +81,8 @@
     "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "tsx": "^4.19.0",
+    "rimraf": "^6.0.1"
   }
 }

@@ -86,30 +86,18 @@ jobs:
         run: npm run build || echo "No build script found"
 
       - name: Deploy to Render
-        if: success()
-        env:
-          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        if: success() && vars.ENABLE_RENDER == 'true'
         run: |
-          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
-            echo "🚀 Triggering Render deployment..."
-            curl -X POST "$RENDER_DEPLOY_HOOK"
-            echo "✅ Deployed to Render"
-          else
-            echo "⚠️  RENDER_DEPLOY_HOOK not configured, skipping Render deployment"
-          fi
+          echo "🚀 Triggering Render deployment..."
+          curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo "✅ Deployed to Render"
 
       - name: Deploy to Vercel
-        if: success()
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        if: success() && vars.ENABLE_VERCEL == 'true'
         run: |
-          if [ -n "$VERCEL_TOKEN" ]; then
-            echo "🚀 Deploying to Vercel..."
-            npx vercel --token "$VERCEL_TOKEN" --prod --yes
-            echo "✅ Deployed to Vercel"
-          else
-            echo "⚠️  VERCEL_TOKEN not configured, skipping Vercel deployment"
-          fi
+          echo "🚀 Deploying to Vercel..."
+          npx vercel --token "${{ secrets.VERCEL_TOKEN }}" --prod --yes
+          echo "✅ Deployed to Vercel"
 
       - name: Deployment Summary
         run: |

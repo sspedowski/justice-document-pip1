@@ -31,15 +31,35 @@ document.addEventListener("DOMContentLoaded", function () {
       const type =
         passwordInput.getAttribute("type") === "password" ? "text" : "password";
       passwordInput.setAttribute("type", type);
+      const svgNS = "http://www.w3.org/2000/svg";
+      // Clear existing
+      while (eyeIcon.firstChild) eyeIcon.removeChild(eyeIcon.firstChild);
       if (type === "text") {
-        eyeIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-        `;
+        const p = document.createElementNS(svgNS, "path");
+        p.setAttribute("stroke-linecap", "round");
+        p.setAttribute("stroke-linejoin", "round");
+        p.setAttribute("stroke-width", "2");
+        p.setAttribute(
+          "d",
+          "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+        );
+        eyeIcon.appendChild(p);
       } else {
-        eyeIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-        `;
+        const p1 = document.createElementNS(svgNS, "path");
+        p1.setAttribute("stroke-linecap", "round");
+        p1.setAttribute("stroke-linejoin", "round");
+        p1.setAttribute("stroke-width", "2");
+        p1.setAttribute("d", "M15 12a3 3 0 11-6 0 3 3 0 016 0z");
+        const p2 = document.createElementNS(svgNS, "path");
+        p2.setAttribute("stroke-linecap", "round");
+        p2.setAttribute("stroke-linejoin", "round");
+        p2.setAttribute("stroke-width", "2");
+        p2.setAttribute(
+          "d",
+          "M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+        );
+        eyeIcon.appendChild(p1);
+        eyeIcon.appendChild(p2);
       }
     });
   }
@@ -108,11 +128,36 @@ document.addEventListener("DOMContentLoaded", function () {
     if (type === "error") {
       alertContainer.className =
         "rounded bg-red-100 border border-red-300 text-red-800 px-4 py-2 mb-2 flex items-center";
-      alertIcon.innerHTML = `<svg class="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03 9-9 9-9 9z"></path></svg>`;
+  // Build SVG without innerHTML
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "h-5 w-5 text-red-600 mr-2");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute("d", "M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03 9-9 9-9 9z");
+  svg.appendChild(path);
+  alertIcon.replaceChildren(svg);
     } else {
       alertContainer.className =
         "rounded bg-blue-100 border border-blue-300 text-blue-800 px-4 py-2 mb-2 flex items-center";
-      alertIcon.innerHTML = `<svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path></svg>`;
+  const svgNS2 = "http://www.w3.org/2000/svg";
+  const svg2 = document.createElementNS(svgNS2, "svg");
+  svg2.setAttribute("class", "h-5 w-5 text-blue-600 mr-2");
+  svg2.setAttribute("fill", "none");
+  svg2.setAttribute("stroke", "currentColor");
+  svg2.setAttribute("viewBox", "0 0 24 24");
+  const p = document.createElementNS(svgNS2, "path");
+  p.setAttribute("stroke-linecap", "round");
+  p.setAttribute("stroke-linejoin", "round");
+  p.setAttribute("stroke-width", "2");
+  p.setAttribute("d", "M13 16h-1v-4h-1m1-4h.01");
+  svg2.appendChild(p);
+  alertIcon.replaceChildren(svg2);
     }
   }
 

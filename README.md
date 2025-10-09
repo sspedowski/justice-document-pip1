@@ -1,5 +1,13 @@
 # Justice Dashboard
 
+### 🆕 What’s New — Vite Dashboard Integration
+
+- Vite + React + TS sub-app now lives in `justice-dashboard/`.
+- CI builds Vite → copies to `public/dashboard/` → builds Next.
+- See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** and the Contributor Command Reference below.
+
+
+
 ## Smoke & Bypass
 
 We ship with deploy-triggered and nightly smoke tests already wired.

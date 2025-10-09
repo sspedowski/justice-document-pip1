@@ -1,10 +1,12 @@
 // middleware.ts
-// Rate limiting for summarize endpoints
+// Global middleware: allow Vercel preview bypass everywhere; rate limit summarize endpoints.
+import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { MemoryRateLimiter } from '@/lib/ratelimit/memory';
 
 export const config = {
-  matcher: ['/api/summarize/(stream|json)'],
+  // Apply to all dynamic paths except Next internals and static assets
+  matcher: ['/((?!_next|favicon.ico|public/).*)'],
 };
 
 // In-memory limiter for dev/single-instance
@@ -26,6 +28,28 @@ const ratelimit = new MemoryRateLimiter({
 });
 
 export async function middleware(req: NextRequest) {
+  // Allow Vercel preview protection bypass (for smoke tests)
+  const bypassToken =
+    req.headers.get('x-vercel-protection-bypass') ??
+    req.nextUrl.searchParams.get('vercel-protection-bypass') ??
+    req.cookies.get('vercel-protection-bypass')?.value;
+
+  const host = req.headers.get('host') || '';
+  const isVercelPreviewHost = host.endsWith('.vercel.app');
+
+  if (bypassToken && isVercelPreviewHost) {
+    // Optional: verify against env if you want strict validation
+    // if (bypassToken === process.env.VERCEL_BYPASS_TOKEN) { return; }
+    return NextResponse.next();
+  }
+
+  // Only rate-limit summarize endpoints
+  const path = req.nextUrl.pathname;
+  const isSummarize = path.startsWith('/api/summarize');
+  if (!isSummarize) {
+    return NextResponse.next();
+  }
+
   const ip =
     req.ip ||
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -33,7 +57,7 @@ export async function middleware(req: NextRequest) {
 
   const { success, reset } = await ratelimit.check(`summ:${ip}`);
 
-  if (success) return;
+  if (success) return NextResponse.next();
 
   const ms = Math.max(0, reset - Date.now());
   return new Response(

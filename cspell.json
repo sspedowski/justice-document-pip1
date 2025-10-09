@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "cachekey",
+    "linkcheck", 
+    "lycheeverse",
+    "nosniff",
+    "pwsh",
+    "pnpm",
+    "vercel",
+    "renderhook",
+    "testjwt",
+    "testsession",
+    "adminpass"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "coverage/**",
+    ".next/**",
+    "web/**",
+    "legacy/**"
+  ]
+}

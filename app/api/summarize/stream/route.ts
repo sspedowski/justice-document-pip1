@@ -25,7 +25,7 @@ async function buildStream(req: Request) {
       try {
         let lastFrame: Record<string, unknown> | null = null;
         for await (const frame of summarizeFrames({ text })) {
-          lastFrame = frame as Record<string, unknown>;
+          lastFrame = frame as unknown as Record<string, unknown>;
           controller.enqueue(encoder.encode(frameToSSE(frame)));
         }
         // Add tracking to final frame

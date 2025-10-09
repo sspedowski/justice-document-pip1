@@ -39,19 +39,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '20.11.1'
+          cache: 'pnpm'
+      - name: Enable corepack (pnpm)
+        run: corepack enable
       - name: Restore ESLint cache
         uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: eslint-${{ github.ref_name }}-${{ hashFiles('eslint.config.js', 'package.json', 'package-lock.json') }}
+          key: eslint-${{ github.ref_name }}-${{ hashFiles('eslint.config.js', 'package.json', 'pnpm-lock.yaml') }}
           restore-keys: |
             eslint-${{ github.ref_name }}-
             eslint-
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       - run: echo "::add-matcher::.github/eslint-problem-matcher.json"
       - name: ESLint (annotated)
-        run: npx eslint "frontend/**/*.{js,jsx,ts,tsx}" -f unix --max-warnings=0 --cache --cache-location .eslintcache
+        run: pnpm run lint

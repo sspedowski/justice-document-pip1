@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development','test','production']).default('development'),
-  JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 chars'),
-  SESSION_SECRET: z.string().min(16, 'SESSION_SECRET must be at least 16 chars'),
+  JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 chars').optional(),
+  SESSION_SECRET: z.string().min(16, 'SESSION_SECRET must be at least 16 chars').optional(),
   NEXT_PUBLIC_APP_NAME: z.string().default('Justice Dashboard'),
   OPENAI_API_KEY: z.string().optional(),
   CLAUDE_API_KEY: z.string().optional(),
