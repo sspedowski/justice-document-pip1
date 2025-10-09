@@ -2,6 +2,7 @@ name: Smoke Test
 
 on:
   deployment_status:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
