@@ -9,9 +9,14 @@ Set-StrictMode -Version Latest
 function Normalize-BaseUrl([string]$u) {
   $u = $u.Trim()
   if (-not $u.StartsWith('http')) { $u = "https://$u" }
-  # drop trailing slash for consistent joins
   if ($u.EndsWith('/')) { $u = $u.Substring(0, $u.Length - 1) }
   return $u
+}
+
+function Add-BypassQuery([string]$Url, [string]$Token) {
+  if ([string]::IsNullOrWhiteSpace($Token)) { return $Url }
+  $sep = ($Url -match '\?') ? '&' : '?'
+  return "$Url${sep}vercel-protection-bypass=$Token"
 }
 
 function Test-IsVercelPreviewProtection {
@@ -64,11 +69,15 @@ $Endpoints = @(
   '/api/summarize/stream?dryRun=1'   # dry-run SSE/JSON path if you expose one
 ) | Select-Object -Unique
 
-# Build headers (Vercel preview protection)
+$HasBypass = ($BypassToken -and $BypassToken.Trim().Length -gt 0)
+$Session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $Headers = @{}
-if ($BypassToken -and $BypassToken.Trim().Length -gt 0) {
+if ($HasBypass) {
   $Headers['x-vercel-protection-bypass'] = $BypassToken.Trim()
-  Write-Host "Bypass header enabled."
+  Write-Host "Bypass enabled: header + query param + cookie via WebSession."
+  # Warm-up GET to set bypass cookie
+  $warmUrl = Add-BypassQuery "$Base/" $BypassToken
+  try { $null = Invoke-WebRequest -UseBasicParsing -Method Get -Uri $warmUrl -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 20 } catch {}
 }
 
 # Accept 2xx + 3xx as success.
@@ -78,15 +87,19 @@ function Invoke-Probe {
   param(
     [string]$Url
   )
-  # try HEAD first (fast), fallback to GET
+  $UrlQ = if ($HasBypass) { Add-BypassQuery $Url $BypassToken } else { $Url }
+  if ($HasBypass) {
+    $r = Invoke-WebRequest -Uri $UrlQ -Method Get -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 20
+    $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET' -Force
+    return $r
+  }
   try {
-    $r = Invoke-WebRequest -Uri $Url -Method Head -Headers $Headers -MaximumRedirection 5 -TimeoutSec 20
-    # annotate method used
+    $r = Invoke-WebRequest -Uri $UrlQ -Method Head -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 20
     $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'HEAD' -Force
     return $r
   } catch {
     Write-Host "HEAD failed for $Url - falling back to GET. Reason: $($_.Exception.Message)"
-    $r = Invoke-WebRequest -Uri $Url -Method Get -Headers $Headers -MaximumRedirection 5 -TimeoutSec 25
+    $r = Invoke-WebRequest -Uri $UrlQ -Method Get -Headers $Headers -WebSession $Session -MaximumRedirection 5 -TimeoutSec 25
     $r | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET' -Force
     return $r
   }
@@ -110,7 +123,8 @@ foreach ($ep in $Endpoints) {
       foreach ($k in $Headers.Keys) { $h[$k] = $Headers[$k] }
       $h['Accept'] = 'text/event-stream'
 
-      $resp = Invoke-WebRequest -Uri $url -Method Get -Headers $h -MaximumRedirection 5 -TimeoutSec 25
+      $urlSse = if ($HasBypass) { Add-BypassQuery $url $BypassToken } else { $url }
+      $resp = Invoke-WebRequest -Uri $urlSse -Method Get -Headers $h -WebSession $Session -MaximumRedirection 5 -TimeoutSec 25
       $resp | Add-Member -NotePropertyName MethodUsed -NotePropertyValue 'GET (SSE)' -Force
     } else {
       $resp = Invoke-Probe -Url $url
