@@ -94,11 +94,24 @@ jobs:
     env:
       CI: '1'
     steps:
-      # minimal, workspace-aware CI steps
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          version: 8
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Enable corepack
+        run: corepack enable
 
       - name: Install deps (workspace)
         run: pnpm install --frozen-lockfile
@@ -110,12 +123,10 @@ jobs:
         run: pnpm run build:dashboard:copy
 
       - name: Assert dashboard artifacts
-        run: |
-          test -f public/dashboard/index.html
-          test -d public/dashboard/assets
+        run: pnpm run build:dashboard:assert
 
       - name: Build Next app
-        run: pnpm build
+        run: pnpm run build:next
 
   linkcheck_pr:
     name: Link Check (PR-tolerant)

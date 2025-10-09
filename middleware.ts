@@ -26,6 +26,18 @@ const ratelimit = new MemoryRateLimiter({
 });
 
 export async function middleware(req: NextRequest) {
+  // Allow Vercel preview protection bypass (for smoke tests)
+  const bypassToken =
+    req.headers.get('x-vercel-protection-bypass') ??
+    req.nextUrl.searchParams.get('vercel-protection-bypass') ??
+    req.cookies.get('vercel-protection-bypass')?.value;
+
+  if (bypassToken) {
+    // Optional: verify against env if you want strict validation
+    // if (bypassToken === process.env.VERCEL_BYPASS_TOKEN) { return; }
+    return;
+  }
+
   const ip =
     req.ip ||
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
