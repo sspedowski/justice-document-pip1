@@ -34,7 +34,10 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.searchParams.get('vercel-protection-bypass') ??
     req.cookies.get('vercel-protection-bypass')?.value;
 
-  if (bypassToken) {
+  const host = req.headers.get('host') || '';
+  const isVercelPreviewHost = host.endsWith('.vercel.app');
+
+  if (bypassToken && isVercelPreviewHost) {
     // Optional: verify against env if you want strict validation
     // if (bypassToken === process.env.VERCEL_BYPASS_TOKEN) { return; }
     return NextResponse.next();
