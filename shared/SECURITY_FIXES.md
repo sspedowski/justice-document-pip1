@@ -64,3 +64,7 @@ LEGAL_PASSWORD=your_secure_legal_password
 - Update Railway environment variables before deploying
 - Test authentication with new environment-based credentials
 - Monitor logs for any security-related errors
+
+## Legacy Cleanup
+
+- [2025-10] Removed legacy/frontend stub (`legacy/dashboard.js`, previously `legacy/backend.server.js`) after migrating to the Vite dashboard sub-app (`justice-dashboard/`). Rationale: superseded and unused in runtime; verified no remaining references.
