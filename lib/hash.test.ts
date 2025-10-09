@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sha256Hex } from './hash.ts';
+import { sha256Hex } from './hash';
 
 describe('sha256Hex', () => {
   it('produces stable hash', () => {
