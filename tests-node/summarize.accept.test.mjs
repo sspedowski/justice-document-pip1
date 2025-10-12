@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 // Legacy pointer route (returns 410)
 import { POST as LEGACY_POST, GET as LEGACY_GET } from '../app/api/summarize/route';
@@ -53,4 +55,21 @@ test('Streaming GET /api/summarize/stream emits SSE frames', async () => {
   const first = await reader.read();
   assert.ok(!first.done);
   reader.cancel();
+});
+
+test('Sentinel: no legacy JSON summarize endpoint in repo', () => {
+  // Ensures the old /api/summarize/json route and summarizeJson client don't creep back
+  const forbiddenPaths = [
+    'app/api/summarize/json',
+    'src/lib/client/summarizeJson.ts',
+    'lib/client/summarizeJson.ts'
+  ];
+
+  for (const path of forbiddenPaths) {
+    const fullPath = join(process.cwd(), path);
+    assert.ok(
+      !existsSync(fullPath),
+      `Forbidden legacy JSON endpoint found: ${path} (use SSE /api/summarize/stream instead)`
+    );
+  }
 });
