@@ -1,5 +1,5 @@
 // Dedicated SSE streaming endpoint: /api/summarize/stream
-import '../../../../src/lib/env.schema.ts';
+import '@/lib/env.schema';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 

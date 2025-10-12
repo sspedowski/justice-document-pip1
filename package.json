@@ -18,7 +18,7 @@
     "build:dashboard:copy": "node ./tools/copy-dashboard.mjs",
     "build:dashboard:assert": "node ./tools/assert-dashboard.mjs",
     "start": "next start",
-    "lint": "eslint -c config/.eslintrc.json . --ext .ts,.tsx,.js,.jsx --max-warnings=0 --cache --cache-location .eslintcache",
+    "lint": "eslint -c config/.eslintrc.json \"app/**/*.{ts,tsx,js,jsx}\" \"src/**/*.{ts,tsx,js,jsx}\" \"tests-node/**/*.{mjs,js,ts,tsx}\" \"tools/**/*.{mjs,js,ts}\" --max-warnings=0 --cache --cache-location .eslintcache --no-error-on-unmatched-pattern",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm run test:unit-node && pnpm run test:vitest",
     "test:unit-node": "node --test --test-reporter=spec --loader=./tools/alias-loader.mjs --loader=@esbuild-kit/esm-loader tests-node",

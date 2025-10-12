@@ -1,14 +1,20 @@
-node_modules/
+# build artifacts
 .next/
 out/
 dist/
+build/
 coverage/
 public/
-cypress/
-legacy/**
-justice-server/**
-packages/frontend/**
-**/*.d.ts
+public/dashboard/
+justice-dashboard/dist/
+
+# package managers
+node_modules/
+
+# caches & logs
 .eslintcache
-packages/frontend/pdf.min.js
-packages/frontend/pdf.worker.min.js
+pnpm-debug.log*
+npm-debug.log*
+
+# attic / legacy
+_archive/

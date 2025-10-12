@@ -1,23 +1,12 @@
-# Normalize line endings
 * text=auto
-
-# Force LF for text files
-*.md text eol=lf
-*.ts text eol=lf
-*.tsx text eol=lf
-*.js text eol=lf
-*.jsx text eol=lf
-*.json text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-
-# GitHub-specific files
-.github/** text eol=lf
-
-# Shell scripts
-*.sh text eol=lf
-
-# Windows-specific files
-*.bat text eol=crlf
-*.cmd text eol=crlf
-*.ps1 text eol=crlf
+*.ps1 eol=crlf
+*.sh eol=lf
+*.mjs eol=lf
+*.ts eol=lf
+*.tsx eol=lf
+*.js eol=lf
+*.jsx eol=lf
+*.json eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+*.md eol=lf

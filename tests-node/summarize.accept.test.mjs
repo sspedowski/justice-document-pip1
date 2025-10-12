@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 // Legacy pointer route (returns 410)
-import { POST as LEGACY_POST, GET as LEGACY_GET } from '../app/api/summarize/route.ts';
+import { POST as LEGACY_POST, GET as LEGACY_GET } from '../app/api/summarize/route';
 // Streaming route
-import { POST as STREAM_POST, GET as STREAM_GET } from '../app/api/summarize/stream/route.ts';
+import { POST as STREAM_POST, GET as STREAM_GET } from '../app/api/summarize/stream/route';
 
 async function readAll(stream) {
   const reader = stream.getReader();
