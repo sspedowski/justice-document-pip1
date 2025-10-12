@@ -1,0 +1,25 @@
+# .github/workflows/docs-link-check.yml
+name: docs-link-check
+on:
+  push:
+    paths: ['docs/**']
+  pull_request:
+    paths: ['docs/**']
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    # keep non-blocking; flip to false later if you want it required
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lychee link check (scoped to docs)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --max-redirects 5
+            --timeout 20
+            --exclude-mail
+            --accept 200,206,429
+            --exclude "https://github.com/*/issues/*,https://vercel.live/*"
+            docs/
