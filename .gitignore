@@ -8,6 +8,7 @@ out/
 dist/
 build/
 coverage/
+public/dashboard/
 
 # Environment files
 .env
@@ -52,3 +53,6 @@ uploads/
 
 # ESLint cache
 .eslintcache
+
+# Claude workspace
+.claude/
