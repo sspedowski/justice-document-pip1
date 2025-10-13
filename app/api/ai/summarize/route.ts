@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { env } from "@/lib/env";
 
 interface BodyInput {
   text?: string;
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const { redacted, summary } = redact(text);
 
-    if (!process.env.GOOGLE_API_KEY) {
+    if (!env.GOOGLE_API_KEY) {
       return NextResponse.json(
         { error: "GOOGLE_API_KEY not configured" },
         { status: 500 }
@@ -69,8 +70,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+    const modelName = env.GEMINI_MODEL;
     const model = genAI.getGenerativeModel({ model: modelName });
 
     const resp = await model.generateContent([{ text: redacted }]);

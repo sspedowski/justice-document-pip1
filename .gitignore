@@ -50,9 +50,13 @@ uploads/
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
 
 # ESLint cache
 .eslintcache
 
 # Claude workspace
 .claude/
+
+# Husky shim
+.husky/_/
