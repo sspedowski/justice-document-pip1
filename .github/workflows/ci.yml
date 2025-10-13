@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
       - uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
@@ -32,6 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
       - uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
@@ -43,6 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
       - uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
@@ -54,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
       - uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
