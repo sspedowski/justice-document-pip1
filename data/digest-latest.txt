@@ -1,0 +1,16 @@
+## Daily Digest - Engineering Activity
+
+### 1) SHIPPED
+- PR #16: Add PR Assistant with auto-comment on PRs
+- Digest preview page implementation
+
+### 2) FAILING PIPELINES
+- None
+
+### 3) NEXT PRIORITIES
+- Merge PR Assistant (#16)
+- Set up DASHBOARD_URL and SLACK_WEBHOOK secrets
+- Enable daily digest workflow
+
+---
+*Sample digest - will be updated by workflow*
