@@ -9,6 +9,9 @@ const EnvSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   CLAUDE_API_KEY: z.string().optional(),
   ELATION_API_KEY: z.string().optional(),
+  GOOGLE_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  RTDB_REQUIRE_AUTH: z.string().optional(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
