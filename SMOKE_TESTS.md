@@ -4,24 +4,29 @@ Quick reference for testing the deployed application.
 
 ## GitHub Actions - Manual Smoke Workflow
 
-### Basic Test
-```bash
-gh workflow run "Manual Smoke" -f base_url="https://your-app.vercel.app"
+### Basic Test (PowerShell-safe)
+```powershell
+$BASE="https://your-app.vercel.app"  # replace with your real deploy URL
+gh workflow run "Manual Smoke" -f base_url="$BASE"
 ```
 
 ### With Vercel Protection Bypass
-```bash
-gh workflow run "Manual Smoke" -f base_url="https://your-app.vercel.app" -f with_bypass=true
+```powershell
+# Requires Actions secret VERCEL_BYPASS_TOKEN or VERCEL_SSO_BYPASS
+$BASE="https://your-app.vercel.app"
+gh workflow run "Manual Smoke" -f base_url="$BASE" -f with_bypass=true
 ```
 
-### Check Status
-```bash
-# List recent runs
+### Check Status (PowerShell-safe)
+```powershell
+# List recent runs for this workflow
 gh run list --workflow "Manual Smoke" --limit 5
 
-# Watch a specific run
-gh run watch <run_id>
+# Capture the newest run ID and watch it
+$RUN_ID = gh run list --workflow "Manual Smoke" --limit 1 --json databaseId -q ".[0].databaseId"
+gh run watch $RUN_ID --exit-status
 ```
+Note: Avoid using angle brackets like `<run_id>` in PowerShell; they are treated as redirection.
 
 ---
 
@@ -121,3 +126,17 @@ Should return 200 OK with the Next.js application.
 - **500**: Check server logs for errors
 - **Timeout**: Increase timeout in smoke test configuration
 - **Connection refused**: Deployment may not be fully ready, wait 30s and retry
+
+---
+
+## Extras
+
+### Filter runs by branch
+```powershell
+gh run list --workflow "Manual Smoke" --branch main --limit 5
+```
+
+### Re-run the same run (keeps inputs)
+```powershell
+gh run rerun $RUN_ID
+```
