@@ -1,14 +1,3 @@
-This is a sample PDF placeholder file for testing the Justice Dashboard "View PDF" hyperlink functionality.
-
-In a real implementation, this would be an actual PDF file containing:
-- Medical documentation
-- Case reports
-- Evidence files
-- Legal documents
-
-File: example1.pdf
-Category: Medical
-Child: Jace
-Case: Withholding treatment
-
-This file demonstrates how the "View PDF" hyperlinks work in the Justice Dashboard table.
+version https://git-lfs.github.com/spec/v1
+oid sha256:a8bfbb56f8ec3bc215e67b71e42263a13a07e1a8e5edd859cb163ac391e2d0d5
+size 587
