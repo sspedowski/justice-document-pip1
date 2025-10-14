@@ -1,16 +1,49 @@
 # Smoke Test Commands
 
+## Quick Start (PowerShell-safe)
+
+```powershell
+# 0) Set your deploy URL
+$BASE = "https://your-app.vercel.app"  # replace with your real URL
+
+# 1) Trigger the Manual Smoke (toggle with_bypass as needed)
+gh workflow run "Manual Smoke" -f base_url="$BASE" -f with_bypass=true
+
+# 2) Grab newest run id and watch to completion (fails shell on non-success)
+$RUN_ID = gh run list --workflow "Manual Smoke" --limit 1 --json databaseId -q ".[0].databaseId"
+gh run watch $RUN_ID --exit-status
+
+# 3) Inspect logs and artifacts
+gh run view $RUN_ID
+gh run view $RUN_ID --log
+gh run download $RUN_ID -D ".\artifacts\smoke-$RUN_ID"
+
+# 4) Optional: direct SSE probe
+$body = @{ text = "hello world"; dryRun = 1 } | ConvertTo-Json -Compress
+curl.exe -N -H "Accept: text/event-stream" -H "Content-Type: application/json" `
+  -X POST "$BASE/api/summarize/stream" --data $body
+```
+
+Notes:
+
+- In PowerShell, angle brackets like `<run_id>` are treated as redirection. Use `$RUN_ID` instead.
+- `--workflow "Manual Smoke"` (by name) vs `--workflow "smoke.yml"` (by file): either works if it matches your repo.
+- Common issues: quoting URLs that include `?` or `&`; attempting bypass without secrets set (workflow prints bypass status without revealing secrets).
+
+
 Quick reference for testing the deployed application.
 
 ## GitHub Actions - Manual Smoke Workflow
 
 ### Basic Test (PowerShell-safe)
+ 
 ```powershell
 $BASE="https://your-app.vercel.app"  # replace with your real deploy URL
 gh workflow run "Manual Smoke" -f base_url="$BASE"
 ```
 
 ### With Vercel Protection Bypass
+ 
 ```powershell
 # Requires Actions secret VERCEL_BYPASS_TOKEN or VERCEL_SSO_BYPASS
 $BASE="https://your-app.vercel.app"
@@ -18,6 +51,7 @@ gh workflow run "Manual Smoke" -f base_url="$BASE" -f with_bypass=true
 ```
 
 ### Check Status (PowerShell-safe)
+ 
 ```powershell
 # List recent runs for this workflow
 gh run list --workflow "Manual Smoke" --limit 5
@@ -33,6 +67,7 @@ Note: Avoid using angle brackets like `<run_id>` in PowerShell; they are treated
 ## Direct API Testing
 
 ### SSE Endpoint (bash/Linux/macOS)
+ 
 ```bash
 curl -N -H "Accept: text/event-stream" \
   -H "Content-Type: application/json" \
@@ -41,6 +76,7 @@ curl -N -H "Accept: text/event-stream" \
 ```
 
 ### SSE Endpoint (PowerShell/Windows)
+ 
 ```powershell
 $body = @{ text = "hello world" } | ConvertTo-Json -Compress
 curl.exe -N -H "Accept: text/event-stream" `
@@ -51,7 +87,8 @@ curl.exe -N -H "Accept: text/event-stream" `
 
 ### Expected Response
 You should see Server-Sent Events like:
-```
+ 
+```text
 event: stage
 data: {"name":"init"}
 
@@ -69,12 +106,14 @@ data: {}
 ## Acceptance Tests Against Deployed App
 
 ### bash/Linux/macOS
+ 
 ```bash
 export BASE_URL="https://your-app.vercel.app"
 pnpm test
 ```
 
 ### PowerShell/Windows
+ 
 ```powershell
 $env:BASE_URL="https://your-app.vercel.app"
 pnpm test
@@ -93,6 +132,7 @@ curl -i https://your-app.vercel.app/api/summarize
 ```
 
 Expected response:
+ 
 ```json
 HTTP/1.1 410 Gone
 {
@@ -105,6 +145,7 @@ HTTP/1.1 410 Gone
 
 ## Health Check
 
+ 
 ```bash
 curl https://your-app.vercel.app/
 ```
@@ -132,11 +173,13 @@ Should return 200 OK with the Next.js application.
 ## Extras
 
 ### Filter runs by branch
+ 
 ```powershell
 gh run list --workflow "Manual Smoke" --branch main --limit 5
 ```
 
 ### Re-run the same run (keeps inputs)
+ 
 ```powershell
 gh run rerun $RUN_ID
 ```
