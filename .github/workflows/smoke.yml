@@ -32,6 +32,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
+          clean: false
+          submodules: false
 
       - name: Compute optional bypass header
         id: bypass

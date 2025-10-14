@@ -8,6 +8,8 @@ The Justice Dashboard supports Claude as an AI provider for generating intellige
 
 ## Configuration
 
+> Tip: Claude usage is optional. Set `CLAUDE_API_KEY` only when you want to enable it.
+
 ### 1. Obtain an API Key
 
 1. Sign up for an [Anthropic account](https://www.anthropic.com/)

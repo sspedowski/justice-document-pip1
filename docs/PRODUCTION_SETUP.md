@@ -11,6 +11,19 @@ This guide covers production-ready enhancements added to the Justice Dashboard C
 
 ---
 
+## AI & Auth environment keys
+Set these in your deployment environment (Vercel Production / Preview or equivalent):
+
+- `GOOGLE_API_KEY` (required for Gemini summarization)
+- `GEMINI_MODEL` (optional; defaults to `gemini-2.5-flash`)
+- `OPENAI_API_KEY`, `CLAUDE_API_KEY` (optional alternative providers)
+- `JWT_SECRET`, `SESSION_SECRET` (32+ characters each)
+- `RTDB_REQUIRE_AUTH` (omit or keep `true` in production; may set `false` locally)
+
+> In production, `RTDB_REQUIRE_AUTH` defaults to **true** via the schema.
+
+---
+
 ## 1. Rate Limiting
 
 ### Development (In-Memory)
